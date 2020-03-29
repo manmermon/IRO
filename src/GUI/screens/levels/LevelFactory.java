@@ -137,6 +137,7 @@ public class LevelFactory
 			final double timeWhole = 4 * timeQuarter;
 			
 			final double userReactionTime = 2D; // 2 second
+			final double userRecoverTime = 2D;
 			final double reactVel = fret.getFretWidth() / userReactionTime;
 			
 			final int wayWidth = ( screenSize.width - (int)fret.getScreenLocation().x );
@@ -181,11 +182,20 @@ public class LevelFactory
 			{
 				if( currentRange == null )
 				{
-					if( prevRange == null
-							|| ( tRng.getMin() - prevRange.getMax() > userReactionTime / 2 ) 
-						)
+					if( prevRange == null )							
 					{
 						currentRange = tRng;
+					}
+					else
+					{
+						if( tRng.getMin() - prevRange.getMax() > userRecoverTime )
+						{
+							currentRange = tRng;
+						}
+						else if( tRng.getMin() - prevRange.getMin() > ( userReactionTime + userRecoverTime ) )
+						{
+							currentRange = tRng;
+						}
 					}
 				}
 				else

@@ -240,7 +240,7 @@ public class GuiManager
 			//lv0 = LevelFactory.getLevel( new File( ".\\src\\sheets\\zelda.mid" ), screenSize );
 			//lv0 = LevelFactory.getLevel( new File( ".\\src\\sheets\\Pokemon.mid" ), screenSize );
 			//lv0 = LevelFactory.getLevel( new File( ".\\src\\sheets\\test5.mid" ), screenSize );
-			lv0 = LevelFactory.getLevel( new File( ".\\src\\sheets\\simpsons.mid" ), screenSize );
+			lv0 = LevelFactory.getLevel( new File( "./src/sheets/simpsons.mid" ), screenSize );
 			//lv0 = LevelFactory.getLevel( new File( ".\\src\\sheets\\alouette.mid" ), screenSize );
 			//lv0 = LevelFactory.getLevel( new File( ".\\src\\sheets\\espana.mid" ), screenSize );
 			
