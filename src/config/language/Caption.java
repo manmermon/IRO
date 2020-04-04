@@ -37,7 +37,7 @@ public class Caption implements ICaption
 	/**
 	 * 
 	 * @param captionID: caption ID
-	 * @param defaultLanguage: default language id. It must not be in java.util.Locale.getISOLanguages(). 
+	 * @param defaultLanguage: default language id. 
 	 * @param txt: default caption
 	 * @throws IllegalArgumentException: If defaultLanguage or captionID is empty or null. 
 	 */
@@ -46,13 +46,15 @@ public class Caption implements ICaption
 		checkLanguage( captionID );
 		checkLanguage( defaultLanguage );
 		
+		/*
 		for( String lang : Locale.getISOLanguages() )
 		{
-			if( lang.equals( defaultLanguage ) )
+			if( !lang.equals( defaultLanguage ) )
 			{
 				throw new IllegalArgumentException( "Default language Id is in java.util.Locale.getISOLanguages()." );
 			}			
 		}
+		*/
 		
 		this.caption = new HashMap< String, String >();
 		
@@ -84,6 +86,11 @@ public class Caption implements ICaption
 		
 		String lbl = this.caption.get( language );
 		
+		if( lbl == null )
+		{
+			lbl = this.caption.get( this.defaultCaptionID );
+		}
+		
 		return lbl;
 	}
 	
@@ -105,7 +112,9 @@ public class Caption implements ICaption
 		
 		for( Locale lang : Locale.getAvailableLocales() )
 		{
-			ok = lang.toString().toLowerCase().equals( Language );
+			String lg = lang.toLanguageTag().toLowerCase();
+			
+			ok = lg.equals( Language );
 			
 			if( ok )
 			{

@@ -23,21 +23,20 @@
 
 package config;
 
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.naming.ConfigurationException;
-
+import config.ConfigParameter.ParameterType;
 import config.language.Caption;
 import config.language.Language;
 import exceptions.ConfigParameterException;
-import general.NumberRange;
+import general.Tuple;
 
 public class ConfigApp 
 {
@@ -49,14 +48,27 @@ public class ConfigApp
 
 	public static final String appDateRange = "2019-" + buildDate.get( Calendar.YEAR );
 
+	public static final String DB_URL = "./user/db/data.db";
+	
+	public static final Tuple< Integer, Integer > playerPicSize = new Tuple<Integer, Integer>( 100, 100 );
+	
+	public static final Tuple< Integer, Integer > playerPicSizeIcon = new Tuple<Integer, Integer>( 32, 32 );
+	
+	public static final String SONG_LIST_SEPARATOR = ";";
 	
 	///////////
 	
 	public static final String LANGUAGE = "LANGUAGE";
 	
+	public static final String USER = "USER";
 	public static final String USER_REACTION_TIME = "USER_REACTION_TIME";
 	public static final String USER_RECOVER_TIME = "USER_RECOVER_TIME";
 	
+	public static final String SONG_LIST = "SONG_LIST";
+	
+	public static final String PREACTION_COLOR = "PREACTION_COLOR";
+	public static final String WAITING_ACTION_COLOR = "WAITING_ACTION_COLOR";
+	public static final String ACTION_COLOR = "ACTION_COLOR";
 	
 	///////////
 	
@@ -76,7 +88,7 @@ public class ConfigApp
 	
 	////////////////////////
 	
-	private static Map< String, ConfigParameter > listConfig = new HashMap< String, ConfigParameter >();
+	private static Map< String, ConfigParameter > listUserConfig = new HashMap< String, ConfigParameter >();
 
 	static
 	{
@@ -85,30 +97,35 @@ public class ConfigApp
 
 	private static void create_Key_Value()
 	{
-		listConfig.clear();
+		listUserConfig.clear();
 
 		loadDefaultProperties();
 	}
 	
 	public static ConfigParameter getProperty( String propertyID )
 	{
-		ConfigParameter par = listConfig.get( propertyID );
+		ConfigParameter par = listUserConfig.get( propertyID );
 		
 		return par;
 	}
-	
+		
 	public static Collection< ConfigParameter > getParameters()
 	{
-		return listConfig.values();
+		return listUserConfig.values();
 	}
 	
-	private static void loadDefaultProperties()
+	public static void loadDefaultProperties()
 	{
 		try
 		{
-			loadDefaultLanguage();
-			loadDefaultUserReactionTime();
-			loadDefaultUserRecoverTime();
+			listUserConfig.clear();
+			
+			loadDefaultLanguage(  );
+			loadDefaultUser(  );
+			loadDefaultUserReactionTime(  );
+			loadDefaultUserRecoverTime(  );
+			loadDefaultActionColors(  );
+			loadDefaultSongList( );
 		}
 		catch (Exception e) 
 		{
@@ -116,30 +133,117 @@ public class ConfigApp
 		}
 	}
 	
-	private static void loadDefaultLanguage() throws ConfigParameterException
+	private static void loadDefaultUser( ) throws ConfigParameterException
 	{
-		Caption id = new Caption( LANGUAGE, Language.defaultLanguage, Language.defaultLanguage );
-		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.STRING );
-		par.add( Language.defaultLanguage );
+		Caption id = new Caption( USER, Language.defaultLanguage, Language.getCaption( Language.defaultLanguage, Language.PLAYER ) );
+		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.USER );		
+		par.add( new User() );		
 		
-		listConfig.put( LANGUAGE, par );
+		listUserConfig.put( USER, par );
 	}
 	
-	private static void loadDefaultUserReactionTime() throws ConfigParameterException
+	private static void loadDefaultLanguage(  ) throws ConfigParameterException
+	{			
+		List< String > Langs = Language.getAvaibleLanguages();
+		
+		Caption id = new Caption( LANGUAGE, Language.defaultLanguage, Language.getCaption( Language.LANGUAGE_TXT, Language.defaultLanguage ) );
+		
+		for( int i = 1; i < Langs.size(); i++ )
+		{	
+			String lang = Langs.get( i );
+			id.setCaption( lang, Language.getCaption( Language.LANGUAGE_TXT, lang ) );
+		}
+		
+		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.STRING );
+		par.addAll( Langs );
+		
+		par.setSelectedValue( Language.getCurrentLanguage() );
+		
+		listUserConfig.put( LANGUAGE, par );
+	}
+	
+	private static void loadDefaultUserReactionTime( ) throws ConfigParameterException
 	{
-		Caption id = new Caption( USER_REACTION_TIME, Language.defaultLanguage, "user reaction time" );
+		Caption id = new Caption( USER_REACTION_TIME, Language.defaultLanguage, "reaction time" );
+		id.setCaption( "es-es", "tiempo de reacción" );
+		
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.NUMBER );
 		par.add( 2D );
 		
-		listConfig.put( USER_REACTION_TIME, par );
+		
+		listUserConfig.put( USER_REACTION_TIME, par );
 	}
 	
-	private static void loadDefaultUserRecoverTime() throws ConfigParameterException
+	private static void loadDefaultUserRecoverTime( ) throws ConfigParameterException
 	{
-		Caption id = new Caption( USER_RECOVER_TIME, Language.defaultLanguage, "user recover time" );
+		Caption id = new Caption( USER_RECOVER_TIME, Language.defaultLanguage, "recover time" );
+		id.setCaption( "es-es", "tiempo de recuperación" );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.NUMBER );
 		par.add( 2D );
 				
-		listConfig.put( USER_RECOVER_TIME, par );
+		listUserConfig.put( USER_RECOVER_TIME, par );
+	}
+	
+	private static void loadDefaultActionColors( )
+	{
+		try
+		{
+			List< Color > colors = new ArrayList<Color>();
+			colors.add( Color.red );
+			colors.add( Color.black );
+			colors.add( Color.white );
+			colors.add( Color.blue );
+			colors.add( Color.cyan );
+			colors.add( Color.gray );
+			colors.add( Color.green );
+			colors.add( Color.lightGray );
+			colors.add( Color.magenta );
+			colors.add( Color.orange );
+			colors.add( Color.pink );			
+			colors.add( Color.yellow );
+			
+			Caption id = new Caption( PREACTION_COLOR, Language.defaultLanguage, "preaction color" );
+			id.setCaption( "es-es", "pre-acción" );
+			ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
+			par.addAll( colors );
+			listUserConfig.put( PREACTION_COLOR, par );
+			
+			id = new Caption( WAITING_ACTION_COLOR, Language.defaultLanguage, "waiting-action color" );
+			id.setCaption( "es-es", "esperando acción" );
+			par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
+			colors.remove( Color.blue );
+			colors.add( 0, Color.blue );
+			par.addAll( colors );					
+			listUserConfig.put( WAITING_ACTION_COLOR, par );
+			
+			id = new Caption( ACTION_COLOR, Language.defaultLanguage, "action color" );
+			id.setCaption( "es-es", "acción realizada" );
+			par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
+			colors.remove( Color.green );
+			colors.add( 0, Color.green );
+			par.addAll( colors );		
+			listUserConfig.put( ACTION_COLOR, par );
+		}
+		catch ( ConfigParameterException e) 
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	private static void loadDefaultSongList( )
+	{
+		try
+		{
+			Caption id = new Caption( SONG_LIST, Language.defaultLanguage, Language.getCaption( Language.MUSIC_LIST , Language.defaultLanguage ) );
+			id.setCaption( "es-es", Language.getCaption( Language.MUSIC_LIST , "es-es" ) );
+			
+			ConfigParameter par = new ConfigParameter( id, ParameterType.STRING );
+			
+			listUserConfig.put( SONG_LIST, par );
+		}
+		catch ( ConfigParameterException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 }

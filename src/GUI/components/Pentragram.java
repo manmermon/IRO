@@ -24,7 +24,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
-import image.imagenPoligono2D;
+import image.basicPainter2D;
 
 public class Pentragram extends AbstractSprite
 {
@@ -69,11 +69,11 @@ public class Pentragram extends AbstractSprite
 			railThinck = 1;
 		}
 		
-		BufferedImage pen = (BufferedImage)imagenPoligono2D.crearLienzoVacio( this.dimension.width, this.dimension.height, null );
+		BufferedImage pen = (BufferedImage)basicPainter2D.createEmptyCanva( this.dimension.width, this.dimension.height, null );
 		
 		for( int i = 0; i < this.numLines; i++ )
 		{
-			imagenPoligono2D.crearImagenLinea( 0, i * this.wayHeight + railLoc - railThinck / 2
+			basicPainter2D.line( 0, i * this.wayHeight + railLoc - railThinck / 2
 												, this.dimension.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, Color.BLACK, pen );
 		}
 		

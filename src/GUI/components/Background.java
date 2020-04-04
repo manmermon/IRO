@@ -26,7 +26,7 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-import image.imagenPoligono2D;
+import image.basicPainter2D;
 
 public class Background extends AbstractSprite 
 {
@@ -44,7 +44,7 @@ public class Background extends AbstractSprite
 	@Override
 	public BufferedImage getSprite() 
 	{
-		Image back = imagenPoligono2D.crearLienzoVacio( this.size.width, this.size.height, Color.WHITE );
+		Image back = basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
 		return (BufferedImage)back;
 	}
 

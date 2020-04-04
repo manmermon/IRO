@@ -26,20 +26,18 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import GUI.screens.levels.Level;
-import GUI.screens.levels.LevelFactory;
-import control.LaunchControl;
-import exceptions.IllegalLevelStateException;
+import GUI.dialogs.AppSettingDialog;
+import config.language.Language;
 
 import javax.swing.JButton;
 import java.awt.FlowLayout;
-import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 
 public class AppUI extends JFrame 
 {
@@ -142,7 +140,7 @@ public class AppUI extends JFrame
 	{
 		if ( this.btnPlay == null) 
 		{
-			this.btnPlay = new JButton("Play");
+			this.btnPlay = new JButton( Language.getLocalCaption( Language.PLAY ));
 			
 			this.btnPlay.setFocusable( false );
 			
@@ -162,10 +160,30 @@ public class AppUI extends JFrame
 	{
 		if ( this.btnSettings == null ) 
 		{ 
-			this.btnSettings = new JButton( "Settings" );
+			this.btnSettings = new JButton( Language.getLocalCaption( Language.SETTING ));
 						
 			this.btnSettings.setIcon( new ImageIcon( AppIcons.Config2( Color.BLACK ).getScaledInstance( 16, 16, BufferedImage.SCALE_SMOOTH ) ) );			
 			//this.btnSettings.setIcon( new ImageIcon( AppIcons.Contrabass( 512, Color.BLACK ) ) );
+			
+			this.btnSettings.addActionListener( new ActionListener()
+			{				
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					Rectangle r = ui.getBounds();
+					
+					Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+					
+					Rectangle rect = new Rectangle();
+					rect.x = ( r.x + r.width) / 2;
+					rect.y = ( r.y + r.height ) / 2;
+					rect.width = d.width / 3;
+					rect.height = d.height / 3;
+					
+					AppSettingDialog setdial = new AppSettingDialog( ui, rect );
+					setdial.setVisible( true );
+				}
+			});
 			
 			this.btnSettings.setFocusable( false );
 		}

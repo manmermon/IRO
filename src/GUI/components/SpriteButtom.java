@@ -6,7 +6,7 @@ import java.awt.Image;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 
-import image.imagenPoligono2D;
+import image.basicPainter2D;
 
 
 public class SpriteButtom extends AbstractSprite
@@ -64,10 +64,10 @@ public class SpriteButtom extends AbstractSprite
 		Image img = null;
 		if( super.spriteSize.width > 0 && super.spriteSize.height > 0 )
 		{
-			img = imagenPoligono2D.crearImagenDibujarFigura( 0, 0, this.poly, Color.RED, null );
-			imagenPoligono2D.crearImagenDibujarPerfilFigura( 0, 0, this.poly, Color.BLACK, 2, img );
+			img = basicPainter2D.paintFigure( 0, 0, this.poly, Color.RED, null );
+			basicPainter2D.paintOutlineFigure( 0, 0, this.poly, Color.BLACK, 2, img );
 			
-			imagenPoligono2D.crearImagenTexto( this.text, null, Color.YELLOW, Color.ORANGE, img );
+			basicPainter2D.text( this.text, null, Color.YELLOW, Color.ORANGE, img );
 		}
 		
 		return (BufferedImage)img;

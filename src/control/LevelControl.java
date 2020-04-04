@@ -42,6 +42,7 @@ import GUI.components.ISprite;
 import GUI.components.TrackNotesSprite;
 import GUI.screens.IScene;
 import GUI.screens.levels.Level;
+import config.ConfigApp;
 import control.events.BackgroundMusicEventListener;
 import control.events.SceneEvent;
 import control.events.SceneEventListener;
@@ -50,7 +51,7 @@ import control.inputs.KeystrokeAction;
 import control.inputs.MouseStrokeAction;
 import exceptions.IllegalLevelStateException;
 import exceptions.LevelException;
-import image.imagenPoligono2D;
+import image.basicPainter2D;
 import music.IROTrack;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
@@ -68,6 +69,10 @@ public class LevelControl extends AbstractStoppableThread implements ILevelContr
 	//private int BPM = MidiDefaults.DEFAULT_TEMPO_BEATS_PER_MINUTE;
 	
 	private boolean backgroundMusicEnd = false;
+	private Color preactionColor = Color.RED;
+	private Color waitActionColor = Color.BLUE;
+	private Color actionColor = Color.GREEN;
+	
 	
 	//private ArrayTreeMap< String, NoteSprite > selectedNotes;
 	
@@ -98,7 +103,11 @@ public class LevelControl extends AbstractStoppableThread implements ILevelContr
 		super.preStart();
 		
 		if( this.scene != null )
-		{		
+		{	
+			this.preactionColor = (Color)ConfigApp.getProperty( ConfigApp.PREACTION_COLOR).getSelectedValue();
+			this.waitActionColor = (Color)ConfigApp.getProperty( ConfigApp.WAITING_ACTION_COLOR).getSelectedValue();
+			this.actionColor = (Color)ConfigApp.getProperty( ConfigApp.ACTION_COLOR).getSelectedValue();
+			
 			this.soundCtrl = new PlayerControl( this.scene.getBackgroundPattern() );
 			this.soundCtrl.addBackgroundMusicEvent( this );
 		}
@@ -155,19 +164,19 @@ public class LevelControl extends AbstractStoppableThread implements ILevelContr
 							if( !note.isSelected() )
 							{
 								note.setSelected( true );
-								note.setColor( Color.GREEN );
+								note.setColor( this.actionColor );
 							}
 						}
 						else if( !note.isSelected() )
 						{
-							note.setColor( Color.BLUE );
+							note.setColor( this.waitActionColor );
 						}
 					}
 					else
 					{	
 						if( !note.isSelected() )
 						{
-							note.setColor( Color.RED );
+							note.setColor( this.preactionColor );
 						}
 						
 						
@@ -318,7 +327,7 @@ public class LevelControl extends AbstractStoppableThread implements ILevelContr
 			{
 				Font f = new Font( Font.SERIF, Font.BOLD, 48 );
 				FontMetrics fm = (new JButton()).getFontMetrics( f );
-				return (BufferedImage)imagenPoligono2D.crearImagenTexto( 0, 0, "Fin", fm, Color.BLACK, Color.MAGENTA, null );
+				return (BufferedImage)basicPainter2D.text( 0, 0, "Fin", fm, Color.BLACK, Color.MAGENTA, null );
 			}
 			
 			@Override

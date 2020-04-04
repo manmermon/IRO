@@ -1,5 +1,6 @@
 package config;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,10 +12,11 @@ import general.NumberRange;
 
 public class ConfigParameter
 {
-	public enum ParameterType { NUMBER, STRING, BOOLEAN };
+	public enum ParameterType { NUMBER, STRING, BOOLEAN, COLOR, USER };
 	
 	private Caption _ID = null;
 	private ParameterType _type = ParameterType.NUMBER;
+	private Object _selectedValue = null;
 	private List< Object > _values = null;
 	private NumberRange _rng = null;
 	
@@ -28,30 +30,21 @@ public class ConfigParameter
 		this._ID = id;
 		this._type = type;		
 		this._values = new ArrayList< Object >();
+		this._selectedValue = null;
 	}
 	
-	public ConfigParameter( Caption id, NumberRange range) throws ConfigurationException
+	public ConfigParameter( Caption id, NumberRange range) throws ConfigParameterException
 	{
 		if( id == null )
 		{
-			throw new ConfigurationException( "Parameter ID is null." );
+			throw new ConfigParameterException( "Parameter ID is null." );
 		}
 		
 		this._ID = id;
 		this._type = ParameterType.NUMBER;		
 		this._rng = range;
 		this._values = new ArrayList< Object >();
-	}
-	
-	public void addAll( List< Object > values ) throws ConfigParameterException
-	{
-		if( values != null )
-		{
-			for( Object v : values )
-			{
-				this.add( v );
-			}
-		}
+		this._selectedValue = null;
 	}
 	
 	public void add( Object value ) throws ConfigParameterException
@@ -99,6 +92,23 @@ public class ConfigParameter
 					}
 					break;
 				}
+				case COLOR:
+				{
+					if( !(value instanceof Color) )
+					{
+						errMsg = "Value is not a Color";
+					}
+					
+					break;					
+				}
+				case USER:
+				{
+					if( !( value instanceof User ) )
+					{
+						errMsg = "Value is not a User";
+					}
+					break;
+				}
 				default:
 				{
 					errMsg = "Parameter type unknown.";
@@ -113,26 +123,41 @@ public class ConfigParameter
 		}
 		
 		this._values.add( value );
-	}
- 
-	public void replace( int index, Object value ) throws ConfigParameterException 
-	{		
-		Object val = this._values.remove( index );
-		try
+		
+		if( this._selectedValue == null )
 		{
-			this.add( value );
+			this._selectedValue = value;
 		}
-		catch ( ConfigParameterException e) 
+	}
+ 	
+	public void addAll( List values ) throws ConfigParameterException
+	{
+		if( values != null )
 		{
-			this._values.add(  index, val );
-			
-			throw e;
+			for( Object val : values )
+			{
+				this.add( val );
+			}
 		}
 	}
 	
-	public void clear( )
+	public void clear()
 	{
-		this._values.clear();
+		this._selectedValue = null;
+		this._values.clear();		 
+	}
+	
+	public void setSelectedValue( int index )
+	{
+		this._selectedValue = this._values.get( index );
+	}
+	
+	public void setSelectedValue( Object val )
+	{
+		if( this._values.contains( val ) )
+		{
+			this._selectedValue = val;
+		}
 	}
 	
 	public Caption get_ID()
@@ -145,9 +170,14 @@ public class ConfigParameter
 		return this._type;
 	}
 	
-	public Object[] getValues()
+	public Object getSelectedValue()
 	{
-		return this._values.toArray( );
+		return this._selectedValue;
+	}
+	
+	public List< Object > getAllValues()
+	{
+		return this._values;
 	}
 	
 	public NumberRange getNumberRange()

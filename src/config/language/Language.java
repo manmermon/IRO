@@ -48,13 +48,107 @@ public class Language
 	private static Locale localLang = null;
 
 	public static final String LANGUAGE = "LANGUAGE";
-		
+	public static final String LANGUAGE_TXT = "LANGUAGE_TXT";
+	
+	public static final String MUSIC_LIST = "MUSIC_LIST";
+	public static final String SELECTED_SONG_LIST = "SELECTED_SONG_LIST";
+	
+	public static final String SONG = "SONG"; 
+	public static final String PLAYER = "PLAYER";
+	public static final String NAME = "NAME";
+	public static final String ANONYMOUS = "ANONYMOUS"; 
+	public static final String SELECT = "SELECT";
+	public static final String ICON = "ICON";
+	public static final String ERROR = "ERROR";
+	public static final String WARNING = "WARNING";
+	public static final String REMOVE = "REMOVE";
+	public static final String DELETE = "DELETE";
+	public static final String REMOVE_USER_MSG = "REMOVE_USER_MSG";
+	public static final String SETTING = "SETTING";
+	public static final String PLAY = "PLAY";
+	public static final String CANCEL = "CANCEL";
+	public static final String NEW = "NEW";	
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
 	{
-		captions.put( LANGUAGE, new Caption( LANGUAGE, defaultLanguage, defaultLanguage ) );
-
+		String esEs = Locale.forLanguageTag( "es-ES" ).toLanguageTag().toLowerCase();
+		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
+		cap.setCaption( esEs, esEs);
+		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( LANGUAGE_TXT, defaultLanguage, "Language" );
+		cap.setCaption( esEs, "Idioma");
+		captions.put( LANGUAGE_TXT, cap );
+		
+		cap = new Caption( PLAY, defaultLanguage, "Play");
+		cap.setCaption( esEs, "Jugar" );
+		captions.put( PLAY, cap );
+		
+		cap = new Caption( SETTING, defaultLanguage, "Settings");
+		cap.setCaption( esEs, "Opciones" );
+		captions.put( SETTING, cap );
+		
+		cap = new Caption( MUSIC_LIST, defaultLanguage, "Song list");
+		cap.setCaption( esEs, "Lista de canciones" );
+		captions.put( MUSIC_LIST, cap );
+		
+		new Caption( SELECTED_SONG_LIST, defaultLanguage, "Selected songs");
+		cap.setCaption( esEs, "Canciones seleccionadas" );
+		captions.put( SELECTED_SONG_LIST, cap );
+		
+		cap = new Caption( SONG, defaultLanguage, "Song(s)" );
+		cap.setCaption( esEs, "Canción(es)" );
+		captions.put( SONG, cap );
+		
+		cap = new Caption( PLAYER, defaultLanguage, "Player" );
+		cap.setCaption( esEs, "Jugador" );
+		captions.put( PLAYER, cap );
+		
+		cap = new Caption( NAME, defaultLanguage, "Name" );
+		cap.setCaption( esEs, "Nombre" );
+		captions.put( NAME, cap );
+		
+		cap = new Caption( ANONYMOUS, defaultLanguage, "Anonymous" ) ;
+		cap.setCaption( esEs, "Anónimo" );
+		captions.put( ANONYMOUS, cap );
+		
+		cap = new Caption( SELECT, defaultLanguage, "Select" );
+		cap.setCaption( esEs, "Seleccionar");
+		captions.put( SELECT, cap );
+				
+		cap = new Caption( ICON, defaultLanguage, "Icon" );
+		cap.setCaption( esEs, "Icono" );
+		captions.put( ICON, cap );
+		
+		cap = new Caption( ERROR, defaultLanguage, "Error" );
+		cap.setCaption( esEs, "Error" );
+		captions.put( ERROR, cap );
+		
+		cap = new Caption( REMOVE, defaultLanguage, "Remove" );
+		cap.setCaption( esEs, "Eliminar" );
+		captions.put( REMOVE, cap );
+		
+		cap = new Caption( DELETE, defaultLanguage, "Delete" );
+		cap.setCaption( esEs, "Eliminar" );
+		captions.put( DELETE, cap );
+		
+		cap = new Caption( REMOVE_USER_MSG, defaultLanguage, "All player data will be remove. Continue?" );
+		cap.setCaption( esEs, "Se eliminarán todos los datos del jugador. ¿Desea continuar?" );
+		captions.put( REMOVE_USER_MSG, cap );
+		
+		cap = new Caption( WARNING, defaultLanguage, "Warning" );
+		cap.setCaption( esEs, "Cuidado" );
+		captions.put( WARNING, cap );
+		
+		cap = new Caption( CANCEL, defaultLanguage, "Cancel" );
+		cap.setCaption( esEs, "Cancelar" );
+		captions.put( CANCEL, cap );
+		
+		cap = new Caption( NEW, defaultLanguage, "New" );
+		cap.setCaption( esEs, "Nuevo" );
+		captions.put( NEW, cap );
 	}
 
 	public static void loadLanguages() 
@@ -161,7 +255,7 @@ public class Language
 		String idLng = defaultLanguage;
 		if ( localLang != null ) 
 		{
-			idLng = localLang.toString();
+			idLng = localLang.toLanguageTag().toLowerCase();
 		}
 
 		return getCaption( captionID, idLng );
@@ -186,9 +280,10 @@ public class Language
 		{
 			for ( Locale lc : Locale.getAvailableLocales() )
 			{
-				if ( lang.toLowerCase().equals( lc.toString().toLowerCase() ) )
+				if ( lang.toLowerCase().equals( lc.toLanguageTag().toLowerCase() ) )
 				{
 					language = lc;
+					break;
 				}
 			}
 
@@ -211,7 +306,7 @@ public class Language
 
 		if ( localLang != null ) 
 		{
-			lng = localLang.toString();
+			lng = localLang.toLanguageTag().toLowerCase();
 		}
 
 		return lng;

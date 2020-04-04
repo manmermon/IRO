@@ -16,7 +16,7 @@ import GUI.components.ISprite;
 import GUI.components.SpriteEvent;
 import GUI.components.SpriteEventListener;
 import general.ArrayTreeMap;
-import image.imagenPoligono2D;
+import image.basicPainter2D;
 
 public abstract class Scene implements IScene, SpriteEventListener
 {
@@ -165,7 +165,7 @@ public abstract class Scene implements IScene, SpriteEventListener
 	{
 		synchronized ( this.SPRITES )
 		{
-			Image scene = imagenPoligono2D.crearLienzoVacio( this.size.width, this.size.height, Color.WHITE );
+			Image scene = basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
 			
 			List< Integer > drawIndexes = new ArrayList< Integer >( this.SPRITES.keySet() );
 			Collections.sort( drawIndexes );
@@ -184,7 +184,7 @@ public abstract class Scene implements IScene, SpriteEventListener
 					{
 						BufferedImage spr = pic.getSprite();
 					
-						imagenPoligono2D.componerImagen( scene, (int)loc.x, (int)loc.y, spr );
+						basicPainter2D.composeImage( scene, (int)loc.x, (int)loc.y, spr );
 					}
 				}
 			}

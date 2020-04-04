@@ -28,7 +28,7 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
-import image.imagenPoligono2D;
+import image.basicPainter2D;
 
 public class Fret extends AbstractSprite
 {
@@ -113,7 +113,7 @@ public class Fret extends AbstractSprite
 	{		 
 		int xs[] = new int[] { 0, this.fret.getBounds().width, this.fret.getBounds().width, 0 };
 		int ys[] = new int[] { 0, 0, this.fret.getBounds().height, this.fret.getBounds().height };
-		return (BufferedImage)imagenPoligono2D.crearImagenPoligonoPerfil( xs, ys, 2, Color.BLACK, null );
+		return (BufferedImage)basicPainter2D.outlinePolygon( xs, ys, 2, Color.BLACK, null );
 	}
 
 	/*

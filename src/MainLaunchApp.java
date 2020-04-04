@@ -52,6 +52,7 @@ import GUI.OpeningDialog;
 import GUI.TextAreaPrintStream;
 import GUI.AppIcons;
 import config.ConfigApp;
+import config.language.Language;
 import control.RefreshControl;
 import control.ScreenControl;
 import control.inputs.InputControl;
@@ -121,6 +122,8 @@ public class MainLaunchApp
 
 	private static AppUI createAppGUI() throws Exception
 	{	
+		Language.changeLanguage( "es-es" );
+		
 		Dimension openDim = new Dimension( 500, 200 );
 		
 		AppUI ui = AppUI.getInstance();

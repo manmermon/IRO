@@ -10,22 +10,22 @@ import java.util.TreeSet;
 
 import org.jfugue.midi.MidiDictionary;
 
-import image.imagenPoligono2D;
+import image.basicPainter2D;
 
 public class AppIcons extends GeneralAppIcon 
 {
 	public static Image appIcon( int size )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 
 		int thick = size/8;
 
-		imagenPoligono2D.crearImagenOvalo( -size + thick, -1, 2*size - (3*thick)/2, size, thick, Color.ORANGE, Color.WHITE, img );
-		imagenPoligono2D.crearImagenLinea( thick/2 - 1, 0, thick/2 - 1, size, thick, Color.ORANGE, img );
+		basicPainter2D.oval( -size + thick, -1, 2*size - (3*thick)/2, size, thick, Color.ORANGE, Color.WHITE, img );
+		basicPainter2D.line( thick/2 - 1, 0, thick/2 - 1, size, thick, Color.ORANGE, img );
 
 		Image quaver = Quaver( size - (int)(4.25 * thick), size - (int)(4.25 * thick), Color.BLACK, null );
 
-		imagenPoligono2D.componerImagen( img, (int)( 1.1 * thick ), ( size - quaver.getHeight( null ) ) /2, quaver );
+		basicPainter2D.composeImage( img, (int)( 1.1 * thick ), ( size - quaver.getHeight( null ) ) /2, quaver );
 
 		return img;
 	}
@@ -114,7 +114,7 @@ public class AppIcons extends GeneralAppIcon
 	
 	public static Image getInstrument( Set< String > idInstruments, int size, Color c )
 	{
-		Image img =  imagenPoligono2D.crearImagenCirculo( 0, 0, size, c, null );
+		Image img =  basicPainter2D.circle( 0, 0, size, c, null );
 		
 		if( idInstruments != null && !idInstruments.isEmpty() )
 		{
@@ -129,7 +129,7 @@ public class AppIcons extends GeneralAppIcon
 			
 			if( !knowInstrs.isEmpty() )
 			{
-				img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+				img = basicPainter2D.createEmptyCanva( size, size, null );
 				List< Point > locs = new ArrayList<Point>();
 				
 				int sizeInst = size / 2 - 1;
@@ -242,7 +242,7 @@ public class AppIcons extends GeneralAppIcon
 					
 					Point loc = locs.get( count );
 					
-					imagenPoligono2D.componerImagen( img, loc.x, loc.y, imgInst );
+					basicPainter2D.composeImage( img, loc.x, loc.y, imgInst );
 					
 					count++;
 					if( count > 8 )
@@ -344,7 +344,7 @@ public class AppIcons extends GeneralAppIcon
 			}			
 			default:
 			{
-				img = imagenPoligono2D.crearImagenCirculo( 0, 0, size, c, null );// Quaver( size, size, c, c );
+				img = basicPainter2D.circle( 0, 0, size, c, null );// Quaver( size, size, c, c );
 				break;
 			}
 		}
@@ -362,7 +362,7 @@ public class AppIcons extends GeneralAppIcon
 			thicknessBorder = 1;
 		}
 
-		Image img = imagenPoligono2D.crearImagenRectangulo( size, size, thicknessBorder, c, Color.WHITE );
+		Image img = basicPainter2D.rectangle( size, size, thicknessBorder, c, Color.WHITE );
 
 		double w = img.getWidth( null ) / 4.0 - thicknessBorder/2;
 
@@ -372,16 +372,16 @@ public class AppIcons extends GeneralAppIcon
 		for( int i = 0; i < 4; i++ )
 		{				
 			int x = (int)( p + thicknessBorder / 2);
-			imagenPoligono2D.crearImagenLinea( x, 0, x, img.getHeight( null ), thicknessBorder, c, img );
+			basicPainter2D.line( x, 0, x, img.getHeight( null ), thicknessBorder, c, img );
 
 			p += w + t4;
 		}
 
-		Image black = imagenPoligono2D.crearImagenRectangulo( img.getWidth( null ) / 6, img.getHeight( null ) / 2, 1, c, c );
+		Image black = basicPainter2D.rectangle( img.getWidth( null ) / 6, img.getHeight( null ) / 2, 1, c, c );
 		p = p - ( w + t4);
 		for( int i = 0; i < 3; i++ )
 		{
-			imagenPoligono2D.componerImagen( img, (int)(p - black.getWidth( null ) / 2 + thicknessBorder / 2), thicknessBorder, black );
+			basicPainter2D.composeImage( img, (int)(p - black.getWidth( null ) / 2 + thicknessBorder / 2), thicknessBorder, black );
 
 			p -= (w + t4);
 		}
@@ -391,7 +391,7 @@ public class AppIcons extends GeneralAppIcon
 
 	public static Image Flute( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 
 		int divSize = size / 10;
 
@@ -405,7 +405,7 @@ public class AppIcons extends GeneralAppIcon
 		int[] ys = new int[] { size - divSize - divSize / 2, divSize /2, 0
 				, divSize / 2, divSize * 2, size };
 
-		imagenPoligono2D.crearImagenPoligonoRelleno( xs, ys, c, img );
+		basicPainter2D.fillPolygon( xs, ys, c, img );
 
 
 		//Color holeColor = new Color( ~c.getRGB() );
@@ -424,7 +424,7 @@ public class AppIcons extends GeneralAppIcon
 
 		for( int i = 0; i < 6; i++ )
 		{
-			imagenPoligono2D.crearImagenCirculo( x, y, divSize, holeColor, img );
+			basicPainter2D.circle( x, y, divSize, holeColor, img );
 			x += divSize;
 			y -= divSize;
 		}
@@ -444,14 +444,14 @@ public class AppIcons extends GeneralAppIcon
 				//, (int)( 1.2 * divSize )
 		};
 
-		imagenPoligono2D.crearImagenPoligonoRelleno(xs, ys, holeColor, img);
+		basicPainter2D.fillPolygon(xs, ys, holeColor, img);
 
 		return img;
 	}
 
 	public static Image Xylophone( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 
 		int thicknessBorder = size / 32;
 
@@ -495,13 +495,13 @@ public class AppIcons extends GeneralAppIcon
 		
 		for( int i = 0; i < numPiece; i++ )
 		{
-			imagenPoligono2D.crearImagenPoligonoRelleno( new int[] { x1, x2, x2, x1}
+			basicPainter2D.fillPolygon( new int[] { x1, x2, x2, x1}
 			, new int[] { y1, y1, y2, y2}
 			, c, img );
 
-			imagenPoligono2D.crearImagenCirculo( (x1 + x2)/2 - r / 2, pH - r / 2,
+			basicPainter2D.circle( (x1 + x2)/2 - r / 2, pH - r / 2,
 					r, nc, img);
-			imagenPoligono2D.crearImagenCirculo( (x1 + x2)/2 - r / 2, size - pH - r
+			basicPainter2D.circle( (x1 + x2)/2 - r / 2, size - pH - r
 					/ 2, r, nc, img);
 
 			x1 = x2 + thicknessBorder;
@@ -511,19 +511,19 @@ public class AppIcons extends GeneralAppIcon
 		}
 
 		thicknessBorder = 2 * thicknessBorder;
-		imagenPoligono2D.crearImagenLinea( size / 2, size / 2, size -
+		basicPainter2D.line( size / 2, size / 2, size -
 				thicknessBorder, size - thicknessBorder, thicknessBorder , c, img );
 
 		r = 3 * thicknessBorder;
-		imagenPoligono2D.crearImagenCirculo( ( size - r) /2, ( size - r) / 2, r,
+		basicPainter2D.circle( ( size - r) /2, ( size - r) / 2, r,
 				c, img );
 
 		thicknessBorder = (int)( 0.9 * thicknessBorder );
-		imagenPoligono2D.crearImagenLinea( size / 2, size / 2, size -
+		basicPainter2D.line( size / 2, size / 2, size -
 				(int)(thicknessBorder * 1.2 ), size - (int)(thicknessBorder * 1.2 ),
 				thicknessBorder , nc, img );
 		r = 3 * thicknessBorder;
-		imagenPoligono2D.crearImagenCirculo( ( size - r) /2, ( size - r) / 2, r,
+		basicPainter2D.circle( ( size - r) /2, ( size - r) / 2, r,
 				nc, img );
 
 		return img;
@@ -531,9 +531,9 @@ public class AppIcons extends GeneralAppIcon
 
 	public static Image Trumpet( int size, Color c)
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 
-		Image tr = imagenPoligono2D.crearImagenPoligonoRelleno( new int[] { 0, size/4, size/4 }
+		Image tr = basicPainter2D.fillPolygon( new int[] { 0, size/4, size/4 }
 																, new int[] { size / 4, 0, size / 2 }
 																, c, null );
 
@@ -545,17 +545,17 @@ public class AppIcons extends GeneralAppIcon
 		}
 
 		int y = tr.getHeight( null ) / 2;
-		imagenPoligono2D.crearImagenLinea( 0, y, size, y, thicknessBorder, c,
+		basicPainter2D.line( 0, y, size, y, thicknessBorder, c,
 				img );
-		imagenPoligono2D.componerImagen( img, size - tr.getWidth( null ), 0, tr );
+		basicPainter2D.composeImage( img, size - tr.getWidth( null ), 0, tr );
 
-		imagenPoligono2D.crearImagenLinea( thicknessBorder / 4 - 1, y - thicknessBorder / 2
+		basicPainter2D.line( thicknessBorder / 4 - 1, y - thicknessBorder / 2
 										, thicknessBorder / 4 - 1, y + thicknessBorder / 2, thicknessBorder / 2
 										, c , img );
 		
 		int w = size - tr.getWidth( null ) - thicknessBorder;
 		int h = size - tr.getHeight( null ) /2 - thicknessBorder;
-		imagenPoligono2D.crearImagenRectanguloRedondo( ( int )( thicknessBorder ) 
+		basicPainter2D.roundRectangle( ( int )( thicknessBorder ) 
 													, y
 													, w
 													, h
@@ -565,35 +565,35 @@ public class AppIcons extends GeneralAppIcon
 													, c, null, img );
 
 		int x = ( int )( 1 * thicknessBorder ) + w / 2;  
-		imagenPoligono2D.crearImagenLinea( x, y - thicknessBorder / 2, x, y + h
+		basicPainter2D.line( x, y - thicknessBorder / 2, x, y + h
 				+ thicknessBorder / 2,  (int)( 0.65 * thicknessBorder ), c, img );
-		imagenPoligono2D.crearImagenLinea( x, y - thicknessBorder, x, y - thicknessBorder / 2
+		basicPainter2D.line( x, y - thicknessBorder, x, y - thicknessBorder / 2
 											, thicknessBorder / 4, c, img );
-		imagenPoligono2D.crearImagenLinea( x - thicknessBorder / 3, y - thicknessBorder - thicknessBorder / 4
+		basicPainter2D.line( x - thicknessBorder / 3, y - thicknessBorder - thicknessBorder / 4
 											, x + thicknessBorder / 3, y - thicknessBorder - thicknessBorder / 4
 											,  thicknessBorder / 4, c, img );
 		
 		
 		x += (int)( 1.25 * thicknessBorder );
-		imagenPoligono2D.crearImagenLinea( x, y - thicknessBorder / 2, x, y + h
+		basicPainter2D.line( x, y - thicknessBorder / 2, x, y + h
 				+ thicknessBorder / 2,  (int)( 0.65 * thicknessBorder ), c, img );
-		imagenPoligono2D.crearImagenLinea( x, y - thicknessBorder, x, y - thicknessBorder / 2
+		basicPainter2D.line( x, y - thicknessBorder, x, y - thicknessBorder / 2
 											, thicknessBorder / 4, c, img );
-		imagenPoligono2D.crearImagenLinea( x - thicknessBorder / 3, y - thicknessBorder - thicknessBorder / 4
+		basicPainter2D.line( x - thicknessBorder / 3, y - thicknessBorder - thicknessBorder / 4
 											, x + thicknessBorder / 3, y - thicknessBorder - thicknessBorder / 4
 											,  thicknessBorder / 4, c, img );
 		
 		x -=  (int)(  2.5 * thicknessBorder );
-		imagenPoligono2D.crearImagenLinea( x, y - thicknessBorder / 2, x, y + h
+		basicPainter2D.line( x, y - thicknessBorder / 2, x, y + h
 				+ thicknessBorder / 2, (int)( 0.65 * thicknessBorder ), c, img );
-		imagenPoligono2D.crearImagenLinea( x, y - thicknessBorder, x, y - thicknessBorder / 2
+		basicPainter2D.line( x, y - thicknessBorder, x, y - thicknessBorder / 2
 											, thicknessBorder / 4, c, img );
-		imagenPoligono2D.crearImagenLinea( x - thicknessBorder / 3, y - thicknessBorder - thicknessBorder / 4
+		basicPainter2D.line( x - thicknessBorder / 3, y - thicknessBorder - thicknessBorder / 4
 											, x + thicknessBorder / 3, y - thicknessBorder - thicknessBorder / 4
 											,  thicknessBorder / 4, c, img );
 		
 		
-		imagenPoligono2D.componerImagen( imagenPoligono2D.crearLienzoVacio( size, size, null )
+		basicPainter2D.composeImage( basicPainter2D.createEmptyCanva( size, size, null )
 												, 0, ( size - img.getHeight( null ) ) / 2
 												, img );
 		
@@ -603,7 +603,7 @@ public class AppIcons extends GeneralAppIcon
 	
 	public static Image Drum( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		//Color borderColor = new Color( ~c.getRGB() );
 				
@@ -628,23 +628,23 @@ public class AppIcons extends GeneralAppIcon
 		int ovalHeigh = divStep * 4;
 		
 		
-		imagenPoligono2D.crearImagenOvalo( 0, size - ovalHeigh, size, ovalHeigh, thicknessBorder, c, c, img );
-		imagenPoligono2D.crearImagenPoligonoRelleno( new int[] { size, 0, 0, size }
+		basicPainter2D.oval( 0, size - ovalHeigh, size, ovalHeigh, thicknessBorder, c, c, img );
+		basicPainter2D.fillPolygon( new int[] { size, 0, 0, size }
 													, new int[] { size - ovalHeigh / 2, size - ovalHeigh / 2
 													, size - ( 3 * ovalHeigh ) / 2, size - ( 3 * ovalHeigh ) / 2}
 													, c, img);
 		
-		imagenPoligono2D.crearImagenOvalo( 0, size - 2 * ovalHeigh, size, ovalHeigh, thicknessBorder, borderColor, borderColor, img );
-		imagenPoligono2D.crearImagenOvalo( 0, size - (int)( 2.05 * ovalHeigh ), size, ovalHeigh, thicknessBorder, c, borderColor, img );
+		basicPainter2D.oval( 0, size - 2 * ovalHeigh, size, ovalHeigh, thicknessBorder, borderColor, borderColor, img );
+		basicPainter2D.oval( 0, size - (int)( 2.05 * ovalHeigh ), size, ovalHeigh, thicknessBorder, c, borderColor, img );
 		
 		int y = size - (int)( 2.05 * ovalHeigh );
-		imagenPoligono2D.crearImagenPunto( ( 2 * size ) / 3, y - 4 * thicknessBorder, thicknessBorder * 3, c, true, img );
-		imagenPoligono2D.crearImagenLinea( ( 2 * size ) / 3 + thicknessBorder, y - 4 * thicknessBorder + thicknessBorder
+		basicPainter2D.dot( ( 2 * size ) / 3, y - 4 * thicknessBorder, thicknessBorder * 3, c, true, img );
+		basicPainter2D.line( ( 2 * size ) / 3 + thicknessBorder, y - 4 * thicknessBorder + thicknessBorder
 											, size - thicknessBorder, thicknessBorder, thicknessBorder
 											, c, img );
 		
-		imagenPoligono2D.crearImagenPunto( size / 3, y - 4 * thicknessBorder, thicknessBorder * 3, c, true, img );
-		imagenPoligono2D.crearImagenLinea( size / 3 + thicknessBorder, y - 4 * thicknessBorder + thicknessBorder
+		basicPainter2D.dot( size / 3, y - 4 * thicknessBorder, thicknessBorder * 3, c, true, img );
+		basicPainter2D.line( size / 3 + thicknessBorder, y - 4 * thicknessBorder + thicknessBorder
 											, thicknessBorder, thicknessBorder, thicknessBorder
 											, c, img );
 		
@@ -653,7 +653,7 @@ public class AppIcons extends GeneralAppIcon
 
 	public static Image Trombone( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 10;
 
@@ -667,55 +667,55 @@ public class AppIcons extends GeneralAppIcon
 		int arcAngle = 180;
 		double arcSize = 3.25  *gridSize;
 		
-		Image tr = imagenPoligono2D.crearImagenTriangulo( (int)( gridSize * 3), 1, c, c, imagenPoligono2D.WEST );
+		Image tr = basicPainter2D.triangle( (int)( gridSize * 3), 1, c, c, basicPainter2D.WEST );
 
-		Image curv = imagenPoligono2D.crearImagenArco( 0, 0, (int)arcSize, (int)arcSize, startAngle, arcAngle, thicknessBorder, c, null, null );
-		Image curv2 = imagenPoligono2D.crearImagenArco( 0, 0, (int)arcSize, (int)arcSize, -startAngle, arcAngle, thicknessBorder, c, null, null );
+		Image curv = basicPainter2D.arc( 0, 0, (int)arcSize, (int)arcSize, startAngle, arcAngle, thicknessBorder, c, null, null );
+		Image curv2 = basicPainter2D.arc( 0, 0, (int)arcSize, (int)arcSize, -startAngle, arcAngle, thicknessBorder, c, null, null );
 		
-		imagenPoligono2D.componerImagen( img, size - tr.getWidth( null ), 0, tr );
+		basicPainter2D.composeImage( img, size - tr.getWidth( null ), 0, tr );
 		
-		imagenPoligono2D.crearImagenLinea( (int)( arcSize / 2 ) + thicknessBorder, tr.getHeight( null ) / 2
+		basicPainter2D.line( (int)( arcSize / 2 ) + thicknessBorder, tr.getHeight( null ) / 2
 											, size - tr.getWidth( null ) / 2, tr.getHeight( null ) / 2
 											, thicknessBorder, c, img );
 		
-		imagenPoligono2D.componerImagen( img, 0, tr.getHeight( null ) / 2 - thicknessBorder / 2, curv );
+		basicPainter2D.composeImage( img, 0, tr.getHeight( null ) / 2 - thicknessBorder / 2, curv );
 		
-		imagenPoligono2D.crearImagenLinea( curv.getWidth( null ) /2 + thicknessBorder
+		basicPainter2D.line( curv.getWidth( null ) /2 + thicknessBorder
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - thicknessBorder
 											, size - tr.getWidth( null ) 
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - thicknessBorder 
 											, thicknessBorder, c, img );
 		
-		imagenPoligono2D.componerImagen( img, size - tr.getWidth( null ) - curv.getWidth( null ) / 2 + thicknessBorder/ 2
+		basicPainter2D.composeImage( img, size - tr.getWidth( null ) - curv.getWidth( null ) / 2 + thicknessBorder/ 2
 										, tr.getHeight( null ) / 2 + curv.getHeight( null ) - thicknessBorder - thicknessBorder / 2, curv2 );
 		
-		imagenPoligono2D.crearImagenLinea( curv.getWidth( null ) /4 
+		basicPainter2D.line( curv.getWidth( null ) /4 
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - 2*thicknessBorder + curv2.getHeight( null )
 											, size - tr.getWidth( null )
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - 2*thicknessBorder  + curv2.getHeight( null )
 											, thicknessBorder, c, img );
 		
 		/****/
-		imagenPoligono2D.crearImagenLinea( curv.getWidth( null ) /4
+		basicPainter2D.line( curv.getWidth( null ) /4
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - 2*thicknessBorder + curv2.getHeight( null ) - thicknessBorder / 2
 											, curv.getWidth( null ) /4
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - 2*thicknessBorder  + curv2.getHeight( null ) + thicknessBorder / 2
 											, thicknessBorder, c, img );
 		
 		
-		imagenPoligono2D.crearImagenLinea( size /2 - thicknessBorder / 2
+		basicPainter2D.line( size /2 - thicknessBorder / 2
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - thicknessBorder
 											, size / 2 - thicknessBorder / 2
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - 2*thicknessBorder + curv2.getHeight( null )
 											, thicknessBorder, c, img );
 	
-		imagenPoligono2D.crearImagenLinea( curv.getWidth( null ) / 2 + thicknessBorder / 2
+		basicPainter2D.line( curv.getWidth( null ) / 2 + thicknessBorder / 2
 											, tr.getHeight( null ) / 2
 											, curv.getWidth( null ) / 2 + thicknessBorder / 2
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - thicknessBorder
 											, thicknessBorder, c, img );
 		
-		imagenPoligono2D.crearImagenLinea( size - tr.getWidth( null ) - thicknessBorder
+		basicPainter2D.line( size - tr.getWidth( null ) - thicknessBorder
 											, tr.getHeight( null ) / 2
 											, size - tr.getWidth( null ) - thicknessBorder
 											, tr.getHeight( null ) / 2 + curv.getHeight( null ) - thicknessBorder
@@ -726,7 +726,7 @@ public class AppIcons extends GeneralAppIcon
 	
 	public static Image Organ( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 10;
 
@@ -765,7 +765,7 @@ public class AppIcons extends GeneralAppIcon
 		
 		for( int i = 0; i < tubeNum; i++ )
 		{ 
-			Image tubeTop = imagenPoligono2D.crearImagenOvalo( 0, 0, tubeWidth, tubeWidth / 2, 1, c, c, null );
+			Image tubeTop = basicPainter2D.oval( 0, 0, tubeWidth, tubeWidth / 2, 1, c, c, null );
 			int holeWidth =  (2 * tubeWidth ) / 3;
 			int holeHeight = tubeWidth / 3;
 			if( holeWidth < 1 )
@@ -777,43 +777,43 @@ public class AppIcons extends GeneralAppIcon
 			{
 				holeHeight = 1;
 			}
-			Image tubeTopHole = imagenPoligono2D.crearImagenOvalo( 0, 0, holeWidth, holeHeight, 1, holeColor, holeColor, null );
+			Image tubeTopHole = basicPainter2D.oval( 0, 0, holeWidth, holeHeight, 1, holeColor, holeColor, null );
 			
-			Image tube = imagenPoligono2D.crearImagenRectanguloRedondo( 0, 0, tubeWidth, tubeHeight - tubeTop.getHeight( null ) / 2 + tubeArc / 2, tubeArc, tubeArc, 1, c, c, null );
+			Image tube = basicPainter2D.roundRectangle( 0, 0, tubeWidth, tubeHeight - tubeTop.getHeight( null ) / 2 + tubeArc / 2, tubeArc, tubeArc, 1, c, c, null );
 			
 			
-			imagenPoligono2D.crearImagenOvalo( tube.getWidth( null ) / 3, tube.getHeight( null ) - (int)( 1.5 * tubeArc )
+			basicPainter2D.oval( tube.getWidth( null ) / 3, tube.getHeight( null ) - (int)( 1.5 * tubeArc )
 															, tube.getWidth( null ) / 3, tubeArc / 2
 															, 1, holeColor, holeColor, tube );
 			
-			imagenPoligono2D.componerImagen( tubeTop, ( tubeTop.getWidth( null ) - tubeTopHole.getWidth( null ) ) / 2
+			basicPainter2D.composeImage( tubeTop, ( tubeTop.getWidth( null ) - tubeTopHole.getWidth( null ) ) / 2
 													, ( tubeTop.getHeight( null ) - tubeTopHole.getHeight( null ) ) / 2
 													, tubeTopHole );
 			
-			imagenPoligono2D.componerImagen( img, i * ( tubeWidth + tubePad) , tubeTop.getHeight( null ) / 2 - tubeArc / 2, tube );
-			imagenPoligono2D.componerImagen( img, i * ( tubePad + tubeWidth ) , 0, tubeTop );
+			basicPainter2D.composeImage( img, i * ( tubeWidth + tubePad) , tubeTop.getHeight( null ) / 2 - tubeArc / 2, tube );
+			basicPainter2D.composeImage( img, i * ( tubePad + tubeWidth ) , 0, tubeTop );
 		}
 		
-		Image keyboard = imagenPoligono2D.crearImagenRectangulo( size, size - tubeHeight - tubePad, thicknessBorder, c, holeColor );
+		Image keyboard = basicPainter2D.rectangle( size, size - tubeHeight - tubePad, thicknessBorder, c, holeColor );
 		
 		int keyWidth = keyboard.getWidth( null ) / 8;
-		Image blackKeys = imagenPoligono2D.crearImagenRectangulo( keyWidth - pad / 2, ( 2 * keyboard.getHeight( null ) ) / 3 - pad / 4
+		Image blackKeys = basicPainter2D.rectangle( keyWidth - pad / 2, ( 2 * keyboard.getHeight( null ) ) / 3 - pad / 4
 																	, thicknessBorder, c, c );
 		
-		imagenPoligono2D.componerImagen( keyboard, keyWidth, 0, blackKeys );
-		imagenPoligono2D.componerImagen( keyboard, 2 * keyWidth, 0, blackKeys );
-		imagenPoligono2D.componerImagen( keyboard, 3 * keyWidth, 0, blackKeys );
-		imagenPoligono2D.componerImagen( keyboard, 5 * keyWidth, 0, blackKeys );
-		imagenPoligono2D.componerImagen( keyboard, 6 * keyWidth, 0, blackKeys );
+		basicPainter2D.composeImage( keyboard, keyWidth, 0, blackKeys );
+		basicPainter2D.composeImage( keyboard, 2 * keyWidth, 0, blackKeys );
+		basicPainter2D.composeImage( keyboard, 3 * keyWidth, 0, blackKeys );
+		basicPainter2D.composeImage( keyboard, 5 * keyWidth, 0, blackKeys );
+		basicPainter2D.composeImage( keyboard, 6 * keyWidth, 0, blackKeys );
 		
-		imagenPoligono2D.componerImagen( img, 0, size - keyboard.getHeight( null ), keyboard );
+		basicPainter2D.composeImage( img, 0, size - keyboard.getHeight( null ), keyboard );
 		
 		return img;
 	}
 
 	public static Image Guitar( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 16;
 
@@ -834,25 +834,25 @@ public class AppIcons extends GeneralAppIcon
 		
 		int mast = thicknessBorder * 2;
 		int mastHead = thicknessBorder * 3; 
-		imagenPoligono2D.crearImagenLinea( size - mast, mast, size / 2, size / 2, mast, c, img );
-		imagenPoligono2D.crearImagenLinea(  size - mast, mast,  size - mast - mastHead / 10, mast + mastHead / 10, mastHead, c, img );
+		basicPainter2D.line( size - mast, mast, size / 2, size / 2, mast, c, img );
+		basicPainter2D.line(  size - mast, mast,  size - mast - mastHead / 10, mast + mastHead / 10, mastHead, c, img );
 		
 		
 		int r = (int)( 0.6 *  size );
 		int r2 = ( 3 * r ) / 4;
 		int r3 = ( 4 * r2 ) / 10;
 		
-		Image circ1 = imagenPoligono2D.crearImagenCirculo( 0, 0, r, c, null );
-		Image circ2 = imagenPoligono2D.crearImagenCirculo( 0, 0, r2, c, null );
+		Image circ1 = basicPainter2D.circle( 0, 0, r, c, null );
+		Image circ2 = basicPainter2D.circle( 0, 0, r2, c, null );
 		
-		imagenPoligono2D.componerImagen( img, 0, size - circ1.getHeight( null ), circ1 );
-		imagenPoligono2D.componerImagen( img, circ1.getWidth( null ) / 2 - circ2.getWidth( null ) / 8
+		basicPainter2D.composeImage( img, 0, size - circ1.getHeight( null ), circ1 );
+		basicPainter2D.composeImage( img, circ1.getWidth( null ) / 2 - circ2.getWidth( null ) / 8
 											, size - circ1.getHeight( null ) 
 												- (int)( Math.cos( Math.PI / 4) *  circ2.getHeight( null ) / 2 ) 
 												+ circ2.getHeight( null ) / 8
 											, circ2 );
 		
-		imagenPoligono2D.crearImagenCirculo( circ1.getWidth( null ) / 2 - circ2.getWidth( null ) / 8 + circ2.getWidth( null ) / 2 - r3 / 2
+		basicPainter2D.circle( circ1.getWidth( null ) / 2 - circ2.getWidth( null ) / 8 + circ2.getWidth( null ) / 2 - r3 / 2
 												, size - circ1.getHeight( null ) 
 													- (int)( Math.cos( Math.PI / 4) *  circ2.getHeight( null ) / 2 ) 
 													+ circ2.getHeight( null ) / 8 
@@ -860,7 +860,7 @@ public class AppIcons extends GeneralAppIcon
 													- r3 / 2
 												, r3, c2, img );
 		
-		imagenPoligono2D.crearImagenLinea( 3 * thicknessBorder, size - r + 3*thicknessBorder
+		basicPainter2D.line( 3 * thicknessBorder, size - r + 3*thicknessBorder
 											, r - 3 * thicknessBorder, size - 3*thicknessBorder, thicknessBorder, c2, img );
 				
 				
@@ -869,7 +869,7 @@ public class AppIcons extends GeneralAppIcon
 
 	public static Image Contrabass( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 10;
 
@@ -902,11 +902,11 @@ public class AppIcons extends GeneralAppIcon
 		
 		int pad = (int)( 1.05 * thicknessBorder );
 		
-		Image topCirc = imagenPoligono2D.crearImagenArco( 0, 0, w, w, 0, 180, 1, c, c, null );
-		Image butCirc = imagenPoligono2D.crearImagenArco( 0, 0, w2, w2, 180, 180, 1, c, c, null );
-		Image fillPad = imagenPoligono2D.crearImagenRectangulo( w, pad, 1, c, c );
+		Image topCirc = basicPainter2D.arc( 0, 0, w, w, 0, 180, 1, c, c, null );
+		Image butCirc = basicPainter2D.arc( 0, 0, w2, w2, 180, 180, 1, c, c, null );
+		Image fillPad = basicPainter2D.rectangle( w, pad, 1, c, c );
 		
-		Image leftCurve = imagenPoligono2D.crearImagenArco( 0, 0
+		Image leftCurve = basicPainter2D.arc( 0, 0
 															, ( butCirc.getWidth( null ) - topCirc.getWidth( null ) ), pad * 2 + thicknessBorder /2
 															, 270, 90, thicknessBorder / 2, c, null, null);
 		
@@ -915,40 +915,40 @@ public class AppIcons extends GeneralAppIcon
 		{
 			r = 1;
 		}
-		Image circ = imagenPoligono2D.crearImagenCirculo( 0, 0, r, c2, null );
+		Image circ = basicPainter2D.circle( 0, 0, r, c2, null );
 		
-		Image rigthCurve = imagenPoligono2D.crearImagenArco( 0, 0
+		Image rigthCurve = basicPainter2D.arc( 0, 0
 														, ( butCirc.getWidth( null ) - topCirc.getWidth( null ) ), pad * 2 + thicknessBorder /2
 														, 180, 90, thicknessBorder / 2, c, null, null);
 				
-		imagenPoligono2D.componerImagen( img, 0, size - butCirc.getHeight( null), butCirc );
+		basicPainter2D.composeImage( img, 0, size - butCirc.getHeight( null), butCirc );
 		
-		imagenPoligono2D.componerImagen( img, (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2
+		basicPainter2D.composeImage( img, (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2
 											,  size - butCirc.getHeight( null) / 2 - topCirc.getHeight( null ) / 2 - pad
 											, topCirc );
 		
-		imagenPoligono2D.componerImagen( img, (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2
+		basicPainter2D.composeImage( img, (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2
 											,  size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null ) 
 											, fillPad );
 		
-		imagenPoligono2D.componerImagen( img, (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 - leftCurve.getWidth( null ) + thicknessBorder / 2
+		basicPainter2D.composeImage( img, (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 - leftCurve.getWidth( null ) + thicknessBorder / 2
 										, size - butCirc.getHeight( null)/2 - leftCurve.getHeight( null ) + thicknessBorder / 2, leftCurve );
 		
-		imagenPoligono2D.componerImagen( img, butCirc.getWidth( null) - rigthCurve.getWidth( null ) + thicknessBorder / 2
+		basicPainter2D.composeImage( img, butCirc.getWidth( null) - rigthCurve.getWidth( null ) + thicknessBorder / 2
 										, size - butCirc.getHeight( null)/2 - rigthCurve.getHeight( null ) + thicknessBorder / 2, rigthCurve );
 		
 				
-		imagenPoligono2D.crearImagenLinea( (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
+		basicPainter2D.line( (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
 											, 0
 											, (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
 											, size / 2, (int)( 0.75 * thicknessBorder ), c, img );		
 		
-		imagenPoligono2D.crearImagenLinea( (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
+		basicPainter2D.line( (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
 												, 0
 												, (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
 												, thicknessBorder, thicknessBorder, c, img );
 		
-		imagenPoligono2D.crearImagenLinea(  size - thicknessBorder
+		basicPainter2D.line(  size - thicknessBorder
 											, 4 * thicknessBorder
 											, size - thicknessBorder
 											, size - thicknessBorder, thicknessBorder / 2, c, img );
@@ -957,15 +957,15 @@ public class AppIcons extends GeneralAppIcon
 		
 		
 		
-		imagenPoligono2D.componerImagen( img, butCirc.getWidth( null )/3  - circ.getWidth( null ) / 2
+		basicPainter2D.composeImage( img, butCirc.getWidth( null )/3  - circ.getWidth( null ) / 2
 											, size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null )
 											, circ );
 		
-		imagenPoligono2D.componerImagen( img, butCirc.getWidth( null ) / 3 - circ.getWidth( null )   
+		basicPainter2D.composeImage( img, butCirc.getWidth( null ) / 3 - circ.getWidth( null )   
 												, size - butCirc.getHeight( null) / 3
 												, circ );
 		
-		imagenPoligono2D.crearImagenLinea( butCirc.getWidth( null ) / 3 + r/4 - circ.getHeight( null ) / 2
+		basicPainter2D.line( butCirc.getWidth( null ) / 3 + r/4 - circ.getHeight( null ) / 2
 											, size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null ) + circ.getHeight( null ) / 2 + r/ 4
 											, butCirc.getWidth( null ) / 3 + r/4 - circ.getHeight( null ) /2
 											, size - butCirc.getHeight( null) / 3 + circ.getHeight( null ) / 2 - r/4
@@ -974,15 +974,15 @@ public class AppIcons extends GeneralAppIcon
 		
 		
 		
-		imagenPoligono2D.componerImagen( img, ( 2 * butCirc.getWidth( null ) ) / 3 - circ.getWidth( null ) / 2
+		basicPainter2D.composeImage( img, ( 2 * butCirc.getWidth( null ) ) / 3 - circ.getWidth( null ) / 2
 											, size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null )
 											, circ );
 
-		imagenPoligono2D.componerImagen( img, ( 2 * butCirc.getWidth( null ) ) / 3    
+		basicPainter2D.composeImage( img, ( 2 * butCirc.getWidth( null ) ) / 3    
 											, size - butCirc.getHeight( null) / 3
 											, circ );
 
-		imagenPoligono2D.crearImagenLinea( ( 2 * butCirc.getWidth( null ) ) / 3 + r /4
+		basicPainter2D.line( ( 2 * butCirc.getWidth( null ) ) / 3 + r /4
 												, size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null ) + circ.getHeight( null ) / 2 + r/ 4
 												, ( 2 * butCirc.getWidth( null ) ) / 3 + r/4 
 												, size - butCirc.getHeight( null) / 3 + circ.getHeight( null ) / 2 - r/4
@@ -994,7 +994,7 @@ public class AppIcons extends GeneralAppIcon
 	
 	public static Image Violin( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 10;
 
@@ -1028,9 +1028,9 @@ public class AppIcons extends GeneralAppIcon
 		}
 					
 		
-		Image topCirc = imagenPoligono2D.crearImagenArco( 0, 0, w, w, 0, 180, 1, c, c, null );
-		Image butCirc = imagenPoligono2D.crearImagenArco( 0, 0, w2, w2, 180, 180, 1, c, c, null );
-		Image fillPad = imagenPoligono2D.crearImagenRectangulo( w - thicknessBorder, pad, 1, c, c );
+		Image topCirc = basicPainter2D.arc( 0, 0, w, w, 0, 180, 1, c, c, null );
+		Image butCirc = basicPainter2D.arc( 0, 0, w2, w2, 180, 180, 1, c, c, null );
+		Image fillPad = basicPainter2D.rectangle( w - thicknessBorder, pad, 1, c, c );
 		
 		int xShift = ( size - topCirc.getWidth( null ) ) / 4;
 		
@@ -1047,12 +1047,12 @@ public class AppIcons extends GeneralAppIcon
 		}
 			
 		
-		Image leftCurve = imagenPoligono2D.crearImagenArco( 0, 0
+		Image leftCurve = basicPainter2D.arc( 0, 0
 															, curvW
 															, curvBotH
 															, 270, 180, thicknessBorder / 2, c, null, null);
 		
-		Image rigthCurve = imagenPoligono2D.crearImagenArco( 0, 0
+		Image rigthCurve = basicPainter2D.arc( 0, 0
 															, curvW
 															, curvBotH
 															, 90, 180, thicknessBorder / 2, c, null, null);
@@ -1062,27 +1062,27 @@ public class AppIcons extends GeneralAppIcon
 		{
 			r = 1;
 		}
-		Image circ = imagenPoligono2D.crearImagenCirculo( 0, 0, r, c2, null );
+		Image circ = basicPainter2D.circle( 0, 0, r, c2, null );
 				
 				
-		imagenPoligono2D.componerImagen( img, xShift + 0, size - butCirc.getHeight( null), butCirc );
+		basicPainter2D.composeImage( img, xShift + 0, size - butCirc.getHeight( null), butCirc );
 		
-		imagenPoligono2D.componerImagen( img, xShift + (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2
+		basicPainter2D.composeImage( img, xShift + (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2
 											,  size - butCirc.getHeight( null) / 2 - topCirc.getHeight( null ) / 2 - pad
 											, topCirc );
 						
-		imagenPoligono2D.componerImagen( img,  xShift + (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + ( topCirc.getWidth( null ) - fillPad.getWidth( null ) ) / 2 
+		basicPainter2D.composeImage( img,  xShift + (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + ( topCirc.getWidth( null ) - fillPad.getWidth( null ) ) / 2 
 												,  size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null ) 
 												, fillPad );
 		
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, xShift -leftCurve.getWidth( null ) / 2 + thicknessBorder / 4
 										, size - butCirc.getHeight( null)/2 - leftCurve.getHeight( null ) + thicknessBorder / 8
 										, leftCurve );
 
 		
-		imagenPoligono2D.componerImagen( img, xShift + (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) - rigthCurve.getWidth( null ) / 2 - thicknessBorder / 4 
+		basicPainter2D.composeImage( img, xShift + (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) - rigthCurve.getWidth( null ) / 2 - thicknessBorder / 4 
 										, size - butCirc.getHeight( null)/2 - rigthCurve.getHeight( null ) + thicknessBorder / 8
 										, rigthCurve );
 		
@@ -1090,23 +1090,23 @@ public class AppIcons extends GeneralAppIcon
 		
 		
 				
-		imagenPoligono2D.crearImagenLinea( xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
+		basicPainter2D.line( xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
 											, 0
 											, xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
 											, size / 2, (int)( 0.75 * thicknessBorder ), c, img );		
 		
-		imagenPoligono2D.crearImagenLinea( xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
+		basicPainter2D.line( xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
 												, 0
 												, xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2
 												, thicknessBorder, thicknessBorder, c, img );
 		
-		imagenPoligono2D.crearImagenLinea( xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2 - ( 3 * thicknessBorder ) / 4 
+		basicPainter2D.line( xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2 - ( 3 * thicknessBorder ) / 4 
 												, thicknessBorder / 4
 												, xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2 + ( 3 * thicknessBorder ) / 4 
 												, thicknessBorder / 4
 												, thicknessBorder / 4, c, img );
 		
-		imagenPoligono2D.crearImagenLinea( xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2 - ( 3 * thicknessBorder ) / 4
+		basicPainter2D.line( xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2 - ( 3 * thicknessBorder ) / 4
 											, thicknessBorder / 4 + thicknessBorder / 2
 											, xShift +  (butCirc.getWidth( null ) - topCirc.getWidth( null ) ) / 2 + topCirc.getWidth( null ) / 2 + ( 3 * thicknessBorder ) / 4 
 											, thicknessBorder / 4 + thicknessBorder / 2
@@ -1114,40 +1114,40 @@ public class AppIcons extends GeneralAppIcon
 		
 		
 		
-		imagenPoligono2D.crearImagenLinea( xShift + topCirc.getWidth( null ) + thicknessBorder
+		basicPainter2D.line( xShift + topCirc.getWidth( null ) + thicknessBorder
 											, 3 * thicknessBorder
 											, xShift + topCirc.getWidth( null ) + thicknessBorder 
 											, size - thicknessBorder / 2
 											, thicknessBorder / 2, c, img );
 		
-		imagenPoligono2D.crearImagenLinea( xShift + topCirc.getWidth( null ) + thicknessBorder
+		basicPainter2D.line( xShift + topCirc.getWidth( null ) + thicknessBorder
 											, (int)( 3.25 * thicknessBorder )
 											, xShift + topCirc.getWidth( null ) + thicknessBorder + thicknessBorder / 2 
 											, (int)( 3.25  * thicknessBorder )
 											, thicknessBorder / 2, c, img );
 		
-		imagenPoligono2D.crearImagenLinea( xShift +  topCirc.getWidth( null ) + thicknessBorder
+		basicPainter2D.line( xShift +  topCirc.getWidth( null ) + thicknessBorder
 										, (int)( size - thicknessBorder * 1.25 )
 										, xShift + topCirc.getWidth( null ) + thicknessBorder + thicknessBorder / 2 
 										, (int)( size - thicknessBorder * 1.25 )
 										, thicknessBorder / 2, c, img );
 		
-		imagenPoligono2D.crearImagenLinea( xShift + topCirc.getWidth( null ) + thicknessBorder + thicknessBorder / 2
+		basicPainter2D.line( xShift + topCirc.getWidth( null ) + thicknessBorder + thicknessBorder / 2
 											, (int)( 3.25 * thicknessBorder )
 											, xShift + topCirc.getWidth( null ) + thicknessBorder + thicknessBorder / 2 
 											, (int)( size - thicknessBorder * 1.25 )
 											, thicknessBorder / 4, c, img );
 		
 		
-		imagenPoligono2D.componerImagen( img, xShift + butCirc.getWidth( null )/3  - circ.getWidth( null ) / 2
+		basicPainter2D.composeImage( img, xShift + butCirc.getWidth( null )/3  - circ.getWidth( null ) / 2
 											, size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null ) - topCirc.getHeight( null ) / 4
 											, circ );
 		
-		imagenPoligono2D.componerImagen( img, xShift + butCirc.getWidth( null ) / 3 - circ.getWidth( null )   
+		basicPainter2D.composeImage( img, xShift + butCirc.getWidth( null ) / 3 - circ.getWidth( null )   
 												, size - butCirc.getHeight( null) / 3 - topCirc.getHeight( null ) / 4
 												, circ );
 		
-		imagenPoligono2D.crearImagenLinea( xShift + butCirc.getWidth( null ) / 3 + r/4 - circ.getHeight( null ) / 2
+		basicPainter2D.line( xShift + butCirc.getWidth( null ) / 3 + r/4 - circ.getHeight( null ) / 2
 											, size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null ) + circ.getHeight( null ) / 2 + r/ 4 - topCirc.getHeight( null ) / 4
 											, xShift + butCirc.getWidth( null ) / 3 + r/4 - circ.getHeight( null ) /2
 											, size - butCirc.getHeight( null) / 3 + circ.getHeight( null ) / 2 - r/4 - topCirc.getHeight( null ) / 4
@@ -1156,21 +1156,21 @@ public class AppIcons extends GeneralAppIcon
 		
 		
 		
-		imagenPoligono2D.componerImagen( img, xShift + ( 2 * butCirc.getWidth( null ) ) / 3 - circ.getWidth( null ) / 2
+		basicPainter2D.composeImage( img, xShift + ( 2 * butCirc.getWidth( null ) ) / 3 - circ.getWidth( null ) / 2
 											, size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null ) - topCirc.getHeight( null ) / 4
 											, circ );
 
-		imagenPoligono2D.componerImagen( img, xShift + ( 2 * butCirc.getWidth( null ) ) / 3    
+		basicPainter2D.composeImage( img, xShift + ( 2 * butCirc.getWidth( null ) ) / 3    
 											, size - butCirc.getHeight( null) / 3 - topCirc.getHeight( null ) / 4
 											, circ );
 
-		imagenPoligono2D.crearImagenLinea( xShift + ( 2 * butCirc.getWidth( null ) ) / 3 + r /4
+		basicPainter2D.line( xShift + ( 2 * butCirc.getWidth( null ) ) / 3 + r /4
 												, size - butCirc.getHeight( null) / 2 - fillPad.getHeight( null ) + circ.getHeight( null ) / 2 + r/ 4 - topCirc.getHeight( null ) / 4
 												, xShift +  ( 2 * butCirc.getWidth( null ) ) / 3 + r/4 
 												, size - butCirc.getHeight( null) / 3 + circ.getHeight( null ) / 2 - r/4 - topCirc.getHeight( null ) / 4
 												, r/ 2, c2, img );
 		
-		imagenPoligono2D.crearImagenOvalo( xShift + thicknessBorder
+		basicPainter2D.oval( xShift + thicknessBorder
 											, (int)( size - thicknessBorder * 1.25 )
 											, (int)( 1.75 * thicknessBorder)
 											, thicknessBorder, 1, c2, c2, img );
@@ -1180,7 +1180,7 @@ public class AppIcons extends GeneralAppIcon
 		
 	public static Image StringEnsemble( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 10;
 
@@ -1211,9 +1211,9 @@ public class AppIcons extends GeneralAppIcon
 			h = 1;
 		}
 		
-		Image head = imagenPoligono2D.crearImagenRectangulo( w, h, 1, c, c );
+		Image head = basicPainter2D.rectangle( w, h, 1, c, c );
 		
-		head = imagenPoligono2D.crearImagenPoligonoRelleno( new int[] { 0, w, w, w - w/6, w / 6, 0}
+		head = basicPainter2D.fillPolygon( new int[] { 0, w, w, w - w/6, w / 6, 0}
 															, new int[] { 0, 0, h - h / 6, h, h, h - h / 6 }
 															, c, null );
 		
@@ -1222,15 +1222,15 @@ public class AppIcons extends GeneralAppIcon
 		{
 			r = 1;
 		}
-		Image circ = imagenPoligono2D.crearImagenCirculo( 0, 0, r, c2, null );
+		Image circ = basicPainter2D.circle( 0, 0, r, c2, null );
 						
-		imagenPoligono2D.componerImagen( head, circ.getWidth( null ) / 2, circ.getWidth( null ), circ );
-		imagenPoligono2D.componerImagen( head, circ.getWidth( null ) / 2, (int)( 2.5 * circ.getWidth( null ) ), circ );
-		imagenPoligono2D.componerImagen( head, circ.getWidth( null ) / 2, 4 * circ.getWidth( null ), circ );
+		basicPainter2D.composeImage( head, circ.getWidth( null ) / 2, circ.getWidth( null ), circ );
+		basicPainter2D.composeImage( head, circ.getWidth( null ) / 2, (int)( 2.5 * circ.getWidth( null ) ), circ );
+		basicPainter2D.composeImage( head, circ.getWidth( null ) / 2, 4 * circ.getWidth( null ), circ );
 		
-		imagenPoligono2D.componerImagen( head, head.getWidth( null ) - circ.getWidth( null ) - circ.getWidth( null ) / 2, circ.getWidth( null ), circ );
-		imagenPoligono2D.componerImagen( head, head.getWidth( null ) - circ.getWidth( null ) - circ.getWidth( null ) / 2, (int)( 2.5 * circ.getWidth( null ) ), circ );
-		imagenPoligono2D.componerImagen( head, head.getWidth( null ) - circ.getWidth( null ) - circ.getWidth( null ) / 2, 4 * circ.getWidth( null ), circ );
+		basicPainter2D.composeImage( head, head.getWidth( null ) - circ.getWidth( null ) - circ.getWidth( null ) / 2, circ.getWidth( null ), circ );
+		basicPainter2D.composeImage( head, head.getWidth( null ) - circ.getWidth( null ) - circ.getWidth( null ) / 2, (int)( 2.5 * circ.getWidth( null ) ), circ );
+		basicPainter2D.composeImage( head, head.getWidth( null ) - circ.getWidth( null ) - circ.getWidth( null ) / 2, 4 * circ.getWidth( null ), circ );
 		
 		
 		
@@ -1249,7 +1249,7 @@ public class AppIcons extends GeneralAppIcon
 			hFret = 1;
 		}
 		 
-		Image fret = imagenPoligono2D.crearImagenRectangulo( wFret, hFret, 1, c, c );
+		Image fret = basicPainter2D.rectangle( wFret, hFret, 1, c, c );
 		
 		
 		int ovalW = (int)( 0.75 * r );
@@ -1264,90 +1264,90 @@ public class AppIcons extends GeneralAppIcon
 			ovalH = 1;
 		}
 		
-		Image oval = imagenPoligono2D.crearImagenOvalo( 0, 0, ovalW, ovalH, 1, c, c, null );
+		Image oval = basicPainter2D.oval( 0, 0, ovalW, ovalH, 1, c, c, null );
 		
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 											, ( size - head.getWidth( null ) ) / 2
 											, 0
 											, head );
 		
 		
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, ( size - head.getWidth( null ) ) / 2 - (int)( 1.5 * oval.getWidth( null ) )
 										, circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2
 										, oval );
 		
-		imagenPoligono2D.crearImagenLinea( ( size - head.getWidth( null ) ) / 2 - (int)( 1.5 * oval.getWidth( null ) ) + ovalW / 2
+		basicPainter2D.line( ( size - head.getWidth( null ) ) / 2 - (int)( 1.5 * oval.getWidth( null ) ) + ovalW / 2
 											, circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2 + ovalH / 2
 											, ( size - head.getWidth( null ) ) / 2
 											, circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2 + ovalH / 2
 											, r / 2, c, img );
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, ( size - head.getWidth( null ) ) / 2 - (int)( 1.5 * oval.getWidth( null ) )
 										, (int)( 2.5 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2)
 										, oval );
 		
-		imagenPoligono2D.crearImagenLinea( ( size - head.getWidth( null ) ) / 2 - (int)( 1.5 * oval.getWidth( null ) ) + ovalW / 2
+		basicPainter2D.line( ( size - head.getWidth( null ) ) / 2 - (int)( 1.5 * oval.getWidth( null ) ) + ovalW / 2
 											, (int)( 2.5 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2) + ovalH / 2
 											, ( size - head.getWidth( null ) ) / 2
 											, (int)( 2.5 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2) + ovalH / 2
 											, r / 2, c, img );
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, ( size - head.getWidth( null ) ) / 2 - (int)( 1.5 * oval.getWidth( null ) )
 										, (int)( 4 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2)
 										, oval );
 		
-		imagenPoligono2D.crearImagenLinea( ( size - head.getWidth( null ) ) / 2 - (int)( 1.5 * oval.getWidth( null ) ) + ovalW / 2
+		basicPainter2D.line( ( size - head.getWidth( null ) ) / 2 - (int)( 1.5 * oval.getWidth( null ) ) + ovalW / 2
 											, (int)( 4 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2) + ovalH / 2
 											, ( size - head.getWidth( null ) ) / 2
 											, (int)( 4 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2) + ovalH / 2
 											, r / 2, c, img );
 		
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, ( size - head.getWidth( null ) ) / 2 + head.getWidth( null ) + (int)( 0.5 * oval.getWidth( null ) )
 										, circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2
 										, oval );
 
-		imagenPoligono2D.crearImagenLinea( ( size - head.getWidth( null ) ) / 2 + head.getWidth( null )
+		basicPainter2D.line( ( size - head.getWidth( null ) ) / 2 + head.getWidth( null )
 											, circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2 + ovalH / 2
 											, ( size - head.getWidth( null ) ) / 2 + head.getWidth( null ) + oval.getWidth( null )
 											, circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2 + ovalH / 2
 											, r / 2, c, img );		
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, ( size - head.getWidth( null ) ) / 2  + head.getWidth( null ) + (int)( 0.5 * oval.getWidth( null ) )
 										, (int)( 2.5 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2)
 										, oval );
 		
-		imagenPoligono2D.crearImagenLinea( ( size - head.getWidth( null ) ) / 2 + head.getWidth( null )
+		basicPainter2D.line( ( size - head.getWidth( null ) ) / 2 + head.getWidth( null )
 										, (int)( 2.5 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2) + ovalH / 2
 										, ( size - head.getWidth( null ) ) / 2 + head.getWidth( null ) + oval.getWidth( null )
 										, (int)( 2.5 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2) + ovalH / 2
 										, r / 2, c, img );
 
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, ( size - head.getWidth( null ) ) / 2  + head.getWidth( null ) + (int)( 0.5 * oval.getWidth( null ) )
 										, (int)( 4 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2)
 										, oval );
 		
-		imagenPoligono2D.crearImagenLinea( ( size - head.getWidth( null ) ) / 2 + head.getWidth( null )
+		basicPainter2D.line( ( size - head.getWidth( null ) ) / 2 + head.getWidth( null )
 										, (int)( 4 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2) + ovalH / 2
 										, ( size - head.getWidth( null ) ) / 2 + head.getWidth( null ) + oval.getWidth( null )
 										, (int)( 4 * circ.getHeight( null ) - ( oval.getHeight( null ) - circ.getHeight( null ) ) / 2) + ovalH / 2
 										, r / 2, c, img );
 		
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 											, ( size - fret.getWidth( null ) ) / 2
 											, size - fret.getHeight( null )
 											, fret);
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 											, ( size - fret.getWidth( null ) ) / 2
 											, size - 2 * fret.getHeight( null ) - fretPad
 											, fret);
@@ -1357,7 +1357,7 @@ public class AppIcons extends GeneralAppIcon
 
 	public static Image Sax( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 10;
 
@@ -1388,7 +1388,7 @@ public class AppIcons extends GeneralAppIcon
 			holeH = 1;
 		}
 		
-		Image hole = imagenPoligono2D.crearImagenArco( 0, 0, holeW, holeH
+		Image hole = basicPainter2D.arc( 0, 0, holeW, holeH
 														, 0, 360, 1, c, c, null );
 	
 		int holeW2 = holeW - 10;
@@ -1403,31 +1403,31 @@ public class AppIcons extends GeneralAppIcon
 			holeH2 = 1;
 		}
 		
-		Image hole2 = imagenPoligono2D.crearImagenArco( 0, 0, holeW2, holeH2
+		Image hole2 = basicPainter2D.arc( 0, 0, holeW2, holeH2
 														, 0, 360, 1, c2, c2, null );
 		
-		imagenPoligono2D.componerImagen( hole
+		basicPainter2D.composeImage( hole
 										, ( hole.getWidth( null ) - hole2.getWidth( null ) ) / 2
 										, ( hole.getHeight( null ) - hole2.getHeight( null ) ) / 2
 										, hole2 );
 		
-		Image tr = imagenPoligono2D.crearImagenTriangulo( hole.getWidth( null ), 1, c, c, imagenPoligono2D.SOUTH );
+		Image tr = basicPainter2D.triangle( hole.getWidth( null ), 1, c, c, basicPainter2D.SOUTH );
 		
-		Image butCurve = imagenPoligono2D.crearImagenArco( 0, 0
+		Image butCurve = basicPainter2D.arc( 0, 0
 															, (int)( 1.5 * tr.getWidth( null ) )
 															, size / 2
 															, 180, 180
 															, (int)( thicknessBorder * 2 )
 															, c, null, null );
 				
-		Image vertLin = imagenPoligono2D.crearImagenLinea( thicknessBorder * 2
+		Image vertLin = basicPainter2D.line( thicknessBorder * 2
 															, 0
 															, thicknessBorder * 2
 															, size - butCurve.getHeight( null ) / 2 - thicknessBorder * 3
 															, thicknessBorder * 4
 															, c, null );
 		
-		Image circTop = imagenPoligono2D.crearImagenCirculo( 0, 0, vertLin.getWidth( null ), c, null );
+		Image circTop = basicPainter2D.circle( 0, 0, vertLin.getWidth( null ), c, null );
 		
 		int rck = vertLin.getWidth( null ) / 2;
 		if( rck < 1 )
@@ -1435,57 +1435,57 @@ public class AppIcons extends GeneralAppIcon
 			rck = 1;
 		}
 		
-		Image circKey = imagenPoligono2D.crearImagenCirculo( 0, 0, rck, c2, null );
+		Image circKey = basicPainter2D.circle( 0, 0, rck, c2, null );
 		
-		imagenPoligono2D.componerImagen( vertLin
+		basicPainter2D.composeImage( vertLin
 											, vertLin.getWidth( null ) - circKey.getWidth( null )
 											, vertLin.getHeight( null ) / 2
 											, circKey );
 		
-		imagenPoligono2D.componerImagen( vertLin
+		basicPainter2D.composeImage( vertLin
 										, vertLin.getWidth( null ) - circKey.getWidth( null )
 										, vertLin.getHeight( null ) / 2 - circKey.getHeight( null ) - rck / 4
 										, circKey );
 		
-		imagenPoligono2D.componerImagen( vertLin
+		basicPainter2D.composeImage( vertLin
 										, vertLin.getWidth( null ) - circKey.getWidth( null )
 										, vertLin.getHeight( null ) / 2 + circKey.getHeight( null ) + rck / 4
 										, circKey );
 		
-		Image blowCurve = imagenPoligono2D.crearImagenArco( 0, 0
+		Image blowCurve = basicPainter2D.arc( 0, 0
 															, circTop.getWidth( null ) * 3
 															, circTop.getHeight( null ) * 2
 															, 0, -80
 															, thicknessBorder / 2
 															, c, null, null );
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, size - hole.getWidth( null ) - butCurve.getWidth( null ) / 2 - thicknessBorder / 2
 										, size - butCurve.getHeight( null )
 										, butCurve );
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 											, size - hole.getWidth( null ) - butCurve.getWidth( null ) / 2 - thicknessBorder / 2
 											, size - butCurve.getHeight( null ) / 2 - vertLin.getHeight( null )
 											, vertLin );
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 											, size - hole.getWidth( null ) - butCurve.getWidth( null ) / 2 - thicknessBorder / 2
 											, size - butCurve.getHeight( null ) / 2 - vertLin.getHeight( null ) - circTop.getHeight( null ) / 2
 											, circTop );
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, size - hole.getWidth( null ) - butCurve.getWidth( null ) / 2 - thicknessBorder / 2 - blowCurve.getWidth( null ) + thicknessBorder /2
 										, size - butCurve.getHeight( null ) / 2 - vertLin.getHeight( null ) - circTop.getHeight( null ) / 2 - blowCurve.getHeight( null ) / 2 + thicknessBorder * 2
 										, blowCurve );
 				
 				
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 										, size - tr.getWidth( null ) 
 										, size - butCurve.getHeight( null ) / 2 - tr.getHeight( null ) / 2 
 										, tr );
 		
-		imagenPoligono2D.componerImagen( img
+		basicPainter2D.composeImage( img
 											, size - hole.getWidth( null ) 
 											,size - butCurve.getHeight( null ) / 2 - tr.getHeight( null ) / 2 - hole.getHeight( null )/ 2 
 											, hole );
@@ -1498,7 +1498,7 @@ public class AppIcons extends GeneralAppIcon
 
 	public static Image Ocarina( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 10;
 
@@ -1521,29 +1521,29 @@ public class AppIcons extends GeneralAppIcon
 		{
 			w = 1;
 		}
-		Image tr = imagenPoligono2D.crearImagenTriangulo( w, 1, c, c, imagenPoligono2D.NORTH );
+		Image tr = basicPainter2D.triangle( w, 1, c, c, basicPainter2D.NORTH );
 		
 		int r = w / 4;
 		if( r < 1 )
 		{
 			r = 1;
 		}
-		Image circ = imagenPoligono2D.crearImagenCirculo( 0, 0, r, c2, null );
+		Image circ = basicPainter2D.circle( 0, 0, r, c2, null );
 		
-		Image body = imagenPoligono2D.crearImagenOvalo( 0, 0, size, size - tr.getHeight( null ) / 2, 1, c, c, null  );
+		Image body = basicPainter2D.oval( 0, 0, size, size - tr.getHeight( null ) / 2, 1, c, c, null  );
 		
-		imagenPoligono2D.componerImagen( body, circ.getWidth( null ) / 2, body.getHeight( null ) / 2, circ );
-		imagenPoligono2D.componerImagen( body, circ.getWidth( null ) / 2 + circ.getWidth( null ), body.getHeight( null ) / 2 + circ.getHeight( null ), circ );
-		imagenPoligono2D.componerImagen( body, circ.getWidth( null ) / 2 + circ.getWidth( null ) * 2, body.getHeight( null ) / 2, circ );
+		basicPainter2D.composeImage( body, circ.getWidth( null ) / 2, body.getHeight( null ) / 2, circ );
+		basicPainter2D.composeImage( body, circ.getWidth( null ) / 2 + circ.getWidth( null ), body.getHeight( null ) / 2 + circ.getHeight( null ), circ );
+		basicPainter2D.composeImage( body, circ.getWidth( null ) / 2 + circ.getWidth( null ) * 2, body.getHeight( null ) / 2, circ );
 		
-		imagenPoligono2D.componerImagen( body, body.getWidth( null ) / 2, circ.getHeight( null ) / 2 - circ.getHeight( null ) / 3, circ );
-		imagenPoligono2D.componerImagen( body, body.getWidth( null ) / 2 + (int)( 1 * circ.getWidth( null ) ), circ.getHeight( null ) / 2 - circ.getHeight( null ) / 3 + circ.getHeight( null ) / 3, circ );
-		imagenPoligono2D.componerImagen( body, body.getWidth( null ) / 2 + 2 * circ.getWidth( null ), circ.getHeight( null ) / 2 - circ.getHeight( null ) / 3 + (int)( 2.5 * circ.getHeight( null ) ) / 3, circ );
-		imagenPoligono2D.componerImagen( body, body.getWidth( null ) / 2 + (int)( 3 * circ.getWidth( null ) ) - circ.getWidth( null ) / 4, circ.getHeight( null ) / 2 - circ.getHeight( null ) / 3 + (int)( 5 * circ.getHeight( null ) ) / 3, circ );
+		basicPainter2D.composeImage( body, body.getWidth( null ) / 2, circ.getHeight( null ) / 2 - circ.getHeight( null ) / 3, circ );
+		basicPainter2D.composeImage( body, body.getWidth( null ) / 2 + (int)( 1 * circ.getWidth( null ) ), circ.getHeight( null ) / 2 - circ.getHeight( null ) / 3 + circ.getHeight( null ) / 3, circ );
+		basicPainter2D.composeImage( body, body.getWidth( null ) / 2 + 2 * circ.getWidth( null ), circ.getHeight( null ) / 2 - circ.getHeight( null ) / 3 + (int)( 2.5 * circ.getHeight( null ) ) / 3, circ );
+		basicPainter2D.composeImage( body, body.getWidth( null ) / 2 + (int)( 3 * circ.getWidth( null ) ) - circ.getWidth( null ) / 4, circ.getHeight( null ) / 2 - circ.getHeight( null ) / 3 + (int)( 5 * circ.getHeight( null ) ) / 3, circ );
 		
-		imagenPoligono2D.componerImagen( img, tr.getWidth( null ) / 8, 0, tr );
+		basicPainter2D.composeImage( img, tr.getWidth( null ) / 8, 0, tr );
 		
-		imagenPoligono2D.componerImagen( img, 0, size - body.getHeight( null ), body );
+		basicPainter2D.composeImage( img, 0, size - body.getHeight( null ), body );
 				
 				
 		return img;
@@ -1551,7 +1551,7 @@ public class AppIcons extends GeneralAppIcon
 	
 	public static Image Whistle( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 2;
 
@@ -1567,7 +1567,7 @@ public class AppIcons extends GeneralAppIcon
 			radio = 1;
 		}
 		
-		imagenPoligono2D.crearImagenCircunferencia( 0, size - radio, radio, thicknessBorder, c, img ); 
+		basicPainter2D.circumference( 0, size - radio, radio, thicknessBorder, c, img ); 
 		
 		double angle = Math.PI/11;
 		
@@ -1586,7 +1586,7 @@ public class AppIcons extends GeneralAppIcon
 		int[] xs = new int[] { (int)( radio * x1 ), (int)( size * x2 ) , size, radio - thicknessBorder/2};
 		int[] ys = new int[] { (int)( y1 * radio +  size - radio ), (int)( size * y2 ) , (size-radio)/2, size/2};
 		
-		imagenPoligono2D.crearImagenPoligonoRelleno(xs, ys, c, img );
+		basicPainter2D.fillPolygon(xs, ys, c, img );
 		
 		int thickness = size /18;
 		if(thickness < 1 )
@@ -1594,9 +1594,9 @@ public class AppIcons extends GeneralAppIcon
 			thickness = 1;
 		}
 		
-		imagenPoligono2D.crearImagenLinea( (int)( 2 * thickness ), thickness, xs[ 0 ] - (int)( 1 * thickness ), ys[ 0 ] - (int)( 1.5 * thickness ), thickness, c, img );
-		imagenPoligono2D.crearImagenLinea( thickness, thickness * 4, xs[ 0 ] - thickness * 2, ys[ 0 ], thickness, c, img );
-		imagenPoligono2D.crearImagenLinea( xs[0] + thickness, ys[ 0 ] - (int)(thickness * 1.5 ), xs[0] + (int)( thickness * 1.5 ), ys[ 0 ] - thickness * 4, thickness, c, img );
+		basicPainter2D.line( (int)( 2 * thickness ), thickness, xs[ 0 ] - (int)( 1 * thickness ), ys[ 0 ] - (int)( 1.5 * thickness ), thickness, c, img );
+		basicPainter2D.line( thickness, thickness * 4, xs[ 0 ] - thickness * 2, ys[ 0 ], thickness, c, img );
+		basicPainter2D.line( xs[0] + thickness, ys[ 0 ] - (int)(thickness * 1.5 ), xs[0] + (int)( thickness * 1.5 ), ys[ 0 ] - thickness * 4, thickness, c, img );
 		
 		
 		return img;
@@ -1604,7 +1604,7 @@ public class AppIcons extends GeneralAppIcon
 	
 	public static Image Bell( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int bellBallSize = size / 5;
 		if( bellBallSize < 1 )
@@ -1612,15 +1612,15 @@ public class AppIcons extends GeneralAppIcon
 			bellBallSize = 1;
 		}
 				
-		Image bellBall = imagenPoligono2D.crearImagenArco( 0, 0, bellBallSize, bellBallSize, 180, 180, 1.5F, c, c, null );
-		Image bellBottom = imagenPoligono2D.crearImagenArco( 0, 0, size, 4 * bellBallSize, 0, 180, 1.5F, c, c, null );
-		Image bellBody = imagenPoligono2D.crearImagenRectangulo( 3 * bellBallSize + 1, 3 * bellBallSize, 2, c, c );
-		Image bellTop = imagenPoligono2D.crearImagenArco( 0, 0, 3 * bellBallSize, 2 * bellBallSize, 0, 180, 1.5F, c, c, null );
+		Image bellBall = basicPainter2D.arc( 0, 0, bellBallSize, bellBallSize, 180, 180, 1.5F, c, c, null );
+		Image bellBottom = basicPainter2D.arc( 0, 0, size, 4 * bellBallSize, 0, 180, 1.5F, c, c, null );
+		Image bellBody = basicPainter2D.rectangle( 3 * bellBallSize + 1, 3 * bellBallSize, 2, c, c );
+		Image bellTop = basicPainter2D.arc( 0, 0, 3 * bellBallSize, 2 * bellBallSize, 0, 180, 1.5F, c, c, null );
 		
-		imagenPoligono2D.componerImagen( img, bellBallSize, 0, bellTop );
-		imagenPoligono2D.componerImagen( img, bellBallSize, bellBallSize, bellBody );
-		imagenPoligono2D.componerImagen( img, 0, size - bellBottom.getHeight( null )/2 - bellBall.getHeight( null ) / 2, bellBottom );
-		imagenPoligono2D.componerImagen( img, ( size - bellBall.getWidth( null ) ) /2, size - bellBall.getHeight( null ), bellBall );
+		basicPainter2D.composeImage( img, bellBallSize, 0, bellTop );
+		basicPainter2D.composeImage( img, bellBallSize, bellBallSize, bellBody );
+		basicPainter2D.composeImage( img, 0, size - bellBottom.getHeight( null )/2 - bellBall.getHeight( null ) / 2, bellBottom );
+		basicPainter2D.composeImage( img, ( size - bellBall.getWidth( null ) ) /2, size - bellBall.getHeight( null ), bellBall );
 		
 		
 		return img;
@@ -1628,7 +1628,7 @@ public class AppIcons extends GeneralAppIcon
 	
 	public static Image Maraca( int size, Color c )
 	{
-		Image img = imagenPoligono2D.crearLienzoVacio( size, size, null );
+		Image img = basicPainter2D.createEmptyCanva( size, size, null );
 		
 		int thicknessBorder = size / 32;
 
@@ -1649,13 +1649,13 @@ public class AppIcons extends GeneralAppIcon
 		int w = size / 2 - thicknessBorder;
 		int h = (size * 1 ) / 2;
 		
-		Image oval = imagenPoligono2D.crearImagenOvalo( 0, 0, w, h, 2, c, c, null );
+		Image oval = basicPainter2D.oval( 0, 0, w, h, 2, c, c, null );
 		
 		int yL =  oval.getHeight( null ) / 2 - thicknessBorder /2;
 		
 		for( int pos = 0; pos < oval.getWidth( null ); pos += thicknessBorder )
 		{
-			imagenPoligono2D.crearImagenCirculo( pos, yL, thicknessBorder, c2, oval );
+			basicPainter2D.circle( pos, yL, thicknessBorder, c2, oval );
 		}
 				
 		int wStick = oval.getWidth( null ) / 3;
@@ -1664,14 +1664,14 @@ public class AppIcons extends GeneralAppIcon
 			wStick = 1;
 		}
 		
-		Image stick = imagenPoligono2D.crearImagenOvalo( 0, 0, wStick, ( h * 4 ) / 3 , 2, c, c, null );
+		Image stick = basicPainter2D.oval( 0, 0, wStick, ( h * 4 ) / 3 , 2, c, c, null );
 				
 		
-		imagenPoligono2D.componerImagen( img, 0, 0, oval );
-		imagenPoligono2D.componerImagen( img, ( oval.getWidth( null ) - stick.getWidth( null ) ) / 2, size - stick.getHeight( null ), stick );
+		basicPainter2D.composeImage( img, 0, 0, oval );
+		basicPainter2D.composeImage( img, ( oval.getWidth( null ) - stick.getWidth( null ) ) / 2, size - stick.getHeight( null ), stick );
 		
-		imagenPoligono2D.componerImagen( img, size - oval.getWidth( null ), 0, oval );
-		imagenPoligono2D.componerImagen( img, size - oval.getWidth( null ) + ( oval.getWidth( null ) - stick.getWidth( null ) ) / 2, size - stick.getHeight( null ), stick );
+		basicPainter2D.composeImage( img, size - oval.getWidth( null ), 0, oval );
+		basicPainter2D.composeImage( img, size - oval.getWidth( null ) + ( oval.getWidth( null ) - stick.getWidth( null ) ) / 2, size - stick.getHeight( null ), stick );
 		
 		return img;
 	}
