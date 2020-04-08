@@ -32,7 +32,7 @@ import java.util.TreeSet;
 import org.jfugue.midi.MidiDictionary;
 import org.jfugue.theory.Note;
 
-import GUI.AppIcons;
+import image.icon.MusicInstrumentIcons;
 import music.IROTrack;
 
 public class TrackNotesSprite extends AbstractSprite
@@ -305,7 +305,7 @@ public class TrackNotesSprite extends AbstractSprite
 				List< Byte > l = new ArrayList< Byte >();
 				l.addAll( instruments );
 				
-				pic = (BufferedImage)AppIcons.getInstrument( l, this.noteScreenSize, this.color );
+				pic = (BufferedImage)MusicInstrumentIcons.getInstrument( l, this.noteScreenSize, this.color );
 			}			
 		}
 		

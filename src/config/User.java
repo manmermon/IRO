@@ -6,8 +6,8 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.ImageIcon;
 
-import GUI.GeneralAppIcon;
 import config.language.Language;
+import image.icon.GeneralAppIcon;
 
 public class User
 {

@@ -58,32 +58,15 @@ public class LSLController extends InputLSLStreamTemplate
 				{	
 					this.archievedTarget = true;
 
-					InputControl.getInstance().action( new IInputAction()
-					{	
-						@Override
-						public InputControllerEvent getInputEvent()
-						{
-							InputControllerEvent event = new InputControllerEvent( this, InputControllerEvent.ACTION_DONE );
-							return event;
-						}
-					} );
+					super.fireInputControllerEvent( InputControllerEvent.ACTION_DONE );
 				}
 			}
 			else if( data <= this._rng.getMin() )
 			{
 				this.archievedTarget = false;
-
-				InputControl.getInstance().action( new IInputAction()
-				{	
-					@Override
-					public InputControllerEvent getInputEvent()
-					{
-						InputControllerEvent event = new InputControllerEvent( this, InputControllerEvent.RECOVER_DONE );
-						return event;
-					}
-				} );
+				
+				super.fireInputControllerEvent( InputControllerEvent.RECOVER_DONE );
 			}				
 		}
 	}
-
 }

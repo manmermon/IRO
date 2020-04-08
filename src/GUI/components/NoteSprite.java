@@ -27,12 +27,9 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jfugue.midi.MidiDefaults;
-import org.jfugue.midi.MidiDictionary;
 import org.jfugue.theory.Note;
 
-import GUI.AppIcons;
-import music.IROChord;
+import image.icon.MusicInstrumentIcons;
 import music.IROTrack;
 
 public class NoteSprite extends AbstractSprite
@@ -303,7 +300,7 @@ public class NoteSprite extends AbstractSprite
 					}
 				}
 				
-				pic = (BufferedImage)AppIcons.getInstrument( instrument, this.noteScreenSize, this.color );
+				pic = (BufferedImage)MusicInstrumentIcons.getInstrument( instrument, this.noteScreenSize, this.color );
 			}			
 		}
 		

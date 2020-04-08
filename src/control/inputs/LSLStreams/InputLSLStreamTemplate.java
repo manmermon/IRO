@@ -34,7 +34,12 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 import javax.swing.Timer;
+import javax.swing.event.EventListenerList;
 
+import control.events.IInputControllerListener;
+import control.events.InputControllerEvent;
+import control.events.SceneEvent;
+import control.events.SceneEventListener;
 import control.inputs.IInputController;
 
 public abstract class InputLSLStreamTemplate extends AbstractStoppableThread implements IInputController
@@ -53,13 +58,15 @@ public abstract class InputLSLStreamTemplate extends AbstractStoppableThread imp
 		
 	private double blockTimer = 0;
 		
+	private EventListenerList listenerList;
+	
 	public InputLSLStreamTemplate( LSL.StreamInfo info) throws Exception
 	{
 		if ( info == null )
 		{
 			throw new IllegalArgumentException("LSL.StreamInlet is null");
 		}
-				
+		
 		this.LSLFormatData = info.channel_format();
 
 		this.inLet = new StreamInlet( info, 360,  0, false );
@@ -68,6 +75,8 @@ public abstract class InputLSLStreamTemplate extends AbstractStoppableThread imp
 		
 		// Avoid unnecessary buffering data, waste unnecessary system, and network resources.
 		this.inLet.close_stream();
+		
+		this.listenerList = new EventListenerList();		
 	}
 
 	protected int createArrayData() throws Exception
@@ -340,6 +349,41 @@ public abstract class InputLSLStreamTemplate extends AbstractStoppableThread imp
 	{
 	}
 
+	
+	/*(non-Javadoc)
+	 * @see @see control.inputs.IInputController#addInputControllerListener(control.events.IInputControllerListener)
+	 */
+	@Override
+	public void addInputControllerListener(IInputControllerListener listener)
+	{
+		this.listenerList.add( IInputControllerListener.class, listener );
+	}
+
+	/*(non-Javadoc)
+	 * @see @see control.inputs.IInputController#removeInputControllerListener(control.events.IInputControllerListener)
+	 */
+	@Override
+	public void removeInputControllerListener(IInputControllerListener listener)
+	{
+		this.listenerList.remove( IInputControllerListener.class, listener );
+	}
+	
+	/**
+	 * 
+	 * @param typeEvent
+	 */
+	protected void fireInputControllerEvent( int typeEvent )
+	{
+		InputControllerEvent event = new InputControllerEvent( this, typeEvent );
+
+		IInputControllerListener[] listeners = this.listenerList.getListeners( IInputControllerListener.class );
+
+		for (int i = 0; i < listeners.length; i++ ) 
+		{
+			listeners[ i ].InputControllerEvent( event );
+		}
+	}
+	
 	protected abstract void managerData( double[] data );	
 	
 }

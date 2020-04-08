@@ -47,7 +47,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import GUI.GeneralAppIcon;
 import config.ConfigParameter.ParameterType;
 import config.language.Caption;
 import config.language.Language;
@@ -55,6 +54,7 @@ import exceptions.ConfigParameterException;
 import general.NumberRange;
 import general.Tuple;
 import image.basicPainter2D;
+import image.icon.GeneralAppIcon;
 
 public class ConfigApp 
 {
