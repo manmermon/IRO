@@ -4,6 +4,7 @@ import GUI.GuiManager;
 import control.events.SceneEventListener;
 import control.inputs.IInputAction;
 import control.inputs.IInputable;
+import control.scenes.ISceneControl;
 import stoppableThread.AbstractStoppableThread;
 
 public class ScreenControl extends AbstractStoppableThread 

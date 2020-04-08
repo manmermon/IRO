@@ -40,7 +40,7 @@ public class Fret extends AbstractSprite
 	
 	public Fret( Pentragram pen, String id ) 
 	{
-		super();
+		super( id );
 		
 		this.pentagram = pen;
 		
@@ -53,7 +53,6 @@ public class Fret extends AbstractSprite
 		this.fret.addPoint( fretWidth, this.pentagram.getPentagramHeigh() );
 		this.fret.addPoint( 0, this.pentagram.getPentagramHeigh() );
 		
-		super.ID = id;
 	}
 	
 	public int getFretWidth()

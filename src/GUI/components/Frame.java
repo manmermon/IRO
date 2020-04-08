@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
-import control.ISceneControl;
+import control.scenes.ISceneControl;
 
 public class Frame extends JPanel
 {

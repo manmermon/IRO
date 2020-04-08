@@ -34,9 +34,7 @@ public class Pentragram extends AbstractSprite
 	
 	public Pentragram( Dimension panelSize, String id ) 
 	{
-		super();
-		
-		super.ID = id;
+		super( id );
 		
 		this.dimension = panelSize;
 		

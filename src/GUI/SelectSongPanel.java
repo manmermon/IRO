@@ -1,4 +1,4 @@
-package GUI.dialogs;
+package GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -6,8 +6,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -15,12 +13,13 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
 
-import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
@@ -28,13 +27,15 @@ import javax.swing.table.TableModel;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.language.Language;
+import config.language.TranslateComponents;
+import exceptions.ConfigParameterException;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 
-public class AppSetMusicLevelDialog extends JDialog
+public class SelectSongPanel extends JPanel
 {
 
 	/**
@@ -56,45 +57,12 @@ public class AppSetMusicLevelDialog extends JDialog
 	private JButton btnClear;
 	private JButton buttonUp;
 	private JButton buttonDown;
-	
-	/*
-	public static void main(String[] args)
+		
+	public SelectSongPanel( )
 	{
-		try
-		{
-			AppSetMusicLevelDialog dialog = new AppSetMusicLevelDialog();
-			dialog.setVisible(true);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	//*/
-
-	/**
-	 * Create the dialog.
-	 */
-	public AppSetMusicLevelDialog( Window owner, Rectangle screen )
-	{
-		super( owner );
+		super.setLayout( new BorderLayout() );
 		
-		if( screen == null )
-		{
-			super.setBounds(100, 100, 450, 300);
-		}
-		else
-		{
-			super.setBounds( screen );
-		}
-		
-		super.setTitle( Language.getLocalCaption( Language.SELECT ) 
-						+ " " + Language.getLocalCaption( Language.SONG ) );
-		
-		super.setModal( true );
-		super.getContentPane().setLayout( new BorderLayout() );
-		super.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		
-		getContentPane().add( this.getContainerPanel(), BorderLayout.CENTER);
+		this.add( this.getContainerPanel(), BorderLayout.CENTER);
 		
 		File f = new File( "./sheets/" );
 		
@@ -116,39 +84,46 @@ public class AppSetMusicLevelDialog extends JDialog
 			for( File file : files )
 			{				
 				tm.addRow( new String[] { file.getPath() } );
-			}			
+			}						
 			
-			ConfigParameter par = ConfigApp.getParameter( ConfigApp.SONG_LIST );
+			this.updateSelectedSong();
+		}
+		catch( Exception e)
+		{	
+		}
+	}
+	
+	private void updateSelectedSong()
+	{
+		JTable t = this.gettableSongList();
+		
+		ConfigParameter par = ConfigApp.getParameter( ConfigApp.SONG_LIST );
+		
+		Object songs = par.getSelectedValue();
+		
+		if( songs != null )
+		{
+			String songList = songs.toString().trim().replaceAll( "\\s+", "" );
 			
-			Object songs = par.getSelectedValue();
-			
-			if( songs != null )
+			if( !songList.isEmpty() )
 			{
-				String songList = songs.toString().trim().replaceAll( "\\s+", "" );
+				String[] list = songList.split( ConfigApp.SONG_LIST_SEPARATOR );
 				
-				if( !songList.isEmpty() )
+				for( String s : list )
 				{
-					String[] list = songList.split( ConfigApp.SONG_LIST_SEPARATOR );
-					
-					for( String s : list )
+					for( int i = 0; i < t.getRowCount(); i++ )
 					{
-						for( int i = 0; i < t.getRowCount(); i++ )
+						String tVal = t.getValueAt( i, 0 ).toString();
+						if( s.equals( tVal ) )
 						{
-							String tVal = t.getValueAt( i, 0 ).toString();
-							if( s.equals( tVal ) )
-							{
-								t.addRowSelectionInterval( i, i );
-								moveSong( t, getSelectedSongTable() );
-								
-								break;
-							}
+							t.addRowSelectionInterval( i, i );
+							moveSong( t, getSelectedSongTable() );
+							
+							break;
 						}
 					}
 				}
 			}
-		}
-		catch( Exception e)
-		{	
 		}
 	}
 	
@@ -190,14 +165,16 @@ public class AppSetMusicLevelDialog extends JDialog
 	{
 		if( this.panelMusicList == null )
 		{
-			this.panelMusicList = new JPanel( new BorderLayout());
+			this.panelMusicList = new JPanel( new BorderLayout() );
 			
 			JPanel panel = new JPanel( new BorderLayout() );
 			panel.add( this.gettableSongList() , BorderLayout.CENTER );
 			
 			JScrollPane scroll = new JScrollPane( panel );
-			scroll.setBorder(BorderFactory.createTitledBorder( Language.getLocalCaption( Language.MUSIC_LIST ) ) );
+			scroll.setBorder( BorderFactory.createTitledBorder( Language.getLocalCaption( Language.MUSIC_LIST ) ) );
 			scroll.setBackground( Color.WHITE );
+			
+			TranslateComponents.add( scroll, Language.getAllCaptions().get( Language.MUSIC_LIST ) );
 			
 			this.panelMusicList.add( scroll, BorderLayout.CENTER );
 			this.panelMusicList.add( this.getPanelControl(), BorderLayout.EAST );
@@ -225,7 +202,7 @@ public class AppSetMusicLevelDialog extends JDialog
 		{
 			this.panelUpDownControl = new JPanel();
 			
-			BoxLayout ly = new BoxLayout(panelUpDownControl, BoxLayout.Y_AXIS);
+			BoxLayout ly = new BoxLayout( panelUpDownControl, BoxLayout.Y_AXIS);
 			panelUpDownControl.setLayout( ly );
 			
 			panelUpDownControl.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5));
@@ -242,7 +219,10 @@ public class AppSetMusicLevelDialog extends JDialog
 	{
 		if( this.buttonUp == null )
 		{
-			this.buttonUp = new JButton( "Up" );
+			this.buttonUp = new JButton( Language.getLocalCaption( Language.UP ) );
+			
+			TranslateComponents.add( this.buttonUp, Language.getAllCaptions().get(  Language.UP ) );
+			
 			this.buttonUp.setAlignmentX(Component.CENTER_ALIGNMENT);
 			
 			this.buttonUp.addActionListener( new ActionListener()
@@ -263,7 +243,10 @@ public class AppSetMusicLevelDialog extends JDialog
 	{
 		if( this.buttonDown == null )
 		{
-			this.buttonDown = new JButton( "Down" );
+			this.buttonDown = new JButton( Language.getLocalCaption( Language.DOWN ) );
+			
+			TranslateComponents.add( this.buttonDown, Language.getAllCaptions().get(  Language.DOWN ) );
+			
 			this.buttonDown.setAlignmentX(Component.CENTER_ALIGNMENT);
 			
 			this.buttonDown.addActionListener( new ActionListener()
@@ -287,6 +270,9 @@ public class AppSetMusicLevelDialog extends JDialog
 			this.panelSelectedSongs = new JPanel( new BorderLayout() );
 			this.panelSelectedSongs.setBorder(BorderFactory.createTitledBorder( Language.getLocalCaption( Language.SELECTED_SONG_LIST ) ) );
 			this.panelSelectedSongs.setBackground( Color.WHITE );
+			
+			TranslateComponents.add( this.panelSelectedSongs, Language.getAllCaptions().get(  Language.SELECTED_SONG_LIST ) );
+
 			
 			this.panelSelectedSongs.add( this.getSelectedSongTable(), BorderLayout.CENTER );
 		}
@@ -354,7 +340,7 @@ public class AppSetMusicLevelDialog extends JDialog
 	
 	private TableModel createTablemodel( )
 	{					
-		TableModel tm =  new DefaultTableModel( null, new String[] {  Language.getLocalCaption( Language.SONG )} )
+		TableModel tm =  new DefaultTableModel( null, new String[] { Language.getLocalCaption( Language.SONG ) } )
 							{
 								private static final long serialVersionUID = 1L;
 								
@@ -382,16 +368,8 @@ public class AppSetMusicLevelDialog extends JDialog
 		{	
 			this.tableSongList = this.getCreateJTable();
 			this.tableSongList.setModel( this.createTablemodel() );
-
-			/*
-			FontMetrics fm = this.tableSongList.getFontMetrics( this.tableSongList.getFont() );			
-			String hCol0 = this.tableSongList.getColumnModel().getColumn( 0 ).getHeaderValue().toString();
 			
-			int s = fm.stringWidth( " " + hCol0 + " " ) * 2;
-			this.tableSongList.getColumnModel().getColumn( 0 ).setResizable( false );
-			this.tableSongList.getColumnModel().getColumn( 0 ).setPreferredWidth( s );
-			this.tableSongList.getColumnModel().getColumn( 0 ).setMaxWidth( s );
-			//*/
+			TranslateComponents.add( this.tableSongList.getTableHeader(), Language.getAllCaptions().get(  Language.SONG ) );
 						
 			this.tableSongList.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
 			
@@ -410,20 +388,40 @@ public class AppSetMusicLevelDialog extends JDialog
 			this.tableSelectedSongList = this.getCreateJTable();
 			this.tableSelectedSongList.setModel( this.createTablemodel() );
 			
-			/*
-			FontMetrics fm = this.tableSelectedSongList.getFontMetrics( this.tableSelectedSongList.getFont() );			
-			String hCol0 = this.tableSelectedSongList.getColumnModel().getColumn( 0 ).getHeaderValue().toString();
+			TranslateComponents.add( this.tableSelectedSongList.getTableHeader(), Language.getAllCaptions().get(  Language.SONG ) );
 			
-			int s = fm.stringWidth( " " + hCol0 + " " ) * 2;
-			this.tableSelectedSongList.getColumnModel().getColumn( 0 ).setResizable( false );
-			this.tableSelectedSongList.getColumnModel().getColumn( 0 ).setPreferredWidth( s );
-			this.tableSelectedSongList.getColumnModel().getColumn( 0 ).setMaxWidth( s );
-			//*/
-						
 			this.tableSelectedSongList.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
 			
 			this.tableSelectedSongList.setPreferredScrollableViewportSize( this.tableSelectedSongList.getPreferredSize() );
 			this.tableSelectedSongList.setFillsViewportHeight( true );
+			
+			this.tableSelectedSongList.getModel().addTableModelListener( new TableModelListener()
+			{	
+				@Override
+				public void tableChanged(TableModelEvent arg0)
+				{
+					DefaultTableModel tm = (DefaultTableModel)arg0.getSource();
+					
+					String songs = "";
+					
+					for( int  i = 0; i < tm.getRowCount(); i++ )
+					{
+						songs += tm.getValueAt( i, 0 ).toString() + ConfigApp.SONG_LIST_SEPARATOR; 
+					}
+					
+					ConfigParameter par = ConfigApp.getParameter( ConfigApp.SONG_LIST );
+						
+					par.clear();
+					try
+					{
+						par.add( songs );
+					}
+					catch (ConfigParameterException ex)
+					{
+						ex.printStackTrace();
+					}
+				}
+			});
 			
 		}
 		
@@ -454,7 +452,7 @@ public class AppSetMusicLevelDialog extends JDialog
 	{
 		if (buttonSelect == null) 
 		{
-			buttonSelect = new JButton(">>");
+			buttonSelect = new JButton( ">>" );
 			buttonSelect.setAlignmentX(Component.CENTER_ALIGNMENT);
 			
 			this.buttonSelect.addActionListener( new ActionListener()
@@ -476,7 +474,7 @@ public class AppSetMusicLevelDialog extends JDialog
 	{
 		if (buttonRemove == null) 
 		{
-			buttonRemove = new JButton("<<");
+			buttonRemove = new JButton( "<<" );
 			buttonRemove.setAlignmentX(Component.CENTER_ALIGNMENT);
 			
 			this.buttonRemove.addActionListener( new ActionListener()
@@ -498,7 +496,10 @@ public class AppSetMusicLevelDialog extends JDialog
 	{
 		if (btnClear == null) 
 		{
-			btnClear = new JButton("clear");
+			btnClear = new JButton( Language.getLocalCaption( Language.CLEAR ) );
+			
+			TranslateComponents.add( this.btnClear, Language.getAllCaptions().get( Language.CLEAR ) );
+			
 			btnClear.setAlignmentX(Component.CENTER_ALIGNMENT);
 			
 			this.btnClear.addActionListener( new ActionListener()

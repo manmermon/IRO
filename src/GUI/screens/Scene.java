@@ -3,7 +3,6 @@ package GUI.screens;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -13,8 +12,8 @@ import java.util.List;
 
 import GUI.components.Frame;
 import GUI.components.ISprite;
-import GUI.components.SpriteEvent;
-import GUI.components.SpriteEventListener;
+import GUI.components.events.SpriteEvent;
+import GUI.components.events.SpriteEventListener;
 import general.ArrayTreeMap;
 import image.basicPainter2D;
 
@@ -38,6 +37,7 @@ public abstract class Scene implements IScene, SpriteEventListener
 		this.removeSprite = new ArrayList< ISprite>();
 		
 		this.frame = new Frame();
+		this.frame.setSize( sceneSize );
 	}
 	
 	@Override

@@ -27,6 +27,10 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
+import GUI.components.events.MouseSpriteEventListener;
+import GUI.components.events.SpriteEventListener;
+import control.inputs.IInputAction;
+
 public interface ISprite 
 {
 	/**
@@ -60,6 +64,12 @@ public interface ISprite
 	
 	/**
 	 * 
+	 * @return Rectangle with sprite bounds
+	 */
+	public Rectangle getBounds();
+	
+	/**
+	 * 
 	 * @return {@link BufferedImage} - sprite's picture.
 	 */
 	public BufferedImage getSprite();
@@ -80,10 +90,28 @@ public interface ISprite
 	 * @return {@link Dimension} - sprite's dimension
 	 */
 	public Dimension getSize();
-	
+		
+	/**
+	 * 
+	 * @param bounds
+	 */
 	public void setFrameBounds( Rectangle bounds );	
 	
+	/**
+	 * 
+	 * @param listener
+	 */
 	public void addSpriteEventListener( SpriteEventListener listener );
 	
+	/**
+	 * 
+	 * @param listener
+	 */
 	public void removeSpriteEventListener( SpriteEventListener listener );
+	
+	/*
+	public void addMouseSpriteEventListener( MouseSpriteEventListener listener );
+	
+	public void removeMouseSpriteEventListener( MouseSpriteEventListener listener );
+	*/
 }

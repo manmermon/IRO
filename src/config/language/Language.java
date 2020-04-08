@@ -63,11 +63,36 @@ public class Language
 	public static final String WARNING = "WARNING";
 	public static final String REMOVE = "REMOVE";
 	public static final String DELETE = "DELETE";
-	public static final String REMOVE_USER_MSG = "REMOVE_USER_MSG";
+	public static final String REMOVE_PLAYER_MSG = "REMOVE_PLAYER_MSG";
+	public static final String REMOVE_PLAYER_IMAGE_MSG = "REMOVE_PLAYER_IMAGE_MSG";
 	public static final String SETTING = "SETTING";
 	public static final String PLAY = "PLAY";
 	public static final String CANCEL = "CANCEL";
 	public static final String NEW = "NEW";	
+	public static final String CLEAR = "CLEAR";
+	public static final String UP = "UP";
+	public static final String DOWN = "DOWN";
+	
+	public static final String TIME = "TIME";
+	public static final String REACTION_TIME = "REACTION_TIME";
+	public static final String RECOVER_TIME = "RECOVER_TIME";
+	public static final String PREACTION_COLOR = "PREACTION_COLOR";
+	public static final String ACTION_COLOR = "ACTION_COLOR";
+	public static final String WAITING_ACTION_COLOR = "WAITING_ACTION_COLOR";
+	
+	public static final String INPUT = "INPUT";
+	public static final String VALUE = "VALUE";
+	public static final String MINIMUM = "MIN";
+	public static final String MAXIMUM = "MAX";
+	
+	public static final String MIN_INPUT_VALUE = "MIN_INPUT_VALUE";
+	public static final String MAX_INPUT_VALUE = "MAX_INPUT_VALUE";
+	
+	public static final String UPDATE = "UPDATE";
+	
+	public static final String CONTROLLER = "CONTROLLER";
+	
+	public static final String CHANNEL = "CHANNEL";
 	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
@@ -134,9 +159,13 @@ public class Language
 		cap.setCaption( esEs, "Eliminar" );
 		captions.put( DELETE, cap );
 		
-		cap = new Caption( REMOVE_USER_MSG, defaultLanguage, "All player data will be remove. Continue?" );
+		cap = new Caption( REMOVE_PLAYER_MSG, defaultLanguage, "All player data will be remove. Continue?" );
 		cap.setCaption( esEs, "Se eliminarán todos los datos del jugador. ¿Desea continuar?" );
-		captions.put( REMOVE_USER_MSG, cap );
+		captions.put( REMOVE_PLAYER_MSG, cap );
+		
+		cap = new Caption( REMOVE_PLAYER_IMAGE_MSG, defaultLanguage, "Image will be remove. Continue?" );
+		cap.setCaption( esEs, "Se eliminarán la imagen del jugador. ¿Desea continuar?" );
+		captions.put( REMOVE_PLAYER_IMAGE_MSG, cap );
 		
 		cap = new Caption( WARNING, defaultLanguage, "Warning" );
 		cap.setCaption( esEs, "Cuidado" );
@@ -149,6 +178,74 @@ public class Language
 		cap = new Caption( NEW, defaultLanguage, "New" );
 		cap.setCaption( esEs, "Nuevo" );
 		captions.put( NEW, cap );
+		
+		cap = new Caption( CLEAR, defaultLanguage, "Clear" );
+		cap.setCaption( esEs, "Limpiar" );
+		captions.put( CLEAR, cap );
+		
+		cap = new Caption( UP, defaultLanguage, "Up" );
+		cap.setCaption( esEs, "Subir" );
+		captions.put( UP, cap );
+		
+		cap = new Caption( DOWN, defaultLanguage, "Down" );
+		cap.setCaption( esEs, "Bajar" );
+		captions.put( DOWN, cap );
+		
+		cap = new Caption( REACTION_TIME, defaultLanguage, "Reaction time" );
+		cap.setCaption( esEs, "tiempo de reacción" );
+		captions.put( REACTION_TIME, cap );
+		
+		cap = new Caption( RECOVER_TIME, defaultLanguage, "Recovering time" );
+		cap.setCaption( esEs, "tiempo de recuperación" );
+		captions.put( RECOVER_TIME, cap );
+		
+		cap = new Caption( PREACTION_COLOR, defaultLanguage, "Pre-action" );
+		cap.setCaption( esEs, "pre-acción" );
+		captions.put( PREACTION_COLOR, cap );
+		
+		cap = new Caption( ACTION_COLOR, defaultLanguage, "Action" );
+		cap.setCaption( esEs, "Acción" );
+		captions.put( ACTION_COLOR, cap );
+		
+		cap = new Caption( WAITING_ACTION_COLOR, defaultLanguage, "Waiting-action" );
+		cap.setCaption( esEs, "Esperando acción" );
+		captions.put( WAITING_ACTION_COLOR, cap );
+		
+		cap = new Caption( INPUT, defaultLanguage, "Input" );
+		cap.setCaption( esEs, "Entrada" );
+		captions.put( INPUT, cap );
+		
+		cap = new Caption( VALUE, defaultLanguage, "Value" );
+		cap.setCaption( esEs, "Valor" );
+		captions.put( VALUE, cap );
+		
+		cap = new Caption( MINIMUM, defaultLanguage, "Minimum" );
+		cap.setCaption( esEs, "Mínimo" );
+		captions.put( MINIMUM, cap );
+		
+		cap = new Caption( MAXIMUM, defaultLanguage, "Maximum" );
+		cap.setCaption( esEs, "Máximo" );
+		captions.put( WAITING_ACTION_COLOR, cap );
+		
+		cap = new Caption( MIN_INPUT_VALUE, defaultLanguage, "Min. input value" );
+		cap.setCaption( esEs, "Mín. valor de entrada" );
+		captions.put( MIN_INPUT_VALUE, cap );
+		
+		cap = new Caption( MAX_INPUT_VALUE, defaultLanguage, "Max. input value" );
+		cap.setCaption( esEs, "Máx. valor de entrada" );
+		captions.put( MAX_INPUT_VALUE, cap );
+		
+		cap = new Caption( UPDATE, defaultLanguage, "Update" );
+		cap.setCaption( esEs, "Actualizar" );
+		captions.put( UPDATE, cap );
+		
+		cap = new Caption( CONTROLLER, defaultLanguage, "Controller" );
+		cap.setCaption( esEs, "Mando" );
+		captions.put( CONTROLLER, cap );
+		
+		cap = new Caption( CHANNEL, defaultLanguage, "Channel(s)" );
+		cap.setCaption( esEs, "Canal(es)" );
+		captions.put( CHANNEL, cap );
 	}
 
 	public static void loadLanguages() 

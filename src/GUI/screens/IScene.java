@@ -29,7 +29,7 @@ public interface IScene
 	public void removeAllSprites();
 		
 	public List< ISprite > getSprites( String idSprite );
-	
+		
 	public int getNumberOfSprites( String idSprite );
 	
 	public void updateLevel();

@@ -41,6 +41,7 @@ import javax.swing.JPanel;
 import GUI.components.Frame;
 import GUI.screens.levels.Level;
 import GUI.screens.levels.LevelFactory;
+import GUI.screens.menus.MainMenuScreen;
 import control.LaunchControl;
 import exceptions.IllegalLevelStateException;
 import stoppableThread.IStoppableThread;
@@ -224,6 +225,30 @@ public class GuiManager
 		}
 	}
 
+	public void mainMenu()
+	{
+		GuiManager.getInstance().removeCurrentFrame();
+		
+		GuiManager.getInstance().fullScreen( false );		
+		
+		Dimension screenSize = GuiManager.getInstance().getScreenSize();
+		
+		MainMenuScreen mainMenu = new MainMenuScreen( screenSize );
+		
+		try 
+		{	
+			LaunchControl.getInstance().launchScene( mainMenu );
+		} 
+		catch (IllegalLevelStateException e1) 
+		{
+			e1.printStackTrace();
+		} 
+		catch (Exception e1) 
+		{
+			e1.printStackTrace();
+		}
+	}
+	
 	public void playLevel()
 	{
 		GuiManager.getInstance().removeCurrentFrame();

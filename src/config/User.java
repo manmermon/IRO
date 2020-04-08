@@ -17,11 +17,14 @@ public class User
 	private String name;
 	private ImageIcon img = null;
 	
+	private ImageIcon defaultImg = GeneralAppIcon.getDoll( ConfigApp.playerPicSizeIcon.x , ConfigApp.playerPicSizeIcon.y
+															, Color.BLACK, Color.WHITE, null );
+	
 	public User()
 	{
 		this.id = ANONYMOUS_USER_ID;
 		this.name = Language.getLocalCaption( Language.ANONYMOUS );
-		this.img = GeneralAppIcon.getDoll( 32, 32, Color.BLACK, Color.WHITE, null );
+		this.img = null;
 	}
 	
 	public User( int id, String name, ImageIcon img )
@@ -31,19 +34,13 @@ public class User
 		this.id = id;
 		this.name = name;
 		
-		if( img != null )
-		{
-			this.img = img;
-		}
-		else
-		{
-			this.setDefaultImage();
-		}
+		this.img = img;
+		
 	}
 	
-	private void setDefaultImage()
+	public void setDefaultImage()
 	{
-		this.img = GeneralAppIcon.getDoll( 64, 64, Color.BLACK, Color.WHITE, null );
+		this.img = null;
 	}
 	
 	public int getId()
@@ -58,7 +55,7 @@ public class User
 	
 	public ImageIcon getImg()
 	{
-		return img;
+		return this.img == null ? this.defaultImg : this.img;
 	}
 	
 	public ImageIcon getImg( int width, int heigh )
@@ -68,6 +65,10 @@ public class User
 		if( img != null && width > 0 && heigh > 0 )
 		{
 			ic = new ImageIcon( ((BufferedImage)img.getImage()).getScaledInstance( width, heigh, Image.SCALE_SMOOTH ) );
+		}
+		else
+		{
+			ic = new ImageIcon( ((BufferedImage)this.defaultImg.getImage()).getScaledInstance( width, heigh, Image.SCALE_SMOOTH ) );
 		}
 		
 		return ic;

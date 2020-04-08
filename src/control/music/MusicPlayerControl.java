@@ -1,4 +1,4 @@
-package control;
+package control.music;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import music.player.IROPlayer;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 
-public class PlayerControl extends AbstractStoppableThread 
+public class MusicPlayerControl extends AbstractStoppableThread 
 {	
 	private IROPlayer iroPlayer;
 	
@@ -20,7 +20,7 @@ public class PlayerControl extends AbstractStoppableThread
 	
 	private List< IROTrack > patternList;
 	
-	public PlayerControl( BackgroundMusic backgroundMusicPattern ) throws MidiUnavailableException
+	public MusicPlayerControl( BackgroundMusic backgroundMusicPattern ) throws MidiUnavailableException
 	{	
 		//this.realPlayer = new RealtimePlayer();
 		

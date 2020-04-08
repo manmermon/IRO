@@ -109,12 +109,11 @@ public class TrackNotesSprite extends AbstractSprite
 	
 	public TrackNotesSprite( String track, List< IROTrack > Notes, String noteID, Pentragram pen, int initLoc ,double shiftVel, boolean ghost ) 
 	{
-		super();
+		super( noteID );
 		
 		this.noteTracks = new ArrayList< IROTrack >();
 		this.noteTracks.addAll( Notes );	
-				
-		super.ID = noteID;		
+						
 		this.pentagram = pen;		
 		this.shiftVelocity = shiftVel;
 			

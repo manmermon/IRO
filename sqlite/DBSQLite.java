@@ -36,24 +36,31 @@ public class DBSQLite
 	 * @author Manuel Merino
 	 */
 
+	public static final String REACTION_TIME = "reactionTime";
+	public static final String RECOVER_TIME = "recoverTime";
+	
+	public static final String SONG_LIST = "songs";
+	
+	public static final String PREACTION_COLOR = "colorPreaction";
+	public static final String WAITING_ACTION_COLOR = "colorWaitingAction";
+	public static final String ACTION_COLOR = "colorAction";
+	
+	
 	private final String prefixComm = "jdbc:sqlite:";
 	
 	private final String userTableName = "user";
 	private final String settingsTableName = "settings";
 	private final String statisticTableName = "statistic";
 	
-	private final String url = this.prefixComm + ConfigApp.DB_URL;
+	private final String url = this.prefixComm + ConfigApp.DB_PATH;
 	
-	private Map< String, Map< String, Class > > tableFields;
-	private Map< String, String > tableFieldsMatchConfigApp;
-	
+	private Map< String, Map< String, Class > > tableFields;	
 	
 	private Connection conn;
 	
 	public DBSQLite()
 	{
 		this.tableFields = new HashMap<String, Map< String, Class > >();
-		this.tableFieldsMatchConfigApp = new HashMap<String, String>();	
 		
 		Map< String, Class > fieldType = new HashMap<String, Class>();
 		this.tableFields.put( this.userTableName, fieldType );
@@ -74,12 +81,6 @@ public class DBSQLite
 		fieldType.put( "colorAction", Integer.class );
 		fieldType.put( "songs", String.class );
 		
-		this.tableFieldsMatchConfigApp.put( "reactionTime", ConfigApp.USER_REACTION_TIME );
-		this.tableFieldsMatchConfigApp.put( "recoverTime", ConfigApp.USER_RECOVER_TIME );
-		this.tableFieldsMatchConfigApp.put( "colorPreaction", ConfigApp.PREACTION_COLOR );
-		this.tableFieldsMatchConfigApp.put( "colorWaitingAction", ConfigApp.WAITING_ACTION_COLOR );
-		this.tableFieldsMatchConfigApp.put( "colorAction", ConfigApp.ACTION_COLOR );
-		this.tableFieldsMatchConfigApp.put( "songs", ConfigApp.SONG_LIST );
 		
 		fieldType = new HashMap<String, Class>();
 		this.tableFields.put( this.statisticTableName, fieldType );
@@ -330,10 +331,9 @@ public class DBSQLite
         	Map< String, Class > tableFieldType = this.tableFields.get( this.settingsTableName );
         	
             if ( rs.next() ) 
-            {
-            	for( String fieldName : this.tableFieldsMatchConfigApp.keySet() )
+            {           	
+            	for( String fieldName : tableFieldType.keySet() )
             	{
-            		String setID = this.tableFieldsMatchConfigApp.get( fieldName );
             		Class type = tableFieldType.get( fieldName );
             		
             		Object val = null;
@@ -366,7 +366,7 @@ public class DBSQLite
             			val = rs.getString( fieldName );
             		}
             		
-            		Tuple< String, Object > par = new Tuple<String, Object>( setID, val );
+            		Tuple< String, Object > par = new Tuple<String, Object>( fieldName, val );
             		pars.add( par );
             	}            	
             }
@@ -399,35 +399,38 @@ public class DBSQLite
 		String sql = "INSERT INTO "+ this.settingsTableName +  "(userID";
 		String sqlValues  = "VALUES(" + userID;
 		
-		Iterator< String > itField = this.tableFieldsMatchConfigApp.keySet().iterator();
+		Map< String, Class > fieldTable = this.tableFields.get( this.settingsTableName );
+		Iterator< String > itField = fieldTable.keySet().iterator();
 		
 		while( itField.hasNext() )
 		{			
 			String fieldName = itField.next();
 			
-			String cid = this.tableFieldsMatchConfigApp.get( fieldName );
 			String value = null;
-			ConfigParameter par = ConfigApp.getProperty( cid );
+			ConfigParameter par = ConfigApp.getProperty( fieldName );
 			
-			Object val = par.getSelectedValue();
-			if( val != null )
+			if( par != null )
 			{
-				value = val.toString();
-			}
-			
-			if( par.get_type() == ConfigParameter.ParameterType.COLOR )
-			{
-				value = ((Color)val).getRGB() + "";
-			}
-			else if( par.get_type() == ParameterType.USER )
-			{
-				value = null;
-			}
-			
-			if( value != null )
-			{			
-				sql += "," + fieldName;
-				sqlValues += "," + value;
+				Object val = par.getSelectedValue();
+				if( val != null )
+				{
+					value = val.toString();
+				}
+				
+				if( par.get_type() == ConfigParameter.ParameterType.COLOR )
+				{
+					value = ((Color)val).getRGB() + "";
+				}
+				else if( par.get_type() == ParameterType.USER )
+				{
+					value = null;
+				}
+				
+				if( value != null )
+				{			
+					sql += "," + fieldName;
+					sqlValues += "," + value;
+				}
 			}
 		}
 		
@@ -462,36 +465,99 @@ public class DBSQLite
 		String sql =  "UPDATE " + this.settingsTableName + " SET ";
 		
 		boolean add = false;
-		for( String fieldName : this.tableFieldsMatchConfigApp.keySet() )
+		Map< String, Class > fields = this.tableFields.get( this.settingsTableName );
+		for( String fieldName : fields.keySet() )
 		{			
-			String cid = this.tableFieldsMatchConfigApp.get( fieldName );
-			String value = null;
-			ConfigParameter par = ConfigApp.getProperty( cid );
-			
-			Object val = par.getSelectedValue();
-			if( val != null )
-			{
-				value = val.toString();
-			}
-			
-			if( par.get_type() == ConfigParameter.ParameterType.COLOR )
-			{
-				value = ((Color)val).getRGB() + "";
-			}
-			else if( par.get_type() == ParameterType.USER )
-			{
-				value = null;
-			}
-			else if( par.get_type() == ParameterType.STRING && value != null )
-			{
-				value = "\"" + value + "\"";
-			}
+			String value = this.getFieldValue( fieldName );			
 			
 			if( value != null )
 			{			
 				add = true;
 				sql += fieldName + " = " + value + " ,";				
 			}
+		}
+		
+		if( add )
+		{		
+			sql = sql.substring( 0, sql.length() - 1 );
+			sql += " WHERE userID = " + userID;
+
+			Statement stmt = null;
+	
+			try 
+			{
+				this.connect();
+	
+				stmt  = conn.createStatement();
+				stmt.executeUpdate(sql );
+			}
+			catch (SQLException e) 
+			{
+				throw e;			 
+			}
+			finally 
+			{
+				if( stmt != null )
+				{
+					stmt.close();
+				}
+				
+				this.closeConnection();
+			}
+		}
+	}
+	
+	private String getFieldValue( String fieldName )
+	{
+		String value = null;
+		
+		ConfigParameter par = ConfigApp.getProperty( fieldName );
+		
+		Object val = par.getSelectedValue();
+		if( val != null )
+		{
+			value = val.toString();
+		}
+		
+		if( par.get_type() == ConfigParameter.ParameterType.COLOR )
+		{
+			value = ((Color)val).getRGB() + "";
+		}
+		else if( par.get_type() == ParameterType.USER )
+		{
+			value = null;
+		}
+		else if( par.get_type() == ParameterType.STRING && value != null )
+		{
+			value = "\"" + value + "\"";
+		}
+		else if( par.get_type() == ParameterType.SONG && value != null )
+		{
+			value = "\"" + value + "\"";
+		}
+		
+		return value;
+	}
+	
+	public void updateUserConfig( int userID, String fieldID ) throws SQLException
+	{
+		Map< String, Class > fields = this.tableFields.get( this.settingsTableName );
+		
+		boolean add = fields.containsKey( fieldID );
+		
+		String sql =  "UPDATE " + this.settingsTableName + " SET ";
+		
+		if( add )
+		{	
+			String value = this.getFieldValue( fieldID );
+			
+			add = (value != null );
+			
+			if( add )
+			{			
+				add = true;
+				sql += fieldID + " = " + value;				
+			}			
 		}
 		
 		if( add )

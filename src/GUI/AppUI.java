@@ -25,14 +25,21 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
+import java.sql.SQLException;
+import java.util.List;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-
-import GUI.dialogs.AppSettingDialog;
+import GUI.dialogs.AppSelectPlayer;
+import config.ConfigApp;
+import config.ConfigParameter;
+import config.User;
+import config.ConfigParameter.ParameterType;
 import config.language.Language;
+import config.language.TranslateComponents;
+import exceptions.ConfigParameterException;
+import general.Tuple;
 
 import javax.swing.JButton;
 import java.awt.FlowLayout;
@@ -44,26 +51,29 @@ public class AppUI extends JFrame
 	/**
 	 * 
 	 */
-	/*
-	public static void main(String[] args)
-	{
-		getInstance().setVisible( true );
-	}
-	*/
-	
+
 	private static final long serialVersionUID = 5759856279333189057L;
 
 	private static AppUI ui;
 	
+	public static final String ID_MAIN_MENU = "MAIN_MENU";
+	public static final String ID_PAUSE_MENU = "PAUSE_MENU";
+	
 	// Panel
-	private JPanel scenePane;
+	//private JPanel settingPanel;
 	private JPanel contentPane;
 	private JPanel panelMenu;
+	private JPanel panelUser; 
+	private JPanel panelPlay;
+	private JPanel panelSettingFields;
+	
 	
 	// Buttom	
 	private JButton btnPlay;
-	private JButton btnSettings;
+	private JButton btPlayer;
 	
+	
+		
 	/**
 	 * Create the frame.
 	 */
@@ -80,9 +90,9 @@ public class AppUI extends JFrame
 	private AppUI() 
 	{
 		super.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-		setBounds(100, 100, 450, 300);
+		super.setBounds(100, 100, 450, 300);
 		
-		setContentPane( this.getMainPanel() );	
+		super.setContentPane( this.getMainPanel() );	
 	}
 	
 	protected JPanel getMainPanel()
@@ -92,48 +102,190 @@ public class AppUI extends JFrame
 			this.contentPane = new JPanel( new BorderLayout() );
 			
 			this.contentPane.add( this.getPanelMenu(), BorderLayout.NORTH );
-			this.contentPane.add( this.getScreenPanel(), BorderLayout.CENTER );
+			//this.contentPane.add( this.getSettingPanel(), BorderLayout.CENTER );			
+			this.contentPane.add( this.getSettingFieldPanel( ), BorderLayout.CENTER );
 		}
 		
 		return this.contentPane;
 	}
 	
-	protected JPanel getScreenPanel()
+	/*
+	private JPanel getSettingPanel()
 	{
-		if( this.scenePane == null )
+		if( this.settingPanel == null )
 		{
-			this.scenePane = new JPanel();
-			//this.contentPane.setBorder( new EmptyBorder(5, 5, 5, 5) );
-			this.scenePane.setLayout( new BorderLayout(0, 0) );
+			this.settingPanel = new JPanel();
 			
-			//this.contentPane.setFocusable( true );
+			this.settingPanel.setLayout( new GridLayout( 2, 1 ) );
 			
-			//this.contentPane.addKeyListener( new KeystrokeAction() );
-			//this.contentPane.add( new Frame() );
-			
-			//this.contentPane.add( new JButton( new ImageIcon( appIcons.appIcon( 32 ) ) ), BorderLayout.CENTER );
+			this.settingPanel.add( this.getSettingFieldPanel() );
+			this.settingPanel.add( SelectSongPanel.getInstance() );
 		}
 		
-		return this.scenePane;
+		return this.settingPanel;
 	}
-		
-	protected Dimension getSceneSize()
-	{
-		return this.getScreenPanel().getSize();
-	}
+	//*/
 	
+	private JPanel getSettingFieldPanel()
+	{
+		if( this.panelSettingFields == null )
+		{
+			this.panelSettingFields = new JPanel( new BorderLayout() );
+			
+			this.panelSettingFields.add( new SettingPanel( ui ) );
+		}
+		
+		return this.panelSettingFields;
+	}
+			
 	private JPanel getPanelMenu() 
 	{
 		if ( this.panelMenu == null ) 
 		{
 			this.panelMenu = new JPanel();
-			FlowLayout flowLayout = (FlowLayout) this.panelMenu.getLayout();
-			flowLayout.setAlignment( FlowLayout.LEFT );
+			this.panelMenu.setLayout(new BorderLayout(0, 0));
+			this.panelMenu.add( this.getPanelPlay(), BorderLayout.WEST);
 			
-			this.panelMenu.add( this.getBtnPlay() );
-			this.panelMenu.add( this.getBtnSettings() );
+			
+			this.panelMenu.add( this.getSelectUserPanel(), BorderLayout.EAST);			
 		}
 		return this.panelMenu;
+	}
+	
+	private JPanel getSelectUserPanel()
+	{
+		if( this.panelUser == null )
+		{
+			this.panelUser = new JPanel( new FlowLayout( FlowLayout.RIGHT ) );
+			this.panelUser.add( this.getSelectPlayerButtom() );
+		}
+		
+		return this.panelUser;
+	}
+	
+	private JButton getSelectPlayerButtom()
+	{
+		if( this.btPlayer == null )
+		{
+			this.btPlayer = new JButton( Language.getLocalCaption( Language.PLAYER ) );
+			
+			TranslateComponents.add( this.btPlayer, Language.getAllCaptions().get( Language.PLAYER ) );
+			
+			this.btPlayer.addActionListener( new ActionListener()
+			{				
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					AppSelectPlayer selplayerDialog = new AppSelectPlayer( ui );
+					
+					Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+					d.width /= 3;
+					d.height /= 3;
+					
+					Rectangle r = ui.getBounds();
+					
+					Rectangle bounds = new Rectangle( d );
+					bounds.setLocation( r.getLocation() );
+					
+					selplayerDialog.setBounds( bounds );
+					selplayerDialog.setVisible( true );
+					
+					User user = selplayerDialog.getSelectedUser();
+					
+					if( user != null ) 
+					{					
+						ConfigParameter parUser = ConfigApp.getParameter( ConfigApp.USER );
+						
+						User currentUser = (User)parUser.getSelectedValue();
+						
+						try
+						{
+							if( currentUser.getId() != user.getId() )
+							{
+								parUser.clear();
+								parUser.add( user );
+													
+								try
+								{
+									List< Tuple< String, Object > > settings = ConfigApp.getUserConfig( user.getId() );
+									
+									if( settings.isEmpty() )
+									{
+										ConfigApp.loadDefaultProperties();
+										parUser = ConfigApp.getParameter( ConfigApp.USER );
+										parUser.clear();
+										parUser.add( user );
+										
+										if( user.getId() != User.ANONYMOUS_USER_ID  )
+										{
+											ConfigApp.insertUserConfig( user.getId() );
+											
+											for( ConfigParameter par : ConfigApp.getParameters() )
+											{
+												par.setUserID( user.getId() );
+											}
+										}
+									}
+									else
+									{
+										for( Tuple< String, Object > par : settings )
+										{
+											Object val = par.y;
+											
+											ConfigParameter p = ConfigApp.getParameter( par.x );
+											if( p != null )
+											{
+												p.setUserID( user.getId() );
+												
+												if( p.getAllValues().size() > 1 )
+												{
+													if( p.get_type() == ParameterType.COLOR )
+													{
+														val = new Color( (Integer)val );
+													}
+	
+													if( val != null )
+													{
+														p.setSelectedValue( val );
+													}
+												}
+												else
+												{
+													p.clear();
+													if( val != null )
+													{
+														p.add( val );
+													}
+												}
+											}
+										}										
+									}
+								}
+								catch ( SQLException ex) 
+								{
+									JOptionPane.showMessageDialog( ui, ex.getCause() + "\n" + ex.getMessage()
+																	, Language.getLocalCaption( Language.ERROR )
+																	, JOptionPane.ERROR_MESSAGE );
+								}
+								finally 
+								{
+									getSettingFieldPanel().setVisible( false );
+									getSettingFieldPanel().removeAll();
+									getSettingFieldPanel().add( new SettingPanel( ui ) );
+									getSettingFieldPanel().setVisible( true );
+								}
+							}
+						} 
+						catch (ConfigParameterException e1)
+						{
+							e1.printStackTrace();
+						}
+					}
+				}
+			});
+		}
+		
+		return this.btPlayer;
 	}
 	
 	private JButton getBtnPlay() 
@@ -141,6 +293,8 @@ public class AppUI extends JFrame
 		if ( this.btnPlay == null) 
 		{
 			this.btnPlay = new JButton( Language.getLocalCaption( Language.PLAY ));
+			
+			TranslateComponents.add( this.btnPlay, Language.getAllCaptions().get( Language.PLAY ) );
 			
 			this.btnPlay.setFocusable( false );
 			
@@ -156,37 +310,17 @@ public class AppUI extends JFrame
 		return this.btnPlay;
 	}
 	
-	private JButton getBtnSettings() 
+	private JPanel getPanelPlay() 
 	{
-		if ( this.btnSettings == null ) 
-		{ 
-			this.btnSettings = new JButton( Language.getLocalCaption( Language.SETTING ));
-						
-			this.btnSettings.setIcon( new ImageIcon( AppIcons.Config2( Color.BLACK ).getScaledInstance( 16, 16, BufferedImage.SCALE_SMOOTH ) ) );			
-			//this.btnSettings.setIcon( new ImageIcon( AppIcons.Contrabass( 512, Color.BLACK ) ) );
+		if (panelPlay == null) 
+		{
+			panelPlay = new JPanel();
+			FlowLayout flowLayout = (FlowLayout) panelPlay.getLayout();
 			
-			this.btnSettings.addActionListener( new ActionListener()
-			{				
-				@Override
-				public void actionPerformed(ActionEvent e)
-				{
-					Rectangle r = ui.getBounds();
-					
-					Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-					
-					Rectangle rect = new Rectangle();
-					rect.x = ( r.x + r.width) / 2;
-					rect.y = ( r.y + r.height ) / 2;
-					rect.width = d.width / 3;
-					rect.height = d.height / 3;
-					
-					AppSettingDialog setdial = new AppSettingDialog( ui, rect );
-					setdial.setVisible( true );
-				}
-			});
-			
-			this.btnSettings.setFocusable( false );
+			flowLayout.setAlignment( FlowLayout.RIGHT );
+			panelPlay.add(getBtnPlay());
 		}
-		return this.btnSettings;
+		
+		return panelPlay;
 	}
 }

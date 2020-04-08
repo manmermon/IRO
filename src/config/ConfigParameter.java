@@ -1,10 +1,9 @@
 package config;
 
 import java.awt.Color;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.naming.ConfigurationException;
 
 import config.language.Caption;
 import exceptions.ConfigParameterException;
@@ -12,13 +11,14 @@ import general.NumberRange;
 
 public class ConfigParameter
 {
-	public enum ParameterType { NUMBER, STRING, BOOLEAN, COLOR, USER };
+	public enum ParameterType { NUMBER, STRING, BOOLEAN, COLOR, USER, SONG };
 	
 	private Caption _ID = null;
 	private ParameterType _type = ParameterType.NUMBER;
 	private Object _selectedValue = null;
 	private List< Object > _values = null;
 	private NumberRange _rng = null;
+	private int _userID = User.ANONYMOUS_USER_ID;
 	
 	public ConfigParameter( Caption id, ParameterType type ) throws ConfigParameterException
 	{
@@ -53,7 +53,7 @@ public class ConfigParameter
 		
 		if( value == null )
 		{
-			errMsg = "Value is null";
+			errMsg = "Value is null.";
 		}
 		else
 		{	
@@ -63,7 +63,7 @@ public class ConfigParameter
 				{
 					if( !(value instanceof Number) )
 					{
-						errMsg = "Value is not a Number";
+						errMsg = "Value is not a Number.";
 					}
 					else if( this._rng != null )
 					{
@@ -79,7 +79,7 @@ public class ConfigParameter
 				{
 					if( !(value instanceof String) )
 					{
-						errMsg = "Value is not a String";
+						errMsg = "Value is not a String.";
 					}
 					
 					break;
@@ -88,7 +88,7 @@ public class ConfigParameter
 				{
 					if( !(value instanceof Boolean) )
 					{
-						errMsg = "Value is not a Boolean";
+						errMsg = "Value is not a Boolean.";
 					}
 					break;
 				}
@@ -96,7 +96,7 @@ public class ConfigParameter
 				{
 					if( !(value instanceof Color) )
 					{
-						errMsg = "Value is not a Color";
+						errMsg = "Value is not a Color.";
 					}
 					
 					break;					
@@ -105,8 +105,17 @@ public class ConfigParameter
 				{
 					if( !( value instanceof User ) )
 					{
-						errMsg = "Value is not a User";
+						errMsg = "Value is not a User.";
 					}
+					break;
+				}
+				case SONG:
+				{
+					if( !( value instanceof String ) )
+					{
+						errMsg = "Value is not the song file's path.";
+					}
+					
 					break;
 				}
 				default:
@@ -126,7 +135,7 @@ public class ConfigParameter
 		
 		if( this._selectedValue == null )
 		{
-			this._selectedValue = value;
+			this.setSelectedValue( value );
 		}
 	}
  	
@@ -141,6 +150,16 @@ public class ConfigParameter
 		}
 	}
 	
+	public void setUserID( int userId )
+	{
+		this._userID = userId;
+	}
+	
+	public int getUserID()
+	{
+		return this._userID;
+	}
+	
 	public void clear()
 	{
 		this._selectedValue = null;
@@ -150,6 +169,18 @@ public class ConfigParameter
 	public void setSelectedValue( int index )
 	{
 		this._selectedValue = this._values.get( index );
+		
+		if( this._userID != User.ANONYMOUS_USER_ID )
+		{
+			try
+			{
+				ConfigApp.updateUserConfig( this._userID, this._ID.getID() );
+			} 
+			catch (SQLException ex)
+			{
+				ex.printStackTrace();
+			}
+		}
 	}
 	
 	public void setSelectedValue( Object val )
@@ -157,6 +188,18 @@ public class ConfigParameter
 		if( this._values.contains( val ) )
 		{
 			this._selectedValue = val;
+			
+			if( this._userID != User.ANONYMOUS_USER_ID )
+			{
+				try
+				{
+					ConfigApp.updateUserConfig( this._userID, this._ID.getID() );
+				} 
+				catch (SQLException ex)
+				{
+					ex.printStackTrace();
+				}
+			}
 		}
 	}
 	

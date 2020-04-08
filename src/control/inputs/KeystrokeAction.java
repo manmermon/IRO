@@ -2,9 +2,13 @@ package control.inputs;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.EventObject;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class KeystrokeAction implements IInputAction, KeyListener 
 {
+	private ConcurrentLinkedQueue< KeyEvent > eventList = new ConcurrentLinkedQueue< KeyEvent >();
+	
 	public KeystrokeAction( ) 
 	{
 	}
@@ -23,5 +27,11 @@ public class KeystrokeAction implements IInputAction, KeyListener
 	@Override
 	public void keyTyped(KeyEvent e) 
 	{	
+	}
+
+	@Override
+	public EventObject getInputEvent()
+	{
+		return this.eventList.poll();
 	}	
 }

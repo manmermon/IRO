@@ -2,6 +2,9 @@ package control;
 
 import GUI.screens.IScene;
 import GUI.screens.levels.Level;
+import GUI.screens.menus.MainMenuScreen;
+import control.scenes.level.LevelControl;
+import control.scenes.menu.MenuScreenControl;
 import exceptions.IllegalLevelStateException;
 import stoppableThread.AbstractStoppableThread;
 
@@ -44,9 +47,17 @@ public class LaunchControl extends AbstractStoppableThread
 		if( scene instanceof Level )
 		{
 			LevelControl lvCtr = new LevelControl();				
-			lvCtr.setLevel( (Level)scene );
+			lvCtr.setScene( scene );
 			
 			ScreenControl.getInstance().setSceneControl( lvCtr );			
 		}
+		else if( scene instanceof MainMenuScreen )
+		{
+			MenuScreenControl menuCtr = new MenuScreenControl();
+			menuCtr.setScene( scene );
+			
+			ScreenControl.getInstance().setSceneControl( menuCtr );
+		}
+			
 	}
 }

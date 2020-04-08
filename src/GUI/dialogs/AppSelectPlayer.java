@@ -20,7 +20,6 @@ import javax.swing.table.TableModel;
 import config.ConfigApp;
 import config.User;
 import config.language.Language;
-import db.sqlite.DBSQLite;
 
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
@@ -66,6 +65,9 @@ public class AppSelectPlayer extends JDialog
 	public AppSelectPlayer( Window owner )
 	{
 		super( owner );
+
+		super.setTitle( Language.getLocalCaption( Language.SELECT )
+						+ " " + Language.getLocalCaption( Language.PLAYER ) );
 		
 		super.setModal( true );
 		super.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
@@ -80,10 +82,9 @@ public class AppSelectPlayer extends JDialog
 		
 		this.addUserToTable( new User() );
 		
-		DBSQLite db = new DBSQLite();
 		try
 		{
-			List< User > users = db.getAllUsers();			
+			List< User > users = ConfigApp.getAllUsers();			
 			
 			for( User user : users )
 			{
@@ -125,12 +126,10 @@ public class AppSelectPlayer extends JDialog
 	
 	public User getSelectedUser()
 	{
-		DBSQLite db = new DBSQLite();
-		
 		User user = null;
 		try
 		{
-			user = db.getUser( this.userID);
+			user = ConfigApp.getUser( this.userID);
 			
 			if( this.userID == User.ANONYMOUS_USER_ID )
 			{
@@ -369,14 +368,12 @@ public class AppSelectPlayer extends JDialog
 				@Override
 				public void actionPerformed(ActionEvent arg0)
 				{
-					int action = JOptionPane.showConfirmDialog( dg, Language.getLocalCaption( Language.REMOVE_USER_MSG )
+					int action = JOptionPane.showConfirmDialog( dg, Language.getLocalCaption( Language.REMOVE_PLAYER_MSG )
 													, Language.getLocalCaption( Language.WARNING )
 													,	JOptionPane.WARNING_MESSAGE );
 					
 					if( action == JOptionPane.OK_OPTION )
 					{
-						DBSQLite db = new DBSQLite();
-						
 						JTable t = getUserTable();
 						DefaultTableModel tm = (DefaultTableModel)t.getModel();
 						
@@ -394,7 +391,7 @@ public class AppSelectPlayer extends JDialog
 							{
 								if( userID != User.ANONYMOUS_USER_ID )
 								{
-									db.delUser( userID );
+									ConfigApp.delUser( userID );
 									tm.removeRow( sel );
 								}
 								
@@ -457,10 +454,9 @@ public class AppSelectPlayer extends JDialog
 																	, Language.getLocalCaption( Language.NAME )
 																	, b.getText() );
 					
-					DBSQLite db = new DBSQLite();
 					try
 					{
-						int userId = db.addUser( userName, null );
+						int userId = ConfigApp.addUser( userName, null );
 						User user = new User( userId, userName, null); 
 						
 						addUserToTable( user );

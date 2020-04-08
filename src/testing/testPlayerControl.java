@@ -6,14 +6,14 @@ import java.util.List;
 import org.jfugue.player.Player;
 import org.jfugue.theory.Note;
 
-import control.PlayerControl;
+import control.music.MusicPlayerControl;
 import music.IROTrack;
 
 public class testPlayerControl 
 {
 	public static void main(String[] args) 
 	{
-		PlayerControl ctrPlay;
+		MusicPlayerControl ctrPlay;
 		try 
 		{
 			/*

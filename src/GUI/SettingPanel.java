@@ -1,4 +1,5 @@
-package GUI.dialogs;
+
+package GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -6,20 +7,13 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -35,87 +29,84 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import GUI.JColorComboBox;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.ConfigParameter.ParameterType;
 import config.User;
 import config.language.Language;
-import db.sqlite.DBSQLite;
+import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
 import general.NumberRange;
-import general.Tuple;
 
-public class AppSettingDialog extends JDialog
+public class SettingPanel extends JPanel
 {
-
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1219995574372606332L;
 	
 	private JPanel containerPanel = null;
+	private JPanel songPanel = null;
 	
-	private JScrollPane scroll = null;
-
-	private JButton btnSelectPlayer = null;
+	private JScrollPane scrollFields = null;
 	
+	private JPopupMenu playerImgPopMenu;
+		
+	private Window owner;
 	/**
 	 * Create the dialog.
 	 */
-	public AppSettingDialog( JFrame owner, Rectangle screenLoc )
+	public SettingPanel( Window owner )
 	{		
-		super( owner );
-		super.setModal( true );
-		super.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
+		this.owner = owner;
 		
-		if( screenLoc == null )
-		{
-			screenLoc = new Rectangle( 450, 300 );
-		}
+		this.setLayout( new GridLayout( 2, 0 ) );
 		
-		super.setBounds( screenLoc );
-		super.getContentPane().setLayout( new BorderLayout() );
+		this.add( this.getContainerScroll()  );
 		
-		super.getContentPane().add( this.getContainerScroll(), BorderLayout.CENTER );
-		
-		super.addWindowListener( new WindowAdapter()
-		{	
-			@Override
-			public void windowClosing(WindowEvent arg0)
-			{
-				saveSetting();
-			}
-		});
+		this.add( this.getSongPanel() );
 	}
 
 	private JScrollPane getContainerScroll()	
 	{
-		if( this.scroll == null )
+		if( this.scrollFields == null )
 		{
-			this.scroll = new JScrollPane( this.getContainerPanel() );
+			this.scrollFields = new JScrollPane( this.getContainerPanel() );
 			
-			this.scroll.setVisible( true );
+			this.scrollFields.setVisible( true );
 		}
 		
-		return this.scroll;
+		return this.scrollFields;
+	}
+	
+	private JPanel getSongPanel()
+	{
+		if( this.songPanel == null )
+		{
+			this.songPanel = new JPanel( new BorderLayout() );
+			
+			this.songPanel.add( new SelectSongPanel(), BorderLayout.CENTER );
+			
+		}
+		
+		return this.songPanel;
 	}
 	
 	private JPanel getContainerPanel()
@@ -126,77 +117,80 @@ public class AppSettingDialog extends JDialog
 			
 			this.containerPanel.setLayout( new BorderLayout() );
 			
-			updateUser();
+			this.updateSetting( );
 		}
 		
 		return this.containerPanel;
 	}
 	
-	private void updateUser()
+	private void updateSetting( )
 	{
-		JPanel container =  this.getContainerPanel();
+		JPanel container = this.getContainerPanel();
 		container.setVisible( false );
 		container.removeAll();
 		
 		int cols = 2;
 		
-		JPanel subContainerPanel = new JPanel();
-		GridLayout ly = new GridLayout( 0, cols );
+		container.setLayout( new BorderLayout() );
 		
-		subContainerPanel.setLayout( ly );
-		subContainerPanel.setBorder( new EmptyBorder(5, 5, 5, 5) );
+		JPanel subContainer = new JPanel( new GridLayout( 0, cols, 0, 0) );
+		container.add( subContainer, BorderLayout.CENTER );
 		
 		Collection< ConfigParameter > pars = ConfigApp.getParameters();
 		
 		List< JPanel > listPanels = new ArrayList<JPanel>();
 		
-		JPanel containerOddPanel = new JPanel( new BorderLayout() );
 		JPanel containerEvenPanel = new JPanel( new BorderLayout() );
-		
-		subContainerPanel.add( containerEvenPanel);
-		subContainerPanel.add( containerOddPanel );
+		subContainer.add(containerEvenPanel);
 		
 		JPanel panelEven = new JPanel();
-		JPanel panelOdd = new JPanel();
 		
-		panelEven.setLayout( new BoxLayout( panelEven, BoxLayout.Y_AXIS ) );
-		panelOdd.setLayout( new BoxLayout( panelOdd, BoxLayout.Y_AXIS ) );
-		
+		panelEven.setLayout( new BoxLayout( panelEven, BoxLayout.Y_AXIS ) );		
 		containerEvenPanel.add( panelEven, BorderLayout.NORTH );
-		containerOddPanel.add( panelOdd, BorderLayout.NORTH );
 		
 		listPanels.add( panelEven );
+		
+		JPanel containerOddPanel = new JPanel( new BorderLayout() );
+		subContainer.add(containerOddPanel);
+		
+		JPanel panelOdd = new JPanel();
+		panelOdd.setLayout( new BoxLayout( panelOdd, BoxLayout.Y_AXIS ) );
+		containerOddPanel.add( panelOdd, BorderLayout.NORTH );
 		listPanels.add( panelOdd );
 		
-		int numPars = 0;
-		for( ConfigParameter p : pars )
+		if( ! listPanels.isEmpty() )
 		{
-			if( p.get_type() != ParameterType.USER )
+			int numPars = 0;
+			for( ConfigParameter p : pars )
 			{
-				int i = numPars % listPanels.size();
-				
-				JPanel panel = listPanels.get( i );
-				
-				panel.add( this.getParamenterPanel( p ) );
-				
-				numPars++;
+				if( p.get_type() != ParameterType.USER && p.get_type() != ParameterType.SONG )
+				{
+					int i = numPars % listPanels.size();
+					
+					JPanel panel = listPanels.get( i );
+					
+					panel.add( this.getParamenterPanel( p ) );
+					
+					numPars++;
+				}
 			}
 		}
 		
 		JPanel userPanel = new JPanel( new BorderLayout() );
 					
 		userPanel.add( this.getUserLabel(), BorderLayout.CENTER );
-		userPanel.add( this.getButtonSelect(), BorderLayout.EAST );
 		
-		container.add( userPanel, BorderLayout.NORTH );
-		container.add( subContainerPanel, BorderLayout.CENTER );
-		
+		container.add( userPanel, BorderLayout.NORTH );		
+				
 		container.setVisible( true );
+		
+		this.getSongPanel().removeAll();
+		this.getSongPanel().add( new SelectSongPanel(), BorderLayout.CENTER );
 	}
 	
 	private JPanel getUserLabel()
 	{
-		ConfigParameter par = ConfigApp.getProperty( ConfigApp.USER );
+		ConfigParameter par = ConfigApp.getParameter( ConfigApp.USER );
 		final User player;
 		if( par != null )
 		{
@@ -233,67 +227,19 @@ public class AppSettingDialog extends JDialog
 			} 
 		});
 		
-		final JDialog dialog = this;
 		btImg.addActionListener( new ActionListener()
 		{	
 			@Override
-			public void actionPerformed(ActionEvent arg0)
+			public void actionPerformed(ActionEvent e)
 			{
-				JButton b = (JButton)arg0.getSource();
-				
-				User user = (User)ConfigApp.getProperty( ConfigApp.USER ).getSelectedValue();
-				if( user.getId() != User.ANONYMOUS_USER_ID )
+				if( player.getId() != User.ANONYMOUS_USER_ID )
 				{
-					JFileChooser jfc = new JFileChooser( "./" );
-
-					jfc.setMultiSelectionEnabled( false );
-
-					jfc.setDialogTitle( "");
-					jfc.setDialogType( JFileChooser.OPEN_DIALOG );
-					jfc.setFileSelectionMode( JFileChooser.FILES_ONLY );
+					JButton b = (JButton)e.getSource();
 					
-					String exts[] = ImageIO.getReaderFileSuffixes();
-					
-					for( int i = exts.length - 1; i >= 0; i-- )
-					{
-						FileNameExtensionFilter filter = new FileNameExtensionFilter( exts[ i ], exts[ i ] );
-									
-						jfc.addChoosableFileFilter( filter );
-						
-						if( i == 0 )
-						{
-							jfc.setFileFilter( filter );
-						}
-					}
-
-					int returnVal = jfc.showDialog( dialog, null);
-					
-					if( returnVal == JFileChooser.APPROVE_OPTION )
-					{
-						File img = jfc.getSelectedFile();
-						
-						try
-						{
-							BufferedImage newImg = ImageIO.read( img );
-							
-							player.getImg().setImage( newImg );
-							
-							DBSQLite db = new DBSQLite();
-							
-							db.updateUser( player );
-							
-							b.setIcon( player.getImg( ConfigApp.playerPicSizeIcon.x, ConfigApp.playerPicSizeIcon.y ) );
-						}
-						catch ( SQLException | IOException e) 
-						{
-							JOptionPane.showMessageDialog( dialog, e.getMessage() 
-															, Language.getLocalCaption( Language.ERROR )
-															, JOptionPane.ERROR_MESSAGE );
-						}
-						
-					}
+					getPlayerImgPopMenu().show( b, b.getLocation().x, b.getLocation().y );
 				}
 			}
+				
 		});
 				
 		panel.add( btImg );
@@ -302,107 +248,131 @@ public class AppSettingDialog extends JDialog
 		return panel;
 	}
 	
-	private JButton getButtonSelect()
+	private JPopupMenu getPlayerImgPopMenu()
 	{
-		if( this.btnSelectPlayer == null )
+		if( this.playerImgPopMenu == null )
 		{
-			this.btnSelectPlayer = new JButton( Language.getLocalCaption( Language.PLAYER ) );
+			this.playerImgPopMenu = new JPopupMenu();
 			
-			final JDialog dialog = this; 
-			this.btnSelectPlayer.addActionListener( new ActionListener()
+			JMenuItem addMenu = new JMenuItem( Language.getLocalCaption( Language.NEW ) );
+			TranslateComponents.add( addMenu, Language.getAllCaptions().get( Language.NEW ) );
+			addMenu.addActionListener( new ActionListener()
 			{				
 				@Override
-				public void actionPerformed(ActionEvent e)
-				{
-					AppSelectPlayer selplayerDialog = new AppSelectPlayer( dialog );
-					
-					selplayerDialog.setBounds( dialog.getBounds() );
-					selplayerDialog.setVisible( true );
-					
-					User user = selplayerDialog.getSelectedUser();
-					
-					if( user != null ) 
-					{					
-						ConfigParameter parUser = ConfigApp.getProperty( ConfigApp.USER );
-						
-						User currentUser = (User)parUser.getSelectedValue();
-						
-						try
-						{
-							if( currentUser.getId() != user.getId() )
-							{
-								parUser.clear();
-								parUser.add( user );
-							
-								DBSQLite db = new DBSQLite();
-															
-								try
-								{
-									List< Tuple< String, Object > > settings = db.getUserConfig( user.getId() );
-									
-									if( settings.isEmpty() )
-									{
-										ConfigApp.loadDefaultProperties();
-										parUser = ConfigApp.getProperty( ConfigApp.USER );
-										parUser.clear();
-										parUser.add( user );
-										
-										if( user.getId() != User.ANONYMOUS_USER_ID  )
-										{
-											db.insertUserConfig( user.getId() );
-										}
-									}
-									else
-									{
-										for( Tuple< String, Object > par : settings )
-										{
-											Object val = par.y;
-											
-											ConfigParameter p = ConfigApp.getProperty( par.x );
-											if( p.getAllValues().size() > 1 )
-											{
-												if( p.get_type() == ParameterType.COLOR )
-												{
-													val = new Color( (Integer)val );
-												}
-
-												if( val != null )
-												{
-													p.setSelectedValue( val );
-												}
-											}
-											else
-											{
-												p.clear();
-												if( val != null )
-												{
-													p.add( val );
-												}
-											}
-										}
-										
-									}
-								}
-								catch ( SQLException ex) 
-								{
-									ex.printStackTrace();
-								}
-								finally 
-								{
-									updateUser();
-								}
-							}
-						} 
-						catch (ConfigParameterException e1)
-						{
-							e1.printStackTrace();
-						}
-					}
+				public void actionPerformed(ActionEvent arg0)
+				{			
+					selectNewUserImage( (JButton)playerImgPopMenu.getInvoker() );
 				}
 			});
+			
+			JMenuItem removeMenu = new JMenuItem( Language.getLocalCaption( Language.REMOVE ) );
+			TranslateComponents.add( removeMenu, Language.getAllCaptions().get( Language.REMOVE ) );
+			removeMenu.addActionListener( new ActionListener()
+			{				
+				@Override
+				public void actionPerformed(ActionEvent arg0)
+				{
+					int act = JOptionPane.showConfirmDialog( owner, Language.getLocalCaption( Language.REMOVE_PLAYER_IMAGE_MSG ) );
+					
+					if( act == JOptionPane.OK_OPTION )
+					{
+						removeUserImage( (JButton)playerImgPopMenu.getInvoker() );
+					}
+				}
+			});			
+			
+			this.playerImgPopMenu.add( addMenu );
+			this.playerImgPopMenu.add( removeMenu );
+			
 		}
-		
-		return this.btnSelectPlayer;
+			
+		return this.playerImgPopMenu;
+	}
+	
+	private void removeUserImage( JButton b )
+	{
+		User user = (User)ConfigApp.getParameter( ConfigApp.USER ).getSelectedValue();
+		if( user.getId() != User.ANONYMOUS_USER_ID )
+		{
+			user.setDefaultImage();
+			
+			updatePlayerImage( b );
+			
+			try
+			{
+				ConfigApp.updateUser( user );
+			} 
+			catch (SQLException ex)
+			{
+				JOptionPane.showMessageDialog( owner, ex.getMessage() 
+						, Language.getLocalCaption( Language.ERROR )
+						, JOptionPane.ERROR_MESSAGE );
+			}
+		}
+	}
+	
+	private void selectNewUserImage( JButton b )
+	{	
+		User user = (User)ConfigApp.getParameter( ConfigApp.USER ).getSelectedValue();
+		if( user.getId() != User.ANONYMOUS_USER_ID )
+		{
+			JFileChooser jfc = new JFileChooser( "./" );
+
+			jfc.setMultiSelectionEnabled( false );
+
+			jfc.setDialogTitle( "");
+			jfc.setDialogType( JFileChooser.OPEN_DIALOG );
+			jfc.setFileSelectionMode( JFileChooser.FILES_ONLY );
+			
+			String exts[] = ImageIO.getReaderFileSuffixes();
+			
+			for( int i = exts.length - 1; i >= 0; i-- )
+			{
+				FileNameExtensionFilter filter = new FileNameExtensionFilter( exts[ i ], exts[ i ] );
+							
+				jfc.addChoosableFileFilter( filter );
+				
+				if( i == 0 )
+				{
+					jfc.setFileFilter( filter );
+				}
+			}
+
+			int returnVal = jfc.showDialog( owner, null);
+			
+			if( returnVal == JFileChooser.APPROVE_OPTION )
+			{
+				File img = jfc.getSelectedFile();
+				
+				try
+				{
+					BufferedImage newImg = ImageIO.read( img );
+					
+					user.getImg().setImage( newImg );
+					
+					ConfigApp.updateUser( user );
+					
+					updatePlayerImage( b );
+				}
+				catch ( SQLException | IOException e) 
+				{
+					JOptionPane.showMessageDialog( owner, e.getMessage() 
+													, Language.getLocalCaption( Language.ERROR )
+													, JOptionPane.ERROR_MESSAGE );
+				}
+				
+			}
+		}
+	}
+	
+	private void updatePlayerImage( JButton b )
+	{
+		if( b != null )
+		{
+			User user = (User)ConfigApp.getParameter( ConfigApp.USER ).getSelectedValue();
+			
+			b.setIcon( user.getImg( ConfigApp.playerPicSizeIcon.x, ConfigApp.playerPicSizeIcon.y ) );
+		}
 	}
 	
 	private JPanel getParamenterPanel( ConfigParameter par )
@@ -418,7 +388,7 @@ public class AppSettingDialog extends JDialog
 		
 		if( par != null )
 		{	
-			ConfigParameter lang = ConfigApp.getProperty( ConfigApp.LANGUAGE );
+			ConfigParameter lang = ConfigApp.getParameter( ConfigApp.LANGUAGE );
 				
 			String l = Language.getCurrentLanguage();
 			
@@ -433,9 +403,11 @@ public class AppSettingDialog extends JDialog
 			
 			String title = par.get_ID().getCaption( l );			
 			panel.setBorder( BorderFactory.createTitledBorder( title ));
+			
+			TranslateComponents.add( panel, par.get_ID() );
 						
 			Component comp = this.getParComponent( par );
-			//panel.add( comp, BorderLayout.CENTER );			
+			
 			panel.add( comp );
 			
 			Dimension d = super.getSize();
@@ -464,7 +436,7 @@ public class AppSettingDialog extends JDialog
 				ParameterType type = par.get_type();
 				List< Object > values = par.getAllValues();
 				Object selectedValue = par.getSelectedValue();
-				String parId = par.get_ID().getID();
+				final String parId = par.get_ID().getID();
 
 				if( values != null )
 				{
@@ -634,86 +606,7 @@ public class AppSettingDialog extends JDialog
 											e1.printStackTrace();
 										}
 									}
-								});
-								
-								if( parId.equals( ConfigApp.SONG_LIST ) )
-								{
-									txt.setEditable( false );
-									
-									final JDialog dg = this;
-									txt.addMouseListener( new MouseAdapter()
-									{
-										@Override
-										public void mouseReleased(MouseEvent e)
-										{
-											JTextField tf = (JTextField)e.getSource();
-											
-											Rectangle bound = new Rectangle();
-											
-											Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-											bound.width = d.width / 2;
-											bound.height = d.height / 2;
-											bound.x = bound.width / 2;
-											bound.y = bound.height / 2;
-											
-											AppSetMusicLevelDialog musicDialog = new AppSetMusicLevelDialog( dg, bound );
-											
-											musicDialog.setVisible( true );
-											
-											String[] songs = musicDialog.getSongList();
-
-											String songlist = "";
-											String toolTipText = "<html>";
-											
-											FontMetrics fm = tf.getFontMetrics( tf.getFont() );
-											
-											if( songs != null )
-											{
-												String ttText = "";
-												for( String song : songs )
-												{
-													songlist += song + ConfigApp.SONG_LIST_SEPARATOR;
-													ttText += song + ConfigApp.SONG_LIST_SEPARATOR;
-													
-													if( fm.stringWidth( ttText ) > bound.width )
-													{
-														toolTipText += "<p>" + ttText + "</p>";
-														
-														ttText = "";
-													}
-												}
-											
-												if( !ttText.isEmpty() )
-												{
-													toolTipText += "<p>" + ttText + "</p>";
-												}
-											}
-											
-											toolTipText += "</html>";
-											
-											tf.setText( songlist );
-											tf.setToolTipText( toolTipText );
-											
-											ConfigParameter par = ConfigApp.getProperty( ConfigApp.SONG_LIST );
-											
-											par.clear();
-											try
-											{
-												par.add( songlist );
-											} 
-											catch (ConfigParameterException e1)
-											{
-												// TODO Auto-generated catch block
-												e1.printStackTrace();
-												
-												JOptionPane.showMessageDialog( dg, e1.getMessage()
-																				, Language.getLocalCaption( Language.ERROR )
-																				, JOptionPane.ERROR_MESSAGE );
-											}
-										}
-										
-									});
-								}
+								});								
 								
 								c = txt;
 							}
@@ -745,6 +638,20 @@ public class AppSettingDialog extends JDialog
 										int selectIndex = cb.getSelectedIndex();
 										
 										par.setSelectedValue( selectIndex );
+										
+										if( parId.equals( ConfigApp.LANGUAGE ) )
+										{
+											Object lang = cb.getSelectedItem();
+											
+											if( lang != null )
+											{											
+												if( !Language.getCurrentLanguage().equals( lang.toString() ) )
+												{
+													TranslateComponents.translate( lang.toString() );
+												}
+											}
+											 
+										}
 									}
 								});
 	
@@ -847,14 +754,13 @@ public class AppSettingDialog extends JDialog
 
 	private void saveSetting()
 	{
-		ConfigParameter par = ConfigApp.getProperty( ConfigApp.USER );
+		ConfigParameter par = ConfigApp.getParameter( ConfigApp.USER );
 		User currentUser = (User)par.getSelectedValue();
 		if( currentUser.getId() != User.ANONYMOUS_USER_ID )
-		{	
-			DBSQLite db = new DBSQLite();			
+		{				
 			try
 			{
-				db.updateUserConfig( currentUser.getId() );
+				ConfigApp.updateUserConfig( currentUser.getId() );
 			} 
 			catch (SQLException e)
 			{

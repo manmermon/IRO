@@ -31,20 +31,38 @@ import image.basicPainter2D;
 public class Background extends AbstractSprite 
 {
 	private Dimension size;
+	private BufferedImage pic = null;
 	
 	public Background( Dimension d, String id ) 
 	{
-		super();
+		super( id );
 		
 		this.size = new Dimension( d );
+	}
 
-		super.ID = id;
+	public Background( BufferedImage bg, String id )
+	{
+		super( id );
+		
+		if( bg == null )
+		{
+			throw new IllegalArgumentException( "Input null." );
+		}
+		
+		this.size = new Dimension( bg.getWidth(), bg.getHeight() );
+
+		this.pic = bg;
 	}
 	
 	@Override
 	public BufferedImage getSprite() 
 	{
-		Image back = basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
+		Image back = this.pic;
+		
+		if( back == null )
+		{
+			basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
+		}
 		return (BufferedImage)back;
 	}
 
