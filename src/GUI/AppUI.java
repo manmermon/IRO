@@ -43,6 +43,7 @@ import general.Tuple;
 
 import javax.swing.JButton;
 import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 
@@ -61,11 +62,12 @@ public class AppUI extends JFrame
 	
 	// Panel
 	//private JPanel settingPanel;
-	private JPanel contentPane;
+	private JPanel panelMain;
+	private JPanel panelSettings;
 	private JPanel panelMenu;
 	private JPanel panelUser; 
 	private JPanel panelPlay;
-	private JPanel panelSettingFields;
+	private JPanel panelFields;
 	
 	
 	// Buttom	
@@ -95,18 +97,32 @@ public class AppUI extends JFrame
 		super.setContentPane( this.getMainPanel() );	
 	}
 	
-	protected JPanel getMainPanel()
+	private JPanel getMainPanel()
 	{
-		if( this.contentPane == null )
+		if( this.panelMain == null )
 		{
-			this.contentPane = new JPanel( new BorderLayout() );
+			this.panelMain = new JPanel();
+			this.panelMain.setLayout( new GridLayout( 0, 2 ) );
 			
-			this.contentPane.add( this.getPanelMenu(), BorderLayout.NORTH );
-			//this.contentPane.add( this.getSettingPanel(), BorderLayout.CENTER );			
-			this.contentPane.add( this.getSettingFieldPanel( ), BorderLayout.CENTER );
+			this.panelMain.add( this.getSettingPanel() );
+			this.panelMain.add( settingInputDevice.getInstance( this ) );
 		}
 		
-		return this.contentPane;
+		return this.panelMain;
+	}
+	
+	private JPanel getSettingPanel()
+	{
+		if( this.panelSettings == null )
+		{
+			this.panelSettings = new JPanel( new BorderLayout() );
+			
+			this.panelSettings.add( this.getPanelMenu(), BorderLayout.NORTH );
+			//this.contentPane.add( this.getSettingPanel(), BorderLayout.CENTER );			
+			this.panelSettings.add( this.getSettingFieldPanel( ), BorderLayout.CENTER );
+		}
+		
+		return this.panelSettings;
 	}
 	
 	/*
@@ -128,14 +144,14 @@ public class AppUI extends JFrame
 	
 	private JPanel getSettingFieldPanel()
 	{
-		if( this.panelSettingFields == null )
+		if( this.panelFields == null )
 		{
-			this.panelSettingFields = new JPanel( new BorderLayout() );
+			this.panelFields = new JPanel( new BorderLayout() );
 			
-			this.panelSettingFields.add( new SettingPanel( ui ) );
+			this.panelFields.add( new SettingPanel( ui ) );
 		}
 		
-		return this.panelSettingFields;
+		return this.panelFields;
 	}
 			
 	private JPanel getPanelMenu() 

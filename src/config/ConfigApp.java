@@ -109,6 +109,8 @@ public class ConfigApp
 	public static final String INPUT_MIN_VALUE = "minInputValue";
 	public static final String INPUT_MAX_VALUE = "maxInputValue";
 	
+	//public static final String SELECTED_INPUT_CHANNEL = "SELECTED_INPUT_CHANNEL";
+	
 	///////////
 	
 	private static boolean test = false;
@@ -168,6 +170,7 @@ public class ConfigApp
 			loadDefaultSongList( );
 			loadDefaultInputRange( );
 			
+			//loadDefaultSelectedInputChannel();
 		}
 		catch (Exception e) 
 		{
@@ -326,6 +329,25 @@ public class ConfigApp
 		}
 	}
 	
+	/*
+	private static void loadDefaultSelectedInputChannel()
+	{
+		try
+		{
+			Caption id = Language.getAllCaptions().get( Language.SELECTED_CHANNEL );
+			id.setID( SELECTED_INPUT_CHANNEL );
+			NumberRange rng = new NumberRange( 1, Integer.MAX_VALUE );
+			ConfigParameter par = new ConfigParameter( id, rng );
+			par.add( 1D );
+			
+			listUserConfig.put( SELECTED_INPUT_CHANNEL, par );
+		}
+		catch (Exception ex) 
+		{
+			ex.printStackTrace();
+		}
+	}
+	//*/
 	
 	///////////////////
 	/*
@@ -992,6 +1014,7 @@ public class ConfigApp
 	}
 
 
+	/*
 	public static void main( String[] arg )
 	{
 		try
@@ -1009,4 +1032,8 @@ public class ConfigApp
 			e.printStackTrace();
 		}
 	}
+	//*/	
 }
+
+
+

@@ -198,7 +198,19 @@ public abstract class InputLSLStreamTemplate extends AbstractStoppableThread imp
 			if (this.timer != null)
 			{
 				this.timer.restart();
-			}
+			}			
+		}
+	}
+	
+	/*(non-Javadoc)
+	 * @see @see stoppableThread.AbstractStoppableThread#runExceptionManager(java.lang.Exception)
+	 */
+	@Override
+	protected void runExceptionManager(Exception e)
+	{
+		if( !( e instanceof InterruptedException ) )
+		{
+			super.stopThread = true;
 		}
 	}
 	

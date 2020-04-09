@@ -26,10 +26,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
+import GUI.AppIcon;
 import GUI.AppUI;
 import GUI.OpeningDialog;
 import GUI.TextAreaPrintStream;
-import GUI.AppIcons;
 import config.ConfigApp;
 import config.language.Language;
 import control.RefreshControl;
@@ -66,6 +66,8 @@ public class MainLaunchApp
 		}
 		catch (Throwable e2)
 		{
+			e2.printStackTrace();
+			
 			showError( e2, true );
 		}
 		finally
@@ -95,6 +97,8 @@ public class MainLaunchApp
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
+			
 			showError( e, true );
 		}
 	}
@@ -112,7 +116,7 @@ public class MainLaunchApp
 		Insets pad = t.getScreenInsets( ui.getGraphicsConfiguration() );
 		
 		OpeningDialog open = new OpeningDialog( openDim 
-												,  AppIcons.appIcon( 128 )
+												,  AppIcon.appIcon( 128 )
 												, ConfigApp.shortNameApp
 												, "<html><center><h1>Opening " + ConfigApp.fullNameApp + ".<br>Wait please...</h1></center></html>" 
 												, Color.WHITE );
@@ -121,13 +125,13 @@ public class MainLaunchApp
 				
 		open.setLocation( dm.width / 2 - openDim.width / 2, dm.height / 2 - openDim.height / 2 );
 		
-		ui.setIconImage( AppIcons.appIcon( 128 ) );
+		ui.setIconImage( AppIcon.appIcon( 128 ) );
 		ui.setTitle(  ConfigApp.fullNameApp + " - " + ConfigApp.shortNameApp );
 		
 		ui.setBackground( SystemColor.info );
 
-		dm.width = (dm.width / 2 - (pad.left + pad.right));
-		dm.height = (dm.height / 2 - (pad.top + pad.bottom));
+		dm.width = ( ( 2 * dm.width ) / 3 - (pad.left + pad.right));
+		dm.height = (( 2 * dm.height ) / 3 - (pad.top + pad.bottom));
 
 		if( dm.width < 650 )
 		{

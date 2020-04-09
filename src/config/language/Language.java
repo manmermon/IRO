@@ -93,6 +93,9 @@ public class Language
 	public static final String CONTROLLER = "CONTROLLER";
 	
 	public static final String CHANNEL = "CHANNEL";
+	public static final String CHANNELS = "CHANNELS";
+	
+	public static final String SELECTED_CHANNEL = "SELECTED_CHANNEL";
 	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
@@ -240,12 +243,20 @@ public class Language
 		captions.put( UPDATE, cap );
 		
 		cap = new Caption( CONTROLLER, defaultLanguage, "Controller" );
-		cap.setCaption( esEs, "Mando" );
+		cap.setCaption( esEs, "Control" );
 		captions.put( CONTROLLER, cap );
 		
-		cap = new Caption( CHANNEL, defaultLanguage, "Channel(s)" );
-		cap.setCaption( esEs, "Canal(es)" );
+		cap = new Caption( CHANNEL, defaultLanguage, "Channel" );
+		cap.setCaption( esEs, "Canal" );
 		captions.put( CHANNEL, cap );
+		
+		cap = new Caption( CHANNELS, defaultLanguage, "Channels" );
+		cap.setCaption( esEs, "Canales" );
+		captions.put( CHANNELS, cap );
+		
+		cap = new Caption( SELECTED_CHANNEL, defaultLanguage, "Selected controller's channel" );
+		cap.setCaption( esEs, "Canal del control seleccionado" );
+		captions.put( SELECTED_CHANNEL, cap );
 	}
 
 	public static void loadLanguages() 

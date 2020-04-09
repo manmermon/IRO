@@ -72,14 +72,14 @@ public class testTwoWayBar extends JFrame
 		//*/
 		
 		JPanel p = new JPanel( new BorderLayout() );
-		p.add( pb, BorderLayout.CENTER );
+		p.add( pb, BorderLayout.NORTH );
 		
 		JPanel p2 = new JPanel( new BorderLayout() );
 		final JLabel lbmin = new JLabel( pb.getBarMinValue()  + "");
 		final JLabel lbmax = new JLabel( pb.getBarMaxValue()  + "");
 		p2.add( lbmin, BorderLayout.WEST );
 		p2.add( lbmax, BorderLayout.EAST );
-		p.add( p2, BorderLayout.NORTH );
+		//p.add( p2, BorderLayout.NORTH );
 		
 		
 		pb.addMouseMotionListener( new MouseMotionListener()
