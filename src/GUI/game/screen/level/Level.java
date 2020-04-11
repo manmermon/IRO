@@ -18,7 +18,7 @@
  *   
  *   Project's URL: https://github.com/manmermon/IRO
  */
-package GUI.screens.levels;
+package GUI.game.screen.level;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -26,11 +26,11 @@ import java.util.List;
 
 import org.jfugue.midi.MidiDefaults;
 
-import GUI.components.Fret;
-import GUI.components.ISprite;
-import GUI.components.TrackNotesSprite;
-import GUI.components.Pentragram;
-import GUI.screens.Scene;
+import GUI.game.component.Fret;
+import GUI.game.component.ISprite;
+import GUI.game.component.Pentragram;
+import GUI.game.component.TrackNotesSprite;
+import GUI.game.screen.Scene;
 
 public class Level extends Scene 
 {

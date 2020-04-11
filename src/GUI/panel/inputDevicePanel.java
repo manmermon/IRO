@@ -1,7 +1,7 @@
 /**
  * 
  */
-package GUI;
+package GUI.panel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -51,7 +51,7 @@ import javax.swing.SpinnerNumberModel;
  * @author manuel merino
  *
  */
-public class settingInputDevice extends JPanel
+public class inputDevicePanel extends JPanel
 {
 	/**
 	 * 
@@ -77,7 +77,7 @@ public class settingInputDevice extends JPanel
 	
 	private LSLControllerInputValuePanel inputShowValuePanel;
 	
-	private static settingInputDevice setInDevPanel = null;
+	private static inputDevicePanel setInDevPanel = null;
 	
 	/*
 	public static void main(String[] args)
@@ -97,19 +97,19 @@ public class settingInputDevice extends JPanel
 
 	private static Window owner;
 	
-	public static settingInputDevice getInstance( Window wOwner )
+	public static inputDevicePanel getInstance( Window wOwner )
 	{
 		owner = wOwner;
 		
 		if( setInDevPanel == null )
 		{
-			setInDevPanel = new settingInputDevice();
+			setInDevPanel = new inputDevicePanel();
 		}
 		
 		return setInDevPanel;
 	}
 	
-	private settingInputDevice( )
+	private inputDevicePanel( )
 	{	
 		this.setLayout(new BorderLayout());		
 		this.add(this.getInputControlPanel(), BorderLayout.NORTH);
@@ -228,6 +228,8 @@ public class settingInputDevice extends JPanel
 		{
 			splitInputPane = new JSplitPane();
 			splitInputPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
+			
+			splitInputPane.setResizeWeight( 0.25 );
 			
 			splitInputPane.setLeftComponent( new JScrollPane( this.getPanelInputDeviceList() ) );
 			splitInputPane.setRightComponent( new JScrollPane( this.getPanelInputValues() ) );
@@ -409,7 +411,9 @@ public class settingInputDevice extends JPanel
 	
 	private TableModel createTablemodel( )
 	{					
-		TableModel tm =  new DefaultTableModel( null, new String[] { Language.getLocalCaption( Language.SELECT ), Language.getLocalCaption( Language.CHANNEL), Language.getLocalCaption( Language.INPUT ) } )
+		TableModel tm =  new DefaultTableModel( null, new String[] { Language.getLocalCaption( Language.SELECT )
+																	, Language.getLocalCaption( Language.CHANNELS )
+																	, Language.getLocalCaption( Language.INPUT ) } )
 							{
 								private static final long serialVersionUID = 1L;
 								

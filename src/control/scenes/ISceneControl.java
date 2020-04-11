@@ -1,6 +1,6 @@
 package control.scenes;
 
-import GUI.screens.IScene;
+import GUI.game.screen.IScene;
 import control.events.SceneEventListener;
 import control.inputs.IInputAction;
 import exceptions.IllegalLevelStateException;

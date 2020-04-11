@@ -1,8 +1,8 @@
 package control;
 
-import GUI.screens.IScene;
-import GUI.screens.levels.Level;
-import GUI.screens.menus.MainMenuScreen;
+import GUI.game.screen.IScene;
+import GUI.game.screen.level.Level;
+import GUI.game.screen.menu.MainMenuScreen;
 import control.scenes.level.LevelControl;
 import control.scenes.menu.MenuScreenControl;
 import exceptions.IllegalLevelStateException;

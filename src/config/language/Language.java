@@ -97,6 +97,16 @@ public class Language
 	
 	public static final String SELECTED_CHANNEL = "SELECTED_CHANNEL";
 	
+	public static final String CHANGE = "CHANGE";
+	public static final String IMAGE = "IMAGE";
+	
+	public static final String CHANGE_IMAGE = "CHANGE_IMAGE";
+	public static final String REMOVE_IMAGE = "REMOVE_IMAGE";
+	
+	public static final String CHANGE_PLAYER = "CHANGE_PLAYER";
+	
+	public static final String TIME_INPUT_TARGET = "TIME_INPUT_TARGET";
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
@@ -109,6 +119,10 @@ public class Language
 		cap = new Caption( LANGUAGE_TXT, defaultLanguage, "Language" );
 		cap.setCaption( esEs, "Idioma");
 		captions.put( LANGUAGE_TXT, cap );
+		
+		cap = new Caption( TIME_INPUT_TARGET, defaultLanguage, "Time in input target" );
+		cap.setCaption( esEs, "Tiempo en el objetivo");
+		captions.put( TIME_INPUT_TARGET, cap );
 		
 		cap = new Caption( PLAY, defaultLanguage, "Play");
 		cap.setCaption( esEs, "Jugar" );
@@ -228,7 +242,7 @@ public class Language
 		
 		cap = new Caption( MAXIMUM, defaultLanguage, "Maximum" );
 		cap.setCaption( esEs, "Máximo" );
-		captions.put( WAITING_ACTION_COLOR, cap );
+		captions.put( MAXIMUM, cap );
 		
 		cap = new Caption( MIN_INPUT_VALUE, defaultLanguage, "Min. input value" );
 		cap.setCaption( esEs, "Mín. valor de entrada" );
@@ -257,6 +271,26 @@ public class Language
 		cap = new Caption( SELECTED_CHANNEL, defaultLanguage, "Selected controller's channel" );
 		cap.setCaption( esEs, "Canal del control seleccionado" );
 		captions.put( SELECTED_CHANNEL, cap );
+		
+		cap = new Caption( CHANGE, defaultLanguage, "Change" );
+		cap.setCaption( esEs, "Cambiar" );
+		captions.put( CHANGE, cap );
+		
+		cap = new Caption( IMAGE, defaultLanguage, "Image" );
+		cap.setCaption( esEs, "Imagen" );
+		captions.put( IMAGE, cap );
+		
+		cap = new Caption( CHANGE_IMAGE, defaultLanguage, "Change image" );
+		cap.setCaption( esEs, "Cambiar imagen" );
+		captions.put( CHANGE_IMAGE, cap );
+		
+		cap = new Caption( REMOVE_IMAGE, defaultLanguage, "Remove image" );
+		cap.setCaption( esEs, "Eliminar imagen" );
+		captions.put( REMOVE_IMAGE, cap );
+		
+		cap = new Caption( CHANGE_PLAYER, defaultLanguage, "Change player" );
+		cap.setCaption( esEs, "Cambiar de jugador" );
+		captions.put( CHANGE_PLAYER, cap );
 	}
 
 	public static void loadLanguages() 

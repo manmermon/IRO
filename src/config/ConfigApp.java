@@ -109,6 +109,8 @@ public class ConfigApp
 	public static final String INPUT_MIN_VALUE = "minInputValue";
 	public static final String INPUT_MAX_VALUE = "maxInputValue";
 	
+	public static final String TIME_IN_INPUT_TARGET = "timeInInputTarget";
+	
 	//public static final String SELECTED_INPUT_CHANNEL = "SELECTED_INPUT_CHANNEL";
 	
 	///////////
@@ -170,6 +172,8 @@ public class ConfigApp
 			loadDefaultSongList( );
 			loadDefaultInputRange( );
 			
+			loadDefaultTimeInInputTarget();
+			
 			//loadDefaultSelectedInputChannel();
 		}
 		catch (Exception e) 
@@ -182,7 +186,7 @@ public class ConfigApp
 	{
 		Caption id = new Caption( USER, Language.defaultLanguage, Language.getCaption( Language.defaultLanguage, Language.PLAYER ) );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.USER );		
-		par.add( new User() );		
+		par.setSelectedValue( new User() );		
 		
 		listUserConfig.put( USER, par );
 	}
@@ -213,7 +217,7 @@ public class ConfigApp
 		id.setID( LANGUAGE );
 		
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.STRING );
-		par.addAll( Langs );
+		par.addAllOptions( Langs );
 		
 		par.setSelectedValue( Language.getCurrentLanguage() );
 		
@@ -226,10 +230,21 @@ public class ConfigApp
 		id.setID( REACTION_TIME );
 		NumberRange rng = new NumberRange( 0.5, Double.MAX_VALUE );
 		ConfigParameter par = new ConfigParameter( id, rng );
-		par.add( 2D );
+		par.setSelectedValue( 2D );
 		
 		
 		listUserConfig.put( REACTION_TIME, par );
+	}
+	
+	private static void loadDefaultTimeInInputTarget( ) throws ConfigParameterException
+	{
+		Caption id = getCaptions( Language.TIME_INPUT_TARGET );
+		id.setID( TIME_IN_INPUT_TARGET );
+		NumberRange rng = new NumberRange( 0, Double.MAX_VALUE );
+		ConfigParameter par = new ConfigParameter( id, rng );
+		par.setSelectedValue( 0D );
+		
+		listUserConfig.put( TIME_IN_INPUT_TARGET, par );
 	}
 	
 	private static void loadDefaultUserRecoverTime( ) throws ConfigParameterException
@@ -238,7 +253,7 @@ public class ConfigApp
 		id.setID( RECOVER_TIME );
 		NumberRange rng = new NumberRange( 0.5, Double.MAX_VALUE );
 		ConfigParameter par = new ConfigParameter( id, rng );
-		par.add( 2D );
+		par.setSelectedValue( 2D );
 				
 		listUserConfig.put( RECOVER_TIME, par );
 	}
@@ -264,7 +279,8 @@ public class ConfigApp
 			Caption id = getCaptions( Language.PREACTION_COLOR );
 			id.setID( PREACTION_COLOR );
 			ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
-			par.addAll( colors );
+			par.addAllOptions( colors );
+			par.setSelectedValue( Color.red );
 			listUserConfig.put( PREACTION_COLOR, par );
 			
 			id = getCaptions( Language.WAITING_ACTION_COLOR);
@@ -272,7 +288,8 @@ public class ConfigApp
 			par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
 			colors.remove( Color.blue );
 			colors.add( 0, Color.blue );
-			par.addAll( colors );					
+			par.addAllOptions( colors );
+			par.setSelectedValue( Color.blue );
 			listUserConfig.put( WAITING_ACTION_COLOR, par );
 			
 			id = getCaptions( Language.ACTION_COLOR );
@@ -280,7 +297,8 @@ public class ConfigApp
 			par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
 			colors.remove( Color.green );
 			colors.add( 0, Color.green );
-			par.addAll( colors );		
+			par.addAllOptions( colors );
+			par.setSelectedValue( Color.green );
 			listUserConfig.put( ACTION_COLOR, par );
 		}
 		catch ( ConfigParameterException e) 
@@ -310,15 +328,15 @@ public class ConfigApp
 	{
 		try
 		{	
-			Caption idMin = Language.getAllCaptions().get( Language.MIN_INPUT_VALUE );
+			Caption idMin = getCaptions( Language.MIN_INPUT_VALUE );
 			idMin.setID( INPUT_MIN_VALUE );
-			Caption idMax = Language.getAllCaptions().get( Language.MAX_INPUT_VALUE );
+			Caption idMax = getCaptions( Language.MAX_INPUT_VALUE );
 			idMax.setID( INPUT_MAX_VALUE );
 			
 			ConfigParameter parMin = new ConfigParameter( idMin, ParameterType.NUMBER );
-			parMin.add( 0D );
+			parMin.setSelectedValue(  0D );
 			ConfigParameter parMax = new ConfigParameter( idMax, ParameterType.NUMBER );
-			parMax.add( 100D );
+			parMax.setSelectedValue( 100D );
 			
 			listUserConfig.put( INPUT_MIN_VALUE, parMin );
 			listUserConfig.put( INPUT_MAX_VALUE, parMax );

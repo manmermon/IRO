@@ -19,23 +19,20 @@
  *   Project's URL: https://github.com/manmermon/IRO
  */
 
-package GUI.components;
+package GUI.game.component;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
-import org.jfugue.midi.MidiDictionary;
 import org.jfugue.theory.Note;
 
 import image.icon.MusicInstrumentIcons;
 import music.IROTrack;
 
-public class TrackNotesSprite extends AbstractSprite
+public class NoteSprite extends AbstractSprite
 { 	
 	public static final int REST = -1;
 	public static final int SI = 0;
@@ -107,13 +104,13 @@ public class TrackNotesSprite extends AbstractSprite
 	}
 	*/
 	
-	public TrackNotesSprite( String track, List< IROTrack > Notes, String noteID, Pentragram pen, int initLoc ,double shiftVel, boolean ghost ) 
+	public NoteSprite( String track, List< IROTrack > Notes, String noteID, Pentragram pen, int initLoc ,double shiftVel, boolean ghost ) 
 	{
 		super( noteID );
 		
 		this.noteTracks = new ArrayList< IROTrack >();
 		this.noteTracks.addAll( Notes );	
-						
+				
 		this.pentagram = pen;		
 		this.shiftVelocity = shiftVel;
 			
@@ -290,22 +287,20 @@ public class TrackNotesSprite extends AbstractSprite
 		{	
 			if( !this.noteTracks.isEmpty() )
 			{	
-				Set< Byte > instruments = new TreeSet< Byte >();
+				String instrument = "";
 				for( IROTrack track : this.noteTracks )
 				{
-					Byte val = MidiDictionary.INSTRUMENT_STRING_TO_BYTE.get( track.getInstrument().toUpperCase() );
-					if( val == null )
+					if( instrument.isEmpty() )
 					{
-						val = Byte.MIN_VALUE;
+						instrument = track.getInstrument();
 					}
-					
-					instruments.add( val );
+					else if( !instrument.equalsIgnoreCase( track.getInstrument() ) )
+					{
+						instrument += track.getInstrument();
+					}
 				}
 				
-				List< Byte > l = new ArrayList< Byte >();
-				l.addAll( instruments );
-				
-				pic = (BufferedImage)MusicInstrumentIcons.getInstrument( l, this.noteScreenSize, this.color );
+				pic = (BufferedImage)MusicInstrumentIcons.getInstrument( instrument, this.noteScreenSize, this.color );
 			}			
 		}
 		

@@ -1,4 +1,4 @@
-package GUI.screens.levels;
+package GUI.game.screen.level;
 
 import javax.swing.event.EventListenerList;
 

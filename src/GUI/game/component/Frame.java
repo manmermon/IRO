@@ -19,7 +19,7 @@
  *   Project's URL: https://github.com/manmermon/IRO
  */
 
-package GUI.components;
+package GUI.game.component;
 
 import java.awt.Dimension;
 import java.awt.Graphics;

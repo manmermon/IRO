@@ -10,9 +10,9 @@ import javax.swing.JButton;
 import javax.swing.event.EventListenerList;
 
 import GUI.GuiManager;
-import GUI.components.Background;
-import GUI.components.Frame;
-import GUI.screens.IScene;
+import GUI.game.component.Background;
+import GUI.game.component.Frame;
+import GUI.game.screen.IScene;
 import control.events.SceneEvent;
 import control.events.SceneEventListener;
 import control.inputs.IInputAction;
@@ -178,7 +178,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread imple
 		
 		fr.setRequestFocusEnabled( true );
 		
-		GuiManager.getInstance().setFrame( fr );
+		GuiManager.getInstance().setGameFrame( fr );
 		
 		fr.requestFocusInWindow();
 	}

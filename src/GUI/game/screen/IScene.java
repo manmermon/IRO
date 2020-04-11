@@ -1,10 +1,10 @@
-package GUI.screens;
+package GUI.game.screen;
 
 import java.awt.Dimension;
 import java.util.List;
 
-import GUI.components.Frame;
-import GUI.components.ISprite;
+import GUI.game.component.Frame;
+import GUI.game.component.ISprite;
 
 public interface IScene 
 {

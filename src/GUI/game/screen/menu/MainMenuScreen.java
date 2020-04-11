@@ -1,4 +1,4 @@
-package GUI.screens.menus;
+package GUI.game.screen.menu;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,11 +9,11 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import GUI.components.Background;
-import GUI.components.Frame;
-import GUI.components.ISprite;
-import GUI.components.SpriteButtom;
-import GUI.screens.Scene;
+import GUI.game.component.Background;
+import GUI.game.component.Frame;
+import GUI.game.component.ISprite;
+import GUI.game.component.SpriteButtom;
+import GUI.game.screen.Scene;
 import config.language.Language;
 import control.inputs.IInputAction;
 import control.inputs.IInputable;

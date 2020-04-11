@@ -1,4 +1,4 @@
-package GUI.screens.levels;
+package GUI.game.screen.level;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -35,14 +35,14 @@ import javax.swing.event.EventListenerList;
 
 
 import GUI.GuiManager;
-import GUI.components.Background;
-import GUI.components.Frame;
-import GUI.components.Fret;
-import GUI.components.ISprite;
-import GUI.components.TrackNotesSprite;
-import GUI.screens.IScene;
-import GUI.screens.Scene;
-import GUI.screens.levels.Level;
+import GUI.game.component.Background;
+import GUI.game.component.Frame;
+import GUI.game.component.Fret;
+import GUI.game.component.ISprite;
+import GUI.game.component.TrackNotesSprite;
+import GUI.game.screen.IScene;
+import GUI.game.screen.Scene;
+import GUI.game.screen.level.Level;
 import config.ConfigApp;
 import control.events.BackgroundMusicEventListener;
 import control.events.SceneEvent;

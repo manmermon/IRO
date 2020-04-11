@@ -1,7 +1,7 @@
 package control.scenes.menu;
 
-import GUI.screens.IScene;
-import GUI.screens.menus.MainMenuScreen;
+import GUI.game.screen.IScene;
+import GUI.game.screen.menu.MainMenuScreen;
 import control.inputs.IInputAction;
 import control.inputs.KeystrokeAction;
 import control.inputs.MouseStrokeAction;

@@ -1,4 +1,4 @@
-package GUI.screens.levels;
+package GUI.game.screen.level;
 
 import java.awt.Dimension;
 import java.awt.geom.Point2D;
@@ -17,11 +17,11 @@ import org.jfugue.midi.MidiParser;
 import org.jfugue.pattern.Pattern;
 import org.jfugue.theory.Note;
 
-import GUI.components.Background;
-import GUI.components.Fret;
-import GUI.components.TrackNotesSprite;
-import GUI.components.Pentragram;
-import GUI.screens.IScene;
+import GUI.game.component.Background;
+import GUI.game.component.Fret;
+import GUI.game.component.Pentragram;
+import GUI.game.component.TrackNotesSprite;
+import GUI.game.screen.IScene;
 import general.ArrayTreeMap;
 import general.NumberRange;
 import io.IROMusicParserListener;

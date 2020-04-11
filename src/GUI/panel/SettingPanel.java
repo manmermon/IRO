@@ -1,5 +1,5 @@
 
-package GUI;
+package GUI.panel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -31,12 +32,12 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
@@ -44,8 +45,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import GUI.GuiManager;
+import GUI.JColorComboBox;
+import GUI.dialogs.AppSelectPlayer;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.ConfigParameter.ParameterType;
@@ -53,7 +59,9 @@ import config.User;
 import config.language.Language;
 import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
+import general.ArrayTreeMap;
 import general.NumberRange;
+import general.Tuple;
 
 public class SettingPanel extends JPanel
 {
@@ -136,7 +144,22 @@ public class SettingPanel extends JPanel
 		JPanel subContainer = new JPanel( new GridLayout( 0, cols, 0, 0) );
 		container.add( subContainer, BorderLayout.CENTER );
 		
-		Collection< ConfigParameter > pars = ConfigApp.getParameters();
+		Collection< ConfigParameter > parameters = ConfigApp.getParameters();
+		
+		ArrayTreeMap< ParameterType, ConfigParameter > orderPars = new ArrayTreeMap< ParameterType, ConfigParameter>();
+		for( ConfigParameter p : parameters )
+		{
+			orderPars.put( p.get_type(), p );
+		}
+		
+		List< ConfigParameter > pars = new ArrayList<ConfigParameter>();
+		for( ParameterType t : orderPars.keySet() )			
+		{
+			for( ConfigParameter p : orderPars.get( t ) )
+			{
+				pars.add( p );
+			}
+		}
 		
 		List< JPanel > listPanels = new ArrayList<JPanel>();
 		
@@ -232,7 +255,7 @@ public class SettingPanel extends JPanel
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				if( player.getId() != User.ANONYMOUS_USER_ID )
+				//if( player.getId() != User.ANONYMOUS_USER_ID )
 				{
 					JButton b = (JButton)e.getSource();
 					
@@ -253,10 +276,10 @@ public class SettingPanel extends JPanel
 		if( this.playerImgPopMenu == null )
 		{
 			this.playerImgPopMenu = new JPopupMenu();
-			
-			JMenuItem addMenu = new JMenuItem( Language.getLocalCaption( Language.NEW ) );
-			TranslateComponents.add( addMenu, Language.getAllCaptions().get( Language.NEW ) );
-			addMenu.addActionListener( new ActionListener()
+						
+			final JMenuItem changeImageMenu = new JMenuItem( Language.getLocalCaption( Language.CHANGE_IMAGE ) );
+			TranslateComponents.add( changeImageMenu, Language.getAllCaptions().get( Language.CHANGE_IMAGE ) );
+			changeImageMenu.addActionListener( new ActionListener()
 			{				
 				@Override
 				public void actionPerformed(ActionEvent arg0)
@@ -265,9 +288,9 @@ public class SettingPanel extends JPanel
 				}
 			});
 			
-			JMenuItem removeMenu = new JMenuItem( Language.getLocalCaption( Language.REMOVE ) );
-			TranslateComponents.add( removeMenu, Language.getAllCaptions().get( Language.REMOVE ) );
-			removeMenu.addActionListener( new ActionListener()
+			final JMenuItem removeImageMenu = new JMenuItem( Language.getLocalCaption( Language.REMOVE_IMAGE ) );
+			TranslateComponents.add( removeImageMenu, Language.getAllCaptions().get( Language.REMOVE_IMAGE ) );
+			removeImageMenu.addActionListener( new ActionListener()
 			{				
 				@Override
 				public void actionPerformed(ActionEvent arg0)
@@ -279,10 +302,151 @@ public class SettingPanel extends JPanel
 						removeUserImage( (JButton)playerImgPopMenu.getInvoker() );
 					}
 				}
-			});			
+			});
 			
-			this.playerImgPopMenu.add( addMenu );
-			this.playerImgPopMenu.add( removeMenu );
+			JMenuItem changePlayerMenu = new JMenuItem( Language.getLocalCaption( Language.CHANGE_PLAYER ) );
+			TranslateComponents.add( changePlayerMenu, Language.getAllCaptions().get( Language.CHANGE_PLAYER ) );
+			changePlayerMenu.addActionListener( new ActionListener()
+			{				
+				@Override
+				public void actionPerformed(ActionEvent arg0)
+				{
+					AppSelectPlayer selplayerDialog = new AppSelectPlayer( owner );
+					
+					Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+					d.width /= 3;
+					d.height /= 3;
+					
+					Rectangle r = owner.getBounds();
+					
+					Rectangle bounds = new Rectangle( d );
+					bounds.setLocation( r.getLocation() );
+					
+					selplayerDialog.setBounds( bounds );
+					selplayerDialog.setVisible( true );
+					
+					User user = selplayerDialog.getSelectedUser();
+					
+					if( user != null ) 
+					{					
+						ConfigParameter parUser = ConfigApp.getParameter( ConfigApp.USER );
+						
+						User currentUser = (User)parUser.getSelectedValue();
+						
+						try
+						{
+							if( currentUser.getId() != user.getId() )
+							{
+								parUser.setSelectedValue( user );
+													
+								try
+								{
+									List< Tuple< String, Object > > settings = ConfigApp.getUserConfig( user.getId() );
+									
+									if( settings.isEmpty() )
+									{
+										ConfigApp.loadDefaultProperties();
+										parUser = ConfigApp.getParameter( ConfigApp.USER );
+										
+										parUser.setSelectedValue( user );
+										
+										if( user.getId() != User.ANONYMOUS_USER_ID  )
+										{
+											ConfigApp.insertUserConfig( user.getId() );
+											
+											for( ConfigParameter par : ConfigApp.getParameters() )
+											{
+												par.setUserID( user.getId() );
+											}
+										}
+									}
+									else
+									{
+										for( Tuple< String, Object > par : settings )
+										{
+											Object val = par.y;
+											
+											ConfigParameter p = ConfigApp.getParameter( par.x );
+											if( p != null )
+											{
+												p.setUserID( user.getId() );
+												
+												if( p.get_type() == ParameterType.COLOR )
+												{
+														val = new Color( (Integer)val );
+												}
+	
+												if( val != null )
+												{
+													p.setSelectedValue( val );
+												}
+											}
+										}										
+									}
+								}
+								catch ( SQLException ex) 
+								{
+									JOptionPane.showMessageDialog( owner, ex.getCause() + "\n" + ex.getMessage()
+																	, Language.getLocalCaption( Language.ERROR )
+																	, JOptionPane.ERROR_MESSAGE );
+								}
+								finally 
+								{
+									GuiManager.getInstance().updateSetting();
+								}
+							}
+						} 
+						catch (ConfigParameterException e1)
+						{
+							e1.printStackTrace();
+						}
+					}
+				}
+			});
+			
+			this.playerImgPopMenu.addPopupMenuListener( new PopupMenuListener()
+			{	
+				@Override
+				public void popupMenuWillBecomeVisible(PopupMenuEvent arg0)
+				{
+					changeImageMenu.setVisible( true );
+					changeImageMenu.setEnabled( true );
+					
+					removeImageMenu.setVisible( true );
+					removeImageMenu.setEnabled( true );
+					
+					ConfigParameter par = ConfigApp.getParameter( ConfigApp.USER );
+					User user = (User)par.getSelectedValue();
+					
+					if( user.getId() == User.ANONYMOUS_USER_ID )
+					{
+						changeImageMenu.setVisible( false );
+						changeImageMenu.setEnabled( false );
+						
+						removeImageMenu.setVisible( false );
+						removeImageMenu.setEnabled( false );
+					}
+				}
+				
+				@Override
+				public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void popupMenuCanceled(PopupMenuEvent arg0)
+				{
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			
+			this.playerImgPopMenu.add( changeImageMenu );
+			this.playerImgPopMenu.add( removeImageMenu );
+			this.playerImgPopMenu.add( new JSeparator() );
+			this.playerImgPopMenu.add( changePlayerMenu );
 			
 		}
 			
@@ -434,17 +598,17 @@ public class SettingPanel extends JPanel
 			try
 			{
 				ParameterType type = par.get_type();
-				List< Object > values = par.getAllValues();
+				List< Object > options = par.getAllOptions();
 				Object selectedValue = par.getSelectedValue();
 				final String parId = par.get_ID().getID();
 
-				if( values != null )
+				if( selectedValue != null )
 				{
 					switch ( type )
 					{
 						case NUMBER:
 						{
-							if( values.size() == 1 )
+							if( options.isEmpty() )
 							{
 								NumberRange rng = par.getNumberRange();
 	
@@ -453,11 +617,7 @@ public class SettingPanel extends JPanel
 									rng = new NumberRange( Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY );
 								}
 	
-								Number value = (Number)values.get( 0 );
-								if( selectedValue != null )
-								{
-									value = (Number)selectedValue;
-								}
+								Number value = (Number)selectedValue;
 								
 								JSpinner sp = new JSpinner();
 								SpinnerNumberModel model = new SpinnerNumberModel( value, rng.getMin(), rng.getMax(), 1 );
@@ -472,8 +632,7 @@ public class SettingPanel extends JPanel
 	
 										try
 										{
-											par.clear();
-											par.add( (Number)sp.getValue() );
+											par.setSelectedValue( (Number)sp.getValue() );
 										} 
 										catch (ConfigParameterException e1)
 										{
@@ -488,20 +647,13 @@ public class SettingPanel extends JPanel
 							{
 								JComboBox< Number > combox = new JComboBox<Number>();
 	
-								for( Object val : values )
+								for( Object val : options )
 								{
 									combox.addItem( (Number)val );
 								}
 								
-								if( selectedValue != null )
-								{
-									combox.setSelectedItem( selectedValue );
-								}	
-								else
-								{
-									combox.setSelectedIndex( 0 );
-								}
-								
+								combox.setSelectedItem( selectedValue );
+																
 								combox.addActionListener( new ActionListener()
 								{									
 									@Override
@@ -509,9 +661,20 @@ public class SettingPanel extends JPanel
 									{
 										JComboBox cb = (JComboBox)arg0.getSource();
 										
-										int selectIndex = cb.getSelectedIndex();
+										Object select = cb.getSelectedItem();
 										
-										par.setSelectedValue( selectIndex );
+										try
+										{
+											par.setSelectedValue( select );
+										} 
+										catch (ConfigParameterException ex)
+										{
+											ex.printStackTrace();
+											
+											JOptionPane.showMessageDialog( owner, ex.getCause() + "\n" + ex.getMessage()
+																			, Language.getLocalCaption( Language.ERROR)
+																			, JOptionPane.ERROR_MESSAGE );
+										}
 									}
 								});
 	
@@ -522,21 +685,12 @@ public class SettingPanel extends JPanel
 						}
 						case STRING:
 						{
-							if( values.size() < 2 )
+							if( options.isEmpty() )
 							{	
 								JTextField txt = new JTextField( );
 																
-								String text = "";
-								
-								if( selectedValue != null )
-								{
-									text = selectedValue.toString();
-								}
-								else if( values.size() == 1 )
-								{
-									text = values.get( 0 ).toString();
-								}
-	
+								String text = selectedValue.toString();
+									
 								txt.setText( text );
 								
 								String toolTipText = "<html>";
@@ -598,8 +752,7 @@ public class SettingPanel extends JPanel
 										{
 											String desc = e.getDocument().getText( 0, e.getDocument().getLength() );
 										
-											par.clear();
-											par.add( desc );
+											par.setSelectedValue( desc );;
 										}
 										catch (Exception e1) 
 										{
@@ -614,30 +767,34 @@ public class SettingPanel extends JPanel
 							{
 								JComboBox< String > combox = new JComboBox<String>();
 	
-								for( Object val : values )
+								for( Object val : options )
 								{
 									combox.addItem( val.toString() );
 								}
 								
-								if (selectedValue == null )
-								{
-									combox.setSelectedIndex( 0 );
-								}
-								else
-								{
-									combox.setSelectedItem( selectedValue.toString() );
-								}
-								
+								combox.setSelectedItem( selectedValue.toString() );
+																
 								combox.addActionListener( new ActionListener()
 								{									
 									@Override
 									public void actionPerformed(ActionEvent arg0)
 									{
-										JComboBox cb = (JComboBox)arg0.getSource();
+										JComboBox< String > cb = (JComboBox< String >)arg0.getSource();
 										
-										int selectIndex = cb.getSelectedIndex();
+										Object select = cb.getSelectedItem();
 										
-										par.setSelectedValue( selectIndex );
+										try
+										{
+											par.setSelectedValue( select );
+										} 
+										catch (ConfigParameterException ex)
+										{
+											ex.printStackTrace();
+											
+											JOptionPane.showMessageDialog( owner, ex.getCause() + "\n" + ex.getMessage()
+											, Language.getLocalCaption( Language.ERROR)
+											, JOptionPane.ERROR_MESSAGE );
+										}
 										
 										if( parId.equals( ConfigApp.LANGUAGE ) )
 										{
@@ -663,12 +820,8 @@ public class SettingPanel extends JPanel
 						case BOOLEAN:
 						{
 							JCheckBox cb = new JCheckBox();
-							cb.setSelected( (Boolean)values.get( 0 ) );
-							if( selectedValue != null )
-							{
-								cb.setSelected( (Boolean)selectedValue );
-							}
-	
+							cb.setSelected( (Boolean)selectedValue );
+							
 							cb.addActionListener( new ActionListener()
 							{								
 								@Override
@@ -678,12 +831,15 @@ public class SettingPanel extends JPanel
 									
 									try
 									{
-										par.clear();
-										par.add( cb.isSelected() );
+										par.setSelectedValue( cb.isSelected() );
 									}
-									catch (ConfigParameterException e)
+									catch (ConfigParameterException ex)
 									{
-										e.printStackTrace();
+										ex.printStackTrace();
+										
+										JOptionPane.showMessageDialog( owner, ex.getCause() + "\n" + ex.getMessage()
+																	, Language.getLocalCaption( Language.ERROR)
+																	, JOptionPane.ERROR_MESSAGE );
 									}
 								}
 							});
@@ -698,9 +854,9 @@ public class SettingPanel extends JPanel
 							LinkedHashMap< String, Color > colors = new LinkedHashMap<String, Color>();
 	
 							int selectedIndex = 0;
-							for( int i = 0; i < values.size(); i++ )
+							for( int i = 0; i < options.size(); i++ )
 							{
-								Color col = (Color)values.get( i );
+								Color col = (Color)options.get( i );
 	
 								String colorName = defaultColor.get( col );
 	
@@ -724,11 +880,24 @@ public class SettingPanel extends JPanel
 								@Override
 								public void actionPerformed(ActionEvent arg0)
 								{
-									JComboBox cb = (JComboBox)arg0.getSource();
+									JColorComboBox cb = (JColorComboBox)arg0.getSource();
 									
-									int selectIndex = cb.getSelectedIndex();
+									String selectColorName = cb.getSelectedItem().toString();
 									
-									par.setSelectedValue( selectIndex );
+									Color select = cb.getColorTable().get( selectColorName );
+									
+									try
+									{
+										par.setSelectedValue( select );
+									} 
+									catch (ConfigParameterException ex)
+									{
+										ex.printStackTrace();
+										
+										JOptionPane.showMessageDialog( owner, ex.getCause() + "\n" + ex.getMessage()
+																		, Language.getLocalCaption( Language.ERROR)
+																		, JOptionPane.ERROR_MESSAGE );
+									}
 								}
 							});
 							
@@ -750,27 +919,6 @@ public class SettingPanel extends JPanel
 		}
 		
 		return c;
-	}
-
-	private void saveSetting()
-	{
-		ConfigParameter par = ConfigApp.getParameter( ConfigApp.USER );
-		User currentUser = (User)par.getSelectedValue();
-		if( currentUser.getId() != User.ANONYMOUS_USER_ID )
-		{				
-			try
-			{
-				ConfigApp.updateUserConfig( currentUser.getId() );
-			} 
-			catch (SQLException e)
-			{
-				e.printStackTrace();
-				
-				JOptionPane.showMessageDialog( this, e.getCause() + "\n" + e.getMessage()
-												, Language.getLocalCaption( Language.ERROR)
-												, JOptionPane.ERROR_MESSAGE );
-			}
-		}
 	}
 }
 

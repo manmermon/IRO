@@ -19,7 +19,7 @@
  *   Project's URL: https://github.com/manmermon/IRO
  */
 
-package GUI.components;
+package GUI.game.component;
 
 import java.awt.Dimension;
 import java.awt.Point;
@@ -27,8 +27,8 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
-import GUI.components.events.MouseSpriteEventListener;
-import GUI.components.events.SpriteEventListener;
+import GUI.game.component.event.MouseSpriteEventListener;
+import GUI.game.component.event.SpriteEventListener;
 import control.inputs.IInputAction;
 
 public interface ISprite 

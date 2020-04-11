@@ -1,4 +1,4 @@
-package GUI;
+package GUI.panel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -410,11 +410,10 @@ public class SelectSongPanel extends JPanel
 					}
 					
 					ConfigParameter par = ConfigApp.getParameter( ConfigApp.SONG_LIST );
-						
-					par.clear();
+											
 					try
 					{
-						par.add( songs );
+						par.setSelectedValue( songs );
 					}
 					catch (ConfigParameterException ex)
 					{

@@ -21,31 +21,19 @@
 package GUI;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.SQLException;
-import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import GUI.dialogs.AppSelectPlayer;
-import config.ConfigApp;
-import config.ConfigParameter;
-import config.User;
-import config.ConfigParameter.ParameterType;
+import GUI.panel.SettingPanel;
+import GUI.panel.inputDevicePanel;
 import config.language.Language;
 import config.language.TranslateComponents;
-import exceptions.ConfigParameterException;
-import general.Tuple;
 
 import javax.swing.JButton;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
 
 public class AppUI extends JFrame 
 {
@@ -65,14 +53,12 @@ public class AppUI extends JFrame
 	private JPanel panelMain;
 	private JPanel panelSettings;
 	private JPanel panelMenu;
-	private JPanel panelUser; 
 	private JPanel panelPlay;
 	private JPanel panelFields;
 	
 	
 	// Buttom	
 	private JButton btnPlay;
-	private JButton btPlayer;
 	
 	
 		
@@ -105,7 +91,7 @@ public class AppUI extends JFrame
 			this.panelMain.setLayout( new GridLayout( 0, 2 ) );
 			
 			this.panelMain.add( this.getSettingPanel() );
-			this.panelMain.add( settingInputDevice.getInstance( this ) );
+			this.panelMain.add( inputDevicePanel.getInstance( this ) );
 		}
 		
 		return this.panelMain;
@@ -148,7 +134,7 @@ public class AppUI extends JFrame
 		{
 			this.panelFields = new JPanel( new BorderLayout() );
 			
-			this.panelFields.add( new SettingPanel( ui ) );
+			this.panelFields.add( new SettingPanel( this ) );
 		}
 		
 		return this.panelFields;
@@ -163,11 +149,12 @@ public class AppUI extends JFrame
 			this.panelMenu.add( this.getPanelPlay(), BorderLayout.WEST);
 			
 			
-			this.panelMenu.add( this.getSelectUserPanel(), BorderLayout.EAST);			
+			//this.panelMenu.add( this.getSelectUserPanel(), BorderLayout.EAST);			
 		}
 		return this.panelMenu;
 	}
 	
+	/*
 	private JPanel getSelectUserPanel()
 	{
 		if( this.panelUser == null )
@@ -178,7 +165,9 @@ public class AppUI extends JFrame
 		
 		return this.panelUser;
 	}
+	//*/
 	
+	/*
 	private JButton getSelectPlayerButtom()
 	{
 		if( this.btPlayer == null )
@@ -285,10 +274,7 @@ public class AppUI extends JFrame
 								}
 								finally 
 								{
-									getSettingFieldPanel().setVisible( false );
-									getSettingFieldPanel().removeAll();
-									getSettingFieldPanel().add( new SettingPanel( ui ) );
-									getSettingFieldPanel().setVisible( true );
+									loadSetting();
 								}
 							}
 						} 
@@ -302,6 +288,15 @@ public class AppUI extends JFrame
 		}
 		
 		return this.btPlayer;
+	}
+	//*/
+	
+	public void loadSetting()
+	{
+		getSettingFieldPanel().setVisible( false );
+		getSettingFieldPanel().removeAll();
+		getSettingFieldPanel().add( new SettingPanel( this ) );
+		getSettingFieldPanel().setVisible( true );
 	}
 	
 	private JButton getBtnPlay() 

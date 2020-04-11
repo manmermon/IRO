@@ -21,13 +21,11 @@
 
 package GUI;
 
-import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Window;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.MouseAdapter;
@@ -36,13 +34,16 @@ import java.io.File;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
-import javax.swing.JPanel;
 
-import GUI.components.Frame;
-import GUI.screens.levels.Level;
-import GUI.screens.levels.LevelFactory;
-import GUI.screens.menus.MainMenuScreen;
+import GUI.game.GameWindow;
+import GUI.game.component.Frame;
+import GUI.game.screen.level.Level;
+import GUI.game.screen.level.LevelFactory;
+import config.ConfigApp;
+import config.ConfigParameter;
 import control.LaunchControl;
+import control.inputs.LSLStreams.LSLController;
+import edu.ucsd.sccn.LSL;
 import exceptions.IllegalLevelStateException;
 import stoppableThread.IStoppableThread;
 
@@ -50,13 +51,12 @@ public class GuiManager
 {
 	private static GuiManager manager;
 	
-	private Frame currentFrame;
-	
-	private JFrame appGUIFullScreen = null;
+	private GameWindow gameWindow = null;
+	private JFrame gameWindowFullScreen = null;
 	private mouseTracking autoHideMenu = null;
 
 	private Point prevGUILocation = null;
-	
+		
 	private GuiManager() 
 	{ }
 	
@@ -70,161 +70,143 @@ public class GuiManager
 		return manager;
 	}
 	
-	public void setFrame( Frame fr )
+	public void updateSetting()
 	{
-		if( this.currentFrame == null )
+		AppUI.getInstance().loadSetting();
+	}
+	
+	public void setGameFrame( Frame fr )
+	{
+		if( this.gameWindow != null )
 		{
-			AppUI ui = AppUI.getInstance();
-
-			JPanel scenePanel = ui.getScreenPanel();
-
-			scenePanel.setVisible( false );
-			scenePanel.removeAll();
-			scenePanel.add( fr, BorderLayout.CENTER );
-			scenePanel.setVisible( true );
+			this.gameWindow.getGamePanel().setVisible( false );
 			
-			this.currentFrame = fr;
+			this.gameWindow.getGamePanel().add( fr );
+			
+			this.gameWindow.getGamePanel().setVisible( true );
 		}
 	}
-	
-	public void removeCurrentFrame()
-	{
-		AppUI ui = AppUI.getInstance();
-
-		JPanel scenePanel = ui.getScreenPanel();
 		
-		scenePanel.setVisible( false );
-		scenePanel.removeAll();
-		scenePanel.setVisible( true );
-		
-		this.currentFrame = null;
-	}
-	
-	public Dimension getScreenSize()
-	{
-		AppUI ui = AppUI.getInstance();
-		return ui.getSceneSize();
-	}
-	
 	public void fullScreen( boolean full )
-	{
-		AppUI ui = AppUI.getInstance();
-		
-		if( !full )
+	{		
+		if( this.gameWindow != null )
 		{
-			if (this.appGUIFullScreen != null)
+			if( !full  )
 			{
-				if (this.autoHideMenu != null)
+				if (this.gameWindowFullScreen != null)
 				{
-					this.autoHideMenu.stopThread( IStoppableThread.FORCE_STOP );
-					this.autoHideMenu = null;
-				}
-	
-				this.appGUIFullScreen.setVisible(false);			
-				
-				ui.setVisible(false);
-				ui.setContentPane( this.appGUIFullScreen.getContentPane() );
-				//ui.setJMenuBar( this.appGUIFullScreen.getJMenuBar() );
-	
-				this.appGUIFullScreen.dispose();
-				this.appGUIFullScreen = null;
-	
-				//ui.getJMenuBar().setVisible(true);
-				ui.setVisible(true);
-			}
-			else if (this.prevGUILocation != null)
-			{
-				ui.setLocation( this.prevGUILocation );
-			}
-		}
-		else
-		{
-				ui.setVisible(false);
-
-				this.appGUIFullScreen = new JFrame();
-				this.appGUIFullScreen.setUndecorated(true);
-				//this.appGUIFullScreen.setJMenuBar(ui.getJMenuBar());
-				//this.appGUIFullScreen.getJMenuBar().setVisible(false);
-				this.appGUIFullScreen.setContentPane(ui.getContentPane());
-				this.appGUIFullScreen.setResizable(false);
-				this.appGUIFullScreen.setAlwaysOnTop(true);
-				this.appGUIFullScreen.setLocation(0, 0);
-				this.appGUIFullScreen.setIconImage(ui.getIconImage());
-				this.appGUIFullScreen.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
-
-				this.appGUIFullScreen.addFocusListener(new FocusAdapter()
-				{
-
-					public void focusGained(FocusEvent e)
+					if (this.autoHideMenu != null)
 					{
-						JFrame jf = (JFrame)e.getSource();
-						jf.toFront();
+						this.autoHideMenu.stopThread( IStoppableThread.FORCE_STOP );
+						this.autoHideMenu = null;
 					}
-				});
-
-				GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-				GraphicsDevice[] gs = ge.getScreenDevices();
-				GraphicsDevice gd = null;
-				
-				if (gs.length == 0)
-				{
-					throw new RuntimeException("No screens found.");
+		
+					this.gameWindowFullScreen.setVisible(false);			
+					
+					this.gameWindow.setVisible(false);
+					this.gameWindow.setContentPane( this.gameWindowFullScreen.getContentPane() );
+					//ui.setJMenuBar( this.appGUIFullScreen.getJMenuBar() );
+		
+					this.gameWindowFullScreen.dispose();
+					this.gameWindowFullScreen = null;
+		
+					//ui.getJMenuBar().setVisible(true);
+					this.gameWindow.setVisible(true);
 				}
-				else
+				else if (this.prevGUILocation != null)
 				{
-					gd = gs[ 0 ];
+					this.gameWindow.setLocation( this.prevGUILocation );
 				}
-				
-				if (gd.isFullScreenSupported())
-				{
-					gd.setFullScreenWindow(this.appGUIFullScreen);
-				}
-				else
-				{
-					Rectangle bounds = gd.getDefaultConfiguration().getBounds();
-
-					this.appGUIFullScreen.setSize(bounds.width, bounds.height);
-				}
-
-				this.appGUIFullScreen.setVisible(true);
-				this.appGUIFullScreen.toFront();
-
-				this.appGUIFullScreen.addMouseMotionListener(new MouseAdapter()
-				{
-
-					public void mouseMoved(MouseEvent e)
+			}
+			else
+			{
+					this.gameWindow.setVisible(false);
+	
+					this.gameWindowFullScreen = new JFrame();
+					this.gameWindowFullScreen.setUndecorated(true);
+					
+					this.gameWindowFullScreen.setContentPane( this.gameWindow.getContentPane());
+					this.gameWindowFullScreen.setResizable(false);
+					this.gameWindowFullScreen.setAlwaysOnTop(true);
+					this.gameWindowFullScreen.setLocation(0, 0);
+					this.gameWindowFullScreen.setIconImage( this.gameWindow.getIconImage());
+					this.gameWindowFullScreen.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+	
+					this.gameWindowFullScreen.addFocusListener(new FocusAdapter()
 					{
-						JFrame jf = (JFrame)e.getSource();
-						JMenuBar menuBar = jf.getJMenuBar();
-
+	
+						public void focusGained(FocusEvent e)
+						{
+							JFrame jf = (JFrame)e.getSource();
+							jf.toFront();
+						}
+					});
+	
+					GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+					GraphicsDevice[] gs = ge.getScreenDevices();
+					GraphicsDevice gd = null;
+					
+					if (gs.length == 0)
+					{
+						throw new RuntimeException("No screens found.");
+					}
+					else
+					{
+						gd = gs[ 0 ];
+					}
+					
+					if (gd.isFullScreenSupported())
+					{
+						gd.setFullScreenWindow(this.gameWindowFullScreen);
+					}
+					else
+					{
+						Rectangle bounds = gd.getDefaultConfiguration().getBounds();
+	
+						this.gameWindowFullScreen.setSize(bounds.width, bounds.height);
+					}
+	
+					this.gameWindowFullScreen.setVisible(true);
+					this.gameWindowFullScreen.toFront();
+	
+					this.gameWindowFullScreen.addMouseMotionListener(new MouseAdapter()
+					{
+	
+						public void mouseMoved(MouseEvent e)
+						{
+							JFrame jf = (JFrame)e.getSource();
+							JMenuBar menuBar = jf.getJMenuBar();
+	
+							if (menuBar != null)
+							{
+								menuBar.setVisible(e.getY() < 15);
+							}
+	
+						}
+					});
+	
+					this.autoHideMenu = new mouseTracking(this.gameWindowFullScreen);
+	
+					try
+					{
+						this.autoHideMenu.startThread();
+					}
+					catch (Exception e1)
+					{
+						JMenuBar menuBar = this.gameWindowFullScreen.getJMenuBar();
 						if (menuBar != null)
 						{
-							menuBar.setVisible(e.getY() < 15);
+							menuBar.setVisible(true);
 						}
-
+	
+						this.autoHideMenu.stopThread( IStoppableThread.FORCE_STOP );
+						this.autoHideMenu = null;
 					}
-				});
-
-				this.autoHideMenu = new mouseTracking(this.appGUIFullScreen);
-
-				try
-				{
-					this.autoHideMenu.startThread();
-				}
-				catch (Exception e1)
-				{
-					JMenuBar menuBar = this.appGUIFullScreen.getJMenuBar();
-					if (menuBar != null)
-					{
-						menuBar.setVisible(true);
-					}
-
-					this.autoHideMenu.stopThread( IStoppableThread.FORCE_STOP );
-					this.autoHideMenu = null;
-				}
+			}
 		}
 	}
 
+	/*
 	public void mainMenu()
 	{
 		GuiManager.getInstance().removeCurrentFrame();
@@ -248,16 +230,48 @@ public class GuiManager
 			e1.printStackTrace();
 		}
 	}
+	*/
+	
+	public void updateInputControllerValue( double inVal )
+	{
+		if( this.gameWindow != null )
+		{
+			LevelProgressIndicator lpi = this.gameWindow.getTargetControllerIndicator();
+			lpi.setValue( inVal );
+		}
+	}
 	
 	public void playLevel()
 	{
-		GuiManager.getInstance().removeCurrentFrame();
+		if( this.gameWindow != null )
+		{
+			this.gameWindow.dispose();
+		}
+		
+		this.gameWindow = new GameWindow();
+		
+		LevelProgressIndicator lpi = this.gameWindow.getTargetControllerIndicator();
+		
+		ConfigParameter par = ConfigApp.getParameter( ConfigApp.INPUT_MIN_VALUE );
+		
+		
+		lpi.setMinimum( ((Number)par.getSelectedValue()).doubleValue() );
+
+		par = ConfigApp.getParameter( ConfigApp.INPUT_MAX_VALUE);
+		
+		lpi.setMaximum( ((Number)par.getSelectedValue()).doubleValue() );
+		
+		this.gameWindow.setVisible( true );
 		
 		GuiManager.getInstance().fullScreen( false );		
 		
-		Dimension screenSize = GuiManager.getInstance().getScreenSize();
+		Dimension screenSize = this.gameWindow.getSize();
 		
-		Level lv0 = LevelFactory.getLevel( 0, screenSize );				
+		Level lv0 = LevelFactory.getLevel( 0, screenSize );			
+		
+		LSL.StreamInfo info = LSL.resolve_streams()[ 0 ];
+		
+		LSLController in = new LSLController( info, 0, )
 		
 		try 
 		{

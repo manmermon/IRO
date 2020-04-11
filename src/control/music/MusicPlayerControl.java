@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.sound.midi.MidiUnavailableException;
 
-import GUI.screens.levels.BackgroundMusic;
+import GUI.game.screen.level.BackgroundMusic;
 import control.events.BackgroundMusicEventListener;
 import music.IROTrack;
 import music.player.IROPlayer;

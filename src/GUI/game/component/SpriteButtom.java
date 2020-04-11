@@ -1,4 +1,4 @@
-package GUI.components;
+package GUI.game.component;
 
 import java.awt.Color;
 import java.awt.Dimension;

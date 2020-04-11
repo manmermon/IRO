@@ -11,12 +11,12 @@ import general.NumberRange;
 
 public class ConfigParameter
 {
-	public enum ParameterType { NUMBER, STRING, BOOLEAN, COLOR, USER, SONG };
+	public enum ParameterType { USER, STRING, NUMBER, BOOLEAN, COLOR, SONG };
 	
 	private Caption _ID = null;
 	private ParameterType _type = ParameterType.NUMBER;
 	private Object _selectedValue = null;
-	private List< Object > _values = null;
+	private List< Object > _options = null;
 	private NumberRange _rng = null;
 	private int _userID = User.ANONYMOUS_USER_ID;
 	
@@ -29,7 +29,7 @@ public class ConfigParameter
 		
 		this._ID = id;
 		this._type = type;		
-		this._values = new ArrayList< Object >();
+		this._options = new ArrayList< Object >();
 		this._selectedValue = null;
 	}
 	
@@ -43,11 +43,22 @@ public class ConfigParameter
 		this._ID = id;
 		this._type = ParameterType.NUMBER;		
 		this._rng = range;
-		this._values = new ArrayList< Object >();
+		this._options = new ArrayList< Object >();
 		this._selectedValue = null;
 	}
 	
-	public void add( Object value ) throws ConfigParameterException
+	public void addOption( Object value ) throws ConfigParameterException
+	{
+		String errMsg = this.checkValue( value );
+		if( errMsg != null ) 
+		{
+			throw new ConfigParameterException( errMsg );
+		}
+		
+		this._options.add( value );
+	}
+ 	
+	private String checkValue( Object value)
 	{
 		String errMsg = null;
 		
@@ -126,28 +137,24 @@ public class ConfigParameter
 			}
 		}
 		
-		if( errMsg != null )
-		{
-			throw new ConfigParameterException( errMsg );
-		}
-		
-		this._values.add( value );
-		
-		if( this._selectedValue == null )
-		{
-			this.setSelectedValue( value );
-		}
+		return errMsg;
 	}
- 	
-	public void addAll( List values ) throws ConfigParameterException
+	
+	public void addAllOptions( List values ) throws ConfigParameterException
 	{
 		if( values != null )
 		{
 			for( Object val : values )
 			{
-				this.add( val );
+				this.addOption( val );
 			}
 		}
+	}
+	
+	public void removeAllOptions()
+	{
+		this._selectedValue = null;
+		this._options.clear();
 	}
 	
 	public void setUserID( int userId )
@@ -160,15 +167,32 @@ public class ConfigParameter
 		return this._userID;
 	}
 	
-	public void clear()
+	public void clearOptions()
 	{
 		this._selectedValue = null;
-		this._values.clear();		 
+		this._options.clear();		 
 	}
 	
-	public void setSelectedValue( int index )
+	public void setSelectedValue( Object val ) throws ConfigParameterException
 	{
-		this._selectedValue = this._values.get( index );
+		String errMsg = this.checkValue( val );
+		
+		if( errMsg != null )
+		{
+			throw new ConfigParameterException( errMsg );
+		}
+		
+		if( !this._options.isEmpty() )
+		{
+			if( this._options.contains( val ) )
+			{
+				this._selectedValue = val;
+			}
+		}
+		else
+		{
+			this._selectedValue = val;
+		}
 		
 		if( this._userID != User.ANONYMOUS_USER_ID )
 		{
@@ -183,24 +207,9 @@ public class ConfigParameter
 		}
 	}
 	
-	public void setSelectedValue( Object val )
+	public void removeSelectedValue()
 	{
-		if( this._values.contains( val ) )
-		{
-			this._selectedValue = val;
-			
-			if( this._userID != User.ANONYMOUS_USER_ID )
-			{
-				try
-				{
-					ConfigApp.updateUserConfig( this._userID, this._ID.getID() );
-				} 
-				catch (SQLException ex)
-				{
-					ex.printStackTrace();
-				}
-			}
-		}
+		this._selectedValue = null;
 	}
 	
 	public Caption get_ID()
@@ -218,9 +227,9 @@ public class ConfigParameter
 		return this._selectedValue;
 	}
 	
-	public List< Object > getAllValues()
+	public List< Object > getAllOptions()
 	{
-		return this._values;
+		return this._options;
 	}
 	
 	public NumberRange getNumberRange()

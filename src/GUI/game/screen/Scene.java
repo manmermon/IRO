@@ -1,4 +1,4 @@
-package GUI.screens;
+package GUI.game.screen;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import GUI.components.Frame;
-import GUI.components.ISprite;
-import GUI.components.events.SpriteEvent;
-import GUI.components.events.SpriteEventListener;
+import GUI.game.component.Frame;
+import GUI.game.component.ISprite;
+import GUI.game.component.event.SpriteEvent;
+import GUI.game.component.event.SpriteEventListener;
 import general.ArrayTreeMap;
 import image.basicPainter2D;
 
