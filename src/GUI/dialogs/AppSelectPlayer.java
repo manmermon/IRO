@@ -18,7 +18,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import config.ConfigApp;
-import config.User;
+import config.Player;
 import config.language.Language;
 
 import java.awt.FlowLayout;
@@ -39,7 +39,7 @@ import javax.swing.JButton;
 
 public class AppSelectPlayer extends JDialog
 {
-	private final int NON_SELECTED_USER = User.ANONYMOUS_USER_ID - 1;
+	private final int NON_SELECTED_USER = Player.ANONYMOUS_USER_ID - 1;
 	/**
 	 * 
 	 */
@@ -80,13 +80,13 @@ public class AppSelectPlayer extends JDialog
 		scroll.getVerticalScrollBar().setUnitIncrement( ConfigApp.playerPicSizeIcon.x / 2 );
 		super.getContentPane().add( scroll, BorderLayout.CENTER);
 		
-		this.addUserToTable( new User() );
+		this.addUserToTable( new Player() );
 		
 		try
 		{
-			List< User > users = ConfigApp.getAllUsers();			
+			List< Player > users = ConfigApp.getAllPlayersDB();			
 			
-			for( User user : users )
+			for( Player user : users )
 			{
 				this.addUserToTable( user );
 			}
@@ -98,7 +98,7 @@ public class AppSelectPlayer extends JDialog
 		}
 	}
 	
-	private void addUserToTable( User user )
+	private void addUserToTable( Player user )
 	{
 		if( user != null )
 		{
@@ -124,16 +124,16 @@ public class AppSelectPlayer extends JDialog
 		}
 	}
 	
-	public User getSelectedUser()
+	public Player getSelectedUser()
 	{
-		User user = null;
+		Player user = null;
 		try
 		{
-			user = ConfigApp.getUser( this.userID);
+			user = ConfigApp.getPlayerDB( this.userID);
 			
-			if( this.userID == User.ANONYMOUS_USER_ID )
+			if( this.userID == Player.ANONYMOUS_USER_ID )
 			{
-				user = new User();
+				user = new Player();
 			}
 			
 		} 
@@ -389,9 +389,9 @@ public class AppSelectPlayer extends JDialog
 							
 							try
 							{
-								if( userID != User.ANONYMOUS_USER_ID )
+								if( userID != Player.ANONYMOUS_USER_ID )
 								{
-									ConfigApp.delUser( userID );
+									ConfigApp.delPlayerDB( userID );
 									tm.removeRow( sel );
 								}
 								
@@ -456,8 +456,8 @@ public class AppSelectPlayer extends JDialog
 					
 					try
 					{
-						int userId = ConfigApp.addUser( userName, null );
-						User user = new User( userId, userName, null); 
+						int userId = ConfigApp.addPlayerDB( userName, null );
+						Player user = new Player( userId, userName, null); 
 						
 						addUserToTable( user );
 					} 

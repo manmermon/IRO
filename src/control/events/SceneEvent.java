@@ -11,7 +11,11 @@ public class SceneEvent extends EventObject
 	private static final long serialVersionUID = 7186425825948198038L;
 
 	public static final int END = -1;
-	public static final int START = 0;
+	public static final int NEW = 0;
+	public static final int START = 1;
+	public static final int PAUSE = 2;
+	public static final int RESUME = 3;
+	
 	
 	private int typeEvent;
 	

@@ -2,5 +2,5 @@ package control;
 
 public interface IScreenControl 
 {
-	public void updateScreen( );
+	public void updateScreen( ); 
 }

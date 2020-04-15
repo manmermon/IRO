@@ -79,7 +79,7 @@ public class Pentragram extends AbstractSprite
 	}
 
 	@Override
-	public void updateSpecificSprite() 
+	protected void updateSpecificSprite() 
 	{	
 	}
 }

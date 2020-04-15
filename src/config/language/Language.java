@@ -120,8 +120,8 @@ public class Language
 		cap.setCaption( esEs, "Idioma");
 		captions.put( LANGUAGE_TXT, cap );
 		
-		cap = new Caption( TIME_INPUT_TARGET, defaultLanguage, "Time in input target" );
-		cap.setCaption( esEs, "Tiempo en el objetivo");
+		cap = new Caption( TIME_INPUT_TARGET, defaultLanguage, "Time in input target (s)" );
+		cap.setCaption( esEs, "Tiempo en el objetivo (s)");
 		captions.put( TIME_INPUT_TARGET, cap );
 		
 		cap = new Caption( PLAY, defaultLanguage, "Play");
@@ -208,16 +208,16 @@ public class Language
 		cap.setCaption( esEs, "Bajar" );
 		captions.put( DOWN, cap );
 		
-		cap = new Caption( REACTION_TIME, defaultLanguage, "Reaction time" );
-		cap.setCaption( esEs, "tiempo de reacción" );
+		cap = new Caption( REACTION_TIME, defaultLanguage, "Reaction time (s)" );
+		cap.setCaption( esEs, "Tiempo de reacción (s)" );
 		captions.put( REACTION_TIME, cap );
 		
-		cap = new Caption( RECOVER_TIME, defaultLanguage, "Recovering time" );
-		cap.setCaption( esEs, "tiempo de recuperación" );
+		cap = new Caption( RECOVER_TIME, defaultLanguage, "Recovering time (s)" );
+		cap.setCaption( esEs, "Tiempo de recuperación (s)" );
 		captions.put( RECOVER_TIME, cap );
 		
 		cap = new Caption( PREACTION_COLOR, defaultLanguage, "Pre-action" );
-		cap.setCaption( esEs, "pre-acción" );
+		cap.setCaption( esEs, "Pre-acción" );
 		captions.put( PREACTION_COLOR, cap );
 		
 		cap = new Caption( ACTION_COLOR, defaultLanguage, "Action" );

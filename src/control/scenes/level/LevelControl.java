@@ -22,45 +22,33 @@
 package control.scenes.level;
 
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.JButton;
-import javax.swing.event.EventListenerList;
-
-
-import GUI.GuiManager;
-import GUI.game.component.Background;
-import GUI.game.component.Frame;
 import GUI.game.component.Fret;
 import GUI.game.component.ISprite;
 import GUI.game.component.TrackNotesSprite;
+import GUI.game.component.event.FretEventListener;
 import GUI.game.screen.IScene;
-import GUI.game.screen.Scene;
 import GUI.game.screen.level.Level;
 import config.ConfigApp;
 import control.events.BackgroundMusicEventListener;
+import control.events.InputActionEvent;
 import control.events.SceneEvent;
-import control.events.SceneEventListener;
-import control.inputs.IInputAction;
-import control.inputs.KeystrokeAction;
-import control.inputs.MouseStrokeAction;
 import control.music.MusicPlayerControl;
 import control.scenes.AbstractSceneControl;
-import exceptions.IllegalLevelStateException;
 import exceptions.SceneException;
-import image.basicPainter2D;
 import music.IROTrack;
-import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
+import control.controller.ControllerManager;
+import control.controller.KeystrokeAction;
+import control.controller.MouseStrokeAction;
 import control.events.BackgroundMusicEvent;
 
-public class LevelControl extends AbstractSceneControl implements BackgroundMusicEventListener
+public class LevelControl extends AbstractSceneControl 
+							implements BackgroundMusicEventListener
+										, FretEventListener
 {
 	private MusicPlayerControl soundCtrl;
 		
@@ -79,6 +67,19 @@ public class LevelControl extends AbstractSceneControl implements BackgroundMusi
 		super();
 		
 		this.actionDone = new AtomicBoolean( true );
+	}
+	
+	/*(non-Javadoc)
+	 * @see @see control.scenes.AbstractSceneControl#setScene(GUI.game.screen.IScene)
+	 */
+	@Override
+	public void setScene(IScene scene) throws SceneException
+	{
+		super.setScene( scene );
+		
+		Level lv = (Level)scene;
+		
+		lv.getFret().addFretEventListener( this );
 	}
 	
 	/*
@@ -124,8 +125,8 @@ public class LevelControl extends AbstractSceneControl implements BackgroundMusi
 	@Override
 	protected void updatedLoopAfterSetScene() 
 	{		
-		List< ISprite > FRET = this.scene.getSprites( IScene.FRET_ID );
-		List< ISprite > Notes = this.scene.getSprites( IScene.NOTE_ID );
+		List< ISprite > FRET = this.scene.getSprites( IScene.FRET_ID, true );
+		List< ISprite > Notes = this.scene.getSprites( IScene.NOTE_ID, true );
 
 		if( FRET != null 
 				&& Notes != null
@@ -159,12 +160,11 @@ public class LevelControl extends AbstractSceneControl implements BackgroundMusi
 					}
 				}
 				else
-				{	
+				{						
 					if( !note.isSelected() )
 					{
 						note.setColor( this.preactionColor );
 					}
-
 
 					if( note.isSelected() && !note.isPlayed() )
 					{
@@ -208,9 +208,9 @@ public class LevelControl extends AbstractSceneControl implements BackgroundMusi
 	 * @see @see control.scenes.AbstractSceneControl#specificUpdateScene(control.inputs.IInputAction)
 	 */
 	@Override
-	public void specificUpdateScene( IInputAction act ) throws SceneException
-	{	
-		this.actionDone.set( act != null );				
+	public void specificUpdateScene( InputActionEvent act ) throws SceneException
+	{			
+		this.actionDone.set( act == null ? false : act.getType() == InputActionEvent.ACTION_DONE );				
 	}
 
 	/*(non-Javadoc)
@@ -273,6 +273,27 @@ public class LevelControl extends AbstractSceneControl implements BackgroundMusi
 	protected Class getSceneClass()
 	{
 		return Level.class;
+	}
+
+	/*(non-Javadoc)
+	 * @see @see GUI.game.component.event.FretEventListener#FretEvent(GUI.game.component.event.FretEvent)
+	 */
+	@Override
+	public void FretEvent(GUI.game.component.event.FretEvent ev)
+	{
+		TrackNotesSprite note = ev.getNote();
+		
+		if( note != null && !note.isGhost() )
+		{
+			if( ev.getType() == GUI.game.component.event.FretEvent.NOTE_ENTERED )
+			{
+				ControllerManager.getInstance().setEnableControllerListener( true );
+			}
+			else if( ev.getType() == GUI.game.component.event.FretEvent.NOTE_EXITED )
+			{
+				ControllerManager.getInstance().setEnableControllerListener( false );
+			}
+		}
 	}
 
 }

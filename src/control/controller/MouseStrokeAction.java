@@ -1,15 +1,15 @@
-package control.inputs;
+package control.controller;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.EventObject;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class MouseStrokeAction implements IInputAction, MouseListener, MouseMotionListener
-{
-	private ConcurrentLinkedQueue< MouseEvent > eventList = new ConcurrentLinkedQueue<MouseEvent>();
-	
+import control.ScreenControl;
+import control.events.InputActionEvent;
+
+public class MouseStrokeAction implements MouseListener
+											, MouseMotionListener
+{	
 	@Override
 	public void mouseClicked(java.awt.event.MouseEvent e) 
 	{	
@@ -27,14 +27,22 @@ public class MouseStrokeAction implements IInputAction, MouseListener, MouseMoti
 
 	@Override
 	public void mousePressed(java.awt.event.MouseEvent e) 
-	{	
+	{
+		int type = InputActionEvent.ACTION_DONE;
+		
+		if( e.getButton() == MouseEvent.BUTTON1 )
+		{
+			type = InputActionEvent.RECOVER_DONE;
+		}
+		
+		final InputActionEvent ev = new InputActionEvent( this, type );
+		
+		ScreenControl.getInstance().InputAction( ev );
 	}
 
 	@Override
 	public void mouseReleased(java.awt.event.MouseEvent e) 
-	{
-		this.eventList.add( e );
-		InputControl.getInstance().action( this );
+	{	
 	}
 
 	@Override
@@ -44,15 +52,6 @@ public class MouseStrokeAction implements IInputAction, MouseListener, MouseMoti
 
 	@Override
 	public void mouseMoved(MouseEvent e) 
-	{
-		this.eventList.add( e );
-		InputControl.getInstance().action( this );		
+	{	
 	}
-
-	@Override
-	public EventObject getInputEvent()
-	{
-		return this.eventList.poll();
-	}
-
 }

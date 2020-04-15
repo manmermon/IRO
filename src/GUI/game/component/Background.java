@@ -67,7 +67,7 @@ public class Background extends AbstractSprite
 	}
 
 	@Override
-	public void updateSpecificSprite() 
+	protected void updateSpecificSprite() 
 	{	
 	}
 }

@@ -1,6 +1,7 @@
 package GUI.game.screen.level;
 
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,7 @@ import org.jfugue.theory.Note;
 
 import GUI.game.component.Background;
 import GUI.game.component.Fret;
+import GUI.game.component.ISprite;
 import GUI.game.component.Pentragram;
 import GUI.game.component.TrackNotesSprite;
 import GUI.game.screen.IScene;
@@ -78,7 +80,8 @@ public class LevelFactory
 		return lv;
 	}
 
-	public static Level getLevel( File midiMusicSheelFile, Dimension screenSize ) throws InvalidMidiDataException, IOException
+	public static Level getLevel( File midiMusicSheelFile, Rectangle screenBounds
+									, double actionTime, double recoverTime ) throws InvalidMidiDataException, IOException
 	{			
 		IROMusicParserListener tool = new IROMusicParserListener();
 		MidiParser parser = new MidiParser();
@@ -87,23 +90,15 @@ public class LevelFactory
 
 		MusicSheet music = tool.getSheet();
 
-		/*
-		int t = music.getTempo();
-		music = new MusicSheet();
-		music.setTempo( t );
-		IROTrack track = music.createNewTrack( "track-0" );
-		track.addNote( 0.0, new Note( "C3w" ) );
-		track.addNote( 1.0, new Note( "Rw" ) );
-		track.addNote( 2.0, new Note( "D3w" ) );
-		track.setInstrument( "Piano" );
-		 */
-
-		return makeLevel( music, screenSize );
+		return makeLevel( music, screenBounds, actionTime, recoverTime );
 	}
 
-	private static Level makeLevel( MusicSheet music, Dimension screenSize )
+	private static Level makeLevel( MusicSheet music, Rectangle screenBounds
+									, final double userReactionTime, final double userRecoverTime )
 	{
 		Level lv = null;
+		
+		Dimension screenSize = screenBounds.getSize();
 
 		if( music != null && music.getNumberOfTracks() > 0 )
 		{		
@@ -136,8 +131,6 @@ public class LevelFactory
 			final double timeQuarter = 60D / tempo;
 			final double timeWhole = 4 * timeQuarter;
 			
-			final double userReactionTime = 2D; // 2 second
-			final double userRecoverTime = 2D;
 			final double reactVel = fret.getFretWidth() / userReactionTime;
 			
 			final int wayWidth = ( screenSize.width - (int)fret.getScreenLocation().x );
@@ -324,395 +317,20 @@ public class LevelFactory
 				lv.addNote( noteSprite );
 			}
 			
-			/*
-			for( IROTrack track : music.getTracks() )
-			{
-				ArrayTreeMap< Double, Note > NOTES = track.getTrackNotes();
-				ArrayTreeMap< Double, Note > copyNotes = new ArrayTreeMap< Double, Note >( );
-				copyNotes.putAll( NOTES );
-				
-				if( NOTES != null && NOTES.size() > 0 )
-				{	
-					if( startDelay < 0 )
-					{
-						startDelay = wayWidthQuarterTime;
-					}
-
-					double ctrReactTime = 0;	
-					double musicSegmentEnd = Double.MIN_VALUE;
-					
-					for( Double noteTrackTime : NOTES.keySet() )
-					{
-						List< Note > Notes = NOTES.get( noteTrackTime );
-						
-						double noteTrackTimeWhole = noteTrackTime * timeWhole;
-						
-						boolean rest = Notes.isEmpty();
-						
-						double maxNoteDur = 0;
-						
-						if( !rest )
-						{
-							Iterator< Note > itNotes = Notes.iterator();
-							boolean listRestNotes = true;
-							
-							while( itNotes.hasNext() )
-							{
-								Note note = itNotes.next();		
-								
-								if( maxNoteDur < note.getDuration() )
-								{
-									maxNoteDur = note.getDuration();
-								}
-								
-								listRestNotes = listRestNotes && note.isRest();
-							}							
-							
-							rest = listRestNotes;
-						}						
-						
-						boolean ghost = ( ( noteTrackTimeWhole - ctrReactTime ) > userReactionTime / 2 ) || rest;
-	
-						if( !ghost  )
-						{
-							if( !musicSheetPlay.existMusicSegmentInTime( noteTrackTime ) )
-							{
-								musicSheetPlay.addNewSegments( new NumberRange( noteTrackTime, noteTrackTime + userReactionTime / timeWhole ) );
-							}
-							
-							musicSheetPlay.addNewTrack( noteTrackTime, track.getID() );
-							
-							musicSheetPlay.addNotes( noteTrackTime, track.getID(), Notes );
-							
-							Note restNote = Note.createRest( maxNoteDur );
-							
-							copyNotes.remove( noteTrackTime );
-							copyNotes.put( noteTrackTime, restNote );
-							
-							if( musicSegmentEnd < ( noteTrackTime + maxNoteDur ) )
-							{
-								musicSegmentEnd = noteTrackTime + maxNoteDur;
-							}
-						}
-						else
-						{							
-							if( ( noteTrackTimeWhole - ctrReactTime ) > userReactionTime )
-							{
-								ctrReactTime = musicSegmentEnd * timeWhole;
-								
-								if( noteTrackTimeWhole > ctrReactTime )
-								{
-									ctrReactTime = noteTrackTimeWhole;
-								}
-								
-								musicSegmentEnd = Double.MIN_VALUE;
-							}
-						}
-					}
-				}
-				
-				NOTES.clear();
-				NOTES.putAll( copyNotes );
-			}
-			
-			musicSheetPlay.setTracksTempo( music.getTempo() );
-			
-			for( IROTrack track : music.getTracks() )
-			{				
-				musicSheetPlay.setTrackInstrument( track.getID(), track.getInstrument() );
-				backgroundPattern.add( track.getPatternTrackSheet() );
-			}
-			
-			for( NumberRange rng : musicSheetPlay.getSegments().keySet() )
-			{	
-				double maxTrackDuration = 0;
-				double initTrack = rng.getMin() * timeWhole;
-				
-				String trackID = "";
-				
-				List< IROTrack > Tracks = musicSheetPlay.getSegments().get( rng );
-				
-				for( IROTrack track : Tracks )
-				{
-					if( maxTrackDuration < track.getTrackDuration() )
-					{
-						maxTrackDuration = track.getTrackDuration();
-					}
-					
-					trackID += track.getID() + "_";
-				}
-								
-				double vel = reactVel;
-
-				int screenPos = (int)( vel * ( initTrack - wayWidthQuarterTime ) ) + (int)fret.getScreenLocation().x;
-									
-				NoteSprite noteSprite = new NoteSprite( trackID
-														, Tracks
-														, IScene.NOTE_ID
-														, pen
-														, screenPos
-														, vel
-														, false
-														);
-
-				//noteSprite.setInstrument( track.getInstrument() );
-				//noteSprite.setTempo( tempo );
-
-				noteSprite.setZIndex( 1 );
-				lv.addNote( noteSprite );
-			}
-			*/
-			
-			/*
-			for( IROTrack track : music.getTracks() )
-			{	
-				if( !track.getID().equals( selectedTrack ) )
-				{
-					backgroundPattern.add( track.getPatternTrackSheet() );
-				}
-				else
-				{	
-					ArrayTreeMap< Double, Note > NOTES = track.getTrackNotes();
-						
-					if( NOTES != null && NOTES.size() > 0 )
-					{
-						final double timeQuarter = 60D / tempo;
-						final double timeWhole = 4 * timeQuarter;			
-						final double velQuarter = screenSize.getWidth()  * timeQuarter;
-	
-						final double userReactionTime = 2D; // 2 second
-						double userNoteDuration = 0.0;
-						Point2D.Double fretLoc = fret.getScreenLocation();
-	
-						final int wayWidth = ( screenSize.width - (int)fretLoc.x );
-						final double reactVel = fret.getFretWidth() / userReactionTime;			
-	
-						final double wayWidthQuarterTime = wayWidth / velQuarter;
-						if( startDelay < 0 )
-						{
-							startDelay = wayWidthQuarterTime;
-						}
-	
-						double ctrReactTime = 0;					
-						List< Tuple< Double, Double > > replaceNotes = new ArrayList< Tuple< Double, Double> >();
-						for( Double noteTrackTime : NOTES.keySet() )
-						{
-							List< Note > Notes = NOTES.get( noteTrackTime );
-								
-							double noteTrackTimeWhole = noteTrackTime * timeWhole;
-	
-							double noteDur = 0;
-							Iterator< Note > itNotes = Notes.iterator();
-							while( itNotes.hasNext() )
-							{
-								Note note = itNotes.next();		
-										
-								if( noteDur < note.getDuration() )
-								{
-									noteDur = note.getDuration();
-								}
-								
-								if( note.isRest() )
-								{
-									itNotes.remove();
-								}
-							}
-	
-	
-							boolean rest = Notes.isEmpty();
-							
-							boolean ghost = ( ( noteTrackTimeWhole - ( ctrReactTime + userNoteDuration ) ) <= userReactionTime ) || rest;
-		
-							if( !ghost  )
-							{
-								itNotes = Notes.iterator();
-								while( itNotes.hasNext() )
-								{
-									Note note = itNotes.next();
-									
-//									int vol = (int)( note.getOnVelocity() * 2 );
-//									if( vol > 127 )
-//									{
-//										vol = 127;
-//									}
-//									note.setOnVelocity( (byte)vol);
-//									
-//									note.setOnVelocity( (byte) maxVolumeNote );
-									
-									if( noteDur < note.getDuration() )
-									{
-										noteDur = note.getDuration();
-									}
-								}
-								
-								double vel = reactVel;		
-								
-								replaceNotes.add( new Tuple<Double, Double>( noteTrackTime, noteDur ) ); 
-								
-								noteDur *= timeQuarter;
-								vel = reactVel;
-	
-								int screenPos = (int)( vel * ( noteTrackTimeWhole - noteDur + wayWidthQuarterTime ) ) + (int)fretLoc.x;
-									
-								ctrReactTime = noteTrackTimeWhole;
-								userNoteDuration = noteDur * 3;
-								
-								NoteSprite noteSprite = new NoteSprite( track.getID()
-																		, Notes
-																		, IScene.NOTE_ID
-																		, pen
-																		, screenPos
-																		, vel
-																		, ghost
-																		);
-		
-								noteSprite.setInstrument( track.getInstrument() );
-								noteSprite.setTempo( tempo );
-		
-								noteSprite.setZIndex( 1 );
-								lv.addNote( noteSprite );
-							}	
-						}
-						
-						for( Tuple< Double, Double > t : replaceNotes )
-						{
-							double time = t.x;
-							double noteDuration = t.y;
-							
-							Note restNote = Note.createRest( noteDuration );
-							
-							NOTES.remove( time );
-							NOTES.put( time, restNote );							
-						}
-						
-						backgroundPattern.add( track.getPatternTrackSheet() );
-					}
-				}
-			}			
-			 */
 			
 			BackgroundMusic backMusic = new BackgroundMusic();
 			backMusic.setPattern( backgroundPattern );
 			backMusic.setDelay( startDelay );
 			
-			lv.setBackgroundPattern( backMusic );			
+			lv.setBackgroundPattern( backMusic );		
+			
+		}
+		
+		for( ISprite sp : lv.getAllSprites( false ) )
+		{
+			sp.setFrameBounds( screenBounds );
 		}
 		
 		return lv;
 	}
-
-
-	/*
-	private static char getNoteDuration( char dur, char auxDur )
-	{
-		switch( dur )
-		{
-		case 'w':
-		{
-			dur = auxDur;
-			break;
-		}	
-		case 'h': 
-		{
-			if( auxDur != 'w' )
-			{
-				dur = auxDur;
-			}
-
-			break;
-		}
-		case 'q':
-		{
-			if( auxDur != 'h' && auxDur != 'w' )
-			{
-				dur = auxDur;
-			}
-			break;
-		}
-		case 'i':
-		{
-			if( auxDur != 'h' && auxDur != 'w' && auxDur != 'q')
-			{
-				dur = auxDur;								
-			}
-			break;
-		}
-		case 's':
-		{
-			if( auxDur == 't' ||auxDur == 'x' || auxDur != 'o')
-			{
-				dur = auxDur;
-			}
-
-			break;
-		}
-		case 't':
-		{
-			if( auxDur == 'x' || auxDur != 'o')
-			{
-				dur = auxDur;
-			}
-
-			break;
-		}	
-		case 'x':
-		{
-			if( auxDur != 'o')
-			{
-				dur = auxDur;
-			}
-
-			break;
-		}
-		}
-
-		return dur;
-	}
-
-	private static double getScale( char dur )
-	{
-		double scale = 1;
-
-		switch( dur )
-		{
-		case 'w':
-		{
-			scale *= 4;
-			break;
-		}	
-		case 'h': 
-		{
-			scale *= 2;						
-			break;
-		}
-		case 'i':
-		{
-			scale /= 2;
-			break;
-		}
-		case 's':
-		{
-			scale /= 4;
-			break;
-		}
-		case 't':
-		{
-			scale /= 8;
-			break;
-		}	
-		case 'x':
-		{
-			scale /= 16;
-			break;
-		}
-		case 'o':
-		{
-			scale /= 32;
-			break;
-		}
-		}
-
-		return scale;
-	}
-	//*/
 }

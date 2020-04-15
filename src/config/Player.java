@@ -9,7 +9,7 @@ import javax.swing.ImageIcon;
 import config.language.Language;
 import image.icon.GeneralAppIcon;
 
-public class User
+public class Player
 {
 	public static final int ANONYMOUS_USER_ID = -1;
 	
@@ -20,14 +20,14 @@ public class User
 	private ImageIcon defaultImg = GeneralAppIcon.getDoll( ConfigApp.playerPicSizeIcon.x , ConfigApp.playerPicSizeIcon.y
 															, Color.BLACK, Color.WHITE, null );
 	
-	public User()
+	public Player()
 	{
 		this.id = ANONYMOUS_USER_ID;
 		this.name = Language.getLocalCaption( Language.ANONYMOUS );
 		this.img = null;
 	}
 	
-	public User( int id, String name, ImageIcon img )
+	public Player( int id, String name, ImageIcon img )
 	{
 		this();
 		

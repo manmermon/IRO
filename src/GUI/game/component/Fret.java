@@ -22,13 +22,16 @@
 package GUI.game.component;
 
 import java.awt.Color;
-import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
+import GUI.game.component.event.FretEvent;
+import GUI.game.component.event.FretEventListener;
 import image.basicPainter2D;
+import statistic.GameStatistic;
+import statistic.GameStatistic.FieldType;
 
 public class Fret extends AbstractSprite
 {
@@ -37,7 +40,7 @@ public class Fret extends AbstractSprite
 	private Polygon fret;
 	
 	private int fretWidth = 100;
-	
+		
 	public Fret( Pentragram pen, String id ) 
 	{
 		super( id );
@@ -62,7 +65,28 @@ public class Fret extends AbstractSprite
 	
 	public boolean isNoteIntoFret( TrackNotesSprite note )
 	{
-		boolean in = this.fret.contains( note.getNoteLocation() );
+		Point2D.Double prevLoc = note.getPreviousNoteLocation();
+		Point2D.Double currentLoc = note.getNoteLocation();
+				
+		boolean in = this.fret.contains( currentLoc );
+		
+		if( in )
+		{
+			if( prevLoc == null
+					|| !this.fret.contains( prevLoc ) )
+			{
+				this.fireFretEvent( FretEvent.NOTE_ENTERED, note );
+			}
+		}
+		else
+		{
+			if( this.fret.contains( prevLoc ) )
+			{ 
+				this.fireFretEvent( FretEvent.NOTE_EXITED, note );
+			}
+		}
+			
+		
 		return in;
 	}
 
@@ -120,7 +144,47 @@ public class Fret extends AbstractSprite
 	 * @see GUI.components.AbstractSprite#updateSprite()
 	 */
 	@Override
-	public void updateSpecificSprite() 
+	protected void updateSpecificSprite() 
 	{		
+	}
+	
+	public void addFretEventListener( FretEventListener listener )
+	{
+		super.listenerList.add( FretEventListener.class, listener );
+	}
+	
+	public void removeFretEventListener( FretEventListener listener )
+	{
+		super.listenerList.remove( FretEventListener.class, listener );
+	}
+	
+	private synchronized void fireFretEvent( int typeEvent, TrackNotesSprite note )
+	{
+		switch ( typeEvent )
+		{
+			case FretEvent.NOTE_ENTERED:
+			{
+				GameStatistic.add( FieldType.NOTE_ENTER_FRET );
+				break;
+			}
+			case FretEvent.NOTE_EXITED:
+			{
+				GameStatistic.add( FieldType.NOTE_EXIT_FRET );
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+		
+		FretEvent event = new FretEvent( this, note, typeEvent );
+
+		FretEventListener[] listeners = super.listenerList.getListeners( FretEventListener.class );
+
+		for (int i = 0; i < listeners.length; i++ ) 
+		{
+			listeners[ i ].FretEvent( event );
+		}
 	}
 }

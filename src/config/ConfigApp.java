@@ -35,6 +35,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -51,10 +54,13 @@ import config.ConfigParameter.ParameterType;
 import config.language.Caption;
 import config.language.Language;
 import exceptions.ConfigParameterException;
+import general.ArrayTreeMap;
 import general.NumberRange;
 import general.Tuple;
 import image.basicPainter2D;
 import image.icon.GeneralAppIcon;
+import statistic.GameStatistic;
+import statistic.GameStatistic.FieldType;
 
 public class ConfigApp 
 {
@@ -66,13 +72,19 @@ public class ConfigApp
 
 	public static final String appDateRange = "2019-" + buildDate.get( Calendar.YEAR );
 
-	public static final String DB_PATH = "./user/db/data.db";
+	private static final String DB_PATH = "./user/db/data.db";
 	
 	public static final Tuple< Integer, Integer > playerPicSize = new Tuple<Integer, Integer>( 100, 100 );
 	
 	public static final Tuple< Integer, Integer > playerPicSizeIcon = new Tuple<Integer, Integer>( 48, 48 );
 	
 	public static final String SONG_LIST_SEPARATOR = ";";
+
+	public static final String SELECTED_CONTROLLER = "SELECTED_CONTROLLER";
+	
+	public static final String LANGUAGE = "LANGUAGE";
+	
+	public static final String PLAYER = "PLAYER";
 	
 	///////////
 	//
@@ -83,6 +95,7 @@ public class ConfigApp
 	
 	private static final String userTableName = "user";
 	private static final String settingsTableName = "settings";
+	private static final String sessionTableName = "session";
 	private static final String statisticTableName = "statistic";
 	
 	private static final String dbURL = prefixComm + DB_PATH;
@@ -91,11 +104,9 @@ public class ConfigApp
 	
 	private static Connection conn;
 	
-	///////////
-	
-	public static final String LANGUAGE = "LANGUAGE";
-	
-	public static final String USER = "USER";
+	/*
+	 * Table: settings
+	 */
 	
 	public static final String REACTION_TIME = "reactionTime";
 	public static final String RECOVER_TIME = "recoverTime";
@@ -109,9 +120,9 @@ public class ConfigApp
 	public static final String INPUT_MIN_VALUE = "minInputValue";
 	public static final String INPUT_MAX_VALUE = "maxInputValue";
 	
-	public static final String TIME_IN_INPUT_TARGET = "timeInInputTarget";
+	public static final String INPUT_SELECTED_CHANNEL = "selectedChannel";
 	
-	//public static final String SELECTED_INPUT_CHANNEL = "SELECTED_INPUT_CHANNEL";
+	public static final String TIME_IN_INPUT_TARGET = "timeInInputTarget";
 	
 	///////////
 	
@@ -174,7 +185,9 @@ public class ConfigApp
 			
 			loadDefaultTimeInInputTarget();
 			
-			//loadDefaultSelectedInputChannel();
+			loadDefaultSelectedChannel();
+			
+			loadDefaultSelectedController();
 		}
 		catch (Exception e) 
 		{
@@ -182,13 +195,29 @@ public class ConfigApp
 		}
 	}
 	
+	private static void loadDefaultSelectedController()
+	{
+		try
+		{
+			Caption id = Language.getAllCaptions().get( Language.CONTROLLER );
+			id.setID( SELECTED_CONTROLLER );
+			ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
+			
+			listUserConfig.put( SELECTED_CONTROLLER, par ); 
+		} 
+		catch (ConfigParameterException ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+	
 	private static void loadDefaultUser( ) throws ConfigParameterException
 	{
-		Caption id = new Caption( USER, Language.defaultLanguage, Language.getCaption( Language.defaultLanguage, Language.PLAYER ) );
+		Caption id = new Caption( PLAYER, Language.defaultLanguage, Language.getCaption( Language.defaultLanguage, Language.PLAYER ) );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.USER );		
-		par.setSelectedValue( new User() );		
+		par.setSelectedValue( new Player() );		
 		
-		listUserConfig.put( USER, par );
+		listUserConfig.put( PLAYER, par );
 	}
 	
 	private static Caption getCaptions(String wordID )
@@ -324,6 +353,26 @@ public class ConfigApp
 		}
 	}
 	
+	private static void loadDefaultSelectedChannel()
+	{
+		try
+		{	
+			Caption id = getCaptions( Language.SELECTED_CHANNEL );
+			id.setID( INPUT_SELECTED_CHANNEL );
+			
+			NumberRange r = new NumberRange( 1D, Double.MAX_VALUE);
+			
+			ConfigParameter par = new ConfigParameter( id, r );
+			par.setSelectedValue( 1D );
+			
+			listUserConfig.put( INPUT_SELECTED_CHANNEL, par );
+		}
+		catch (Exception ex) 
+		{
+			ex.printStackTrace();
+		}
+	}
+	
 	private static void loadDefaultInputRange()
 	{
 		try
@@ -398,13 +447,21 @@ public class ConfigApp
 		fieldType.put( SONG_LIST, String.class );
 		fieldType.put( INPUT_MIN_VALUE, Double.class );
 		fieldType.put( INPUT_MAX_VALUE, Double.class );
-		
+		fieldType.put( INPUT_SELECTED_CHANNEL, Double.class );
+
+		fieldType = new HashMap<String, Class>();
+		fieldType.put( "idSession", Integer.class );
+		fieldType.put( "userID", Integer.class );
+		fieldType.put( "date", Integer.class );
+		tableFields.put( sessionTableName, fieldType );
 		
 		fieldType = new HashMap<String, Class>();
+		//fieldType.put( "number", Integer.class );
+		//fieldType.put( "idSession", Integer.class );
+		fieldType.put( "actionID", Integer.class );
+		fieldType.put( "actionName", String.class );
+		fieldType.put( "time", Integer.class );	
 		tableFields.put( statisticTableName, fieldType );
-		
-		fieldType.put( "id", Integer.class );
-		fieldType.put( "userID", Integer.class );
 	}
 	
 
@@ -450,21 +507,34 @@ public class ConfigApp
 				+ ", songs text\n"
 				+ ", minInputValue real\n"
 				+ ", maxInputValue real\n"
+				+ ", selectedChannel real"
 				+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
 				+ ");";
 
-		String sqlCreateTableStatistic = 
-				"CREATE TABLE IF NOT EXISTS statistic (\n"
-						+ " id integer PRIMARY KEY AUTOINCREMENT\n"
-						+ ", userID integer UNIQUE\n"
+		String sqlCreateTableSession = 
+				"CREATE TABLE IF NOT EXISTS session (\n"
+						+ " idSession integer PRIMARY KEY AUTOINCREMENT\n"
+						+ ", userID integer"
+						+ ", date integer NOT NULL\n"
 						+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
 						+ ");";
 
+		String sqlCreateTableStatistic = 
+				"CREATE TABLE IF NOT EXISTS statistic (\n"
+						+ " number integer PRIMARY KEY AUTOINCREMENT\n"
+						+ ", idSession integer\n"
+						+ ", actionID integer NOT NULL\n"
+						+ ", actionName integer NOT NULL\n"
+						+ ", time integer NOT NULL\n"						
+						+ ", FOREIGN KEY ( idSession ) REFERENCES statistic( idSession ) ON DELETE CASCADE\n"
+						+ ");";
+		
 		try ( Connection conn = DriverManager.getConnection( dbURL );
 				Statement stmt = conn.createStatement()) 
 		{
 			stmt.execute( sqlCreateTableUser );
 			stmt.execute( sqlCreateTableConfig );
+			stmt.execute( sqlCreateTableSession );
 			stmt.execute( sqlCreateTableStatistic );
 		} 
 		catch ( SQLException e ) 
@@ -473,12 +543,12 @@ public class ConfigApp
 		}
 	}
 
-	public static int addUser( String name, BufferedImage img ) throws SQLException
+	public static int addPlayerDB( String name, BufferedImage img ) throws SQLException
 	{
 		String vars = "name";
 		String vals = "?";
 
-		int userID = User.ANONYMOUS_USER_ID;
+		int userID = Player.ANONYMOUS_USER_ID;
 
 		if( img != null )
 		{
@@ -547,7 +617,7 @@ public class ConfigApp
 		return userID;
 	}
 
-	public static void updateUser( User user ) throws SQLException
+	public static void updatePlayerDB( Player user ) throws SQLException
 	{
 		if( user != null )
 		{
@@ -603,7 +673,7 @@ public class ConfigApp
 		}
 	}
 
-	public static void delUser( int id ) throws SQLException
+	public static void delPlayerDB( int id ) throws SQLException
 	{	
 		String sql = "DELETE FROM " + userTableName + " WHERE id = ?";
 		PreparedStatement pstmt = null;
@@ -632,7 +702,7 @@ public class ConfigApp
 		}
 	}
 
-	public static List< Tuple< String, Object > > getUserConfig( int userID ) throws SQLException
+	public static List< Tuple< String, Object > > getPlayerConfigDB( int userID ) throws SQLException
 	{
 		String sql = "SELECT * FROM " + settingsTableName + " WHERE userID = " + userID;
 
@@ -713,7 +783,7 @@ public class ConfigApp
 		return pars;
 	}
 
-	public static void insertUserConfig( int userID ) throws SQLException
+	public static void insertPlayerConfigDB( int userID ) throws SQLException
 	{		
 		String sql = "INSERT INTO "+ settingsTableName +  "(userID";
 		String sqlValues  = "VALUES(" + userID;
@@ -779,7 +849,7 @@ public class ConfigApp
 		}
 	}
 
-	public static void updateUserConfig( int userID ) throws SQLException
+	public static void updatePlayerConfigDB( int userID ) throws SQLException
 	{
 		String sql =  "UPDATE " + settingsTableName + " SET ";
 
@@ -858,7 +928,7 @@ public class ConfigApp
 		return value;
 	}
 
-	public static void updateUserConfig( int userID, String fieldID ) throws SQLException
+	public static void updatePlayerConfigDB( int userID, String fieldID ) throws SQLException
 	{
 		Map< String, Class > fields = tableFields.get( settingsTableName );
 
@@ -908,14 +978,14 @@ public class ConfigApp
 		}
 	}
 
-	public static User getUser( int ID ) throws SQLException, IOException
+	public static Player getPlayerDB( int ID ) throws SQLException, IOException
 	{
 		String sql = "SELECT * FROM " + userTableName + " WHERE id = " + ID;
 
 		Statement stmt = null;
 		ResultSet rs = null;
 
-		User user = null;
+		Player user = null;
 
 		try
 		{ 
@@ -943,7 +1013,7 @@ public class ConfigApp
 					img = (BufferedImage)GeneralAppIcon.getDoll( 64, 64, Color.BLACK, Color.WHITE, null ).getImage();
 				}
 
-				user = new User( id, name, new ImageIcon( img ) );
+				user = new Player( id, name, new ImageIcon( img ) );
 			}
 		} 
 		catch (SQLException e) 
@@ -968,14 +1038,14 @@ public class ConfigApp
 		return user;
 	}
 
-	public static List< User > getAllUsers() throws SQLException, IOException
+	public static List< Player > getAllPlayersDB() throws SQLException, IOException
 	{
 		String sql = "SELECT * FROM " + userTableName;
 
 		Statement stmt = null;
 		ResultSet rs = null;
 
-		List< User > users = new ArrayList<User>();
+		List< Player > users = new ArrayList<Player>();
 
 		try
 		{ 
@@ -1004,7 +1074,7 @@ public class ConfigApp
 					icon = new ImageIcon( img ); 
 				}
 
-				User user = new User( id, name, icon );
+				Player user = new Player( id, name, icon );
 
 				users.add( user );
 			}
@@ -1031,16 +1101,95 @@ public class ConfigApp
 		return users;
 	}
 
+	public static void saveStatistic() throws SQLException
+	{
+		int playerID = GameStatistic.getPlayerID();
+		ArrayTreeMap< LocalDateTime, GameStatistic.FieldType > register = GameStatistic.getRegister();
+		
+		if( playerID != Player.ANONYMOUS_USER_ID && !register.isEmpty() )
+		{
+			LocalDateTime startTime = GameStatistic.getStartDateTime();
+			
+			ZonedDateTime zdt = ZonedDateTime.of( startTime, ZoneId.systemDefault() );
+			
+			String sql = "INSERT INTO "+ sessionTableName +  "(userID, date) ";
+			String sqlValues  = "VALUES(" + playerID + "," + zdt.toInstant().toEpochMilli() + ")";
 
+			Statement stmt = null;
+
+			ResultSet rs = null;
+			
+			try 
+			{
+				connectDB();
+
+				stmt  = conn.createStatement();
+			
+				Integer sessionID = null;
+				
+				if( stmt.executeUpdate( sql + sqlValues ) > 0 )
+				{
+					rs = stmt.getGeneratedKeys();
+					if(rs != null && rs.next())
+					{
+						sessionID = rs.getInt( 1 );
+					}
+				}
+				
+				if( sessionID != null )
+				{	
+					for( LocalDateTime t : register.keySet() )
+					{
+						List< FieldType > fields = register.get( t );
+						
+						zdt = ZonedDateTime.of( t, ZoneId.systemDefault() );
+						
+						for( FieldType f : fields )
+						{
+							sql = "INSERT INTO "+ statisticTableName +  "(idSession,actionID,actionName,time)";
+							sqlValues = " VALUES(" + sessionID 
+										+ "," + f.ordinal()
+										+ ",\"" + f.name() + "\""
+										+ "," + zdt.toInstant().toEpochMilli()
+										+ ")";
+							
+							stmt.executeUpdate( sql + sqlValues );
+						}
+					}
+					
+					GameStatistic.clearRegister();
+				}
+				
+			}
+			catch (SQLException e) 
+			{
+				throw e;			 
+			}
+			finally 
+			{
+				if( rs != null )
+				{
+					rs.close();
+				}
+				
+				if( stmt != null )
+				{
+					stmt.close();
+				}
+
+				closeDBConnection();
+			}
+		}
+	}
 	/*
 	public static void main( String[] arg )
 	{
 		try
 		{
 			SetTables();
-			addUser( "Manuel M.", null );
-			addUser( "Luis V.", (BufferedImage)GeneralAppIcon.getSmileIcon( 9, 64, Color.BLACK, Color.RED ).getImage() );
-			addUser( "MM", (BufferedImage)GeneralAppIcon.getSmileIcon( 9, 64, Color.BLACK, Color.YELLOW ).getImage() );
+			addPlayerDB( "Manuel M.", null );
+			addPlayerDB( "Luis V.", (BufferedImage)GeneralAppIcon.getSmileIcon( 9, 64, Color.BLACK, Color.RED ).getImage() );
+			addPlayerDB( "MM", (BufferedImage)GeneralAppIcon.getSmileIcon( 9, 64, Color.BLACK, Color.YELLOW ).getImage() );
 
 
 

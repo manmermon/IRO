@@ -1,21 +1,32 @@
 package control;
 
-import GUI.GuiManager;
+import javax.swing.JOptionPane;
+
+import GUI.AppUI;
+import GUI.GameManager;
+import GUI.game.screen.IScene;
+import config.language.Language;
+import control.events.InputActionEvent;
+import control.events.InputActionListerner;
 import control.events.SceneEventListener;
-import control.inputs.IInputAction;
-import control.inputs.IInputable;
 import control.scenes.ISceneControl;
+import exceptions.SceneException;
+import statistic.GameStatistic;
+import statistic.GameStatistic.FieldType;
 import stoppableThread.AbstractStoppableThread;
 
 public class ScreenControl extends AbstractStoppableThread 
-							implements IScreenControl, IInputable
-										, ISceneManager, SceneEventListener
+							implements IScreenControl
+										//, IInputable
+										, ISceneManager
+										, SceneEventListener
+										, InputActionListerner
 {
 	private static ScreenControl screenCtrl;
 	
 	private ISceneControl sceneCtrl;
 	
-	private IInputAction inAction = null;
+	private InputActionEvent inAction = null;
 	
 	private ScreenControl( ) 
 	{
@@ -46,9 +57,7 @@ public class ScreenControl extends AbstractStoppableThread
 		synchronized( this )
 		{
 			super.wait();
-			
-			//System.out.println("\tScreenControl.runInLoop()");
-			
+						
 			if( this.sceneCtrl != null )
 			{
 				this.sceneCtrl.updateScene( this.inAction );
@@ -58,6 +67,18 @@ public class ScreenControl extends AbstractStoppableThread
 		}
 	}
 
+	/*(non-Javadoc)
+	 * @see @see stoppableThread.AbstractStoppableThread#runExceptionManager(java.lang.Exception)
+	 */
+	@Override
+	protected void runExceptionManager(Exception e)
+	{
+		if( !( e instanceof InterruptedException ) )
+		{
+			super.runExceptionManager( e ); 
+		}
+	}
+	
 	@Override
 	public void updateScreen( ) 
 	{
@@ -66,36 +87,85 @@ public class ScreenControl extends AbstractStoppableThread
 			this.notify();
 		}
 	}
-	
-	public void action( IInputAction act )
-	{
-		synchronized( this )
-		{
-			this.inAction = act;
-		}
-	}
 		
-	public void setSceneControl( ISceneControl sceneCtr ) throws NullPointerException
+	/*
+	 * (non-Javadoc)
+	 * @see @see control.ISceneManager#startScened(GUI.game.screen.IScene)
+	 */
+	@Override
+	public void setScene( IScene scene ) throws Exception	
 	{
 		synchronized( this )
-		{
+		{				
+			if( this.sceneCtrl != null )
+			{
+				this.sceneCtrl.destroyScene();
+				this.sceneCtrl = null;
+			}
+			
+			ISceneControl sceneCtr = SceneControlManager.getInstance().getSceneControl( scene );
+						
 			if( sceneCtr == null )
 			{
-				throw new NullPointerException( "Input scene control null." );
+				throw new SceneException( "Scene control null." );
 			}
 			
 			this.sceneCtrl = sceneCtr;
 			this.sceneCtrl.addSceneEventListener( this );
 		}
 	}
-
+	
+	/*(non-Javadoc)
+	 * @see @see control.ISceneManager#startScene()
+	 */
+	@Override
+	public void startScene() throws Exception
+	{
+		synchronized ( this )
+		{
+			if( this.sceneCtrl != null 
+					&& this.sceneCtrl.getSceneState() == ISceneControl.SCENE_STATE_NEW )
+			{
+				this.sceneCtrl.startScene();
+			}
+		}
+	}
+	
+	
 	@Override
 	public void SceneEvent( control.events.SceneEvent ev) 
 	{		
-		if( ev.getType() == control.events.SceneEvent.END )
+		if( ev.getType() == control.events.SceneEvent.START)
 		{
+			GameStatistic.add( FieldType.GAME_START );
+		}		
+		else if( ev.getType() == control.events.SceneEvent.END )
+		{
+			if( !super.getState().equals( Thread.State.WAITING ) 
+					|| !super.getState().equals( Thread.State.TIMED_WAITING ) )
+			{
+				super.interrupt(); 
+			}
+			
 			synchronized ( this )
 			{
+				GameStatistic.add( FieldType.GAME_END );
+				
+				try
+				{
+					GameManager.getInstance().stopLevel( );
+				}
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+					
+					JOptionPane.showMessageDialog( AppUI.getInstance()
+													, ex.getMessage()
+													, Language.getLocalCaption( Language.ERROR )
+													, JOptionPane.ERROR_MESSAGE );
+				}
+				
+				/*
 				if( this.sceneCtrl != null )
 				{
 					try 
@@ -109,8 +179,46 @@ public class ScreenControl extends AbstractStoppableThread
 					}				
 				}
 				
-				GuiManager.getInstance().fullScreen( false );
+				GameManager.getInstance().fullScreen( false );
+				//*/
 			}
+		}
+		else if( ev.getType() == control.events.SceneEvent.PAUSE )
+		{
+			GameStatistic.add( FieldType.GAME_PAUSE );
+		}
+		else if( ev.getType() == control.events.SceneEvent.RESUME )
+		{
+			GameStatistic.add( FieldType.GAME_RESUME );
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see @see control.ISceneManager#stopScene()
+	 */
+	@Override
+	public void stopScene() throws Exception
+	{
+		synchronized( this )
+		{
+			if( this.sceneCtrl != null )
+			{
+				this.sceneCtrl.destroyScene();
+				this.sceneCtrl = null;
+			}
+		}
+	}
+
+	/*(non-Javadoc)
+	 * @see @see control.events.InputActionListerner#InputAction(control.events.InputActionEvent)
+	 */
+	@Override
+	public void InputAction(InputActionEvent ev)
+	{
+		if( ev != null )
+		{
+			this.inAction = ev;
 		}
 	}
 }

@@ -2,9 +2,9 @@ package control.scenes.menu;
 
 import GUI.game.screen.IScene;
 import GUI.game.screen.menu.MainMenuScreen;
-import control.inputs.IInputAction;
-import control.inputs.KeystrokeAction;
-import control.inputs.MouseStrokeAction;
+import control.controller.KeystrokeAction;
+import control.controller.MouseStrokeAction;
+import control.events.InputActionEvent;
 import control.scenes.AbstractSceneControl;
 import exceptions.SceneException;
 
@@ -38,7 +38,7 @@ public class MenuScreenControl extends AbstractSceneControl
 	 * @see @see control.scenes.AbstractSceneControl#specificUpdateScene(control.inputs.IInputAction)
 	 */
 	@Override
-	protected void specificUpdateScene( IInputAction act ) throws SceneException
+	protected void specificUpdateScene( InputActionEvent act ) throws SceneException
 	{	
 	}
 

@@ -2,21 +2,17 @@ package GUI.game.screen.menu;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
 import GUI.game.component.Background;
-import GUI.game.component.Frame;
 import GUI.game.component.ISprite;
 import GUI.game.component.SpriteButtom;
 import GUI.game.screen.Scene;
 import config.language.Language;
-import control.inputs.IInputAction;
-import control.inputs.IInputable;
+import control.controller.IInputable;
+import control.events.InputActionEvent;
 import image.basicPainter2D;
 
 public class MainMenuScreen extends Scene implements IInputable
@@ -74,7 +70,7 @@ public class MainMenuScreen extends Scene implements IInputable
 	}
 
 	@Override
-	public void action(IInputAction act)
+	public void action( InputActionEvent act)
 	{
 		for( List< ISprite > spriteList : super.SPRITES.values() )
 		{

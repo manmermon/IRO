@@ -15,9 +15,9 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.EventObject;
 
-import control.inputs.IInputAction;
-import control.inputs.IInputable;
-import control.inputs.MouseStrokeAction;
+import control.controller.IInputAction;
+import control.controller.IInputable;
+import control.events.InputActionEvent;
 import image.basicPainter2D;
 
 public class SpriteButtom extends AbstractSprite implements IInputable
@@ -200,43 +200,17 @@ public class SpriteButtom extends AbstractSprite implements IInputable
 	@Override
 	public void updateSpecificSprite() 
 	{		
-	}	
-	
-	@Override
-	public void action( IInputAction act )
-	{
-		if( act != null )
-		{
-			if( act instanceof MouseStrokeAction )
-			{
-				MouseStrokeAction mouseAct = (MouseStrokeAction)act;
-				EventObject ev = mouseAct.getInputEvent();
-				
-				if( ev != null && ev instanceof MouseEvent )
-				{
-					MouseEvent event = (MouseEvent)ev;
-					
-					Frame fr = (Frame)ev.getSource();
-					
-					Point loc = fr.getMousePosition();
-					
-					if( loc != null )
-					{
-						if( this.screenPoly.contains( loc ) )
-						{
-							this.currentBgColor = this.bgColor.brighter();
-							this.currentFgColor = this.fgColor.brighter();
-						}
-						else
-						{
-							this.currentBgColor = this.bgColor;
-							this.currentFgColor = this.fgColor;
-						}
-					}
-					
-					if( event.getID() == )
-				}
-			}
-		}
 	}
+
+
+
+	/*(non-Javadoc)
+	 * @see @see control.controller.IInputable#action(control.controller.IInputAction)
+	 */
+	@Override
+	public void action( InputActionEvent act)
+	{
+		// TODO Auto-generated method stub
+		
+	}	
 }

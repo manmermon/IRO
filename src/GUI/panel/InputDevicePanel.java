@@ -6,7 +6,6 @@ package GUI.panel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.Point;
@@ -21,9 +20,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -35,23 +31,25 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
+import config.ConfigApp;
+import config.ConfigParameter;
 import config.language.Caption;
 import config.language.Language;
 import config.language.TranslateComponents;
-import control.inputs.LSLStreams.LSLControllerInputValuePanel;
+import control.controller.ControllerManager;
+import control.controller.ControllerMetadata;
+import control.controller.LSLStreams.LSLStreamMetadata;
 import edu.ucsd.sccn.LSL;
-import general.Tuple;
-import stoppableThread.IStoppableThread;
+import exceptions.ConfigParameterException;
 
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
 
 /**
  * @author manuel merino
  *
  */
-public class inputDevicePanel extends JPanel
+public class InputDevicePanel extends JPanel
 {
 	/**
 	 * 
@@ -67,67 +65,39 @@ public class inputDevicePanel extends JPanel
 	private JPanel panelInputDeviceList;
 	private JPanel panelInputValues;
 	
-	private JSpinner selectChannelSpinner;
+	//private JSpinner selectChannelSpinner;
 
 	private JTable inputDeviceTable;
 	
-	private LSL.StreamInfo selectedLSLStream = null;
-	private int selectedChannel = 0;
+	private ControllerInputValuePanel inputValues = null;
+	
+	//private LSL.StreamInfo selectedLSLStream = null;
+	//private int selectedChannel = 0;
 	private LSL.StreamInfo[] lslStreamInfo = null;
+		
+	private static InputDevicePanel setInDevPanel = null;
 	
-	private LSLControllerInputValuePanel inputShowValuePanel;
-	
-	private static inputDevicePanel setInDevPanel = null;
-	
-	/*
-	public static void main(String[] args)
-	{
-		try
-		{
-			settingInputDevice dialog = new settingInputDevice();
-			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			dialog.setVisible(true);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
-	//*/
-
 	private static Window owner;
 	
-	public static inputDevicePanel getInstance( Window wOwner )
+	public static InputDevicePanel getInstance( Window wOwner )
 	{
 		owner = wOwner;
 		
 		if( setInDevPanel == null )
 		{
-			setInDevPanel = new inputDevicePanel();
+			setInDevPanel = new InputDevicePanel();
 		}
 		
 		return setInDevPanel;
 	}
 	
-	private inputDevicePanel( )
+	private InputDevicePanel( )
 	{	
 		this.setLayout(new BorderLayout());		
 		this.add(this.getInputControlPanel(), BorderLayout.NORTH);
 		this.add( this.getInputDevicePanel(), BorderLayout.CENTER );
 		
 		this.updateInputs();
-	}
-
-	public Tuple< LSL.StreamInfo, Integer > getSelectedControllerAndChannel()
-	{
-		Tuple< LSL.StreamInfo, Integer > sel = null;
-		
-		if( this.selectedLSLStream != null )
-		{
-			sel = new Tuple<LSL.StreamInfo, Integer>( this.selectedLSLStream, this.selectedChannel );
-		}
-		
-		return sel;
 	}
 	
 	private JPanel getInputControlPanel()
@@ -140,12 +110,14 @@ public class inputDevicePanel extends JPanel
 			fl_contentPanel.setAlignment(FlowLayout.RIGHT);
 			this.inputCtrPanel.setLayout(fl_contentPanel);
 		
+			/*
 			Caption cap = Language.getAllCaptions().get( Language.SELECTED_CHANNEL );
 			JLabel lb = new JLabel( cap.getCaption( Language.getCurrentLanguage() ) );
 			TranslateComponents.add( lb, cap );
 			
 			this.inputCtrPanel.add( lb );
 			this.inputCtrPanel.add( this.getSelectedChannelSpinner() );
+			//*/
 			this.inputCtrPanel.add( this.getBtRefresh() );
 		}
 		
@@ -182,6 +154,7 @@ public class inputDevicePanel extends JPanel
 		return this.btRefresh;
 	}
 
+	/*
 	private JSpinner getSelectedChannelSpinner()
 	{
 		if( this.selectChannelSpinner == null )
@@ -210,6 +183,7 @@ public class inputDevicePanel extends JPanel
 		
 		return this.selectChannelSpinner;
 	}
+	//*/
 	
 	private JPanel getInputDevicePanel()
 	{
@@ -307,22 +281,37 @@ public class inputDevicePanel extends JPanel
 						{
 							Boolean sel = (Boolean)t.getValueAt( selRow, selCol );
 							
-							selectedLSLStream = null;
+							//selectedLSLStream = null;
 							
-							JSpinner sp = getSelectedChannelSpinner();
+							//JSpinner sp = getSelectedChannelSpinner();
 							
-							if( sel )						
+							ConfigParameter par = ConfigApp.getParameter( ConfigApp.SELECTED_CONTROLLER );
+							
+							try
 							{
-								selectedLSLStream = lslStreamInfo[ selRow ];
-																
-								sp.setEnabled( true );
-								SpinnerNumberModel spm = (SpinnerNumberModel)sp.getModel();
-								spm.setMaximum( selectedLSLStream.channel_count() );
+								if( sel )						
+								{
+									//selectedLSLStream = lslStreamInfo[ selRow ];
+									
+									
+									par.setSelectedValue( new LSLStreamMetadata( lslStreamInfo[ selRow ] ) );
+									/*
+									sp.setEnabled( true );
+									SpinnerNumberModel spm = (SpinnerNumberModel)sp.getModel();
+									spm.setMaximum( selectedLSLStream.channel_count() );
+									*/
+								}
+								else
+								{	
+									//selectedChannel = 0;
+									//sp.setEnabled( false );
+									
+									par.removeSelectedValue();
+								}
 							}
-							else
-							{	
-								selectedChannel = 0;
-								sp.setEnabled( false );
+							catch ( ConfigParameterException ex) 
+							{
+								ex.printStackTrace();
 							}
 						}
 					}
@@ -448,24 +437,30 @@ public class inputDevicePanel extends JPanel
 			tm.removeRow( i );
 		}
 		
-		boolean selStream = false;
 		for( LSL.StreamInfo info : this.lslStreamInfo )
 		{
-			boolean sel = ( this.selectedLSLStream != null)
-							&& ( this.selectedLSLStream.uid().equals( info.uid() ) );
+			ConfigParameter par = ConfigApp.getParameter( ConfigApp.SELECTED_CONTROLLER );
 			
-			selStream = selStream || sel;
+			Object selectedController = par.getSelectedValue();
+			
+			boolean sel = (selectedController != null );
+			
+			if( sel )
+			{
+				ControllerMetadata meta = (ControllerMetadata)selectedController;
+				
+				sel = meta.getControllerID().equals( info.uid() );
+			}
 			
 			Object[] row = new Object[] { sel, info.channel_count(), "  " + info.name() };
 			
 			tm.addRow( row );
 		}
 		
-		if( !selStream )
+		if( this.lslStreamInfo.length == 1 )
 		{
-			JSpinner sp = this.getSelectedChannelSpinner();
-			sp.setValue( 1 );
-			sp.setEnabled( false );
+			t.addRowSelectionInterval( 0, 0 );
+			t.setValueAt( true, 0, 0);
 		}
 	}
 
@@ -488,32 +483,30 @@ public class inputDevicePanel extends JPanel
 			lb.setText( txt );
 			
 			panel.add( lb, BorderLayout.NORTH );	
-					
-			if( this.inputShowValuePanel != null )
-			{
-				this.inputShowValuePanel.stopThread( IStoppableThread.FORCE_STOP );
-				this.inputShowValuePanel = null;
-			}
 			
 			try
 			{
-				this.inputShowValuePanel = new  LSLControllerInputValuePanel( info );
+				ControllerManager.getInstance().stopController();
 				
-				JPanel inPanel = this.inputShowValuePanel.getInputValuePanel();
+				ControllerManager.getInstance().startController( info );
 				
-				panel.add( inPanel, BorderLayout.CENTER );
+				this.inputValues = new ControllerInputValuePanel( info.channel_count() );
+				this.inputValues.setVisible( true );
+				panel.add( this.inputValues, BorderLayout.CENTER );
 				
-				this.inputShowValuePanel.startThread();
+				ControllerManager.getInstance().addControllerListener( this.inputValues );				
 			}
 			catch (Exception ex)
 			{
 				ex.printStackTrace();
 				
-				JOptionPane.showMessageDialog( this.owner, ex.getCause() + "\n" + ex.getMessage()
+				JOptionPane.showMessageDialog( owner, ex.getCause() + "\n" + ex.getMessage()
 												, Language.getLocalCaption( Language.ERROR ), JOptionPane.ERROR_MESSAGE );
 			}
 		}
 		
 		panel.setVisible( true );
 	}
+
+	
 }

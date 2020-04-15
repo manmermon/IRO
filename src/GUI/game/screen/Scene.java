@@ -101,7 +101,7 @@ public abstract class Scene implements IScene, SpriteEventListener
 	}
 	
 	@Override
-	public List< ISprite > getSprites( String idSprite ) 
+	public List< ISprite > getSprites( String idSprite, boolean onlyOnScreen ) 
 	{
 		synchronized ( this.SPRITES_By_ID )
 		{
@@ -114,11 +114,37 @@ public abstract class Scene implements IScene, SpriteEventListener
 			{
 				for( ISprite sp : sprs )
 				{
-					if( sceneLoc.contains( sp.getScreenLocation() ) )
+					if( onlyOnScreen )
+					{
+						if( sceneLoc.contains( sp.getScreenLocation() ) )
+						{
+							sprites.add( sp );
+						}
+					}
+					else
 					{
 						sprites.add( sp );
 					}
 				}
+			}
+			
+			return sprites; 
+		}
+	}
+	
+	/*(non-Javadoc)
+	 * @see @see GUI.game.screen.IScene#getAllSprites()
+	 */
+	@Override		
+	public List< ISprite > getAllSprites( boolean onlyOnScreen )
+	{
+		synchronized ( this.SPRITES_By_ID )
+		{
+			List< ISprite > sprites = new ArrayList< ISprite >();
+						
+			for( String idSprite : this.SPRITES_By_ID.keySet() )
+			{
+				sprites.addAll( this.getSprites( idSprite, onlyOnScreen ) );
 			}
 			
 			return sprites; 

@@ -11,5 +11,7 @@ import java.util.EventListener;
  */
 public interface IInputControllerListener extends EventListener 
 {
-	public void InputControllerEvent( InputControllerEvent  ev);
+	public void InputControllerEvent( InputControllerEvent  ev );
+	
+	public void enableProcessInputControllerEvent( boolean enable );
 }

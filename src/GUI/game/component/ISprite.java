@@ -29,7 +29,7 @@ import java.awt.image.BufferedImage;
 
 import GUI.game.component.event.MouseSpriteEventListener;
 import GUI.game.component.event.SpriteEventListener;
-import control.inputs.IInputAction;
+import control.controller.IInputAction;
 
 public interface ISprite 
 {

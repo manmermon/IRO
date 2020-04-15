@@ -34,7 +34,7 @@ import config.ConfigApp;
 import config.language.Language;
 import control.RefreshControl;
 import control.ScreenControl;
-import control.inputs.InputControl;
+import control.controller.ControllerActionChecker;
 
 public class MainLaunchApp
 {
@@ -92,8 +92,10 @@ public class MainLaunchApp
 			RefreshControl drawCtrl = RefreshControl.getInstance();
 			drawCtrl.startThread();
 			
+			/*
 			InputControl inCtrl = InputControl.getInstance();
 			inCtrl.startThread();
+			*/			
 		}
 		catch (Exception e)
 		{

@@ -20,26 +20,24 @@ public class InputControllerEvent extends EventObject
 	 *
 	 */
 	
-	public static final int RECOVER_DONE = -1;
-	public static final int ACTION_DONE = 0;
-	
+	private double[] inValues;
 	
 	private int typeEvent;
 	
-	public InputControllerEvent( Object source ) 
-	{
-		super( source );
-	}
-	
-	public InputControllerEvent( Object source, int type ) 
+	public InputControllerEvent( Object source, double[] values ) 
 	{
 		super( source );
 		
-		this.typeEvent = type;
-	}
+		this.inValues = values;
+	}	
 	
 	public int getType()
 	{
 		return this.typeEvent;
+	}
+	
+	public double[] getInputValues()
+	{
+		return this.inValues;
 	}
 }

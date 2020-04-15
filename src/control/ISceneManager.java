@@ -1,8 +1,12 @@
 package control;
 
-import control.scenes.ISceneControl;
+import GUI.game.screen.IScene;
 
 public interface ISceneManager 
 {
-	public void setSceneControl( ISceneControl sceneCtr ) throws NullPointerException;
+	public void setScene( IScene scene ) throws Exception;
+	
+	public void startScene( ) throws Exception;
+	
+	public void stopScene() throws Exception;	
 }

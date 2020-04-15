@@ -20,7 +20,7 @@
  *   
  */
 
-package control.inputs.LSLStreams;
+package control.controller.LSLStreams;
 
 import edu.ucsd.sccn.LSL;
 import edu.ucsd.sccn.LSL.StreamInlet;
@@ -36,13 +36,12 @@ import java.util.concurrent.TimeoutException;
 import javax.swing.Timer;
 import javax.swing.event.EventListenerList;
 
+import control.controller.ControllerMetadata;
+import control.controller.IInputController;
 import control.events.IInputControllerListener;
 import control.events.InputControllerEvent;
-import control.events.SceneEvent;
-import control.events.SceneEventListener;
-import control.inputs.IInputController;
 
-public abstract class InputLSLStreamTemplate extends AbstractStoppableThread implements IInputController
+public class InputLSLStreamController extends AbstractStoppableThread implements IInputController
 {
 	private LSL.StreamInlet inLet = null;
 
@@ -60,13 +59,16 @@ public abstract class InputLSLStreamTemplate extends AbstractStoppableThread imp
 		
 	private EventListenerList listenerList;
 	
-	public InputLSLStreamTemplate( LSL.StreamInfo info) throws Exception
+	private ControllerMetadata metadata = null;
+	
+	public InputLSLStreamController( LSL.StreamInfo info) throws Exception
 	{
 		if ( info == null )
 		{
 			throw new IllegalArgumentException("LSL.StreamInlet is null");
 		}
 		
+		this.metadata = new LSLStreamMetadata( info );
 		this.LSLFormatData = info.channel_format();
 
 		this.inLet = new StreamInlet( info, 360,  0, false );
@@ -193,7 +195,7 @@ public abstract class InputLSLStreamTemplate extends AbstractStoppableThread imp
 				this.timer.stop();
 			}
 			
-			this.managerData( data );
+			this.fireInputControllerEvent( data );
 			
 			if (this.timer != null)
 			{
@@ -384,9 +386,9 @@ public abstract class InputLSLStreamTemplate extends AbstractStoppableThread imp
 	 * 
 	 * @param typeEvent
 	 */
-	protected void fireInputControllerEvent( int typeEvent )
+	protected void fireInputControllerEvent( double[] values )
 	{
-		InputControllerEvent event = new InputControllerEvent( this, typeEvent );
+		InputControllerEvent event = new InputControllerEvent( this, values );
 
 		IInputControllerListener[] listeners = this.listenerList.getListeners( IInputControllerListener.class );
 
@@ -395,7 +397,44 @@ public abstract class InputLSLStreamTemplate extends AbstractStoppableThread imp
 			listeners[ i ].InputControllerEvent( event );
 		}
 	}
+
+	/*(non-Javadoc)
+	 * @see @see control.inputs.IInputController#stopController()
+	 */
+	@Override
+	public void stopController() throws Exception
+	{
+		super.stopThread( IStoppableThread.FORCE_STOP );
+	} 
 	
-	protected abstract void managerData( double[] data );	
-	
+	/*(non-Javadoc)
+	 * @see @see control.inputs.IInputController#startController()
+	 */
+	@Override
+	public void startController() throws Exception
+	{
+		super.startThread();
+	}
+
+
+	/*(non-Javadoc)
+	 * @see @see control.controller.IInputController#getMetadataController()
+	 */
+	@Override
+	public ControllerMetadata getMetadataController()
+	{
+		return this.metadata;
+	}
+
+	/*(non-Javadoc)
+	 * @see @see control.controller.IInputController#getListener()
+	 */
+	@Override
+	public IInputControllerListener[] getListener()
+	{
+		IInputControllerListener[] listeners = this.listenerList.getListeners( IInputControllerListener.class );
+
+		return listeners;
+	}
+
 }

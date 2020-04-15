@@ -11,14 +11,14 @@ import general.NumberRange;
 
 public class ConfigParameter
 {
-	public enum ParameterType { USER, STRING, NUMBER, BOOLEAN, COLOR, SONG };
+	public enum ParameterType { USER, STRING, NUMBER, BOOLEAN, COLOR, SONG, OTHER };
 	
 	private Caption _ID = null;
 	private ParameterType _type = ParameterType.NUMBER;
 	private Object _selectedValue = null;
 	private List< Object > _options = null;
 	private NumberRange _rng = null;
-	private int _userID = User.ANONYMOUS_USER_ID;
+	private int _userID = Player.ANONYMOUS_USER_ID;
 	
 	public ConfigParameter( Caption id, ParameterType type ) throws ConfigParameterException
 	{
@@ -114,7 +114,7 @@ public class ConfigParameter
 				}
 				case USER:
 				{
-					if( !( value instanceof User ) )
+					if( !( value instanceof Player ) )
 					{
 						errMsg = "Value is not a User.";
 					}
@@ -127,6 +127,10 @@ public class ConfigParameter
 						errMsg = "Value is not the song file's path.";
 					}
 					
+					break;
+				}
+				case OTHER:
+				{
 					break;
 				}
 				default:
@@ -194,15 +198,17 @@ public class ConfigParameter
 			this._selectedValue = val;
 		}
 		
-		if( this._userID != User.ANONYMOUS_USER_ID )
+		if( this._userID != Player.ANONYMOUS_USER_ID )
 		{
 			try
 			{
-				ConfigApp.updateUserConfig( this._userID, this._ID.getID() );
+				ConfigApp.updatePlayerConfigDB( this._userID, this._ID.getID() );
 			} 
 			catch (SQLException ex)
 			{
 				ex.printStackTrace();
+				
+				throw new ConfigParameterException( ex );
 			}
 		}
 	}

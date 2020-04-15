@@ -15,6 +15,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -49,13 +51,13 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import GUI.GuiManager;
+import GUI.GameManager;
 import GUI.JColorComboBox;
 import GUI.dialogs.AppSelectPlayer;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.ConfigParameter.ParameterType;
-import config.User;
+import config.Player;
 import config.language.Language;
 import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
@@ -192,9 +194,14 @@ public class SettingPanel extends JPanel
 					
 					JPanel panel = listPanels.get( i );
 					
-					panel.add( this.getParamenterPanel( p ) );
+					JPanel parPanel = this.getParamenterPanel( p );
 					
-					numPars++;
+					if( parPanel != null )
+					{
+						panel.add( parPanel );
+						
+						numPars++;
+					}
 				}
 			}
 		}
@@ -213,15 +220,15 @@ public class SettingPanel extends JPanel
 	
 	private JPanel getUserLabel()
 	{
-		ConfigParameter par = ConfigApp.getParameter( ConfigApp.USER );
-		final User player;
+		ConfigParameter par = ConfigApp.getParameter( ConfigApp.PLAYER );
+		final Player player;
 		if( par != null )
 		{
-			player = (User)par.getSelectedValue();
+			player = (Player)par.getSelectedValue();
 		}
 		else
 		{
-			 player = new User();
+			 player = new Player();
 		}
 
 		JPanel panel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
@@ -325,13 +332,13 @@ public class SettingPanel extends JPanel
 					selplayerDialog.setBounds( bounds );
 					selplayerDialog.setVisible( true );
 					
-					User user = selplayerDialog.getSelectedUser();
+					Player user = selplayerDialog.getSelectedUser();
 					
 					if( user != null ) 
 					{					
-						ConfigParameter parUser = ConfigApp.getParameter( ConfigApp.USER );
+						ConfigParameter parUser = ConfigApp.getParameter( ConfigApp.PLAYER );
 						
-						User currentUser = (User)parUser.getSelectedValue();
+						Player currentUser = (Player)parUser.getSelectedValue();
 						
 						try
 						{
@@ -341,18 +348,18 @@ public class SettingPanel extends JPanel
 													
 								try
 								{
-									List< Tuple< String, Object > > settings = ConfigApp.getUserConfig( user.getId() );
+									List< Tuple< String, Object > > settings = ConfigApp.getPlayerConfigDB( user.getId() );
 									
 									if( settings.isEmpty() )
 									{
 										ConfigApp.loadDefaultProperties();
-										parUser = ConfigApp.getParameter( ConfigApp.USER );
+										parUser = ConfigApp.getParameter( ConfigApp.PLAYER );
 										
 										parUser.setSelectedValue( user );
 										
-										if( user.getId() != User.ANONYMOUS_USER_ID  )
+										if( user.getId() != Player.ANONYMOUS_USER_ID  )
 										{
-											ConfigApp.insertUserConfig( user.getId() );
+											ConfigApp.insertPlayerConfigDB( user.getId() );
 											
 											for( ConfigParameter par : ConfigApp.getParameters() )
 											{
@@ -384,7 +391,7 @@ public class SettingPanel extends JPanel
 										}										
 									}
 								}
-								catch ( SQLException ex) 
+								catch ( Exception ex) 
 								{
 									JOptionPane.showMessageDialog( owner, ex.getCause() + "\n" + ex.getMessage()
 																	, Language.getLocalCaption( Language.ERROR )
@@ -392,7 +399,7 @@ public class SettingPanel extends JPanel
 								}
 								finally 
 								{
-									GuiManager.getInstance().updateSetting();
+									GameManager.getInstance().updateSetting();
 								}
 							}
 						} 
@@ -415,10 +422,10 @@ public class SettingPanel extends JPanel
 					removeImageMenu.setVisible( true );
 					removeImageMenu.setEnabled( true );
 					
-					ConfigParameter par = ConfigApp.getParameter( ConfigApp.USER );
-					User user = (User)par.getSelectedValue();
+					ConfigParameter par = ConfigApp.getParameter( ConfigApp.PLAYER );
+					Player user = (Player)par.getSelectedValue();
 					
-					if( user.getId() == User.ANONYMOUS_USER_ID )
+					if( user.getId() == Player.ANONYMOUS_USER_ID )
 					{
 						changeImageMenu.setVisible( false );
 						changeImageMenu.setEnabled( false );
@@ -455,8 +462,8 @@ public class SettingPanel extends JPanel
 	
 	private void removeUserImage( JButton b )
 	{
-		User user = (User)ConfigApp.getParameter( ConfigApp.USER ).getSelectedValue();
-		if( user.getId() != User.ANONYMOUS_USER_ID )
+		Player user = (Player)ConfigApp.getParameter( ConfigApp.PLAYER ).getSelectedValue();
+		if( user.getId() != Player.ANONYMOUS_USER_ID )
 		{
 			user.setDefaultImage();
 			
@@ -464,7 +471,7 @@ public class SettingPanel extends JPanel
 			
 			try
 			{
-				ConfigApp.updateUser( user );
+				ConfigApp.updatePlayerDB( user );
 			} 
 			catch (SQLException ex)
 			{
@@ -477,8 +484,8 @@ public class SettingPanel extends JPanel
 	
 	private void selectNewUserImage( JButton b )
 	{	
-		User user = (User)ConfigApp.getParameter( ConfigApp.USER ).getSelectedValue();
-		if( user.getId() != User.ANONYMOUS_USER_ID )
+		Player user = (Player)ConfigApp.getParameter( ConfigApp.PLAYER ).getSelectedValue();
+		if( user.getId() != Player.ANONYMOUS_USER_ID )
 		{
 			JFileChooser jfc = new JFileChooser( "./" );
 
@@ -514,7 +521,7 @@ public class SettingPanel extends JPanel
 					
 					user.getImg().setImage( newImg );
 					
-					ConfigApp.updateUser( user );
+					ConfigApp.updatePlayerDB( user );
 					
 					updatePlayerImage( b );
 				}
@@ -533,7 +540,7 @@ public class SettingPanel extends JPanel
 	{
 		if( b != null )
 		{
-			User user = (User)ConfigApp.getParameter( ConfigApp.USER ).getSelectedValue();
+			Player user = (Player)ConfigApp.getParameter( ConfigApp.PLAYER ).getSelectedValue();
 			
 			b.setIcon( user.getImg( ConfigApp.playerPicSizeIcon.x, ConfigApp.playerPicSizeIcon.y ) );
 		}
@@ -541,14 +548,7 @@ public class SettingPanel extends JPanel
 	
 	private JPanel getParamenterPanel( ConfigParameter par )
 	{		
-		JPanel panel = new JPanel();
-		/*
-		Dimension d  = new Dimension( fieldSize );
-		
-		
-		panel.setPreferredSize( d );
-		panel.setBackground( Color.GREEN);
-		//*/
+		JPanel panel = null;
 		
 		if( par != null )
 		{	
@@ -561,30 +561,31 @@ public class SettingPanel extends JPanel
 			{
 				l = languages.toString();
 			}
-			
-			//panel.setLayout( new BorderLayout() );
-			panel.setLayout( new GridLayout( 0, 1 ) );
-			
-			String title = par.get_ID().getCaption( l );			
-			panel.setBorder( BorderFactory.createTitledBorder( title ));
-			
-			TranslateComponents.add( panel, par.get_ID() );
 						
 			Component comp = this.getParComponent( par );
 			
-			panel.add( comp );
-			
-			Dimension d = super.getSize();
-			Dimension dc = comp.getPreferredSize();
-			Dimension size = panel.getPreferredSize();
-			
-			size.width = d.width / 3;
-			size.height = dc.height > size.height ? dc.height : size.height;
-			
-			panel.setPreferredSize( size );
+			if( comp != null )
+			{
+				panel = new JPanel();
+				panel.setLayout( new GridLayout( 0, 1 ) );
+				
+				String title = par.get_ID().getCaption( l );			
+				panel.setBorder( BorderFactory.createTitledBorder( title ));
+				
+				TranslateComponents.add( panel, par.get_ID() );
+				
+				panel.add( comp );
+				
+				Dimension d = super.getSize();
+				Dimension dc = comp.getPreferredSize();
+				Dimension size = panel.getPreferredSize();
+				
+				size.width = d.width / 3;
+				size.height = dc.height > size.height ? dc.height : size.height;
+				
+				panel.setPreferredSize( size );
+			}
 		}
-		
-		panel.setVisible( true );
 		
 		return panel;
 	}
@@ -637,6 +638,35 @@ public class SettingPanel extends JPanel
 										catch (ConfigParameterException e1)
 										{
 											e1.printStackTrace();
+										}
+									}
+								});
+								
+								sp.addMouseWheelListener( new MouseWheelListener() 
+								{				
+									@Override
+									public void mouseWheelMoved(MouseWheelEvent e) 
+									{
+										if( e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL )
+										{
+											try
+											{	
+												JSpinner sp = (JSpinner)e.getSource();
+												
+												int d = e.getWheelRotation();
+												
+												if( d > 0 )
+												{
+													sp.setValue( sp.getModel().getPreviousValue() );
+												}
+												else
+												{
+													sp.setValue( sp.getModel().getNextValue() );
+												}	
+											}
+											catch( IllegalArgumentException ex )
+											{												
+											}
 										}
 									}
 								});
@@ -908,7 +938,7 @@ public class SettingPanel extends JPanel
 						default:
 						{
 							break;
-					}
+						}
 					}
 				}
 			}

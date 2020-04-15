@@ -29,8 +29,12 @@ import java.util.List;
 
 import org.jfugue.theory.Note;
 
+import GUI.game.component.event.SpriteEvent;
+import GUI.game.component.event.SpriteEventListener;
 import image.icon.MusicInstrumentIcons;
 import music.IROTrack;
+import statistic.GameStatistic;
+import statistic.GameStatistic.FieldType;
 
 public class NoteSprite extends AbstractSprite
 { 	
@@ -312,7 +316,7 @@ public class NoteSprite extends AbstractSprite
 	 * @see GUI.components.ISprite#updateSprite()
 	 */
 	@Override
-	public void updateSpecificSprite() 
+	protected void updateSpecificSprite() 
 	{
 		double t = 0;
 		
@@ -332,5 +336,4 @@ public class NoteSprite extends AbstractSprite
 	{
 		return this.isGhost;
 	}
-	
 }

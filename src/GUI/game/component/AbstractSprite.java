@@ -24,17 +24,15 @@ package GUI.game.component;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.event.EventListenerList;
 
-import GUI.game.component.event.MouseSpriteEvent;
-import GUI.game.component.event.MouseSpriteEventListener;
 import GUI.game.component.event.SpriteEvent;
 import GUI.game.component.event.SpriteEventListener;
-import control.inputs.IInputAction;
+import statistic.GameStatistic;
+import statistic.GameStatistic.FieldType;
 
 public abstract class AbstractSprite implements ISprite 
 {
@@ -46,22 +44,10 @@ public abstract class AbstractSprite implements ISprite
 	protected Dimension spriteSize;
 	
 	protected EventListenerList listenerList;
-	
+
 	private Rectangle frameBounds;
 	
 	private boolean onScreen = false;
-	
-	/*
-	public AbstractSprite() 
-	{
-		this.screenLoc = new Point2D.Double( );
-		this.zIndex = 0;
-		this.ID = getClass().getSimpleName();
-		this.spriteSize = new Dimension( 50, 50 );
-		
-		this.listenerList = new EventListenerList();
-	}
-	*/
 	
 	public AbstractSprite( String idSprite )
 	{		
@@ -160,23 +146,9 @@ public abstract class AbstractSprite implements ISprite
 	{
 		this.listenerList.remove( SpriteEventListener.class, listener );
 	}
-	
-	/*
-	@Override
-	public void addMouseSpriteEventListener(MouseSpriteEventListener listener)
-	{
-		this.listenerList.add( MouseSpriteEventListener.class, listener );
-	}
-	
-	@Override
-	public void removeMouseSpriteEventListener(MouseSpriteEventListener listener)
-	{
-		this.listenerList.remove( MouseSpriteEventListener.class, listener );
-	}
-	*/
-	
+		
 	private synchronized void fireSceneEvent( int typeEvent )
-	{
+	{		
 		SpriteEvent event = new SpriteEvent( this, typeEvent );
 
 		SpriteEventListener[] listeners = this.listenerList.getListeners( SpriteEventListener.class );
@@ -187,27 +159,6 @@ public abstract class AbstractSprite implements ISprite
 		}
 	}
 	
-	/*
-	private synchronized void fireMouseEvent( MouseEvent mouseEvent )
-	{
-		MouseSpriteEvent event = new MouseSpriteEvent( this, mouseEvent );
-
-		MouseSpriteEventListener[] listeners = this.listenerList.getListeners( MouseSpriteEventListener.class );
-
-		for (int i = 0; i < listeners.length; i++ ) 
-		{
-			listeners[ i ].MouseSpriteEvent( event );
-		}
-	}
-	*/
-	
-	/*
-	 * (non-Javadoc)
-	 * @see GUI.components.ISprite#getSprite()
-	 */
-	@Override
-	public abstract BufferedImage getSprite();
-
 	@Override
 	public void setFrameBounds(Rectangle bounds) 
 	{
@@ -239,17 +190,7 @@ public abstract class AbstractSprite implements ISprite
 			}
 		}
 	}
-	
-	/*
-	public void CheckMouseEvent( MouseEvent event )
-	{
-		if( event != null )
-		{
-			this.fireMouseEvent( event );
-		}
-	}
-	*/
-	
+		
 	@Override
 	public Rectangle getBounds()
 	{
@@ -263,5 +204,13 @@ public abstract class AbstractSprite implements ISprite
 	}
 	
 	protected abstract void updateSpecificSprite();
-
+	
+	
+	/*
+	 * (non-Javadoc)
+	 * @see GUI.components.ISprite#getSprite()
+	 */
+	@Override
+	public abstract BufferedImage getSprite();
+	
 }

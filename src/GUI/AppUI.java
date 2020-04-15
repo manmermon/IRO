@@ -25,9 +25,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import GUI.panel.SettingPanel;
-import GUI.panel.inputDevicePanel;
+import GUI.panel.InputDevicePanel;
 import config.language.Language;
 import config.language.TranslateComponents;
 
@@ -91,7 +92,7 @@ public class AppUI extends JFrame
 			this.panelMain.setLayout( new GridLayout( 0, 2 ) );
 			
 			this.panelMain.add( this.getSettingPanel() );
-			this.panelMain.add( inputDevicePanel.getInstance( this ) );
+			this.panelMain.add( InputDevicePanel.getInstance( this ) );
 		}
 		
 		return this.panelMain;
@@ -307,14 +308,37 @@ public class AppUI extends JFrame
 			
 			TranslateComponents.add( this.btnPlay, Language.getAllCaptions().get( Language.PLAY ) );
 			
-			this.btnPlay.setFocusable( false );
+			//this.btnPlay.setFocusable( false );
 			
 			this.btnPlay.addActionListener( new ActionListener() 
 			{				
 				@Override
 				public void actionPerformed(ActionEvent e) 
 				{
-					GuiManager.getInstance().playLevel();
+					try
+					{
+						JButton b = (JButton)e.getSource();
+						b.requestFocus();
+												
+						GameManager.getInstance().playLevel();
+					} 
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+						
+						String msg = "";
+						
+						if( ex.getCause() != null )
+						{
+							msg = ex.getCause().toString();
+						}
+
+						msg += "\n" +ex.getMessage();
+						
+						JOptionPane.showMessageDialog( ui, msg 
+														, Language.getLocalCaption( Language.ERROR )
+														, JOptionPane.ERROR_MESSAGE );
+					}
 				}
 			});
 		}

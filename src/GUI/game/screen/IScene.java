@@ -1,6 +1,7 @@
 package GUI.game.screen;
 
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.List;
 
 import GUI.game.component.Frame;
@@ -28,10 +29,12 @@ public interface IScene
 	
 	public void removeAllSprites();
 		
-	public List< ISprite > getSprites( String idSprite );
-		
-	public int getNumberOfSprites( String idSprite );
+	public List< ISprite > getSprites( String idSprite, boolean onlyOnScreen );
 	
+	public List< ISprite > getAllSprites( boolean onlyOnScreen );
+	
+	public int getNumberOfSprites( String idSprite );
+		
 	public void updateLevel();
 	
 	public Frame getScene();	

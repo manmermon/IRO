@@ -32,8 +32,12 @@ import java.util.TreeSet;
 import org.jfugue.midi.MidiDictionary;
 import org.jfugue.theory.Note;
 
+import GUI.game.component.event.SpriteEvent;
+import GUI.game.component.event.SpriteEventListener;
 import image.icon.MusicInstrumentIcons;
 import music.IROTrack;
+import statistic.GameStatistic;
+import statistic.GameStatistic.FieldType;
 
 public class TrackNotesSprite extends AbstractSprite
 { 	
@@ -61,7 +65,7 @@ public class TrackNotesSprite extends AbstractSprite
 		
 	private boolean isGhost = false;
 	
-	//private IROChord chord;
+	private Point2D.Double previousLocation = null;
 	
 	private List< IROTrack > noteTracks;
 	
@@ -151,6 +155,31 @@ public class TrackNotesSprite extends AbstractSprite
 		this.isPlay = false;
 		
 		this.isGhost = ghost;
+		
+		super.addSpriteEventListener( new SpriteEventListener()
+		{	
+			@Override
+			public void SpriteEvent(SpriteEvent ev)
+			{				
+				switch ( ev.getType()  )
+				{
+					case SpriteEvent.ON_SCREEN:
+					{
+						GameStatistic.add( FieldType.NOTE_SHOW );
+						break;
+					}
+					case SpriteEvent.OUTPUT_SCREEN:
+					{
+						GameStatistic.add( FieldType.NOTE_REMOVE );
+						break;
+					}
+					default:
+					{
+						break;
+					}
+				}
+			}
+		});
 	}
 	
 	public void setTempo( int bpm )
@@ -248,6 +277,14 @@ public class TrackNotesSprite extends AbstractSprite
 		this.color = c;
 	}
 	
+	/**
+	 * @return the color
+	 */
+	public Color getColor()
+	{
+		return this.color;
+	}
+	
 	public void setPlayed( boolean played )
 	{
 		this.isPlay = played;
@@ -317,7 +354,7 @@ public class TrackNotesSprite extends AbstractSprite
 	 * @see GUI.components.ISprite#updateSprite()
 	 */
 	@Override
-	public void updateSpecificSprite() 
+	protected void updateSpecificSprite() 
 	{
 		double t = 0;
 		
@@ -327,10 +364,23 @@ public class TrackNotesSprite extends AbstractSprite
 		}
 		
 		double update = this.shiftVelocity * t * this.shiftDirection;
+		
+		if( this.previousLocation == null )
+		{
+			this.previousLocation = new Point2D.Double( super.screenLoc.x, super.screenLoc.y );
+		}
+		
+		this.previousLocation = this.getNoteLocation();
+		
 		super.screenLoc.x += update;
 		
 		
 		this.time = System.nanoTime();
+	}
+	
+	public Point2D.Double getPreviousNoteLocation()
+	{
+		return this.previousLocation;
 	}
 
 	public boolean isGhost() 

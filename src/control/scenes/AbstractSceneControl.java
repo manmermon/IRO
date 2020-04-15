@@ -5,18 +5,19 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.JButton;
 import javax.swing.event.EventListenerList;
 
-import GUI.GuiManager;
+import GUI.GameManager;
 import GUI.game.component.Background;
 import GUI.game.component.Frame;
 import GUI.game.screen.IScene;
+import control.controller.IInputable;
+import control.events.InputActionEvent;
 import control.events.SceneEvent;
 import control.events.SceneEventListener;
-import control.inputs.IInputAction;
-import control.inputs.IInputable;
 import exceptions.SceneException;
 import image.basicPainter2D;
 import stoppableThread.AbstractStoppableThread;
@@ -26,13 +27,16 @@ import stoppableThread.IStoppableThread;
  * @author manuel
  *
  */
-public abstract class AbstractSceneControl extends AbstractStoppableThread implements ISceneControl
+public abstract class AbstractSceneControl extends AbstractStoppableThread 
+										implements ISceneControl
 {
 	protected IScene scene;
 	
 	private EventListenerList listenerList;
 	
 	private Class sceneClass = null;
+	
+	private AtomicInteger sceneState = new AtomicInteger( ISceneControl.SCENE_STATE_NEW );
 	
 	/**
 	 * @throws SceneException 
@@ -56,6 +60,20 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread imple
 		}
 		
 		this.sceneClass = sclass;
+	}
+	
+	/*(non-Javadoc)
+	 * @see @see stoppableThread.AbstractStoppableThread#preStart()
+	 */
+	@Override
+	protected void preStart() throws Exception
+	{
+		synchronized ( this.sceneState )
+		{
+			this.sceneState.set( ISceneControl.SCENE_STATE_RUNNING );
+		}
+
+		super.preStart();
 	}
 	
 	/*
@@ -132,14 +150,12 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread imple
 		this.setInputables( this.scene );		
 	}
 	
-	
-	
 	/*
 	 * (non-Javadoc)
 	 * @see @see control.scenes.ISceneControl#updateScene(control.inputs.IInputAction)
 	 */
 	@Override
-	public void updateScene( IInputAction act ) throws SceneException
+	public void updateScene( InputActionEvent act ) throws SceneException
 	{	
 		this.specificUpdateScene( act );
 		
@@ -168,6 +184,18 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread imple
 		}
 	}
 	
+	/*(non-Javadoc)
+	 * @see @see stoppableThread.AbstractStoppableThread#runExceptionManager(java.lang.Exception)
+	 */
+	@Override
+	protected void runExceptionManager(Exception e)
+	{
+		if( !( e instanceof InterruptedException ) )
+		{
+			super.runExceptionManager(e);
+		}
+	}
+	
 	/**
 	 * 
 	 * @param fr
@@ -178,7 +206,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread imple
 		
 		fr.setRequestFocusEnabled( true );
 		
-		GuiManager.getInstance().setGameFrame( fr );
+		GameManager.getInstance().setGameFrame( fr );
 		
 		fr.requestFocusInWindow();
 	}
@@ -219,6 +247,15 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread imple
 		}
 	}
 	
+	/*(non-Javadoc)
+	 * @see @see control.scenes.ISceneControl#startScene()
+	 */
+	@Override
+	public void startScene() throws Exception
+	{
+		super.startThread();
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see control.ISceneControl#destroyScene()
@@ -233,6 +270,18 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread imple
 		}
 	}
 	
+	/*(non-Javadoc)
+	 * @see @see control.scenes.ISceneControl#getSceneState()
+	 */
+	@Override
+	public int getSceneState()
+	{
+		synchronized ( this.sceneState )
+		{
+			return this.sceneState.get();
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see @see stoppableThread.AbstractStoppableThread#cleanUp()
@@ -240,6 +289,11 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread imple
 	@Override
 	protected void cleanUp() throws Exception 
 	{
+		synchronized ( this.sceneState )
+		{
+			this.sceneState.set( ISceneControl.SCENE_STATE_END );
+		}
+		
 		super.cleanUp();
 
 		this.specificCleanUp();
@@ -301,7 +355,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread imple
 	 * @param act
 	 * @throws SceneException
 	 */
-	protected abstract  void specificUpdateScene( IInputAction act ) throws SceneException;
+	protected abstract  void specificUpdateScene( InputActionEvent act ) throws SceneException;
 	
 	/**
 	 * 
