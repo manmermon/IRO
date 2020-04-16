@@ -73,7 +73,7 @@ public class GameManager
 	
 	public void updateSetting()
 	{
-		AppUI.getInstance().loadSetting();
+		MainAppUI.getInstance().loadSetting();
 	}
 	
 	public void setGameFrame( Frame fr )
@@ -198,7 +198,7 @@ public class GameManager
 			GameStatistic.setPlayerID( playerID );
 			
 			this.gameWindow = new GameWindow();
-			this.gameWindow.setIconImage( AppUI.getInstance().getIconImage() );
+			this.gameWindow.setIconImage( MainAppUI.getInstance().getIconImage() );
 				
 			par = ConfigApp.getParameter( ConfigApp.INPUT_MIN_VALUE );
 			double min = ((Number)par.getSelectedValue()).doubleValue();
@@ -253,7 +253,7 @@ public class GameManager
 			
 			File fileSong = new File( songs[ 0 ] );
 			
-			this.gameWindow.setTitle( AppUI.getInstance().getTitle() + ": " + fileSong.getName() );
+			this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() + ": " + fileSong.getName() );
 			
 			Level level = LevelFactory.getLevel( fileSong, screenBounds, actionTime, recoverTime );
 	
@@ -267,7 +267,7 @@ public class GameManager
 			
 			this.gameWindow.putControllerListener();
 			
-			AppUI.getInstance().setVisible( false );
+			MainAppUI.getInstance().setVisible( false );
 			
 			this.gameWindow.setVisible( true );
 			
@@ -281,7 +281,7 @@ public class GameManager
 				this.gameWindow = null;
 			}
 			
-			AppUI.getInstance().setVisible( true );
+			MainAppUI.getInstance().setVisible( true );
 
 			throw ex;
 		}
@@ -306,6 +306,6 @@ public class GameManager
 		
 		ConfigApp.saveStatistic();
 		
-		AppUI.getInstance().setVisible( true );
+		MainAppUI.getInstance().setVisible( true );
 	}
 }

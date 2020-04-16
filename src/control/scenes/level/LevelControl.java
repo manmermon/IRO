@@ -49,9 +49,7 @@ import control.events.BackgroundMusicEvent;
 public class LevelControl extends AbstractSceneControl 
 							implements BackgroundMusicEventListener
 										, FretEventListener
-{
-	private MusicPlayerControl soundCtrl;
-		
+{		
 	private AtomicBoolean actionDone;
 	private boolean backgroundMusicEnd = false;
 	private Color preactionColor = Color.RED;
@@ -97,27 +95,15 @@ public class LevelControl extends AbstractSceneControl
 			this.waitActionColor = (Color)ConfigApp.getParameter( ConfigApp.WAITING_ACTION_COLOR).getSelectedValue();
 			this.actionColor = (Color)ConfigApp.getParameter( ConfigApp.ACTION_COLOR).getSelectedValue();
 			
-			this.soundCtrl = new MusicPlayerControl( ((Level)this.scene).getBackgroundPattern() );
-			this.soundCtrl.addBackgroundMusicEvent( this );
+			MusicPlayerControl.getInstance().setBackgroundMusicPatter( ( ((Level)this.scene).getBackgroundPattern() ) );
+			MusicPlayerControl.getInstance().addBackgroundMusicEvent( this );
 		}
 		else
 		{
 			throw new SceneException( "Level null" );
 		}
 	} 
-	
-	/*
-	 * (non-Javadoc)
-	 * @see @see control.scenes.AbstractSceneControl#startUp()
-	 */
-	@Override
-	protected void startUp() throws Exception 
-	{
-		super.startUp();
-			
-		this.soundCtrl.startThread();			
-	}
-	
+		
 	/*
 	 * (non-Javadoc)
 	 * @see @see control.scenes.AbstractSceneControl#updatedLoopAfterSetScene()
@@ -179,8 +165,16 @@ public class LevelControl extends AbstractSceneControl
 			this.actionDone.set( false );
 
 			if( !noteTracks.isEmpty() )
-			{		
-				this.soundCtrl.playNotes( noteTracks );					
+			{	
+				try
+				{
+					MusicPlayerControl.getInstance().playNotes( noteTracks );
+				} 
+				catch (Exception ex)
+				{
+					// TODO Auto-generated catch block
+					ex.printStackTrace();
+				}					
 			}				
 		}
 	}
@@ -236,7 +230,14 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	public void specificDestroyScene()
 	{
-		this.soundCtrl.stopThread( IStoppableThread.FORCE_STOP );
+		try
+		{
+			MusicPlayerControl.getInstance().stopMusic();
+		} 
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 	
 	/*(non-Javadoc)
@@ -245,14 +246,6 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	protected void specificCleanUp()
 	{
-		
-		if( this.soundCtrl != null )
-		{
-			this.soundCtrl.stopThread( IStoppableThread.FORCE_STOP );
-		}
-		
-		this.soundCtrl =  null;
-				
 		this.actionDone = null;
 	}
 

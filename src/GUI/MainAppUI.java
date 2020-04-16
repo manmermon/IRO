@@ -36,7 +36,7 @@ import javax.swing.JButton;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 
-public class AppUI extends JFrame 
+public class MainAppUI extends JFrame 
 {
 	/**
 	 * 
@@ -44,7 +44,7 @@ public class AppUI extends JFrame
 
 	private static final long serialVersionUID = 5759856279333189057L;
 
-	private static AppUI ui;
+	private static MainAppUI ui;
 	
 	public static final String ID_MAIN_MENU = "MAIN_MENU";
 	public static final String ID_PAUSE_MENU = "PAUSE_MENU";
@@ -66,17 +66,17 @@ public class AppUI extends JFrame
 	/**
 	 * Create the frame.
 	 */
-	public static AppUI getInstance()
+	public static MainAppUI getInstance()
 	{
 		if( ui == null )
 		{
-			ui = new AppUI();
+			ui = new MainAppUI();
 		}
 		
 		return ui;
 	}
 	
-	private AppUI() 
+	private MainAppUI() 
 	{
 		super.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		super.setBounds(100, 100, 450, 300);

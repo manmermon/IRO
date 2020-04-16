@@ -2,7 +2,7 @@ package control;
 
 import javax.swing.JOptionPane;
 
-import GUI.AppUI;
+import GUI.MainAppUI;
 import GUI.GameManager;
 import GUI.game.screen.IScene;
 import config.language.Language;
@@ -159,7 +159,7 @@ public class ScreenControl extends AbstractStoppableThread
 				{
 					ex.printStackTrace();
 					
-					JOptionPane.showMessageDialog( AppUI.getInstance()
+					JOptionPane.showMessageDialog( MainAppUI.getInstance()
 													, ex.getMessage()
 													, Language.getLocalCaption( Language.ERROR )
 													, JOptionPane.ERROR_MESSAGE );

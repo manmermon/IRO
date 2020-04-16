@@ -27,7 +27,7 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
 import GUI.AppIcon;
-import GUI.AppUI;
+import GUI.MainAppUI;
 import GUI.OpeningDialog;
 import GUI.TextAreaPrintStream;
 import config.ConfigApp;
@@ -78,11 +78,11 @@ public class MainLaunchApp
 
 	private static void createApplication() throws Throwable
 	{
-		AppUI ui = createAppGUI();		
+		MainAppUI ui = createAppGUI();		
 		createAppCoreControl( ui );
 	}
 
-	private static void createAppCoreControl( AppUI ui )
+	private static void createAppCoreControl( MainAppUI ui )
 	{
 		try
 		{
@@ -105,13 +105,13 @@ public class MainLaunchApp
 		}
 	}
 
-	private static AppUI createAppGUI() throws Exception
+	private static MainAppUI createAppGUI() throws Exception
 	{	
 		Language.changeLanguage( "es-es" );
 		
 		Dimension openDim = new Dimension( 500, 200 );
 		
-		AppUI ui = AppUI.getInstance();
+		MainAppUI ui = MainAppUI.getInstance();
 		
 		Toolkit t = Toolkit.getDefaultToolkit();
 		Dimension dm = t.getScreenSize();

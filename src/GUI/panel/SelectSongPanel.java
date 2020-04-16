@@ -12,28 +12,44 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.jfugue.midi.MidiParser;
+import org.jfugue.midi.MidiParserListener;
+import org.jfugue.pattern.Pattern;
+import org.staccato.StaccatoParser;
+import org.staccato.StaccatoParserListener;
+
+import GUI.game.screen.level.BackgroundMusic;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.language.Language;
 import config.language.TranslateComponents;
+import control.music.MusicPlayerControl;
 import exceptions.ConfigParameterException;
+import image.basicPainter2D;
 
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Sequence;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 
 public class SelectSongPanel extends JPanel
 {
@@ -48,6 +64,7 @@ public class SelectSongPanel extends JPanel
 	private JPanel panelSelectedSongs;
 	private JPanel panelUpDownControl;
 	private JPanel panelMoveCtr;
+	private JPanel panelSongInfo;
 	
 	private JTable tableSongList;
 	private JTable tableSelectedSongList;
@@ -57,14 +74,20 @@ public class SelectSongPanel extends JPanel
 	private JButton btnClear;
 	private JButton buttonUp;
 	private JButton buttonDown;
-		
+	private JButton btPlayStopSong;
+	
+	private JLabel lbSongInfo;
+	
+	private Pattern pattern = null;
+	
 	public SelectSongPanel( )
 	{
 		super.setLayout( new BorderLayout() );
 		
+		this.add( this.getSongInfoPanel(), BorderLayout.NORTH);
 		this.add( this.getContainerPanel(), BorderLayout.CENTER);
 		
-		File f = new File( "./sheets/" );
+		File f = new File( ConfigApp.SONG_FILE_PATH );
 		
 		try
 		{
@@ -144,6 +167,96 @@ public class SelectSongPanel extends JPanel
 		
 		return songs;
 	}
+	
+	private JPanel getSongInfoPanel()
+	{
+		if( this.panelSongInfo == null )
+		{
+			this.panelSongInfo = new JPanel( new BorderLayout() );
+			
+			this.panelSongInfo.setBorder( BorderFactory.createTitledBorder( Language.getLocalCaption( Language.SONG ) ) );
+			
+			TranslateComponents.add( this.panelSongInfo, Language.getAllCaptions().get( Language.SONG ) );	
+			
+			this.panelSongInfo.add( this.getSongInfoLabel(), BorderLayout.CENTER );
+			this.panelSongInfo.add( this.getPlayStopSongButton(), BorderLayout.WEST);
+		}
+		
+		return this.panelSongInfo;
+	}
+	
+	private JLabel getSongInfoLabel()
+	{
+		if( this.lbSongInfo == null )
+		{
+			this.lbSongInfo = new JLabel();
+		}
+		
+		return this.lbSongInfo;
+	}
+	
+	private JButton getPlayStopSongButton()
+	{
+		if( this.btPlayStopSong == null )
+		{
+			this.btPlayStopSong = new JButton();
+			
+			this.btPlayStopSong.setIcon( new ImageIcon( basicPainter2D.triangle( 16, 1, Color.BLACK, Color.GREEN,  basicPainter2D.EAST ) ) );
+			
+			this.btPlayStopSong.setBorder( BorderFactory.createRaisedSoftBevelBorder() );
+			
+			this.btPlayStopSong.addActionListener( new ActionListener()
+			{				
+				private Pattern patternCopy = null;
+				private boolean played = false;
+				
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					JButton b = (JButton)e.getSource();
+					
+					if( pattern != null )
+					{
+						BackgroundMusic bgm = new BackgroundMusic();
+						bgm.setPattern( pattern );
+						
+						boolean play = ( patternCopy == null ) 
+										|| ( pattern != patternCopy );								
+						patternCopy = pattern;
+						
+						try
+						{							
+							MusicPlayerControl.getInstance().stopMusic();
+							b.setIcon( new ImageIcon( basicPainter2D.triangle( 16, 1, Color.BLACK, Color.GREEN, basicPainter2D.EAST ) ) );
+							
+							if( !played || play )
+							{	
+								b.setIcon( new ImageIcon( basicPainter2D.rectangle( 16, 16, 1, Color.BLACK, Color.ORANGE ) ) );
+								
+								MusicPlayerControl.getInstance().setBackgroundMusicPatter( bgm );
+								MusicPlayerControl.getInstance().startMusic();
+								
+								played = true;
+							}
+							else
+							{
+								played = false;
+							}
+						}
+						catch (Exception ex)
+						{
+							// TODO Auto-generated catch block
+							ex.printStackTrace();
+						}
+						 
+					}
+				}
+			});
+		}
+		
+		return this.btPlayStopSong;
+	}
+	
 	
 	private JPanel getContainerPanel()
 	{
@@ -376,6 +489,8 @@ public class SelectSongPanel extends JPanel
 			this.tableSongList.setPreferredScrollableViewportSize( this.tableSongList.getPreferredSize() );
 			this.tableSongList.setFillsViewportHeight( true );
 			
+			this.addSelectionListenerTable( this.tableSongList );
+			
 		}
 		
 		return this.tableSongList;
@@ -394,6 +509,8 @@ public class SelectSongPanel extends JPanel
 			
 			this.tableSelectedSongList.setPreferredScrollableViewportSize( this.tableSelectedSongList.getPreferredSize() );
 			this.tableSelectedSongList.setFillsViewportHeight( true );
+			
+			this.addSelectionListenerTable( this.tableSelectedSongList );
 			
 			this.tableSelectedSongList.getModel().addTableModelListener( new TableModelListener()
 			{	
@@ -425,6 +542,71 @@ public class SelectSongPanel extends JPanel
 		}
 		
 		return this.tableSelectedSongList;
+	}
+	
+	private void addSelectionListenerTable( final JTable table)
+	{
+		if( table != null )
+		{
+			table.getSelectionModel().addListSelectionListener( new ListSelectionListener()
+			{	
+				@Override
+				public void valueChanged(ListSelectionEvent arg0)
+				{	
+					int sel = table.getSelectedRow();
+					
+					if( MusicPlayerControl.getInstance().isPlay() )
+					{
+						getPlayStopSongButton().doClick();
+					}
+					
+					if( sel >= 0 )
+					{
+						String info = "";
+						try
+						{
+							String song = table.getValueAt( sel, 0 ).toString();
+							
+							File midiMusicSheelFile = new File( song );
+							
+							StaccatoParserListener listener = new StaccatoParserListener();
+							
+							MidiParser parser = new MidiParser();
+							parser.addParserListener( listener );
+							parser.parse( MidiSystem.getSequence( midiMusicSheelFile ) );
+							
+							StaccatoParser staccatoParser = new StaccatoParser();
+							MidiParserListener midiParserListener = new MidiParserListener();
+							staccatoParser.addParserListener( midiParserListener );
+							staccatoParser.parse( listener.getPattern() );
+							
+							pattern = listener.getPattern();
+							
+							Sequence sequence = midiParserListener.getSequence();
+								
+							long millis = sequence.getMicrosecondLength(); //micros
+							String time = String.format("%02d:%02d:%02d", 
+													TimeUnit.MICROSECONDS.toHours(millis),
+													TimeUnit.MICROSECONDS.toMinutes(millis) -  
+													TimeUnit.HOURS.toMinutes(TimeUnit.MICROSECONDS.toHours(millis)), // The change is in this line
+													TimeUnit.MICROSECONDS.toSeconds(millis) - 
+													TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(millis)));
+						
+							info = midiMusicSheelFile.getName() + "; " + time + "; " + Language.getLocalCaption( Language.TRACK ) 
+									+ " " + sequence.getTracks().length;
+							
+						}
+						catch( Exception ex )
+						{							
+						}
+						finally
+						{
+							getSongInfoLabel().setText( "    " + info );
+						}
+					}
+				}
+			});
+		}
 	}
 	
 	private JPanel getPanelControl() 

@@ -74,6 +74,8 @@ public class ConfigApp
 
 	private static final String DB_PATH = "./user/db/data.db";
 	
+	public static final String SONG_FILE_PATH = "./sheets/";
+	
 	public static final Tuple< Integer, Integer > playerPicSize = new Tuple<Integer, Integer>( 100, 100 );
 	
 	public static final Tuple< Integer, Integer > playerPicSizeIcon = new Tuple<Integer, Integer>( 48, 48 );

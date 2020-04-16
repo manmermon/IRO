@@ -2,8 +2,7 @@ package control.music;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sound.midi.MidiUnavailableException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import GUI.game.screen.level.BackgroundMusic;
 import control.events.BackgroundMusicEventListener;
@@ -20,15 +19,44 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	
 	private List< IROTrack > patternList;
 	
-	public MusicPlayerControl( BackgroundMusic backgroundMusicPattern ) throws MidiUnavailableException
+	private static MusicPlayerControl mpctr = null;
+	
+	private AtomicBoolean isPlay = new AtomicBoolean( false );
+	
+	private MusicPlayerControl( )
 	{	
-		//this.realPlayer = new RealtimePlayer();
-		
-		this.backgroundMusic = backgroundMusicPattern;
-		
 		this.patternList = new ArrayList< IROTrack >();
 		
-		super.setName( this.getClass().getSimpleName() );		
+		super.setName( this.getClass().getSimpleName() );	
+		
+		try
+		{
+			super.startThread();
+		} 
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
+	}
+	
+	public static MusicPlayerControl getInstance()
+	{
+		if( mpctr == null )
+		{
+			mpctr = new MusicPlayerControl();
+		}
+		
+		return mpctr;
+	}
+	
+	public void setBackgroundMusicPatter( BackgroundMusic backgroundMusicPattern )
+	{
+		if( this.backgroundMusic != null )
+		{
+			this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
+		}
+		
+		this.backgroundMusic = backgroundMusicPattern;				
 	}
 	
 	public void addBackgroundMusicEvent( BackgroundMusicEventListener listener ) 
@@ -49,30 +77,51 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	{	
 	}
 	
-	/*
-	@Override
-	protected void preStart() throws Exception 
+	public void startMusic( ) throws Exception 
 	{
-		super.preStart();
-	}
-	*/
-	
-	@Override
-	protected void startUp( ) throws Exception 
-	{
-		super.startUp();
+		synchronized( this.patternList )
+		{
+			if( this.iroPlayer != null )
+			{
+				this.iroPlayer.stop();
+				this.iroPlayer = null;
+			}
+		}
 		
 		if( this.backgroundMusic != null )
 		{						
-			this.backgroundMusic.startThread();
-		}		
-		
-		if( this.iroPlayer != null )
-		{
-			this.iroPlayer.stop();
+			this.isPlay.set( true );
+			this.backgroundMusic.startThread();						
+			this.iroPlayer = new IROPlayer();
 		}
-		
-		this.iroPlayer = new IROPlayer();
+	}
+	
+	public void stopMusic( ) throws Exception 
+	{
+		synchronized( this.patternList )
+		{
+			if( this.iroPlayer != null )
+			{
+				this.iroPlayer.stop();
+				this.iroPlayer = null;
+			}
+			
+			if( this.backgroundMusic != null )
+			{						
+				this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
+			}
+			
+			this.isPlay.set( false );
+			this.patternList.clear();
+		}
+	}
+	
+	public boolean isPlay()
+	{
+		synchronized( this.patternList )
+		{
+			return this.isPlay.get();
+		}
 	}
 	
 	@Override
@@ -84,7 +133,10 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			
 			synchronized( this.patternList )
 			{
-				this.iroPlayer.play( this.patternList );
+				if( this.iroPlayer != null )
+				{
+					this.iroPlayer.play( this.patternList );
+				}
 				
 				this.patternList.clear();
 			}
@@ -110,35 +162,16 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
 			this.backgroundMusic = null;
 		}
-		
-		if( this.iroPlayer != null )
+				
+		synchronized( this.patternList )
 		{
-			this.iroPlayer.stop();			
-		}
-		this.iroPlayer = null;
-		
-		/*
-		Set< Thread > threads = Thread.getAllStackTraces().keySet();
-		
-		for( Thread thread : threads )
-		{				
-			boolean del = false;
-			
-			for( StackTraceElement el : thread.getStackTrace() )
+			if( this.iroPlayer != null )
 			{
-				if( el.getFileName() != null && el.getFileName().equals( "RealtimeMidiParserListener.java" ) )
-				{
-					del = true;
-					break;
-				}
+				this.iroPlayer.stop();
 			}
 			
-			if( del )
-			{
-				thread.stop();
-			}
-		}
-		*/
+			this.iroPlayer = null;
+		}	
 	}
 		
 	public void playNotes( IROTrack track )

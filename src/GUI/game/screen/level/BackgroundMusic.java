@@ -61,7 +61,10 @@ public class BackgroundMusic extends AbstractStoppableThread
 	{	
 		if( friendliness == IStoppableThread.FORCE_STOP )
 		{
-			this.player.getManagedPlayer().finish();
+			if( this.player != null )
+			{
+				this.player.getManagedPlayer().finish();
+			}
 		}
 	}
 

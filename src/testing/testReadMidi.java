@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
@@ -32,7 +33,7 @@ public class testReadMidi
 
 	public static void main(String[] args) throws Exception 
 	{
-		String path = "G:\\Sync_datos\\WorkSpace\\GitHub\\IRO\\IRO\\src\\sheets\\zelda.mid";
+		String path = "./sheets/zelda.mid";
 		//String path = "G:\\Sync_datos\\WorkSpace\\GitHub\\IRO\\IRO\\src\\sheets\\tes7.mid";
 		File midiMusicSheelFile = new File( path );
 
@@ -44,13 +45,26 @@ public class testReadMidi
 		parser.addParserListener( listener );
 		parser.parse( MidiSystem.getSequence( midiMusicSheelFile ) );        
 
+		System.out.println("testReadMidi.main() " + listener.getPattern() );
+		
 		StaccatoParser staccatoParser = new StaccatoParser();
 		MidiParserListener midiParserListener = new MidiParserListener();
 		staccatoParser.addParserListener( midiParserListener );
 		staccatoParser.parse( listener.getPattern() );
 		Sequence sequence = midiParserListener.getSequence();
 
+		long millis = sequence.getMicrosecondLength(); //micros
+		String time = String.format("%02d:%02d:%02d", 
+								TimeUnit.MICROSECONDS.toHours(millis),
+								TimeUnit.MICROSECONDS.toMinutes(millis) -  
+								TimeUnit.HOURS.toMinutes(TimeUnit.MICROSECONDS.toHours(millis)), // The change is in this line
+								TimeUnit.MICROSECONDS.toSeconds(millis) - 
+								TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(millis)));
+		
+		
 		System.out.println("testReadMidi.main() " + listener.getPattern() );
+		System.out.println("testReadMidi.main() " + time );
+		
 		
 		int trackNumber = 0;        
 		Map< Integer,  ArrayTreeMap< Long, Note > > noteChannels = new HashMap< Integer,  ArrayTreeMap< Long, Note > >();

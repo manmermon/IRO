@@ -107,6 +107,8 @@ public class Language
 	
 	public static final String TIME_INPUT_TARGET = "TIME_INPUT_TARGET";
 	
+	public static final String TRACK = "TRACK";
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
@@ -291,6 +293,10 @@ public class Language
 		cap = new Caption( CHANGE_PLAYER, defaultLanguage, "Change player" );
 		cap.setCaption( esEs, "Cambiar de jugador" );
 		captions.put( CHANGE_PLAYER, cap );
+		
+		cap = new Caption( TRACK, defaultLanguage, "Tracks" );
+		cap.setCaption( esEs, "Pistas" );
+		captions.put( TRACK, cap );
 	}
 
 	public static void loadLanguages() 
