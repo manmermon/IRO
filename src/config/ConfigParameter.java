@@ -20,6 +20,8 @@ public class ConfigParameter
 	private NumberRange _rng = null;
 	private int _userID = Player.ANONYMOUS_USER_ID;
 	
+	private int priority = 0;
+	
 	public ConfigParameter( Caption id, ParameterType type ) throws ConfigParameterException
 	{
 		if( id == null )
@@ -45,6 +47,22 @@ public class ConfigParameter
 		this._rng = range;
 		this._options = new ArrayList< Object >();
 		this._selectedValue = null;
+	}
+	
+	/**
+	 * @return the priority
+	 */
+	public int getPriority()
+	{
+		return this.priority;
+	}
+	
+	/**
+	 * @param priority the priority to set
+	 */
+	public void setPriority(int priority)
+	{
+		this.priority = priority;
 	}
 	
 	public void addOption( Object value ) throws ConfigParameterException

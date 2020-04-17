@@ -204,6 +204,7 @@ public class ConfigApp
 			Caption id = Language.getAllCaptions().get( Language.CONTROLLER );
 			id.setID( SELECTED_CONTROLLER );
 			ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
+			par.setPriority(  Integer.MAX_VALUE );
 			
 			listUserConfig.put( SELECTED_CONTROLLER, par ); 
 		} 
@@ -218,6 +219,7 @@ public class ConfigApp
 		Caption id = new Caption( PLAYER, Language.defaultLanguage, Language.getCaption( Language.defaultLanguage, Language.PLAYER ) );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.USER );		
 		par.setSelectedValue( new Player() );		
+		par.setPriority( Integer.MAX_VALUE );
 		
 		listUserConfig.put( PLAYER, par );
 	}
@@ -251,6 +253,7 @@ public class ConfigApp
 		par.addAllOptions( Langs );
 		
 		par.setSelectedValue( Language.getCurrentLanguage() );
+		par.setPriority( 0 );
 		
 		listUserConfig.put( LANGUAGE, par );
 	}
@@ -262,6 +265,7 @@ public class ConfigApp
 		NumberRange rng = new NumberRange( 0.5, Double.MAX_VALUE );
 		ConfigParameter par = new ConfigParameter( id, rng );
 		par.setSelectedValue( 2D );
+		par.setPriority( 2 );
 		
 		
 		listUserConfig.put( REACTION_TIME, par );
@@ -274,6 +278,7 @@ public class ConfigApp
 		NumberRange rng = new NumberRange( 0, Double.MAX_VALUE );
 		ConfigParameter par = new ConfigParameter( id, rng );
 		par.setSelectedValue( 0D );
+		par.setPriority( 6 );
 		
 		listUserConfig.put( TIME_IN_INPUT_TARGET, par );
 	}
@@ -285,6 +290,7 @@ public class ConfigApp
 		NumberRange rng = new NumberRange( 0.5, Double.MAX_VALUE );
 		ConfigParameter par = new ConfigParameter( id, rng );
 		par.setSelectedValue( 2D );
+		par.setPriority( 3 );
 				
 		listUserConfig.put( RECOVER_TIME, par );
 	}
@@ -312,6 +318,7 @@ public class ConfigApp
 			ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
 			par.addAllOptions( colors );
 			par.setSelectedValue( Color.red );
+			par.setPriority( 7 );
 			listUserConfig.put( PREACTION_COLOR, par );
 			
 			id = getCaptions( Language.WAITING_ACTION_COLOR);
@@ -321,6 +328,7 @@ public class ConfigApp
 			colors.add( 0, Color.blue );
 			par.addAllOptions( colors );
 			par.setSelectedValue( Color.blue );
+			par.setPriority( 8 );
 			listUserConfig.put( WAITING_ACTION_COLOR, par );
 			
 			id = getCaptions( Language.ACTION_COLOR );
@@ -330,6 +338,7 @@ public class ConfigApp
 			colors.add( 0, Color.green );
 			par.addAllOptions( colors );
 			par.setSelectedValue( Color.green );
+			par.setPriority( 9 );
 			listUserConfig.put( ACTION_COLOR, par );
 		}
 		catch ( ConfigParameterException e) 
@@ -346,6 +355,7 @@ public class ConfigApp
 			id.setID( SONG_LIST );
 			
 			ConfigParameter par = new ConfigParameter( id, ParameterType.SONG );
+			par.setPriority( Integer.MAX_VALUE - 1 );
 			
 			listUserConfig.put( SONG_LIST, par );
 		}
@@ -361,11 +371,12 @@ public class ConfigApp
 		{	
 			Caption id = getCaptions( Language.SELECTED_CHANNEL );
 			id.setID( INPUT_SELECTED_CHANNEL );
-			
+						
 			NumberRange r = new NumberRange( 1D, Double.MAX_VALUE);
 			
 			ConfigParameter par = new ConfigParameter( id, r );
 			par.setSelectedValue( 1D );
+			par.setPriority( 1 );
 			
 			listUserConfig.put( INPUT_SELECTED_CHANNEL, par );
 		}
@@ -386,8 +397,11 @@ public class ConfigApp
 			
 			ConfigParameter parMin = new ConfigParameter( idMin, ParameterType.NUMBER );
 			parMin.setSelectedValue(  0D );
+			parMin.setPriority( 4 );
+			
 			ConfigParameter parMax = new ConfigParameter( idMax, ParameterType.NUMBER );
 			parMax.setSelectedValue( 100D );
+			parMax.setPriority( 5 );
 			
 			listUserConfig.put( INPUT_MIN_VALUE, parMin );
 			listUserConfig.put( INPUT_MAX_VALUE, parMax );

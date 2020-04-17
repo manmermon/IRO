@@ -148,14 +148,14 @@ public class SettingPanel extends JPanel
 		
 		Collection< ConfigParameter > parameters = ConfigApp.getParameters();
 		
-		ArrayTreeMap< ParameterType, ConfigParameter > orderPars = new ArrayTreeMap< ParameterType, ConfigParameter>();
+		ArrayTreeMap< Integer, ConfigParameter > orderPars = new ArrayTreeMap< Integer, ConfigParameter>();
 		for( ConfigParameter p : parameters )
 		{
-			orderPars.put( p.get_type(), p );
+			orderPars.put( p.getPriority(), p );
 		}
 		
 		List< ConfigParameter > pars = new ArrayList<ConfigParameter>();
-		for( ParameterType t : orderPars.keySet() )			
+		for( Integer t : orderPars.keySet() )			
 		{
 			for( ConfigParameter p : orderPars.get( t ) )
 			{

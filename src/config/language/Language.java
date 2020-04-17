@@ -53,7 +53,8 @@ public class Language
 	public static final String MUSIC_LIST = "MUSIC_LIST";
 	public static final String SELECTED_SONG_LIST = "SELECTED_SONG_LIST";
 	
-	public static final String SONG = "SONG"; 
+	public static final String SONG = "SONG";
+	public static final String SONGS = "SONGS";
 	public static final String PLAYER = "PLAYER";
 	public static final String NAME = "NAME";
 	public static final String ANONYMOUS = "ANONYMOUS"; 
@@ -142,9 +143,13 @@ public class Language
 		cap.setCaption( esEs, "Canciones seleccionadas" );
 		captions.put( SELECTED_SONG_LIST, cap );
 		
-		cap = new Caption( SONG, defaultLanguage, "Song(s)" );
-		cap.setCaption( esEs, "Canción(es)" );
+		cap = new Caption( SONG, defaultLanguage, "Song" );
+		cap.setCaption( esEs, "Canción" );
 		captions.put( SONG, cap );
+		
+		cap = new Caption( SONGS, defaultLanguage, "Songs" );
+		cap.setCaption( esEs, "Canciones" );
+		captions.put( SONGS, cap );
 		
 		cap = new Caption( PLAYER, defaultLanguage, "Player" );
 		cap.setCaption( esEs, "Jugador" );

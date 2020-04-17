@@ -40,7 +40,6 @@ import control.music.MusicPlayerControl;
 import control.scenes.AbstractSceneControl;
 import exceptions.SceneException;
 import music.IROTrack;
-import stoppableThread.IStoppableThread;
 import control.controller.ControllerManager;
 import control.controller.KeystrokeAction;
 import control.controller.MouseStrokeAction;
@@ -95,7 +94,7 @@ public class LevelControl extends AbstractSceneControl
 			this.waitActionColor = (Color)ConfigApp.getParameter( ConfigApp.WAITING_ACTION_COLOR).getSelectedValue();
 			this.actionColor = (Color)ConfigApp.getParameter( ConfigApp.ACTION_COLOR).getSelectedValue();
 			
-			MusicPlayerControl.getInstance().setBackgroundMusicPatter( ( ((Level)this.scene).getBackgroundPattern() ) );
+			MusicPlayerControl.getInstance().setBackgroundMusicPatter( (((Level)this.scene).getBackgroundPattern() ) );
 			MusicPlayerControl.getInstance().addBackgroundMusicEvent( this );
 		}
 		else
@@ -103,6 +102,20 @@ public class LevelControl extends AbstractSceneControl
 			throw new SceneException( "Level null" );
 		}
 	} 
+	
+	/*
+	 * (non-Javadoc)
+	 * @see @see control.scenes.AbstractSceneControl#startUp()
+	 */
+	@Override
+	protected void startUp() throws Exception 
+	{
+		super.startUp();
+
+		MusicPlayerControl.getInstance().startMusic();			
+	}
+
+
 		
 	/*
 	 * (non-Javadoc)
