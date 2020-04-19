@@ -26,10 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import GUI.game.component.Fret;
-import GUI.game.component.ISprite;
-import GUI.game.component.TrackNotesSprite;
 import GUI.game.component.event.FretEventListener;
+import GUI.game.component.sprite.Fret;
+import GUI.game.component.sprite.ISprite;
+import GUI.game.component.sprite.InputGoal;
+import GUI.game.component.sprite.MusicNoteGroup;
+import GUI.game.component.sprite.Score;
 import GUI.game.screen.IScene;
 import GUI.game.screen.level.Level;
 import config.ConfigApp;
@@ -112,11 +114,9 @@ public class LevelControl extends AbstractSceneControl
 	{
 		super.startUp();
 
-		MusicPlayerControl.getInstance().startMusic();			
+		MusicPlayerControl.getInstance().startMusic();
 	}
 
-
-		
 	/*
 	 * (non-Javadoc)
 	 * @see @see control.scenes.AbstractSceneControl#updatedLoopAfterSetScene()
@@ -138,7 +138,7 @@ public class LevelControl extends AbstractSceneControl
 
 			for( ISprite __Note : Notes )
 			{
-				TrackNotesSprite note = (TrackNotesSprite) __Note;
+				MusicNoteGroup note = (MusicNoteGroup) __Note;
 
 				if( fret.isNoteIntoFret( note ) )
 				{	
@@ -151,6 +151,11 @@ public class LevelControl extends AbstractSceneControl
 						{
 							note.setSelected( true );
 							note.setColor( this.actionColor );
+							
+							for( ISprite score : this.scene.getSprites( IScene.SCORE_ID, true ) )
+							{
+								((Score)score).incrementScore();
+							}							
 						}
 					}
 					else if( !note.isSelected() )
@@ -287,7 +292,7 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	public void FretEvent(GUI.game.component.event.FretEvent ev)
 	{
-		TrackNotesSprite note = ev.getNote();
+		MusicNoteGroup note = ev.getNote();
 		
 		if( note != null && !note.isGhost() )
 		{
@@ -302,4 +307,16 @@ public class LevelControl extends AbstractSceneControl
 		}
 	}
 
+	public void updateInputGoal( double percentage )
+	{
+		if( this.scene != null )
+		{
+			List< ISprite > targets = this.scene.getSprites( IScene.INPUT_TARGET_ID, true );
+			
+			for( ISprite tg : targets )
+			{
+				((InputGoal)tg).setPercentage( percentage );
+			}
+		}
+	}
 }

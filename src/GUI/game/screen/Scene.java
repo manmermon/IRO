@@ -11,9 +11,9 @@ import java.util.Collections;
 import java.util.List;
 
 import GUI.game.component.Frame;
-import GUI.game.component.ISprite;
 import GUI.game.component.event.SpriteEvent;
 import GUI.game.component.event.SpriteEventListener;
+import GUI.game.component.sprite.ISprite;
 import general.ArrayTreeMap;
 import image.basicPainter2D;
 

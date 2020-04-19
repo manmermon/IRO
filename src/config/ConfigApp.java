@@ -75,6 +75,8 @@ public class ConfigApp
 	private static final String DB_PATH = "./user/db/data.db";
 	
 	public static final String SONG_FILE_PATH = "./sheets/";
+	public static final String BACKGROUND_SPRITE_FILE_PATH = "./resources/background/";
+	public static final String NOTE_SPRITE_FILE_PATH = "./resources/note/";
 	
 	public static final Tuple< Integer, Integer > playerPicSize = new Tuple<Integer, Integer>( 100, 100 );
 	
@@ -658,7 +660,7 @@ public class ConfigApp
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					try
 					{
-						BufferedImage scaleImg = basicPainter2D.convertToBufferedImage( img.getScaledInstance( ConfigApp.playerPicSize.x, ConfigApp.playerPicSize.y, BufferedImage.SCALE_SMOOTH ) );
+						BufferedImage scaleImg = basicPainter2D.copyImage( img.getScaledInstance( ConfigApp.playerPicSize.x, ConfigApp.playerPicSize.y, BufferedImage.SCALE_SMOOTH ) );
 						ImageIO.write( scaleImg, "png", bos );
 						imageBytes = bos.toByteArray();
 					}

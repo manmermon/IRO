@@ -19,7 +19,7 @@
  *   Project's URL: https://github.com/manmermon/IRO
  */
 
-package GUI.game.component;
+package GUI.game.component.sprite;
 
 import java.awt.Color;
 import java.awt.Polygon;
@@ -40,7 +40,9 @@ public class Fret extends AbstractSprite
 	private Polygon fret;
 	
 	private int fretWidth = 100;
-		
+
+	private Color fretFillColor;
+	
 	public Fret( Pentragram pen, String id ) 
 	{
 		super( id );
@@ -56,6 +58,8 @@ public class Fret extends AbstractSprite
 		this.fret.addPoint( fretWidth, this.pentagram.getPentagramHeigh() );
 		this.fret.addPoint( 0, this.pentagram.getPentagramHeigh() );
 		
+		this.fretFillColor = new Color( 255, 255, 255, 160 );
+		
 	}
 	
 	public int getFretWidth()
@@ -63,7 +67,7 @@ public class Fret extends AbstractSprite
 		return this.fretWidth;
 	}
 	
-	public boolean isNoteIntoFret( TrackNotesSprite note )
+	public boolean isNoteIntoFret( MusicNoteGroup note )
 	{
 		Point2D.Double prevLoc = note.getPreviousNoteLocation();
 		Point2D.Double currentLoc = note.getNoteLocation();
@@ -134,9 +138,17 @@ public class Fret extends AbstractSprite
 	@Override
 	public BufferedImage getSprite() 
 	{		 
+		/*
 		int xs[] = new int[] { 0, this.fret.getBounds().width, this.fret.getBounds().width, 0 };
 		int ys[] = new int[] { 0, 0, this.fret.getBounds().height, this.fret.getBounds().height };
 		return (BufferedImage)basicPainter2D.outlinePolygon( xs, ys, 2, Color.BLACK, null );
+		//*/
+		
+		Rectangle r = this.fret.getBounds();
+		
+		return (BufferedImage)basicPainter2D.rectangle( r.width, r.height, 3
+														, this.fretFillColor
+														, this.fretFillColor );
 	}
 
 	/*
@@ -158,7 +170,7 @@ public class Fret extends AbstractSprite
 		super.listenerList.remove( FretEventListener.class, listener );
 	}
 	
-	private synchronized void fireFretEvent( int typeEvent, TrackNotesSprite note )
+	private synchronized void fireFretEvent( int typeEvent, MusicNoteGroup note )
 	{
 		switch ( typeEvent )
 		{

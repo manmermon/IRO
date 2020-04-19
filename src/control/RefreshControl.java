@@ -35,7 +35,7 @@ public class RefreshControl extends AbstractStoppableThread
 	
 	//private InputAction inAction;
 	
-	private RefreshControl() throws Exception
+	private RefreshControl()
 	{
 		super.setName( this.getClass().getSimpleName() );
 		
@@ -43,7 +43,12 @@ public class RefreshControl extends AbstractStoppableThread
 		this.waitTime = (long)( 1000 / this.FPS );		
 	}
 	
-	public static RefreshControl getInstance() throws Exception
+	public double getFPS()
+	{
+		return this.FPS;
+	}
+	
+	public static RefreshControl getInstance()
 	{
 		if( drawCtr == null )
 		{

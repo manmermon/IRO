@@ -6,9 +6,9 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import GUI.game.component.Background;
-import GUI.game.component.ISprite;
-import GUI.game.component.SpriteButtom;
+import GUI.game.component.sprite.Background;
+import GUI.game.component.sprite.ISprite;
+import GUI.game.component.sprite.Buttom;
 import GUI.game.screen.Scene;
 import config.language.Language;
 import control.controller.IInputable;
@@ -32,7 +32,7 @@ public class MainMenuScreen extends Scene implements IInputable
 										, MainMenuScreen.BACKGROUND_ID );
 		
 		
-		SpriteButtom btOption = new SpriteButtom( BUTTON_SPRITE_ID );
+		Buttom btOption = new Buttom( BUTTON_SPRITE_ID );
 		btOption.setSize( btSize );
 		btOption.setZIndex( MainMenuScreen.PLANE_NOTE );
 		Point2D.Double loc = new Point2D.Double( d.width / 4, d.height / 3 );

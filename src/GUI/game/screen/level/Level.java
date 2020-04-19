@@ -26,10 +26,10 @@ import java.util.List;
 
 import org.jfugue.midi.MidiDefaults;
 
-import GUI.game.component.Fret;
-import GUI.game.component.ISprite;
-import GUI.game.component.Pentragram;
-import GUI.game.component.TrackNotesSprite;
+import GUI.game.component.sprite.Fret;
+import GUI.game.component.sprite.ISprite;
+import GUI.game.component.sprite.Pentragram;
+import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.screen.Scene;
 
 public class Level extends Scene 
@@ -61,7 +61,7 @@ public class Level extends Scene
 		super.add( sprite, PLANE_BRACKGROUND );
 	}
 	
-	public void addNote( TrackNotesSprite sprite )
+	public void addNote( MusicNoteGroup sprite )
 	{
 		sprite.setZIndex( PLANE_NOTE );
 		super.add( sprite, PLANE_NOTE );
@@ -95,13 +95,13 @@ public class Level extends Scene
 		return (Pentragram)pen.get( 0 ); 
 	}
 	
-	public List< TrackNotesSprite > getNotes()
+	public List< MusicNoteGroup > getNotes()
 	{
 		List< ISprite > sprites = this.SPRITES.get( PLANE_NOTE );
-		List< TrackNotesSprite > notes = new ArrayList< TrackNotesSprite >( );
+		List< MusicNoteGroup > notes = new ArrayList< MusicNoteGroup >( );
 		for( ISprite sprite : sprites )
 		{
-			notes.add( (TrackNotesSprite)sprite );
+			notes.add( (MusicNoteGroup)sprite );
 		}
 		
 		return notes;

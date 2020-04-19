@@ -10,6 +10,7 @@ import control.events.InputActionEvent;
 import control.events.InputActionListerner;
 import control.events.SceneEventListener;
 import control.scenes.ISceneControl;
+import control.scenes.level.LevelControl;
 import exceptions.SceneException;
 import statistic.GameStatistic;
 import statistic.GameStatistic.FieldType;
@@ -219,6 +220,17 @@ public class ScreenControl extends AbstractStoppableThread
 		if( ev != null )
 		{
 			this.inAction = ev;
+		}
+	}
+
+	public void setUpdateLevelInputGoal( double percent )
+	{
+		synchronized ( this )
+		{
+			if( this.sceneCtrl != null && this.sceneCtrl instanceof LevelControl )
+			{
+				((LevelControl)this.sceneCtrl).updateInputGoal( percent );
+			}
 		}
 	}
 }

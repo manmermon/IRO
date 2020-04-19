@@ -18,64 +18,74 @@
  *   
  *   Project's URL: https://github.com/manmermon/IRO
  */
-package GUI.game.component;
+
+package GUI.game.component.sprite;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.Buffer;
+
+import javax.imageio.ImageIO;
 
 import image.basicPainter2D;
 
-public class Pentragram extends AbstractSprite
+public class Background extends AbstractSprite 
 {
-	private Dimension dimension;
-	private int numLines = 7; 
-	private int wayHeight;
+	private Dimension size;
+	private BufferedImage pic = null;
 	
-	public Pentragram( Dimension panelSize, String id ) 
+	public Background( Dimension d, String id, String file ) 
 	{
 		super( id );
 		
-		this.dimension = panelSize;
+		this.size = new Dimension( d );
 		
-		this.wayHeight = this.dimension.height / this.numLines;
+		try
+		{
+			if( file != null )
+			{
+				Image img = ImageIO.read( new File( file ) );
+				img = img.getScaledInstance( this.size.width
+											, this.size.height
+											, Image.SCALE_SMOOTH );
+				
+				this.pic = (BufferedImage)basicPainter2D.copyImage( img );
+			}
+		}
+		catch (IOException ex)
+		{	
+		}
 	}
-	
-	public int getPentagramHeigh()
-	{
-		return this.dimension.height;
-	}
-	
-	public int getPentragramWidth()
-	{
-		return this.dimension.width;
-	}
-	
-	public int getRailHeight()
-	{
-		return this.dimension.height / this.numLines;
-	}
-	
 
+	public Background( BufferedImage bg, String id )
+	{
+		super( id );
+		
+		if( bg == null )
+		{
+			throw new IllegalArgumentException( "Input null." );
+		}
+		
+		this.size = new Dimension( bg.getWidth(), bg.getHeight() );
+
+		this.pic = bg;
+	}
+	
 	@Override
 	public BufferedImage getSprite() 
 	{
-		int railLoc = this.wayHeight / 2;
-		int railThinck = railLoc / 10;
-		if( railThinck < 1 )
+		Image back = this.pic;
+		
+		if( back == null )
 		{
-			railThinck = 1;
+			basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
 		}
 		
-		BufferedImage pen = (BufferedImage)basicPainter2D.createEmptyCanva( this.dimension.width, this.dimension.height, null );
-		
-		for( int i = 0; i < this.numLines; i++ )
-		{
-			basicPainter2D.line( 0, i * this.wayHeight + railLoc - railThinck / 2
-												, this.dimension.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, Color.BLACK, pen );
-		}
-		
-		return pen;
+		return (BufferedImage)back;
 	}
 
 	@Override

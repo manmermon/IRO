@@ -298,6 +298,22 @@ public class IROTrack
 		return this.notes;
 	}
 	
+	public double getStartTime()
+	{
+		double t = -1;
+		 
+		if( this.notes.isEmpty() )
+		{
+			Double val = this.notes.getFirstKey();
+			if( val != null )
+			{
+				t = val.doubleValue();
+			}
+		}
+		
+		return t;
+	}
+	
 	public Pattern getPatternTrackSheet()
 	{	
 		return PatternTools.createPattern( this.tempo, this.voiceID, this.instrument, this.notes );

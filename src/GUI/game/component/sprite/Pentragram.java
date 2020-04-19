@@ -18,52 +18,64 @@
  *   
  *   Project's URL: https://github.com/manmermon/IRO
  */
-
-package GUI.game.component;
+package GUI.game.component.sprite;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import image.basicPainter2D;
 
-public class Background extends AbstractSprite 
+public class Pentragram extends AbstractSprite
 {
-	private Dimension size;
-	private BufferedImage pic = null;
+	private Dimension dimension;
+	private int numLines = 7; 
+	private int wayHeight;
 	
-	public Background( Dimension d, String id ) 
+	public Pentragram( Dimension panelSize, String id ) 
 	{
 		super( id );
 		
-		this.size = new Dimension( d );
-	}
-
-	public Background( BufferedImage bg, String id )
-	{
-		super( id );
+		this.dimension = panelSize;
 		
-		if( bg == null )
-		{
-			throw new IllegalArgumentException( "Input null." );
-		}
-		
-		this.size = new Dimension( bg.getWidth(), bg.getHeight() );
-
-		this.pic = bg;
+		this.wayHeight = this.dimension.height / this.numLines;
 	}
 	
+	public int getPentagramHeigh()
+	{
+		return this.dimension.height;
+	}
+	
+	public int getPentragramWidth()
+	{
+		return this.dimension.width;
+	}
+	
+	public int getRailHeight()
+	{
+		return this.dimension.height / this.numLines;
+	}
+	
+
 	@Override
 	public BufferedImage getSprite() 
 	{
-		Image back = this.pic;
-		
-		if( back == null )
+		int railLoc = this.wayHeight / 2;
+		int railThinck = railLoc / 10;
+		if( railThinck < 1 )
 		{
-			basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
+			railThinck = 1;
 		}
-		return (BufferedImage)back;
+		
+		BufferedImage pen = (BufferedImage)basicPainter2D.createEmptyCanva( this.dimension.width, this.dimension.height, null );
+		
+		for( int i = 0; i < this.numLines; i++ )
+		{
+			basicPainter2D.line( 0, i * this.wayHeight + railLoc - railThinck / 2
+												, this.dimension.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, Color.BLACK, pen );
+		}
+		
+		return pen;
 	}
 
 	@Override

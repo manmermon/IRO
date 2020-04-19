@@ -11,8 +11,8 @@ import javax.swing.JButton;
 import javax.swing.event.EventListenerList;
 
 import GUI.GameManager;
-import GUI.game.component.Background;
 import GUI.game.component.Frame;
+import GUI.game.component.sprite.Background;
 import GUI.game.screen.IScene;
 import control.controller.IInputable;
 import control.events.InputActionEvent;
@@ -299,7 +299,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 		this.specificCleanUp();
 		
 		this.scene.removeAllSprites();
-		Background fin = new Background( this.scene.getSize(), "FIN" ) 
+		Background fin = new Background( this.scene.getSize(), "FIN", null ) 
 		{				
 			@Override
 			public BufferedImage getSprite() 

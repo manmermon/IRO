@@ -1,4 +1,4 @@
-package GUI.game.component;
+package GUI.game.component.sprite;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -20,7 +20,7 @@ import control.controller.IInputable;
 import control.events.InputActionEvent;
 import image.basicPainter2D;
 
-public class SpriteButtom extends AbstractSprite implements IInputable
+public class Buttom extends AbstractSprite implements IInputable
 {	
 	private RoundRectangle2D poly;
 	private RoundRectangle2D screenPoly;
@@ -40,7 +40,7 @@ public class SpriteButtom extends AbstractSprite implements IInputable
 	 */
 	private String text;
 	
-	public SpriteButtom( String id )
+	public Buttom( String id )
 	{
 		super( id );
 		

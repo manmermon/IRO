@@ -69,9 +69,12 @@ public class ControllerManager
 	
 	public void setEnableControllerListener( boolean ena )
 	{
-		for( IInputControllerListener listener : controller.getListener() )
+		if( controller != null )
 		{
-			listener.enableProcessInputControllerEvent( ena );
+			for( IInputControllerListener listener : controller.getListener() )
+			{
+				listener.enableProcessInputControllerEvent( ena );
+			}
 		}
 	}
 		

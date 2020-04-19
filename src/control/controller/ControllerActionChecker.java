@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.event.EventListenerList;
 
+import control.ScreenControl;
 import control.events.IInputControllerListener;
 import control.events.InputActionEvent;
 import control.events.InputActionListerner;
@@ -92,7 +93,7 @@ public class ControllerActionChecker implements IInputControllerListener
 					this.statistic++;
 				}
 
-				boolean done = true;
+				double timerPercentage = 100;
 
 				if( this.targetTime > 0 )
 				{
@@ -108,11 +109,11 @@ public class ControllerActionChecker implements IInputControllerListener
 						t = ( System.nanoTime() - this.refTime ) / 1e9D;
 					}
 
-					done = ( t  >= this.targetTime );						
-				} 
+					timerPercentage = 100 * t  / this.targetTime;						
+				}				
 
-				if( done )
-				{
+				if( timerPercentage >= 100 )
+				{	
 					if( this.statistic == 1 )
 					{
 						GameStatistic.add( FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
@@ -127,8 +128,14 @@ public class ControllerActionChecker implements IInputControllerListener
 					{	
 						this.archievedTarget.set( true );
 						
-						this.fireActionEvent( InputActionEvent.ACTION_DONE );
+						ScreenControl.getInstance().setUpdateLevelInputGoal( 100 );
+						
+						this.fireActionEvent( InputActionEvent.ACTION_DONE );						
 					}
+				}
+				else
+				{
+					ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage );
 				}
 				
 				this.recoverLevelReported = false;
@@ -151,6 +158,7 @@ public class ControllerActionChecker implements IInputControllerListener
 				if( this.archievedTarget.getAndSet( false ) && this.enable )
 				{		
 					this.fireActionEvent( InputActionEvent.RECOVER_DONE );
+					ScreenControl.getInstance().setUpdateLevelInputGoal( 0 );
 				}
 				
 				if( !this.recoverLevelReach.getAndSet( true ) )

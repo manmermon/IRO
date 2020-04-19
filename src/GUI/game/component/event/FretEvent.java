@@ -5,7 +5,7 @@ package GUI.game.component.event;
 
 import java.util.EventObject;
 
-import GUI.game.component.TrackNotesSprite;
+import GUI.game.component.sprite.MusicNoteGroup;
 
 /**
  * @author Manuel Merino Monge
@@ -21,14 +21,14 @@ public class FretEvent extends EventObject
 	
 	private int typeEvent;
 	
-	private TrackNotesSprite trackNote;
+	private MusicNoteGroup trackNote;
 	
-	public FretEvent( Object source, TrackNotesSprite note ) 
+	public FretEvent( Object source, MusicNoteGroup note ) 
 	{
 		this( source, note, NOTE_OUT_BOUNDS );
 	}
 	
-	public FretEvent( Object source, TrackNotesSprite note, int type ) 
+	public FretEvent( Object source, MusicNoteGroup note, int type ) 
 	{
 		super( source );
 		
@@ -41,7 +41,7 @@ public class FretEvent extends EventObject
 		return this.typeEvent;
 	}
 
-	public TrackNotesSprite getNote()
+	public MusicNoteGroup getNote()
 	{
 		return this.trackNote;
 	}

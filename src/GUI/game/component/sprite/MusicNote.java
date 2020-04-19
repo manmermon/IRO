@@ -19,17 +19,14 @@
  *   Project's URL: https://github.com/manmermon/IRO
  */
 
-package GUI.game.component;
+package GUI.game.component.sprite;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 
-import org.jfugue.midi.MidiDictionary;
 import org.jfugue.theory.Note;
 
 import GUI.game.component.event.SpriteEvent;
@@ -39,7 +36,7 @@ import music.IROTrack;
 import statistic.GameStatistic;
 import statistic.GameStatistic.FieldType;
 
-public class TrackNotesSprite extends AbstractSprite
+public class MusicNote extends AbstractSprite
 { 	
 	public static final int REST = -1;
 	public static final int SI = 0;
@@ -65,7 +62,7 @@ public class TrackNotesSprite extends AbstractSprite
 		
 	private boolean isGhost = false;
 	
-	private Point2D.Double previousLocation = null;
+	//private IROChord chord;
 	
 	private List< IROTrack > noteTracks;
 	
@@ -111,13 +108,13 @@ public class TrackNotesSprite extends AbstractSprite
 	}
 	*/
 	
-	public TrackNotesSprite( String track, List< IROTrack > Notes, String noteID, Pentragram pen, int initLoc ,double shiftVel, boolean ghost ) 
+	public MusicNote( String track, List< IROTrack > Notes, String noteID, Pentragram pen, int initLoc ,double shiftVel, boolean ghost ) 
 	{
 		super( noteID );
 		
 		this.noteTracks = new ArrayList< IROTrack >();
 		this.noteTracks.addAll( Notes );	
-						
+				
 		this.pentagram = pen;		
 		this.shiftVelocity = shiftVel;
 			
@@ -155,31 +152,6 @@ public class TrackNotesSprite extends AbstractSprite
 		this.isPlay = false;
 		
 		this.isGhost = ghost;
-		
-		super.addSpriteEventListener( new SpriteEventListener()
-		{	
-			@Override
-			public void SpriteEvent(SpriteEvent ev)
-			{				
-				switch ( ev.getType()  )
-				{
-					case SpriteEvent.ON_SCREEN:
-					{
-						GameStatistic.add( FieldType.NOTE_SHOW );
-						break;
-					}
-					case SpriteEvent.OUTPUT_SCREEN:
-					{
-						GameStatistic.add( FieldType.NOTE_REMOVE );
-						break;
-					}
-					default:
-					{
-						break;
-					}
-				}
-			}
-		});
 	}
 	
 	public void setTempo( int bpm )
@@ -277,14 +249,6 @@ public class TrackNotesSprite extends AbstractSprite
 		this.color = c;
 	}
 	
-	/**
-	 * @return the color
-	 */
-	public Color getColor()
-	{
-		return this.color;
-	}
-	
 	public void setPlayed( boolean played )
 	{
 		this.isPlay = played;
@@ -327,22 +291,20 @@ public class TrackNotesSprite extends AbstractSprite
 		{	
 			if( !this.noteTracks.isEmpty() )
 			{	
-				Set< Byte > instruments = new TreeSet< Byte >();
+				String instrument = "";
 				for( IROTrack track : this.noteTracks )
 				{
-					Byte val = MidiDictionary.INSTRUMENT_STRING_TO_BYTE.get( track.getInstrument().toUpperCase() );
-					if( val == null )
+					if( instrument.isEmpty() )
 					{
-						val = Byte.MIN_VALUE;
+						instrument = track.getInstrument();
 					}
-					
-					instruments.add( val );
+					else if( !instrument.equalsIgnoreCase( track.getInstrument() ) )
+					{
+						instrument += track.getInstrument();
+					}
 				}
 				
-				List< Byte > l = new ArrayList< Byte >();
-				l.addAll( instruments );
-				
-				pic = (BufferedImage)MusicInstrumentIcons.getInstrument( l, this.noteScreenSize, this.color );
+				pic = (BufferedImage)MusicInstrumentIcons.getInstrument( instrument, this.noteScreenSize, this.color );
 			}			
 		}
 		
@@ -364,28 +326,14 @@ public class TrackNotesSprite extends AbstractSprite
 		}
 		
 		double update = this.shiftVelocity * t * this.shiftDirection;
-		
-		if( this.previousLocation == null )
-		{
-			this.previousLocation = new Point2D.Double( super.screenLoc.x, super.screenLoc.y );
-		}
-		
-		this.previousLocation = this.getNoteLocation();
-		
 		super.screenLoc.x += update;
 		
 		
 		this.time = System.nanoTime();
-	}
-	
-	public Point2D.Double getPreviousNoteLocation()
-	{
-		return this.previousLocation;
 	}
 
 	public boolean isGhost() 
 	{
 		return this.isGhost;
 	}
-	
 }

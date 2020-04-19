@@ -112,4 +112,18 @@ public class MusicSheet
 			voice++;
 		}
 	}
+
+	public double getDuration()
+	{
+		double t = 0;
+		for( IROTrack track : this.tracks.values() )
+		{
+			if( t < ( track.getStartTime() + track.getTrackDuration() ) )
+			{
+				t = track.getTrackDuration() + track.getStartTime();
+			}
+		}
+		
+		return t;
+	}
 }
