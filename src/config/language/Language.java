@@ -110,6 +110,9 @@ public class Language
 	
 	public static final String TRACK = "TRACK";
 	
+	public static final String BACKGROUND = "BACKGROUND";
+	public static final String NOTE = "NOTE";
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
@@ -118,6 +121,14 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( NOTE, defaultLanguage, "Note" );
+		cap.setCaption( esEs, "Nota");
+		captions.put( NOTE, cap );
+		
+		cap = new Caption( BACKGROUND, defaultLanguage, "Background" );
+		cap.setCaption( esEs, "Fondo");
+		captions.put( BACKGROUND, cap );
 		
 		cap = new Caption( LANGUAGE_TXT, defaultLanguage, "Language" );
 		cap.setCaption( esEs, "Idioma");

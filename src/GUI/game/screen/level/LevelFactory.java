@@ -27,6 +27,7 @@ import GUI.game.component.sprite.Score;
 import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.screen.IScene;
 import config.ConfigApp;
+import config.ConfigParameter;
 import general.ArrayTreeMap;
 import general.NumberRange;
 import io.IROMusicParserListener;
@@ -65,7 +66,15 @@ public class LevelFactory
 			lv = new Level( screenSize );
 			lv.setBPM( tempo );
 
-			Background back = new Background( screenSize, IScene.BACKGROUND_ID, ConfigApp.BACKGROUND_SPRITE_FILE_PATH + "006.jpeg" );
+			ConfigParameter par = ConfigApp.getParameter( ConfigApp.BACKGROUND_IMAGE );
+			Object bg = par.getSelectedValue();
+			String path = null;
+			if( bg != null )
+			{
+				path = bg.toString();
+			}
+					
+			Background back = new Background( screenSize, IScene.BACKGROUND_ID, path );
 			back.setZIndex( -1 );
 			lv.addBackgroud( back );
 
@@ -308,6 +317,14 @@ public class LevelFactory
 				backgroundPattern.add( track.getPatternTrackSheet() );
 			}
 			
+			par = ConfigApp.getParameter( ConfigApp.NOTE_IMAGE);
+			Object nt = par.getSelectedValue();
+			path = null;
+			if( nt != null )
+			{
+				path = nt.toString();
+			}
+			
 			for( NumberRange rng : musicSheetPlay.getSegments().keySet() )
 			{	
 				double initTimeTrack = rng.getMin() * timeWhole;
@@ -347,7 +364,8 @@ public class LevelFactory
 														, screenPos
 														, vel
 														, false
-														, ConfigApp.NOTE_SPRITE_FILE_PATH + "001.png");
+														, path 
+														);
 
 				noteSprite.setZIndex( 1 );
 				lv.addNote( noteSprite );

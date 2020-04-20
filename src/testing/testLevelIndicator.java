@@ -64,20 +64,22 @@ public class testLevelIndicator extends JFrame
 		this.contentPane.add( level4, BorderLayout.SOUTH );
 		//*/
 		
-		/*
-		LevelProgressIndicator progLevel = new LevelProgressIndicator( -100, 100, new double[] { -80, 80 } );
+		//*
+		double min = -.9, max = -.85, l1 = -.89, l2 = -.87;
+		LevelProgressIndicator progLevel = new LevelProgressIndicator(  );
+		
 		progLevel.setInset( new Insets( 0, 20, 0, 20 ));
 		progLevel.setEditable( true );
 		
-		LevelProgressIndicator progLevel2 = new LevelProgressIndicator( -100, 100, new double[] { -80, 80 } );
+		LevelProgressIndicator progLevel2 = new LevelProgressIndicator( min, max, new double[] { l1, l2 } );
 		progLevel2.setEditable( true );
 		progLevel2.setOrientation( LevelProgressIndicator.VERTICAL );
 		
-		LevelProgressIndicator progLevel3 = new LevelProgressIndicator( -100, 100, new double[] { -80, 80 } );
+		LevelProgressIndicator progLevel3 = new LevelProgressIndicator( min, max, new double[] { l1, l2 } );
 		progLevel3.setEditable( true );
 		progLevel3.setInverted( true );
 		
-		LevelProgressIndicator progLevel4 = new LevelProgressIndicator( -100, 100, new double[] { -80, 80 } );
+		LevelProgressIndicator progLevel4 = new LevelProgressIndicator( min, max, new double[] { l1, l2 } );
 		progLevel4.setEditable( true );
 		progLevel4.setOrientation( LevelProgressIndicator.VERTICAL );
 		progLevel4.setInverted( true );
@@ -89,7 +91,7 @@ public class testLevelIndicator extends JFrame
 		this.contentPane.add( progLevel4, BorderLayout.WEST );		
 		//*/
 		
-		//*
+		/*
 		LevelIndicator progLevel = new LevelIndicator( 3 );
 		progLevel.setEditable( true );
 		

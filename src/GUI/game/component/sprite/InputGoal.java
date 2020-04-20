@@ -22,11 +22,14 @@ public class InputGoal extends AbstractSprite
 	
 	private final int startAngle = 90;
 	
-	private final long reachedTargetShowingTime = 1_500_000_000 ;
+	private final double reachedTargetShowingTime = 1.5D;
 	
 	private long startTime = Long.MIN_VALUE;
 	
 	private boolean isSetStartTime = false;
+	
+	private BufferedImage reachedTarget = null;
+	
 	
 	/**
 	 * 
@@ -40,6 +43,17 @@ public class InputGoal extends AbstractSprite
 		
 		super.screenLoc.x = centerX - super.spriteSize.width / 2;
 		super.screenLoc.y = pen.getScreenLocation().y + pen.getRailHeight() / 2;
+		
+		this.reachedTarget = (BufferedImage)basicPainter2D.circle( 0, 0
+																	, super.spriteSize.width
+																	, Color.WHITE, null );
+
+		basicPainter2D.composeImage( this.reachedTarget, 0, 0 
+									, GeneralAppIcon.Correct()
+												.getImage()
+												.getScaledInstance( this.reachedTarget.getWidth()
+																	, this.reachedTarget.getHeight()
+																	, Image.SCALE_SMOOTH ) );
 	}
 	
 	/*(non-Javadoc)
@@ -58,7 +72,7 @@ public class InputGoal extends AbstractSprite
 	public BufferedImage getSprite()
 	{
 		BufferedImage sprite = null;
-				
+		
 		synchronized ( this.percentage )
 		{
 			if( this.percentage > 0 )
@@ -66,13 +80,13 @@ public class InputGoal extends AbstractSprite
 				if( percentage < 100 )
 				{
 					sprite = (BufferedImage)basicPainter2D.arc(0, 0
-							, super.spriteSize.width
-							, super.spriteSize.height
-							, this.startAngle
-							, (int)( this.startAngle - 360 * this.percentage / 100 )
-							, super.spriteSize.width / 8
-							, new Color( 130 , 255, 130 )
-							, null, null );
+															, super.spriteSize.width
+															, super.spriteSize.height
+															, this.startAngle
+															, (int)( -360 * this.percentage / 100 )
+															, super.spriteSize.width / 8
+															, new Color( 130 , 255, 130 )
+															, null, null );
 				}				
 				else if( !this.isSetStartTime )
 				{
@@ -83,26 +97,23 @@ public class InputGoal extends AbstractSprite
 			
 			if( this.isSetStartTime )
 			{
-				if( System.nanoTime() - this.startTime < this.reachedTargetShowingTime )
+				if( ( ( System.nanoTime() - this.startTime ) / 1e9D ) < this.reachedTargetShowingTime )
 				{
-				
-					sprite = (BufferedImage)basicPainter2D.circle( 0, 0
-																	, super.spriteSize.width
-																	, Color.WHITE, null );
-					
-					basicPainter2D.composeImage( sprite, 0, 0 
-												, GeneralAppIcon.Correct()
-																.getImage()
-																.getScaledInstance( sprite.getWidth()
-																					, sprite.getHeight()
-																					, Image.SCALE_SMOOTH ) );
+					if( sprite != null )
+					{
+						sprite = (BufferedImage)basicPainter2D.composeImage( basicPainter2D.copyImage( this.reachedTarget ), 0, 0, sprite );
+					}
+					else
+					{
+						sprite = this.reachedTarget;
+					}
 				}
 				else
 				{
 					this.percentage = 0D;
 					this.isSetStartTime = false;
 				}
-			}
+			}			
 		}
 		
 		return sprite;
@@ -110,11 +121,11 @@ public class InputGoal extends AbstractSprite
 
 	public void setPercentage( double percentage )
 	{
-		synchronized ( this.percentage)
+		synchronized ( this.percentage )
 		{
 			this.percentage = percentage;
 			
-			if( this.percentage == 100 && this.isSetStartTime )
+			if( this.percentage >= 100 && this.isSetStartTime )
 			{
 				this.isSetStartTime = false;
 			}

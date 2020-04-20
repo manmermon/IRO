@@ -27,6 +27,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
+
 import GUI.panel.SettingPanel;
 import GUI.panel.InputDevicePanel;
 import config.language.Language;
@@ -50,12 +52,13 @@ public class MainAppUI extends JFrame
 	public static final String ID_PAUSE_MENU = "PAUSE_MENU";
 	
 	// Panel
-	//private JPanel settingPanel;
-	private JPanel panelMain;
+	//private JPanel settingPanel;	
 	private JPanel panelSettings;
 	private JPanel panelMenu;
 	private JPanel panelPlay;
 	private JPanel panelFields;
+	
+	private JSplitPane splitPanelMain;
 	
 	
 	// Buttom	
@@ -84,18 +87,20 @@ public class MainAppUI extends JFrame
 		super.setContentPane( this.getMainPanel() );	
 	}
 	
-	private JPanel getMainPanel()
+	private JSplitPane getMainPanel()
 	{
-		if( this.panelMain == null )
+		if( this.splitPanelMain == null )
 		{
-			this.panelMain = new JPanel();
-			this.panelMain.setLayout( new GridLayout( 0, 2 ) );
+			this.splitPanelMain = new JSplitPane();
 			
-			this.panelMain.add( this.getSettingPanel() );
-			this.panelMain.add( InputDevicePanel.getInstance( this ) );
+			this.splitPanelMain.setLeftComponent( this.getSettingPanel() );
+			this.splitPanelMain.setRightComponent( InputDevicePanel.getInstance( this ) );
+			
+			this.splitPanelMain.setResizeWeight( 0.5 );
+			this.splitPanelMain.setOneTouchExpandable( true );
 		}
 		
-		return this.panelMain;
+		return this.splitPanelMain;
 	}
 	
 	private JPanel getSettingPanel()

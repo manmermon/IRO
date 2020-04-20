@@ -60,23 +60,36 @@ public class ControllerActionChecker implements IInputControllerListener
 			synchronized ( this.sync )
 			{
 				this.refTime = null;
+				
+				this.archievedTarget.set( false );
+				
+				this.recoverLevelReach.set( false );
+				
+				GameStatistic.add( FieldType.CONTROLLER_WAIT_RECORVER_LEVEL );
+				
+				if( !ena )
+				{
+					Thread t = new Thread()
+					{
+						public void run() 
+						{
+							ScreenControl.getInstance().setUpdateLevelInputGoal( 0 );
+						};
+					};
+					
+					t.start();
+						
+				}
+							
+				this.enable = ena;
 			}
-			
-			this.archievedTarget.set( false );
-			
-			this.recoverLevelReach.set( false );
-			
-			GameStatistic.add( FieldType.CONTROLLER_WAIT_RECORVER_LEVEL );
 		}
-		
-		this.enable = ena;
 	}
 	
 	@Override
 	public void InputControllerEvent( InputControllerEvent ev )
 	{
 		double[] values = ev.getInputValues();
-	
 				
 		if( values != null 
 				&& this.selectedChannel >= 0 
@@ -84,94 +97,98 @@ public class ControllerActionChecker implements IInputControllerListener
 		  )
 		{
 			double data = values[ this.selectedChannel ];
+			double timerPercentage = 0;
 
-			if( data > this._rng.getMax() )
+			synchronized ( this.sync )
 			{
-				if( this.statistic == 0 )
+				if( data > this._rng.getMax() )
 				{
-					GameStatistic.add( FieldType.CONTROLER_LEVEL_REACH );
-					this.statistic++;
-				}
-
-				double timerPercentage = 100;
-
-				if( this.targetTime > 0 )
-				{
-					double t = -this.targetTime;
-					
-					synchronized ( this.sync )
+					if( this.statistic == 0 )
 					{
+						GameStatistic.add( FieldType.CONTROLER_LEVEL_REACH );
+						this.statistic++;
+					}
+	
+					timerPercentage  = 100;
+	
+					if( this.targetTime > 0 )
+					{
+						double t = -this.targetTime;
+						
 						if( this.refTime == null )
 						{
 							this.refTime = System.nanoTime();
 						}
-								
+
 						t = ( System.nanoTime() - this.refTime ) / 1e9D;
-					}
-
-					timerPercentage = 100 * t  / this.targetTime;						
-				}				
-
-				if( timerPercentage >= 100 )
-				{	
-					if( this.statistic == 1 )
-					{
-						GameStatistic.add( FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
-						this.statistic++;
-					}
-
-					this.refTime = null;
-
-					if( !this.archievedTarget.get( ) 
-							&& this.enable 
-							&&  this.recoverLevelReach.get() )
+	
+						timerPercentage = 100 * t  / this.targetTime;						
+					}				
+	
+					if( timerPercentage >= 100 )
 					{	
-						this.archievedTarget.set( true );
-						
-						ScreenControl.getInstance().setUpdateLevelInputGoal( 100 );
-						
-						this.fireActionEvent( InputActionEvent.ACTION_DONE );						
+						if( this.statistic == 1 )
+						{
+							GameStatistic.add( FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
+							this.statistic++;
+						}
+	
+						/*
+						synchronized ( this.sync )
+						{
+							this.refTime = null;
+						}
+						//*/
+	
+						if( !this.archievedTarget.get( ) 
+								&& this.enable 
+								&&  this.recoverLevelReach.get() )
+						{	
+							this.archievedTarget.set( true );
+							
+							this.fireActionEvent( InputActionEvent.ACTION_DONE );						
+						}
 					}
+					
+					this.recoverLevelReported = false;
+				}
+				else if ( this._rng.within( data ) )
+				{
+					if( this.statistic > 0 )
+					{
+						GameStatistic.add( FieldType.CONTROLLER_MAINTAIN_LEVEL_FINISH );
+						this.statistic = 0;
+					}
+					
+					this.recoverLevelReported = false;
+					
+					this.refTime = null;
 				}
 				else
+				{	
+					this.statistic = 0;
+					
+					if( this.archievedTarget.getAndSet( false ) && this.enable )
+					{		
+						this.fireActionEvent( InputActionEvent.RECOVER_DONE );
+					}
+					
+					if( !this.recoverLevelReach.getAndSet( true ) )
+					{
+						GameStatistic.add( FieldType.CONTROLLER_RESTORED_LEVEL );
+						
+						this.recoverLevelReported = true;
+					}
+					else if( !this.recoverLevelReported )
+					{
+						GameStatistic.add( FieldType.CONTROLER_RECOVER_LEVEL_REACH );
+					}				
+				}
+				
+				if( this.enable )
 				{
 					ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage );
 				}
-				
-				this.recoverLevelReported = false;
-			}
-			else if ( this._rng.within( data ) )
-			{
-				if( this.statistic > 0 )
-				{
-					GameStatistic.add( FieldType.CONTROLLER_MAINTAIN_LEVEL_FINISH );
-					this.statistic = 0;
-				}
-				
-				this.recoverLevelReported = false;
-				this.refTime = null;
-			}
-			else
-			{	
-				this.statistic = 0;
-				
-				if( this.archievedTarget.getAndSet( false ) && this.enable )
-				{		
-					this.fireActionEvent( InputActionEvent.RECOVER_DONE );
-					ScreenControl.getInstance().setUpdateLevelInputGoal( 0 );
-				}
-				
-				if( !this.recoverLevelReach.getAndSet( true ) )
-				{
-					GameStatistic.add( FieldType.CONTROLLER_RESTORED_LEVEL );
-					
-					this.recoverLevelReported = true;
-				}
-				else if( !this.recoverLevelReported )
-				{
-					GameStatistic.add( FieldType.CONTROLER_RECOVER_LEVEL_REACH );
-				}
-				
 			}
 		}
 	}

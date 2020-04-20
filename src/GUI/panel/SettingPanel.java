@@ -41,6 +41,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
@@ -58,6 +59,7 @@ import config.ConfigApp;
 import config.ConfigParameter;
 import config.ConfigParameter.ParameterType;
 import config.Player;
+import config.language.Caption;
 import config.language.Language;
 import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
@@ -73,7 +75,7 @@ public class SettingPanel extends JPanel
 	private static final long serialVersionUID = -1219995574372606332L;
 	
 	private JPanel containerPanel = null;
-	private JPanel songPanel = null;
+	private JTabbedPane scenePanel = null;
 	
 	private JScrollPane scrollFields = null;
 	
@@ -106,17 +108,33 @@ public class SettingPanel extends JPanel
 		return this.scrollFields;
 	}
 	
-	private JPanel getSongPanel()
+	private JTabbedPane getSongPanel()
 	{
-		if( this.songPanel == null )
+		if( this.scenePanel == null )
 		{
-			this.songPanel = new JPanel( new BorderLayout() );
+			//this.songPanel = new JPanel( new BorderLayout() );
+			this.scenePanel = new JTabbedPane();
 			
-			this.songPanel.add( new SelectSongPanel(), BorderLayout.CENTER );
+			this.setSceneTabbedPanels();
 			
 		}
 		
-		return this.songPanel;
+		return this.scenePanel;
+	}
+	
+	private void setSceneTabbedPanels()
+	{
+		JTabbedPane panel = this.getSongPanel();
+		panel.removeAll();
+		
+		Caption cap = Language.getAllCaptions().get( Language.SONGS );			
+		panel.addTab( cap.getCaption( Language.getCurrentLanguage() )
+								, new SelectSongPanel() );
+		
+		cap = Language.getAllCaptions().get( Language.IMAGE );
+		panel.addTab( cap.getCaption( Language.getCurrentLanguage() )
+								, new SelectLevelImagePanel() );
+		//TranslateComponents.add( this.scenePanel, cap );
 	}
 	
 	private JPanel getContainerPanel()
@@ -214,8 +232,7 @@ public class SettingPanel extends JPanel
 				
 		container.setVisible( true );
 		
-		this.getSongPanel().removeAll();
-		this.getSongPanel().add( new SelectSongPanel(), BorderLayout.CENTER );
+		this.setSceneTabbedPanels();
 	}
 	
 	private JPanel getUserLabel()

@@ -128,6 +128,9 @@ public class ConfigApp
 	
 	public static final String TIME_IN_INPUT_TARGET = "timeInInputTarget";
 	
+	public static final String BACKGROUND_IMAGE = "backgroundImage";
+	public static final String NOTE_IMAGE = "noteImage";
+	
 	///////////
 	
 	private static boolean test = false;
@@ -192,10 +195,38 @@ public class ConfigApp
 			loadDefaultSelectedChannel();
 			
 			loadDefaultSelectedController();
+			
+
+			loadDefaultSceneImages();
 		}
 		catch (Exception e) 
 		{
 			e.printStackTrace();
+		}
+	}
+	
+	private static void loadDefaultSceneImages()
+	{
+		try
+		{
+			Caption id = Language.getAllCaptions().get( Language.BACKGROUND );
+			id.setID( BACKGROUND_IMAGE );
+			ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
+			par.setPriority(  Integer.MAX_VALUE );
+			
+			listUserConfig.put( BACKGROUND_IMAGE, par );
+			
+			
+			id = Language.getAllCaptions().get( Language.NOTE );
+			id.setID( NOTE_IMAGE );
+			par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
+			par.setPriority(  Integer.MAX_VALUE );
+			
+			listUserConfig.put( NOTE_IMAGE, par );
+		} 
+		catch (ConfigParameterException ex)
+		{
+			ex.printStackTrace();
 		}
 	}
 	
@@ -466,6 +497,8 @@ public class ConfigApp
 		fieldType.put( INPUT_MIN_VALUE, Double.class );
 		fieldType.put( INPUT_MAX_VALUE, Double.class );
 		fieldType.put( INPUT_SELECTED_CHANNEL, Double.class );
+		fieldType.put( BACKGROUND_IMAGE, String.class );
+		fieldType.put( NOTE_IMAGE, String.class );
 
 		fieldType = new HashMap<String, Class>();
 		fieldType.put( "idSession", Integer.class );
@@ -526,6 +559,8 @@ public class ConfigApp
 				+ ", minInputValue real\n"
 				+ ", maxInputValue real\n"
 				+ ", selectedChannel real"
+				+ ", backgroundImage text"
+				+ ", noteImage text"
 				+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
 				+ ");";
 

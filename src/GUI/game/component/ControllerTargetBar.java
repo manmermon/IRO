@@ -46,12 +46,12 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 	
 	public void setMinimum( double min )
 	{		
-		this.pgbar.setMinimum( min * 1.15 );
+		this.pgbar.setMinimum( min  );
 	}
 	
 	public void setMaximum( double max )
 	{
-		pgbar.setMaximum( max * 1.15 );
+		pgbar.setMaximum( max );
 	}
 	
 	public void setLevels( double[] levels )

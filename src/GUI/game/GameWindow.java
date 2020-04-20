@@ -173,7 +173,7 @@ public class GameWindow extends JFrame
 	{	
 		ControllerTargetBar lpi = this.getTargetControllerIndicator();
 		
-		double distance = Math.abs( max - min ) * 0.15 ;
+		double distance = Math.abs( max - min ) / 4 ;
 		
 		lpi.setMinimum( min - distance );		
 		lpi.setMaximum( max + distance );		
