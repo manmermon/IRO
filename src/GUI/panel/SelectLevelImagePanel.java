@@ -6,13 +6,11 @@ package GUI.panel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -35,8 +33,8 @@ import exceptions.ConfigParameterException;
 import music.IROTrack;
 
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -66,6 +64,15 @@ public class SelectLevelImagePanel extends JPanel
 	{
 		super.setLayout( new BorderLayout() );
 		this.add( this.getContainerPanel(), BorderLayout.CENTER );
+		
+		super.addComponentListener( new ComponentAdapter()
+		{	
+			@Override
+			public void componentShown(ComponentEvent e)
+			{
+				setPreviewScene();
+			}
+		});
 				
 		this.setPreviewScene( );
 	}
@@ -120,7 +127,7 @@ public class SelectLevelImagePanel extends JPanel
 			}
 			
 			Level lv = new Level( size );
-			
+						
 			Background back = new Background( size, IScene.BACKGROUND_ID, bgPath );
 			back.setZIndex( -1 );
 			lv.addBackgroud( back );
@@ -138,9 +145,9 @@ public class SelectLevelImagePanel extends JPanel
 			lv.addFret( fret );
 			
 			List< IROTrack > notes = new ArrayList< IROTrack >( );
-			IROTrack t = new IROTrack();
-			t.addNote( 0, new Note( "A" ) );
-			notes.add( t );
+			IROTrack tr = new IROTrack();
+			tr.addNote( 0, new Note( "A" ) );
+			notes.add( tr );
 			MusicNoteGroup noteSprite1 = new MusicNoteGroup( "Test1"
 															, notes
 															, IScene.NOTE_ID
@@ -158,9 +165,9 @@ public class SelectLevelImagePanel extends JPanel
 			}
 			
 			notes = new ArrayList< IROTrack >( );
-			t = new IROTrack();
-			t.addNote( 0, new Note( "D" ) );
-			notes.add( t );
+			tr = new IROTrack();
+			tr.addNote( 0, new Note( "D" ) );
+			notes.add( tr );
 			MusicNoteGroup noteSprite2 = new MusicNoteGroup( "Test2"
 															, notes
 															, IScene.NOTE_ID
@@ -178,14 +185,14 @@ public class SelectLevelImagePanel extends JPanel
 			}
 			
 			notes = new ArrayList< IROTrack >( );
-			t = new IROTrack();
-			t.addNote( 0, new Note( "C" ) );
-			notes.add( t );
+			tr = new IROTrack();
+			tr.addNote( 0, new Note( "C" ) );
+			notes.add( tr );
 			MusicNoteGroup noteSprite3 = new MusicNoteGroup( "Test3"
 															, notes
 															, IScene.NOTE_ID
 															, pen
-															, (int)fret.getBounds().getMaxX()   
+															, ( size.width + (int)fret.getBounds().getMaxX() ) / 2     
 															, 0D
 															, false
 															, notPath );
@@ -196,7 +203,7 @@ public class SelectLevelImagePanel extends JPanel
 			{
 				noteSprite3.setColor( (Color)c );
 			}
-			
+				
 			lv.addNote( noteSprite1 );
 			lv.addNote( noteSprite2 );
 			lv.addNote( noteSprite3 );
@@ -204,7 +211,7 @@ public class SelectLevelImagePanel extends JPanel
 			preview.setVisible( false );
 			preview.removeAll();
 			preview.add( lv.getScene(), BorderLayout.CENTER );
-			preview.setVisible( true );
+			preview.setVisible( true );			
 		}
 	}
 	

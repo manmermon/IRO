@@ -49,6 +49,7 @@ public class Background extends AbstractSprite
 			if( file != null )
 			{
 				Image img = ImageIO.read( new File( file ) );
+				
 				img = img.getScaledInstance( this.size.width
 											, this.size.height
 											, Image.SCALE_SMOOTH );

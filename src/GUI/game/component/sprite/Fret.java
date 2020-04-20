@@ -58,8 +58,7 @@ public class Fret extends AbstractSprite
 		this.fret.addPoint( fretWidth, this.pentagram.getPentagramHeigh() );
 		this.fret.addPoint( 0, this.pentagram.getPentagramHeigh() );
 		
-		this.fretFillColor = new Color( 255, 255, 255, 160 );
-		
+		this.fretFillColor = new Color( 255, 255, 255, 160 );		
 	}
 	
 	public int getFretWidth()
