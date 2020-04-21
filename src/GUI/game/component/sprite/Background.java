@@ -25,55 +25,23 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.Buffer;
-
-import javax.imageio.ImageIO;
 
 import image.basicPainter2D;
 
 public class Background extends AbstractSprite 
 {
-	private Dimension size;
 	private BufferedImage pic = null;
 	
-	public Background( Dimension d, String id, String file ) 
+	public Background( Dimension d, String id ) 
 	{
 		super( id );
 		
-		this.size = new Dimension( d );
-		
-		try
-		{
-			if( file != null )
-			{
-				Image img = ImageIO.read( new File( file ) );
-				
-				img = img.getScaledInstance( this.size.width
-											, this.size.height
-											, Image.SCALE_SMOOTH );
-				
-				this.pic = (BufferedImage)basicPainter2D.copyImage( img );
-			}
-		}
-		catch (IOException ex)
-		{	
-		}
+		super.setSize( d );
 	}
 
-	public Background( BufferedImage bg, String id )
+	public void setImage( BufferedImage bgImage )
 	{
-		super( id );
-		
-		if( bg == null )
-		{
-			throw new IllegalArgumentException( "Input null." );
-		}
-		
-		this.size = new Dimension( bg.getWidth(), bg.getHeight() );
-
-		this.pic = bg;
+		this.pic = bgImage;
 	}
 	
 	@Override
@@ -83,7 +51,8 @@ public class Background extends AbstractSprite
 		
 		if( back == null )
 		{
-			basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
+			Dimension size = super.getSize();
+			basicPainter2D.createEmptyCanva( size.width, size.height, Color.WHITE );
 		}
 		
 		return (BufferedImage)back;

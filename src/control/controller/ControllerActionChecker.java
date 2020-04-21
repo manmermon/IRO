@@ -73,6 +73,7 @@ public class ControllerActionChecker implements IInputControllerListener
 					{
 						public void run() 
 						{
+							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( 0 )");
 							ScreenControl.getInstance().setUpdateLevelInputGoal( 0 );
 						};
 					};
@@ -187,7 +188,16 @@ public class ControllerActionChecker implements IInputControllerListener
 				
 				if( this.enable )
 				{
-					ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage );
+					final double tp = timerPercentage;
+					Thread t = new Thread() 
+					{
+						public void run() 
+						{
+							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage )" );
+							ScreenControl.getInstance().setUpdateLevelInputGoal( tp );
+						};
+					};
+					t.start();
 				}
 			}
 		}

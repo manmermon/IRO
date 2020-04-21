@@ -104,12 +104,23 @@ public class SelectSongPanel extends JPanel
 			
 			File[] files = f.listFiles( filter );
 			
-			for( File file : files )
-			{				
-				tm.addRow( new String[] { file.getPath() } );
-			}						
-			
-			this.updateSelectedSong();
+			if( files != null && files.length > 0 )
+			{
+				String[] filePaths = new String[ files.length ];
+				for( int i = 0; i < files.length; i++ )
+				{
+						filePaths[ i ] = files[ i ].getPath();
+				}
+				
+				Arrays.sort( filePaths, String.CASE_INSENSITIVE_ORDER );
+				
+				for( String file : filePaths )
+				{				
+					tm.addRow( new String[] { file } );
+				}						
+				
+				this.updateSelectedSong();
+			}
 		}
 		catch( Exception e)
 		{	
@@ -140,7 +151,7 @@ public class SelectSongPanel extends JPanel
 						if( s.equals( tVal ) )
 						{
 							t.addRowSelectionInterval( i, i );
-							moveSong( t, getSelectedSongTable() );
+							moveSong( t, getSelectedSongTable(), false );
 							
 							break;
 						}
@@ -644,7 +655,7 @@ public class SelectSongPanel extends JPanel
 					JTable tSelectedSong = getSelectedSongTable();
 					JTable tSongList = gettableSongList();
 					
-					moveSong( tSongList, tSelectedSong );				
+					moveSong( tSongList, tSelectedSong, false );				
 				}
 			});
 		}
@@ -666,7 +677,7 @@ public class SelectSongPanel extends JPanel
 					JTable tSelectedSong = getSelectedSongTable();
 					JTable tSongList = gettableSongList();
 					
-					moveSong( tSelectedSong, tSongList );
+					moveSong( tSelectedSong, tSongList, true );
 				}
 			});
 		}
@@ -695,7 +706,7 @@ public class SelectSongPanel extends JPanel
 					{
 						tsel.addRowSelectionInterval( 0, tsel.getRowCount() - 1 );
 						
-						moveSong( tsel, tlist );					
+						moveSong( tsel, tlist, true );					
 					}
 				}
 			});
@@ -703,7 +714,7 @@ public class SelectSongPanel extends JPanel
 		return btnClear;
 	}
 	
-	private void moveSong( JTable source, JTable dest )
+	private void moveSong( JTable source, JTable dest, boolean sortDest )
 	{
 		DefaultTableModel tmSource = (DefaultTableModel)source.getModel();
 		DefaultTableModel tmDest = (DefaultTableModel)dest.getModel();
@@ -713,15 +724,48 @@ public class SelectSongPanel extends JPanel
 		
 		if( selIndex.length > 0 )
 		{
+			String[] songs = null;
+			if( sortDest )
+			{
+				songs = new String[ tmDest.getRowCount() + selIndex.length ];
+				for( int i = 0; i < tmDest.getRowCount(); i++ )
+				{					
+					songs[ i ] = tmDest.getValueAt( i, 0 ).toString();
+				}				
+			}
+			
 			for( int i = selIndex.length - 1; i >= 0; i-- )
 			{
 				int index = selIndex[ i ];
 				
 				String song = source.getValueAt( index, 0 ).toString();
-				
-				tmDest.addRow( new String[] { song } );
+			
+				if( !sortDest )
+				{
+					tmDest.addRow( new String[] { song } );
+				}
+				else
+				{
+					songs[ dest.getRowCount() + i ] = song;
+				}
 				
 				tmSource.removeRow( index );
+			}
+			
+			if( songs != null )
+			{
+				Arrays.sort( songs, String.CASE_INSENSITIVE_ORDER );
+				for( int i = 0; i < songs.length; i++ )
+				{
+					if( i < tmDest.getRowCount() )
+					{
+						tmDest.setValueAt( songs[ i ], i, 0 );
+					}
+					else
+					{
+						tmDest.addRow( new String[] { songs[ i ] } );
+					}
+				}
 			}
 		}
 	}

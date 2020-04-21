@@ -15,8 +15,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.jfugue.theory.Note;
 
@@ -30,14 +28,20 @@ import GUI.game.screen.level.Level;
 import config.ConfigApp;
 import config.ConfigParameter;
 import exceptions.ConfigParameterException;
+import image.basicPainter2D;
 import music.IROTrack;
 
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -127,10 +131,27 @@ public class SelectLevelImagePanel extends JPanel
 			}
 			
 			Level lv = new Level( size );
-						
-			Background back = new Background( size, IScene.BACKGROUND_ID, bgPath );
+			
+			Background back = new Background( size, IScene.BACKGROUND_ID );
 			back.setZIndex( -1 );
 			lv.addBackgroud( back );
+			if( bgPath != null )
+			{
+				try
+				{
+					Image img = ImageIO.read( new File( bgPath ) );
+						
+					img = img.getScaledInstance( back.getBounds().width
+												, back.getBounds().height
+												, Image.SCALE_SMOOTH );
+							
+					back.setImage( (BufferedImage)basicPainter2D.copyImage( img ) );
+				}
+				catch (IOException ex)
+				{	
+				}
+			}
+			
 	
 			Pentragram pen = new Pentragram( size, IScene.PENTRAGRAM_ID );
 			pen.setZIndex( 0 );
@@ -149,13 +170,35 @@ public class SelectLevelImagePanel extends JPanel
 			tr.addNote( 0, new Note( "A" ) );
 			notes.add( tr );
 			MusicNoteGroup noteSprite1 = new MusicNoteGroup( "Test1"
+															, 0
 															, notes
 															, IScene.NOTE_ID
 															, pen
 															, (int)fret.getScreenLocation().x  
 															, 0D
-															, false
-															, notPath );
+															, false );
+			
+			BufferedImage noteImg = null;
+			if( notPath != null )
+			{
+				try
+				{
+					Image img = ImageIO.read( new File( notPath ) );
+					
+					Color bg = new Color( 255, 255, 255, 140 );
+					Dimension s = noteSprite1.getBounds().getSize();
+					noteImg = (BufferedImage)basicPainter2D.circle( 0, 0, s.width, bg, null );
+					noteImg = (BufferedImage)basicPainter2D.composeImage( noteImg, 0, 0
+																		, basicPainter2D.copyImage( 
+																				img.getScaledInstance( noteImg.getWidth() 
+																						, noteImg.getHeight()
+																						, Image.SCALE_SMOOTH ) ) );
+				}
+				catch (Exception ex) 
+				{
+				}
+			}
+			noteSprite1.setImage( noteImg );
 			
 			par = ConfigApp.getParameter( ConfigApp.ACTION_COLOR );
 			Object c = par.getSelectedValue();
@@ -169,13 +212,14 @@ public class SelectLevelImagePanel extends JPanel
 			tr.addNote( 0, new Note( "D" ) );
 			notes.add( tr );
 			MusicNoteGroup noteSprite2 = new MusicNoteGroup( "Test2"
+															, 0
 															, notes
 															, IScene.NOTE_ID
 															, pen
 															, (int)fret.getScreenLocation().x  
 															, 0D
-															, false
-															, notPath );
+															, false );
+			noteSprite2.setImage( noteImg );
 			
 			par = ConfigApp.getParameter( ConfigApp.WAITING_ACTION_COLOR );
 			c = par.getSelectedValue();
@@ -189,13 +233,14 @@ public class SelectLevelImagePanel extends JPanel
 			tr.addNote( 0, new Note( "C" ) );
 			notes.add( tr );
 			MusicNoteGroup noteSprite3 = new MusicNoteGroup( "Test3"
+															, 0				
 															, notes
 															, IScene.NOTE_ID
 															, pen
 															, ( size.width + (int)fret.getBounds().getMaxX() ) / 2     
 															, 0D
-															, false
-															, notPath );
+															, false );
+			noteSprite3.setImage( noteImg );
 															
 			par = ConfigApp.getParameter( ConfigApp.PREACTION_COLOR );
 			c = par.getSelectedValue();
@@ -281,12 +326,12 @@ public class SelectLevelImagePanel extends JPanel
 					JRadioButton b = new JRadioButton( file.getName() );
 					
 					final String filePath = file.getAbsolutePath();
-					b.addChangeListener( new ChangeListener()
+					b.addActionListener( new ActionListener()
 					{						
 						@Override
-						public void stateChanged(ChangeEvent arg0)
+						public void actionPerformed(ActionEvent e)
 						{
-							AbstractButton b = (AbstractButton)arg0.getSource();
+							AbstractButton b = (AbstractButton)e.getSource();
 							
 							if( b.isSelected() )
 							{
@@ -318,7 +363,7 @@ public class SelectLevelImagePanel extends JPanel
 				Enumeration< AbstractButton > en = btgr.getElements();
 				if( en.hasMoreElements() )
 				{
-					en.nextElement().setSelected( true );
+					en.nextElement().doClick();
 				}
 			}
 		}

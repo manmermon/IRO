@@ -118,9 +118,9 @@ public class MusicSheet
 		double t = 0;
 		for( IROTrack track : this.tracks.values() )
 		{
-			if( t < ( track.getStartTime() + track.getTrackDuration() ) )
+			if( t < ( track.getStartTimeFirstNote() + track.getTrackDuration() ) )
 			{
-				t = track.getTrackDuration() + track.getStartTime();
+				t = track.getTrackDuration() + track.getStartTimeFirstNote();
 			}
 		}
 		

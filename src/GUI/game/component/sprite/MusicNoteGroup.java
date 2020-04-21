@@ -22,23 +22,20 @@
 package GUI.game.component.sprite;
 
 import java.awt.Color;
-import java.awt.Image;
+import java.awt.Dimension;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
-import javax.imageio.ImageIO;
 
 import org.jfugue.midi.MidiDictionary;
 import org.jfugue.theory.Note;
 
 import GUI.game.component.event.SpriteEvent;
 import GUI.game.component.event.SpriteEventListener;
-import control.RefreshControl;
+import control.music.MusicPlayerControl;
 import general.NumberRange;
 import image.basicPainter2D;
 import image.icon.MusicInstrumentIcons;
@@ -63,8 +60,6 @@ public class MusicNoteGroup extends AbstractSprite
 	
 	private Color color ;
 	
-	private int noteScreenSize = 30;
-	
 	private boolean isSelected;
 	private boolean isPlay;
 		
@@ -75,6 +70,15 @@ public class MusicNoteGroup extends AbstractSprite
 	private List< IROTrack > noteTracks;
 	
 	private BufferedImage noteImg = null;
+	
+	private Double SheetTime = Double.NaN;	
+	private Double delay = 0D;	
+	
+	//
+	//
+	// ANIMATION SETTTINGS
+	//
+	//
 	
 	private NumberRange angleRange = new NumberRange( -45, 45 );
 	private final int numAngles = 7;
@@ -87,11 +91,12 @@ public class MusicNoteGroup extends AbstractSprite
 	private final long totalTimeAnimation = 1000; // milliseconds
 	private long timeUpdate = totalTimeAnimation / numAngles; // milliseconds
 	
-	public MusicNoteGroup( String track, List< IROTrack > Notes
+	public MusicNoteGroup( String track
+							, double sheetTime
+							, List< IROTrack > Notes
 							, String noteID, Pentragram pen
-							, int initLoc ,double shiftVel
-							, boolean ghost
-							, String file) 
+							, int initLoc , double shiftVel
+							, boolean ghost ) 
 	{
 		super( noteID );
 				
@@ -103,31 +108,22 @@ public class MusicNoteGroup extends AbstractSprite
 			
 		
 		int y = this.pentagram.getRailHeight();
-		
-		this.noteScreenSize = y;//(2 * y ) / 3;
-		if( this.noteScreenSize < 1 )
-		{
-			this.noteScreenSize = 1;
-		}
-		
-		if( file != null && !ghost )
-		{
-			try
-			{
-				Image img = ImageIO.read( new File( file ) );
 				
-				Color bg = new Color( 255, 255, 255, 140 );
-				this.noteImg = (BufferedImage)basicPainter2D.circle( 0, 0, this.noteScreenSize, bg, null );
-				this.noteImg = (BufferedImage)basicPainter2D.composeImage( this.noteImg, 0, 0
-																		, basicPainter2D.copyImage( 
-																				img.getScaledInstance( this.noteScreenSize
-																						, this.noteScreenSize
-																						, Image.SCALE_SMOOTH ) ) );
-			}
-			catch (Exception ex) 
-			{
-			}
+		Dimension d = new Dimension();
+		d.width = y;
+		d.height = y;
+		
+		if( d.width < 1 )
+		{
+			d.width = 1;
 		}
+		
+		if( d.height < 1 )
+		{
+			d.height = 1;
+		}
+		
+		super.setSize( d );
 		
 		int noteLine = REST;
 		
@@ -140,20 +136,22 @@ public class MusicNoteGroup extends AbstractSprite
 				{
 					if( !n.isRest() )
 					{
-						noteLine = this.getNoteValue( n.toString() );			
+						noteLine = getNoteValue( n.toString() );			
 						break noteScreenLoc;
 					}
 				}
 			}
 		}
 		
-		super.screenLoc = new Point2D.Double( initLoc, noteLine * y + ( y - this.noteScreenSize ) / 2);
+		super.screenLoc = new Point2D.Double( initLoc, noteLine * y + ( y - super.getSize().width ) / 2);
 		
 		this.color = Color.RED;		
 		
 		this.isPlay = false;
 		
 		this.isGhost = ghost;
+		
+		this.SheetTime = sheetTime;
 		
 		super.addSpriteEventListener( new SpriteEventListener()
 		{	
@@ -165,6 +163,13 @@ public class MusicNoteGroup extends AbstractSprite
 					case SpriteEvent.ON_SCREEN:
 					{
 						GameStatistic.add( FieldType.NOTE_SHOW );
+						
+						synchronized ( delay )
+						{
+							delay = ( SheetTime - MusicPlayerControl.getInstance().getPlayTime() );
+							//System.out.println("MusicNoteGroup.MusicNoteGroup() " + delay + ": " + noteTracks );
+						}						
+						
 						break;
 					}
 					case SpriteEvent.OUTPUT_SCREEN:
@@ -181,6 +186,11 @@ public class MusicNoteGroup extends AbstractSprite
 		});
 	}
 	
+	public void setImage( BufferedImage img )
+	{
+		this.noteImg = img;		
+	}
+	
 	public void setTempo( int bpm )
 	{
 		for( IROTrack track : this.noteTracks )
@@ -194,7 +204,7 @@ public class MusicNoteGroup extends AbstractSprite
 		this.isGhost = ghost;
 	}
 	
-	private int getNoteValue( String n )
+	private static int getNoteValue( String n )
 	{ 
 		int note = DO;
 		
@@ -288,8 +298,8 @@ public class MusicNoteGroup extends AbstractSprite
 	public Point2D.Double getNoteLocation()
 	{
 		Point2D.Double loc = new Point2D.Double( );
-		loc.x += this.noteScreenSize / 2 + super.getScreenLocation().x;
-		loc.y += this.noteScreenSize / 2 + super.getScreenLocation().y;
+		loc.x += super.getSize().width / 2 + super.getScreenLocation().x;
+		loc.y += super.getSize().width / 2 + super.getScreenLocation().y;
 		
 		return loc;
 	}
@@ -325,7 +335,7 @@ public class MusicNoteGroup extends AbstractSprite
 					List< Byte > l = new ArrayList< Byte >();
 					l.addAll( instruments );
 					
-					pic = (BufferedImage)MusicInstrumentIcons.getInstrument( l, this.noteScreenSize, this.color );
+					pic = (BufferedImage)MusicInstrumentIcons.getInstrument( l, super.getSize().width, this.color );
 				}
 				else
 				{	
@@ -357,12 +367,18 @@ public class MusicNoteGroup extends AbstractSprite
 			t = ( System.nanoTime() - this.time ) / 1e9D;
 		}
 		
-		double update = this.shiftVelocity * t * this.shiftDirection;
-		
 		if( this.previousLocation == null )
 		{
 			this.previousLocation = new Point2D.Double( super.screenLoc.x, super.screenLoc.y );
 		}
+		
+		double gradient = this.shiftVelocity * this.shiftDirection;
+		double update = t * gradient;
+		synchronized ( this.delay )
+		{			
+			update += -this.delay * gradient;				
+			this.delay = 0D;
+		}		
 		
 		this.previousLocation = this.getNoteLocation();
 		
@@ -400,4 +416,12 @@ public class MusicNoteGroup extends AbstractSprite
 		return this.isGhost;
 	}
 	
+	/**
+	 * @return the sheetTime
+	 */
+	public double getSheetTime()
+	{
+		return this.SheetTime;
+	}
 }
+

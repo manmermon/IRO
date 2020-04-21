@@ -28,8 +28,8 @@ public class MainMenuScreen extends Scene implements IInputable
 		btSize.width /= 4;
 		btSize.height /= 10;
 		
-		Background bg = new Background( (BufferedImage)basicPainter2D.createEmptyCanva( d.width, d.height, Color.GREEN.brighter() )
-										, MainMenuScreen.BACKGROUND_ID );
+		Background bg = new Background( d, MainMenuScreen.BACKGROUND_ID );
+		bg.setImage( (BufferedImage)basicPainter2D.createEmptyCanva( d.width, d.height, Color.GREEN.brighter() ) );
 		
 		
 		Buttom btOption = new Buttom( BUTTON_SPRITE_ID );

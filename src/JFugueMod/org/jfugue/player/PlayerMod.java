@@ -20,8 +20,6 @@
 package JFugueMod.org.jfugue.player;
 
 import org.jfugue.player.ManagedPlayer;
-import org.jfugue.player.ManagedPlayerListener;
-import org.jfugue.player.Player;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
@@ -40,15 +38,17 @@ import org.staccato.StaccatoParser;
  * This Player uses a ManagedPlayer but does not expose any of the ManagedPlayer's 
  * ability to be managed. 
  */
-public class PlayerMod extends Player 
+public class PlayerMod 
 {
 	private StaccatoParser staccatoParser;
 	private MidiParserListener midiParserListener;
-	private ManagedPlayerMod managedPlayer;
+	private ManagedPlayerMod2 managedPlayer;
+	
+	private boolean emptySeq = true;
 	
 	public PlayerMod() 
 	{
-		managedPlayer = new ManagedPlayerMod();
+		managedPlayer = new ManagedPlayerMod2();
 		staccatoParser = new StaccatoParser();
 		midiParserListener = new MidiParserListener();
 		staccatoParser.addParserListener( midiParserListener );
@@ -75,98 +75,50 @@ public class PlayerMod extends Player
 		return midiParserListener.getSequence();
 	}
 	
-	public void play(PatternProducer... patternProducers) 
+	public void load(PatternProducer... patternProducers) throws MidiUnavailableException, InvalidMidiDataException 
 	{
-	    play(new Pattern(patternProducers));
+		load(new Pattern(patternProducers));
 	}
 	
-	public void play(PatternProducer patternProducer)
+	public void load(PatternProducer patternProducer) throws MidiUnavailableException, InvalidMidiDataException
 	{
-	    play(patternProducer.getPattern().toString());
+		load(patternProducer.getPattern().toString());
 	}
 	
-	public void play(String... strings) 
+	public void load(String... strings) throws MidiUnavailableException, InvalidMidiDataException 
 	{
-		play(new Pattern(strings));
+		load( new Pattern( strings ) );
 	}
 
-	public void play(String string) 
+	public void load(String string) throws MidiUnavailableException, InvalidMidiDataException 
 	{
-		play(getSequence(string));
+		load( getSequence( string ) );
 	}
 	
-	/**
-	 * This method plays a sequence by starting the sequence and waiting for the sequence
-	 * to finish before continuing. It also converts InvalidMidiDataException and 
-	 * MidiUnavailableException to RuntimeExceptions for easier end-user programming.
-	 * If you want to create an application where you catch those exceptions, you
-	 * may want to use ManagedPlayer directly.
-	 * 
-	 * @param sequence
-	 */
-	public void play(Sequence sequence) 
+	public void load( Sequence sequence ) throws MidiUnavailableException, InvalidMidiDataException
+	{
+		this.emptySeq = false;
+		managedPlayer.loadSequence( sequence );		
+	}
+	
+	public boolean isEmpty()
+	{
+		return this.emptySeq;
+	}
+	
+	public void play() 
 	{
 		try
 		{
-			managedPlayer.start(sequence);
+			managedPlayer.start();
 		} 
-		catch (InvalidMidiDataException e) 
+		catch (IllegalStateException e) 
 		{
 			throw new RuntimeException(e);
 		}
-		catch (MidiUnavailableException e) 
-		{
-			throw new RuntimeException(e);
-		}
-
-		/*
-		 * @author Manuel Merino Monge
-		 *
-		 * --> BEGIN
-		 */
-		
-		/*
-		// Wait for the sequence to finish playing
-		
-		while ( !managedPlayer.isFinished() ) 
-		{ 
-            try 
-            {
-                Thread.sleep(20); // don't hog all of the CPU
-            } 
-            catch (InterruptedException e) 
-            {
-				// Nothing to do here
-            }
-		}
-		*/
-				
-		/*
-		 * <-- END
-		 */
 	}
 	
-	public void delayPlay(final long millisToDelay, final PatternProducer... patternProducers) 
-	{
-	    delayPlay(millisToDelay, new Pattern(patternProducers));
-	}
-
-	public void delayPlay(final long millisToDelay, final PatternProducer patternProducer) 
-	{
-	    delayPlay(millisToDelay, patternProducer.getPattern().toString());
-	}
-
-	public void delayPlay(final long millisToDelay, final String... strings) 
-	{
-		delayPlay(millisToDelay, new Pattern(strings));
-	}
-
-	public void delayPlay(final long millisToDelay, final String string) 
-	{
-		delayPlay(millisToDelay, getSequence(string));
-	}
-
-	public void delayPlay(final long millisToDelay, final Sequence sequence) 
+	public void delayPlay(final long millisToDelay ) 
 	{
 		Thread thread = new Thread() 
 		{
@@ -178,10 +130,9 @@ public class PlayerMod extends Player
 				} 
 				catch (InterruptedException e) 
 				{
-					// Get yourself an egg and beat it!
 				}
 				
-				PlayerMod.this.play( sequence );
+				PlayerMod.this.play( );
 			}
 		};
 		

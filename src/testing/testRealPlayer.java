@@ -1,5 +1,6 @@
 package testing;
 
+import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
 
 import org.jfugue.pattern.Pattern;
@@ -73,7 +74,8 @@ public class testRealPlayer {
 			p7 = "T100 V0 I[Piano] @4.0 F5q.a79d0 @4.375 G5ia82d0 @4.5 A5qa87d0 @4.75 A5qa76d0 T100 V1 I[Piano] @4.0 F4qa77d0 @4.25 C5qa99d0 @4.5 F4qa79d0 @4.75 C5qa103d0";
 			
 			PlayerMod play = new PlayerMod();
-			play.play( p7 );
+			play.load( p7 );
+			play.play( );
 			Thread.sleep( 30_000L );
 			
 			
@@ -87,7 +89,15 @@ public class testRealPlayer {
 				public void run() {
 					PlayerMod p = new PlayerMod();
 					System.out.println("testRealPlayer.main(...).new Thread() {...}.run() A " + p.getManagedPlayer().isPlaying());
-					p.play( p1 );
+					try
+					{
+						p.load( p1 );
+					} catch (MidiUnavailableException | InvalidMidiDataException ex)
+					{
+						// TODO Auto-generated catch block
+						ex.printStackTrace();
+					}
+					p.play( );
 					//p.getManagedPlayer().finish();
 				}
 			};
@@ -97,7 +107,15 @@ public class testRealPlayer {
 				public void run() {
 					PlayerMod p = new PlayerMod();
 					System.out.println("testRealPlayer.main(...).new Thread() {...}.run() B " + p.getManagedPlayer().isPlaying());
-					p.play( p2 );
+					try
+					{
+						p.load( p2 );
+					} catch (MidiUnavailableException | InvalidMidiDataException ex)
+					{
+						// TODO Auto-generated catch block
+						ex.printStackTrace();
+					}
+					p.play( );
 					//p.getManagedPlayer().finish();
 				}
 			};

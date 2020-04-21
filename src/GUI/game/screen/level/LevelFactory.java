@@ -1,8 +1,11 @@
 package GUI.game.screen.level;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -11,6 +14,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.imageio.ImageIO;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiSystem;
 
@@ -30,6 +34,7 @@ import config.ConfigApp;
 import config.ConfigParameter;
 import general.ArrayTreeMap;
 import general.NumberRange;
+import image.basicPainter2D;
 import io.IROMusicParserListener;
 import music.MusicSheet;
 import music.IROTrack;
@@ -66,6 +71,13 @@ public class LevelFactory
 			lv = new Level( screenSize );
 			lv.setBPM( tempo );
 
+			
+			//
+			//
+			// IMAGES
+			//
+			//
+			
 			ConfigParameter par = ConfigApp.getParameter( ConfigApp.BACKGROUND_IMAGE );
 			Object bg = par.getSelectedValue();
 			String path = null;
@@ -74,9 +86,26 @@ public class LevelFactory
 				path = bg.toString();
 			}
 					
-			Background back = new Background( screenSize, IScene.BACKGROUND_ID, path );
+			Background back = new Background( screenSize, IScene.BACKGROUND_ID );
 			back.setZIndex( -1 );
 			lv.addBackgroud( back );
+			if( path != null )
+			{
+				try
+				{
+					Image img = ImageIO.read( new File( path ) );
+						
+					img = img.getScaledInstance( back.getBounds().width
+												, back.getBounds().height
+												, Image.SCALE_SMOOTH );
+							
+					back.setImage( (BufferedImage)basicPainter2D.copyImage( img ) );
+				}
+				catch (IOException ex)
+				{	
+				}
+			}		
+			
 
 			Pentragram pen = new Pentragram( screenSize, IScene.PENTRAGRAM_ID );
 			pen.setZIndex( 0 );
@@ -98,8 +127,16 @@ public class LevelFactory
 			fret.setScreenLocation( loc );
 			lv.addFret( fret );
 			
+			//
+			//
+			// NOTES
+			//
+			//
+			
+			
 			Pattern backgroundPattern = new Pattern();
 			backgroundPattern.setTempo( tempo );			
+						
 			
 			String selectedTrack = IROTrack.TRACK_ID_DEFAULT_PREFIX +1;
 			
@@ -325,6 +362,8 @@ public class LevelFactory
 				path = nt.toString();
 			}
 			
+			BufferedImage noteImg = null;
+			Color bgc = new Color( 255, 255, 255, 140 );
 			for( NumberRange rng : musicSheetPlay.getSegments().keySet() )
 			{	
 				double initTimeTrack = rng.getMin() * timeWhole;
@@ -343,6 +382,8 @@ public class LevelFactory
 					{
 						shift = auxShift;
 					}
+
+					
 				}
 				
 				if( shift < Double.MAX_VALUE )
@@ -356,16 +397,39 @@ public class LevelFactory
 				double vel = reactVel;
 
 				int screenPos = (int)fret.getScreenLocation().x + wayWidth + (int)( vel * initTimeTrack ) ;
-									
+				
 				MusicNoteGroup noteSprite = new MusicNoteGroup( trackID
+														, initTimeTrack //+ startDelay
 														, Tracks
 														, IScene.NOTE_ID
 														, pen
 														, screenPos
 														, vel
 														, false
-														, path 
 														);
+				
+				if( noteImg == null )
+				{
+					if( path != null )
+					{
+						try
+						{
+							Image img = ImageIO.read( new File( path ) );
+							
+							Dimension s = noteSprite.getBounds().getSize();
+							noteImg = (BufferedImage)basicPainter2D.circle( 0, 0, s.width, bgc, null );
+							noteImg = (BufferedImage)basicPainter2D.composeImage( noteImg, 0, 0
+									, basicPainter2D.copyImage( 
+											img.getScaledInstance( noteImg.getWidth() 
+													, noteImg.getHeight()
+													, Image.SCALE_SMOOTH ) ) );
+						}
+						catch (Exception ex) 
+						{
+						}
+					}
+				}
+				noteSprite.setImage( noteImg );
 
 				noteSprite.setZIndex( 1 );
 				lv.addNote( noteSprite );
@@ -389,6 +453,7 @@ public class LevelFactory
 	}
 	//*/
 	
+	/*
 	private static Level makeLevel2( MusicSheet music, Rectangle screenBounds
 			, final double userReactionTime, final double userRecoverTime )
 	{
@@ -652,5 +717,6 @@ public class LevelFactory
 
 		return lv;
 	}
+	//*/
 
 }

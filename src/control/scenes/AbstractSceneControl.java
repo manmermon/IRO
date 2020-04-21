@@ -299,7 +299,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 		this.specificCleanUp();
 		
 		this.scene.removeAllSprites();
-		Background fin = new Background( this.scene.getSize(), "FIN", null ) 
+		Background fin = new Background( this.scene.getSize(), "FIN" ) 
 		{				
 			@Override
 			public BufferedImage getSprite() 

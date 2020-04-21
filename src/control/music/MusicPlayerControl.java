@@ -23,6 +23,8 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	
 	private AtomicBoolean isPlay = new AtomicBoolean( false );
 	
+	private long startTime = -1; 
+	
 	private MusicPlayerControl( )
 	{	
 		this.patternList = new ArrayList< IROTrack >();
@@ -94,6 +96,8 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			this.backgroundMusic.startThread();						
 			this.iroPlayer = new IROPlayer();
 		}
+		
+		this.startTime = System.nanoTime();
 	}
 	
 	public void stopMusic( ) throws Exception 
@@ -114,6 +118,11 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			this.isPlay.set( false );
 			this.patternList.clear();
 		}
+	}
+	
+	public double getPlayTime()
+	{
+		return ( System.nanoTime() - this.startTime ) / 1e9D;
 	}
 	
 	public boolean isPlay()

@@ -25,8 +25,7 @@ public class IROTrack
 	public static final char NOTE_SOL = 'G';
 	public static final char NOTE_LA = 'A';
 	public static final char NOTE_SI = 'B';
-	
-	
+		
 	private String ID;
 	private String instrument;
 	private ArrayTreeMap< Double, Note > notes;	 // Pressed time of notes	
@@ -37,7 +36,9 @@ public class IROTrack
 	
 	private byte maxVolumeNote = 0;
 	
-	public IROTrack() 
+	public double initTrackSheetTime = 0D; 
+	
+	public IROTrack( ) 
 	{
 		this( "track-" + System.currentTimeMillis() );
 	}
@@ -49,6 +50,12 @@ public class IROTrack
 		this.instrument = "Piano";
 		
 		this.notes = new ArrayTreeMap< Double, Note >();
+		
+	}
+	
+	public void setStartTrackTimeInSheet( double initTrackTime )
+	{
+		this.initTrackSheetTime = initTrackTime; 
 	}
 	
 	public void setID( String id )
@@ -298,11 +305,11 @@ public class IROTrack
 		return this.notes;
 	}
 	
-	public double getStartTime()
+	public double getStartTimeFirstNote()
 	{
 		double t = -1;
 		 
-		if( this.notes.isEmpty() )
+		if( !this.notes.isEmpty() )
 		{
 			Double val = this.notes.getFirstKey();
 			if( val != null )
@@ -312,6 +319,11 @@ public class IROTrack
 		}
 		
 		return t;
+	}
+	
+	public double getStartTrackTimeInSheet()
+	{
+		return this.initTrackSheetTime;
 	}
 	
 	public Pattern getPatternTrackSheet()
