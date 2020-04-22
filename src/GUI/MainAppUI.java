@@ -27,16 +27,18 @@ import java.awt.event.ActionListener;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
 
 import GUI.panel.SettingPanel;
 import GUI.panel.InputDevicePanel;
+import config.language.Caption;
 import config.language.Language;
 import config.language.TranslateComponents;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import java.awt.FlowLayout;
-import java.awt.GridLayout;
 
 public class MainAppUI extends JFrame 
 {
@@ -57,6 +59,7 @@ public class MainAppUI extends JFrame
 	private JPanel panelMenu;
 	private JPanel panelPlay;
 	private JPanel panelFields;
+	private JPanel panelMultiplayer;
 	
 	private JSplitPane splitPanelMain;
 	
@@ -64,6 +67,11 @@ public class MainAppUI extends JFrame
 	// Buttom	
 	private JButton btnPlay;
 	
+	// Radio Button
+	private ButtonGroup multiplayerGroup;;	
+	private JRadioButton singlePlayer;
+	private JRadioButton localMultiplayerPlayer;
+	private JRadioButton localRemoteMultiplayerPlayer;
 	
 		
 	/**
@@ -84,7 +92,12 @@ public class MainAppUI extends JFrame
 		super.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		super.setBounds(100, 100, 450, 300);
 		
-		super.setContentPane( this.getMainPanel() );	
+		super.setContentPane( this.getMainPanel() );
+		
+		this.multiplayerGroup = new ButtonGroup();
+		this.multiplayerGroup.add( this.getSinglePlayerBt() );
+		this.multiplayerGroup.add( this.getLocalMultiplayerPlayerBt() );
+		this.multiplayerGroup.add( this.getRemoteMultiplayerPlayerBt() );
 	}
 	
 	private JSplitPane getMainPanel()
@@ -153,11 +166,68 @@ public class MainAppUI extends JFrame
 			this.panelMenu = new JPanel();
 			this.panelMenu.setLayout(new BorderLayout(0, 0));
 			this.panelMenu.add( this.getPanelPlay(), BorderLayout.WEST);
+			this.panelMenu.add( this.getMultiplayerPanel(), BorderLayout.EAST );
+			
 			
 			
 			//this.panelMenu.add( this.getSelectUserPanel(), BorderLayout.EAST);			
 		}
 		return this.panelMenu;
+	}
+	
+	private JPanel getMultiplayerPanel()
+	{
+		if( this.panelMultiplayer == null )
+		{
+			this.panelMultiplayer = new JPanel( new FlowLayout( FlowLayout.RIGHT ) );
+			
+			this.panelMultiplayer.add( this.getSinglePlayerBt() );
+			this.panelMultiplayer.add( this.getLocalMultiplayerPlayerBt() );
+			this.panelMultiplayer.add( this.getRemoteMultiplayerPlayerBt() );
+			
+			this.getSinglePlayerBt().doClick();
+		}
+		
+		return this.panelMultiplayer; 
+	}
+	
+	private JRadioButton getSinglePlayerBt()
+	{
+		if( this.singlePlayer == null )
+		{
+			Caption cap = Language.getAllCaptions().get( Language.SINGLE );
+			this.singlePlayer = new JRadioButton( cap.getCaption( Language.getCurrentLanguage() ) );
+			
+			TranslateComponents.add( this.singlePlayer, cap );		
+		}
+		
+		return this.singlePlayer;
+	}
+	
+	private JRadioButton getLocalMultiplayerPlayerBt() 
+	{
+		if( this.localMultiplayerPlayer == null )
+		{
+			Caption cap = Language.getAllCaptions().get( Language.LOCAL_MULTIPLAYER );
+			this.localMultiplayerPlayer = new JRadioButton( cap.getCaption( Language.getCurrentLanguage() ) );
+			
+			TranslateComponents.add( this.localMultiplayerPlayer, cap );
+		}
+		
+		return this.localMultiplayerPlayer;
+	}
+	
+	private JRadioButton getRemoteMultiplayerPlayerBt()
+	{
+		if( this.localRemoteMultiplayerPlayer == null )
+		{
+			Caption cap = Language.getAllCaptions().get( Language.REMOTE_MULTIPLAYER );
+			this.localRemoteMultiplayerPlayer = new JRadioButton( cap.getCaption( Language.getCurrentLanguage() ) );
+			
+			TranslateComponents.add( this.localRemoteMultiplayerPlayer, cap );
+		}
+		
+		return this.localRemoteMultiplayerPlayer;
 	}
 	
 	/*

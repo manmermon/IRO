@@ -1,7 +1,7 @@
 package control.music;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import GUI.game.screen.level.BackgroundMusic;
@@ -17,19 +17,21 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	
 	private BackgroundMusic backgroundMusic = null;
 	
-	private List< IROTrack > patternList;
-	
 	private static MusicPlayerControl mpctr = null;
 	
 	private AtomicBoolean isPlay = new AtomicBoolean( false );
 	
-	private long startTime = -1; 
+	private long startTime = -1;
+	
+	private Object sync = new Object();
+	
+	private ConcurrentLinkedQueue< String > playtrackIDList;
 	
 	private MusicPlayerControl( )
 	{	
-		this.patternList = new ArrayList< IROTrack >();
-		
 		super.setName( this.getClass().getSimpleName() );	
+		
+		this.playtrackIDList = new ConcurrentLinkedQueue<String>();
 		
 		try
 		{
@@ -81,28 +83,30 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	
 	public void startMusic( ) throws Exception 
 	{
-		synchronized( this.patternList )
+		synchronized( this.sync )
 		{
 			if( this.iroPlayer != null )
 			{
 				this.iroPlayer.stop();
 				this.iroPlayer = null;
 			}
-		}
-		
-		if( this.backgroundMusic != null )
-		{						
-			this.isPlay.set( true );
-			this.backgroundMusic.startThread();						
+			
 			this.iroPlayer = new IROPlayer();
+			
+			if( this.backgroundMusic != null )
+			{						
+				this.backgroundMusic.startThread();
+			}
+			
+			this.isPlay.set( true );
+			
+			this.startTime = System.nanoTime();
 		}
-		
-		this.startTime = System.nanoTime();
 	}
 	
 	public void stopMusic( ) throws Exception 
 	{
-		synchronized( this.patternList )
+		synchronized( this.sync )
 		{
 			if( this.iroPlayer != null )
 			{
@@ -116,7 +120,6 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			}
 			
 			this.isPlay.set( false );
-			this.patternList.clear();
 		}
 	}
 	
@@ -127,7 +130,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	
 	public boolean isPlay()
 	{
-		synchronized( this.patternList )
+		synchronized( this.sync )
 		{
 			return this.isPlay.get();
 		}
@@ -140,14 +143,17 @@ public class MusicPlayerControl extends AbstractStoppableThread
 		{
 			super.wait();
 			
-			synchronized( this.patternList )
+			synchronized( this.sync )
 			{
 				if( this.iroPlayer != null )
 				{
-					this.iroPlayer.play( this.patternList );
+					while( !this.playtrackIDList.isEmpty() )
+					{						
+						String trackID = this.playtrackIDList.poll();
+						this.iroPlayer.play( trackID );
+					}
+					
 				}
-				
-				this.patternList.clear();
 			}
 		}
 	}
@@ -165,45 +171,63 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	protected void cleanUp() throws Exception 
 	{
 		super.cleanUp();
-		
-		if( this.backgroundMusic != null )
-		{
-			this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
-			this.backgroundMusic = null;
-		}
 				
-		synchronized( this.patternList )
+		synchronized( this )
 		{
+			if( this.backgroundMusic != null )
+			{
+				this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
+				this.backgroundMusic = null;
+			}
+			
 			if( this.iroPlayer != null )
 			{
 				this.iroPlayer.stop();
 			}
 			
+			this.playtrackIDList.clear();
+			
 			this.iroPlayer = null;
 		}	
 	}
-		
-	public void playNotes( IROTrack track )
+	
+	public void loadTrack( IROTrack track )
 	{
 		synchronized( this )
 		{
-			synchronized( this.patternList )
+			synchronized( this.sync )
 			{
-				this.patternList.add( track );
+				this.iroPlayer.loadTrack( track );
 			}
+		}
+	}
+	
+	public void loadTracks( String trackID, List< IROTrack > tracks )
+	{
+		synchronized( this )
+		{
+			synchronized( this.sync )
+			{
+				this.iroPlayer.loadTracks( trackID, tracks );
+			}
+		}
+	}
+	
+	public void playTrack( String trackID )
+	{
+		synchronized( this )
+		{
+			this.playtrackIDList.add( trackID );
 			
 			super.notify();
 		}
 	}
 	
-	public void playNotes( List< IROTrack > tracks )
+	public void playTracks( List< String > trackIDs )
 	{
 		synchronized( this )
 		{
-			synchronized( this.patternList )
-			{
-				this.patternList.addAll( tracks );
-			}
+			this.playtrackIDList.addAll( trackIDs );
 			
 			super.notify();
 		}

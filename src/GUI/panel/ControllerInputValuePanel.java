@@ -163,8 +163,10 @@ public class ControllerInputValuePanel extends JPanel implements IInputControlle
 	/*(non-Javadoc)
 	 * @see @see control.events.IInputControllerListener#enableProcessInputControllerEvent(boolean)
 	 */
+	/*
 	@Override
 	public void enableProcessInputControllerEvent(boolean enable)
 	{		
 	}
+	//*/
 }

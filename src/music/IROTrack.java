@@ -36,7 +36,7 @@ public class IROTrack
 	
 	private byte maxVolumeNote = 0;
 	
-	public double initTrackSheetTime = 0D; 
+	//public double initTrackSheetTime = 0D; 
 	
 	public IROTrack( ) 
 	{
@@ -53,10 +53,12 @@ public class IROTrack
 		
 	}
 	
+	/*
 	public void setStartTrackTimeInSheet( double initTrackTime )
 	{
 		this.initTrackSheetTime = initTrackTime; 
 	}
+	//*/
 	
 	public void setID( String id )
 	{
@@ -321,10 +323,12 @@ public class IROTrack
 		return t;
 	}
 	
+	/*
 	public double getStartTrackTimeInSheet()
 	{
 		return this.initTrackSheetTime;
 	}
+	//*/
 	
 	public Pattern getPatternTrackSheet()
 	{	

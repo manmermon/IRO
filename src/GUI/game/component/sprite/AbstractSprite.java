@@ -56,7 +56,6 @@ public abstract class AbstractSprite implements ISprite
 		
 		this.screenLoc = new Point2D.Double( );
 		this.zIndex = 0;
-		this.ID = getClass().getSimpleName();
 		this.spriteSize = new Dimension( 50, 50 );
 		
 		this.listenerList = new EventListenerList();

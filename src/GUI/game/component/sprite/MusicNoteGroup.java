@@ -74,6 +74,8 @@ public class MusicNoteGroup extends AbstractSprite
 	private Double SheetTime = Double.NaN;	
 	private Double delay = 0D;	
 	
+	private String trackID = "";
+	
 	//
 	//
 	// ANIMATION SETTTINGS
@@ -99,7 +101,9 @@ public class MusicNoteGroup extends AbstractSprite
 							, boolean ghost ) 
 	{
 		super( noteID );
-				
+		
+		this.trackID = "track-" + System.nanoTime();
+		
 		this.noteTracks = new ArrayList< IROTrack >();
 		this.noteTracks.addAll( Notes );	
 						
@@ -130,6 +134,8 @@ public class MusicNoteGroup extends AbstractSprite
 		noteScreenLoc:
 		for( IROTrack Track : this.noteTracks )
 		{
+			this.trackID += Track.getID();
+			
 			for( List< Note > notes : Track.getTrackNotes().values() )
 			{	
 				for( Note n : notes )
@@ -166,8 +172,8 @@ public class MusicNoteGroup extends AbstractSprite
 						
 						synchronized ( delay )
 						{
+							MusicPlayerControl.getInstance().loadTracks( trackID, getNotes() );
 							delay = ( SheetTime - MusicPlayerControl.getInstance().getPlayTime() );
-							//System.out.println("MusicNoteGroup.MusicNoteGroup() " + delay + ": " + noteTracks );
 						}						
 						
 						break;
@@ -185,6 +191,11 @@ public class MusicNoteGroup extends AbstractSprite
 			}
 		});
 	}
+	
+	public String getTrackID()
+	{
+		return this.trackID;
+	}	
 	
 	public void setImage( BufferedImage img )
 	{

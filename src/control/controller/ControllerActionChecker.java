@@ -28,7 +28,7 @@ public class ControllerActionChecker implements IInputControllerListener
 	private Long refTime;
 	private Object sync = new Object();			
 	
-	private boolean enable = false;
+	private boolean enabledController = false;
 	
 	private AtomicBoolean recoverLevelReach = new AtomicBoolean( false );
 	
@@ -53,10 +53,11 @@ public class ControllerActionChecker implements IInputControllerListener
 		this.targetTime = time;
 	}	
 	
+ 	/*
 	public void enableProcessInputControllerEvent( boolean ena )
 	{
 		if( this.enable != ena )
-		{
+		{	
 			synchronized ( this.sync )
 			{
 				this.refTime = null;
@@ -86,6 +87,7 @@ public class ControllerActionChecker implements IInputControllerListener
 			}
 		}
 	}
+	*/
 	
 	@Override
 	public void InputControllerEvent( InputControllerEvent ev )
@@ -100,6 +102,15 @@ public class ControllerActionChecker implements IInputControllerListener
 			double data = values[ this.selectedChannel ];
 			double timerPercentage = 0;
 
+			boolean enable = ScreenControl.getInstance().activeInputControl();
+			
+			if( enable && !this.enabledController)
+			{
+				refTime = null;
+				
+				this.enabledController = true;
+			}
+			
 			synchronized ( this.sync )
 			{
 				if( data > this._rng.getMax() )
@@ -113,15 +124,13 @@ public class ControllerActionChecker implements IInputControllerListener
 					timerPercentage  = 100;
 	
 					if( this.targetTime > 0 )
-					{
-						double t = -this.targetTime;
-						
+					{	
 						if( this.refTime == null )
 						{
 							this.refTime = System.nanoTime();
 						}
 
-						t = ( System.nanoTime() - this.refTime ) / 1e9D;
+						double t = ( System.nanoTime() - this.refTime ) / 1e9D;
 	
 						timerPercentage = 100 * t  / this.targetTime;						
 					}				
@@ -134,15 +143,8 @@ public class ControllerActionChecker implements IInputControllerListener
 							this.statistic++;
 						}
 	
-						/*
-						synchronized ( this.sync )
-						{
-							this.refTime = null;
-						}
-						//*/
-	
 						if( !this.archievedTarget.get( ) 
-								&& this.enable 
+								&& enable 
 								&&  this.recoverLevelReach.get() )
 						{	
 							this.archievedTarget.set( true );
@@ -169,7 +171,7 @@ public class ControllerActionChecker implements IInputControllerListener
 				{	
 					this.statistic = 0;
 					
-					if( this.archievedTarget.getAndSet( false ) && this.enable )
+					if( this.archievedTarget.getAndSet( false ) && enable )
 					{		
 						this.fireActionEvent( InputActionEvent.RECOVER_DONE );
 					}
@@ -186,7 +188,7 @@ public class ControllerActionChecker implements IInputControllerListener
 					}				
 				}
 				
-				if( this.enable )
+				if( enable )
 				{
 					final double tp = timerPercentage;
 					Thread t = new Thread() 
@@ -199,6 +201,22 @@ public class ControllerActionChecker implements IInputControllerListener
 					};
 					t.start();
 				}
+				else if( this.enabledController )
+				{
+					this.enabledController = false;
+					//this.refTime = null;
+					
+					Thread t = new Thread() 
+					{
+						public void run() 
+						{
+							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( 0 )" );
+							ScreenControl.getInstance().setUpdateLevelInputGoal( 0 );
+						};
+					};
+					t.start();
+				}
+					
 			}
 		}
 	}

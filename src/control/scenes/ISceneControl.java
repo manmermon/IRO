@@ -14,6 +14,12 @@ public interface ISceneControl
 	
 	/**
 	 * 
+	 * @return
+	 */
+	public boolean activeInputController();
+	
+	/**
+	 * 
 	 * @param act
 	 * @throws SceneException
 	 */

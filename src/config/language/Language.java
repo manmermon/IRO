@@ -53,9 +53,13 @@ public class Language
 	public static final String MUSIC_LIST = "MUSIC_LIST";
 	public static final String SELECTED_SONG_LIST = "SELECTED_SONG_LIST";
 	
-	public static final String SONG = "SONG";
-	public static final String SONGS = "SONGS";
 	public static final String PLAYER = "PLAYER";
+	public static final String SINGLE = "SINGLE";
+	public static final String LOCAL_MULTIPLAYER = "LOCAL_MULTIPLAYER";
+	public static final String REMOTE_MULTIPLAYER = "REMOTE_MULTIPLAYER";
+	
+	public static final String SONG = "SONG";
+	public static final String SONGS = "SONGS";	
 	public static final String NAME = "NAME";
 	public static final String ANONYMOUS = "ANONYMOUS"; 
 	public static final String SELECT = "SELECT";
@@ -121,6 +125,18 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( SINGLE, defaultLanguage, "Single" );
+		cap.setCaption( esEs, "Individual");
+		captions.put( SINGLE, cap );
+		
+		cap = new Caption( LOCAL_MULTIPLAYER, defaultLanguage, "Local multiplayer" );
+		cap.setCaption( esEs, "Multijugador local");
+		captions.put( LOCAL_MULTIPLAYER, cap );
+		
+		cap = new Caption( REMOTE_MULTIPLAYER, defaultLanguage, "Remote multiplayer" );
+		cap.setCaption( esEs, "Multijugador remoto");
+		captions.put( REMOTE_MULTIPLAYER, cap );
 		
 		cap = new Caption( NOTE, defaultLanguage, "Note" );
 		cap.setCaption( esEs, "Nota");

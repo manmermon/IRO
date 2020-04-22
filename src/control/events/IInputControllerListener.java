@@ -13,5 +13,5 @@ public interface IInputControllerListener extends EventListener
 {
 	public void InputControllerEvent( InputControllerEvent  ev );
 	
-	public void enableProcessInputControllerEvent( boolean enable );
+	//public void enableProcessInputControllerEvent( boolean enable );
 }

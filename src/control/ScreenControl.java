@@ -134,64 +134,60 @@ public class ScreenControl extends AbstractStoppableThread
 	
 	
 	@Override
-	public void SceneEvent( control.events.SceneEvent ev) 
+	public void SceneEvent( final control.events.SceneEvent ev) 
 	{		
-		if( ev.getType() == control.events.SceneEvent.START)
+		Thread t = new Thread()
 		{
-			GameStatistic.add( FieldType.GAME_START );
-		}		
-		else if( ev.getType() == control.events.SceneEvent.END )
-		{
-			if( !super.getState().equals( Thread.State.WAITING ) 
-					|| !super.getState().equals( Thread.State.TIMED_WAITING ) )
-			{
-				super.interrupt(); 
-			}
-			
-			synchronized ( this )
-			{
-				GameStatistic.add( FieldType.GAME_END );
-				
-				try
+			/*(non-Javadoc)
+			 * @see @see stoppableThread.AbstractStoppableThread#run()
+			 */
+			@Override
+			public synchronized void run()
+			{			
+				if( ev.getType() == control.events.SceneEvent.START)
 				{
-					GameManager.getInstance().stopLevel( );
-				}
-				catch (Exception ex)
+					GameStatistic.add( FieldType.GAME_START );
+				}		
+				else if( ev.getType() == control.events.SceneEvent.END )
 				{
-					ex.printStackTrace();
-					
-					JOptionPane.showMessageDialog( MainAppUI.getInstance()
-													, ex.getMessage()
-													, Language.getLocalCaption( Language.ERROR )
-													, JOptionPane.ERROR_MESSAGE );
-				}
-				
-				/*
-				if( this.sceneCtrl != null )
-				{
-					try 
+					if( !super.getState().equals( Thread.State.WAITING ) 
+							|| !super.getState().equals( Thread.State.TIMED_WAITING ) )
 					{
-						this.sceneCtrl.destroyScene();
-						this.sceneCtrl = null;
+						super.interrupt(); 
 					}
-					catch (Exception e) 
+
+					synchronized ( this )
 					{
-						e.printStackTrace();
-					}				
+						GameStatistic.add( FieldType.GAME_END );
+
+						try
+						{
+							GameManager.getInstance().stopLevel( );
+						}
+						catch (Exception ex)
+						{
+							ex.printStackTrace();
+
+							JOptionPane.showMessageDialog( MainAppUI.getInstance()
+									, ex.getMessage()
+									, Language.getLocalCaption( Language.ERROR )
+									, JOptionPane.ERROR_MESSAGE );
+						}
+					}
 				}
-				
-				GameManager.getInstance().fullScreen( false );
-				//*/
+				else if( ev.getType() == control.events.SceneEvent.PAUSE )
+				{
+					GameStatistic.add( FieldType.GAME_PAUSE );
+				}
+				else if( ev.getType() == control.events.SceneEvent.RESUME )
+				{
+					GameStatistic.add( FieldType.GAME_RESUME );
+				}
 			}
-		}
-		else if( ev.getType() == control.events.SceneEvent.PAUSE )
-		{
-			GameStatistic.add( FieldType.GAME_PAUSE );
-		}
-		else if( ev.getType() == control.events.SceneEvent.RESUME )
-		{
-			GameStatistic.add( FieldType.GAME_RESUME );
-		}
+		};
+		
+		t.start();
+		
 	}
 	
 	/*
@@ -232,5 +228,20 @@ public class ScreenControl extends AbstractStoppableThread
 				((LevelControl)this.sceneCtrl).updateInputGoal( percent );
 			}
 		}
+	}
+	
+	public boolean activeInputControl()
+	{
+		boolean act = false;
+		
+		synchronized ( this )
+		{
+			if( this.sceneCtrl != null )
+			{
+				act = this.sceneCtrl.activeInputController();
+			}
+		}
+		
+		return act;
 	}
 }

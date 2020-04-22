@@ -119,7 +119,10 @@ public class SelectSongPanel extends JPanel
 					tm.addRow( new String[] { file } );
 				}						
 				
-				this.updateSelectedSong();
+				t.setRowSelectionInterval( 0, 0 );
+				moveSong( t, getSelectedSongTable(), false );
+				
+				this.updateSelectedSong();				
 			}
 		}
 		catch( Exception e)

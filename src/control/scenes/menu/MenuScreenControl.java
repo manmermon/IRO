@@ -67,4 +67,14 @@ public class MenuScreenControl extends AbstractSceneControl
 		return MainMenuScreen.class;
 	}
 
+	/*(non-Javadoc)
+	 * @see @see control.scenes.ISceneControl#activeInputController()
+	 */
+	@Override
+	public boolean activeInputController()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

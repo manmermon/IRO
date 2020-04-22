@@ -22,22 +22,13 @@ import tools.PatternTools;
 public class IROPlayer 
 {
 	private Map< String, PlayerNote > players;
-	private PlayerNote allocatedPlayer = null;
 		
 	public IROPlayer() 
 	{		
-		this.players = new HashMap< String, PlayerNote>( );
-		
-		try
-		{
-			this.allocatedPlayer = new PlayerNote();
-		} 
-		catch (MidiUnavailableException ex)
-		{
-		}
+		this.players = new HashMap< String, PlayerNote>( );		
 	}
 	
-	public void play( List< IROTrack > Tracks )
+	public void loadTracks( String trackID, List< IROTrack > Tracks )
 	{
 		try
 		{
@@ -48,21 +39,11 @@ public class IROPlayer
 				pat.add( tr.getPatternTrackSheet() );
 			}
 		
-			PlayerNote player;
-			if( this.allocatedPlayer != null )
-			{
-				player = allocatedPlayer;
-			}
-			else
-			{
-				player = new PlayerNote();
-			}
+			PlayerNote player = new PlayerNote();
 			player.setPattern( pat );
+			player.setName( trackID );
 			
 			this.players.put( player.getName(), player );
-			player.startThread();
-			
-			this.allocatedPlayer = new PlayerNote();
 		}
 		catch (Exception e) 
 		{
@@ -70,29 +51,69 @@ public class IROPlayer
 		}		
 	}
 	
-	public void play( List< Note > NOTES, String instrument, int voice, int layer, int bpm ) throws Exception
-	{			
+	public void loadTrack( IROTrack Track )
+	{
+		try
+		{
+			Pattern pat = new Pattern();
+			
+			pat.add( Track.getPatternTrackSheet() );
+		
+			PlayerNote player = new PlayerNote();
+			player.setPattern( pat );
+			player.setName( Track.getID() );
+			
+			this.players.put( player.getName(), player );
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}		
+	}
+	
+	public String loadNotes( List< Note > NOTES, String instrument, int voice, int layer, int bpm ) throws Exception
+	{		
+		String trackID = null;
+		
 		if( NOTES != null && !NOTES.isEmpty() )
 		{	
 			List< List< Note > > noteList = new ArrayList< List< Note > >();
 			noteList.add( NOTES );
 			Pattern NotesPattern = PatternTools.createPattern( bpm, voice, layer, instrument, noteList );
 			
-			PlayerNote player;
-			if( this.allocatedPlayer != null )
-			{
-				player = allocatedPlayer;
-			}
-			else
-			{
-				player = new PlayerNote();
-			}
+			PlayerNote player = new PlayerNote();
 			player.setPattern( NotesPattern );
 						
 			this.players.put( player.getName(), player );
 			player.startThread();			
-			
-			this.allocatedPlayer = new PlayerNote();
+		
+			trackID = player.getName();
+		}
+		
+		return trackID;
+	}
+	
+	public void play( String trackID ) throws Exception
+	{
+		synchronized( this.players )
+		{
+			PlayerNote player = this.players.get( trackID );
+			if( player != null )
+			{
+				player.startThread();
+			}
+		}
+	}
+	
+	public void stopTrack( String trackID ) throws Exception
+	{
+		synchronized( this.players )
+		{
+			PlayerNote player = this.players.get( trackID );
+			if( player != null )
+			{
+				player.stopThread( IStoppableThread.FORCE_STOP );
+			}
 		}
 	}
 	
@@ -131,7 +152,6 @@ public class IROPlayer
 
 		public void setPattern( Pattern pattern ) throws MidiUnavailableException, InvalidMidiDataException
 		{
-			//this.musicPattern = pattern;
 			this.player.load( pattern );
 		}
 		
@@ -157,12 +177,7 @@ public class IROPlayer
 			{	
 				if( !this.player.isEmpty() )
 				{
-					long t = System.nanoTime();
-					//Sequence seq = this.player.getSequence( this.musicPattern );
-					//System.out.println("IROPlayer.PlayerNote.runInLoop() A " + ( System.nanoTime() - t ) / 1e6D );
-					//t = System.nanoTime();
 					this.player.play( );
-					System.out.println("IROPlayer.PlayerNote.runInLoop() B " + ( System.nanoTime() - t ) / 1e6D );
 					
 					this.wait();
 				}

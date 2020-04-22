@@ -429,11 +429,11 @@ public class ConfigApp
 			idMax.setID( INPUT_MAX_VALUE );
 			
 			ConfigParameter parMin = new ConfigParameter( idMin, ParameterType.NUMBER );
-			parMin.setSelectedValue(  0D );
+			parMin.setSelectedValue(  -0.7D );
 			parMin.setPriority( 4 );
 			
 			ConfigParameter parMax = new ConfigParameter( idMax, ParameterType.NUMBER );
-			parMax.setSelectedValue( 100D );
+			parMax.setSelectedValue( 00D );
 			parMax.setPriority( 5 );
 			
 			listUserConfig.put( INPUT_MIN_VALUE, parMin );

@@ -67,6 +67,7 @@ public class ControllerManager
 		}
 	}
 	
+	/*
 	public void setEnableControllerListener( boolean ena )
 	{
 		if( controller != null )
@@ -77,6 +78,7 @@ public class ControllerManager
 			}
 		}
 	}
+	//*/
 		
 	public IInputController getController()
 	{

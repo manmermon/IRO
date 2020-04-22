@@ -41,6 +41,7 @@ import control.events.SceneEvent;
 import control.music.MusicPlayerControl;
 import control.scenes.AbstractSceneControl;
 import exceptions.SceneException;
+import general.ArrayTreeMap;
 import music.IROTrack;
 import control.controller.ControllerManager;
 import control.controller.KeystrokeAction;
@@ -49,13 +50,15 @@ import control.events.BackgroundMusicEvent;
 
 public class LevelControl extends AbstractSceneControl 
 							implements BackgroundMusicEventListener
-										, FretEventListener
+										//, FretEventListener
 {		
 	private AtomicBoolean actionDone;
 	private boolean backgroundMusicEnd = false;
 	private Color preactionColor = Color.RED;
 	private Color waitActionColor = Color.BLUE;
 	private Color actionColor = Color.GREEN;
+	
+	private boolean noteIntoFret = false;
 	
 	/**
 	 * @throws SceneException 
@@ -71,6 +74,7 @@ public class LevelControl extends AbstractSceneControl
 	/*(non-Javadoc)
 	 * @see @see control.scenes.AbstractSceneControl#setScene(GUI.game.screen.IScene)
 	 */
+	/*
 	@Override
 	public void setScene(IScene scene) throws SceneException
 	{
@@ -80,6 +84,7 @@ public class LevelControl extends AbstractSceneControl
 		
 		lv.getFret().addFretEventListener( this );
 	}
+	//*/
 	
 	/*
 	 * (non-Javadoc)
@@ -134,14 +139,18 @@ public class LevelControl extends AbstractSceneControl
 		{
 			Fret fret = (Fret)FRET.get( 0 );
 
-			List< IROTrack > noteTracks = new ArrayList< IROTrack >();
+			List< String > noteTracks = new ArrayList<String>();
 
+			boolean noteInFret = false;
+			
 			for( ISprite __Note : Notes )
 			{
 				MusicNoteGroup note = (MusicNoteGroup) __Note;
 
 				if( fret.isNoteIntoFret( note ) )
 				{	
+					noteInFret = true;
+					
 					if( this.actionDone.get() 
 							|| note.isGhost() 
 							//|| true 
@@ -173,12 +182,13 @@ public class LevelControl extends AbstractSceneControl
 					if( note.isSelected() && !note.isPlayed() )
 					{
 						note.setPlayed( true );
-
-						noteTracks.addAll( note.getNotes() );							
+						
+						noteTracks.add( note.getTrackID() );							
 					}
-
 				}					
 			}
+			
+			this.noteIntoFret = noteInFret;
 
 			this.actionDone.set( false );
 
@@ -186,7 +196,7 @@ public class LevelControl extends AbstractSceneControl
 			{	
 				try
 				{
-					MusicPlayerControl.getInstance().playNotes( noteTracks );
+					MusicPlayerControl.getInstance().playTracks( noteTracks );
 				} 
 				catch (Exception ex)
 				{
@@ -289,6 +299,7 @@ public class LevelControl extends AbstractSceneControl
 	/*(non-Javadoc)
 	 * @see @see GUI.game.component.event.FretEventListener#FretEvent(GUI.game.component.event.FretEvent)
 	 */
+	/*
 	@Override
 	public void FretEvent(GUI.game.component.event.FretEvent ev)
 	{
@@ -306,6 +317,7 @@ public class LevelControl extends AbstractSceneControl
 			}
 		}
 	}
+	//*/
 
 	public void updateInputGoal( double percentage )
 	{
@@ -317,6 +329,18 @@ public class LevelControl extends AbstractSceneControl
 			{
 				((InputGoal)tg).setPercentage( percentage );
 			}
+		}
+	}
+
+	/*(non-Javadoc)
+	 * @see @see control.scenes.ISceneControl#activeInputController()
+	 */
+	@Override
+	public boolean activeInputController()
+	{
+		synchronized ( this )
+		{
+			return this.noteIntoFret;
 		}
 	}
 }

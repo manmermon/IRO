@@ -24,7 +24,8 @@ public class testIROPlayer
 			notes.add( new Note( pat[ i ]) );
 		
 			try {
-				player.play( notes, "piano", 0, 0, 73 );
+				String id = player.loadNotes( notes, "piano", 0, 0, 73 );
+				player.play( id );
 				Thread.sleep( st[ i ] );
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
