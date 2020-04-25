@@ -84,7 +84,7 @@ public class AppSelectPlayer extends JDialog
 		
 		try
 		{
-			List< Player > allPlayers = ConfigApp.getAllPlayersDB();			
+			List< Player > allPlayers = ConfigApp.dbGetAllPlayers();			
 			Set< Player > selectedPlayer = ConfigApp.getPlayers();
 			
 			for( Player player : allPlayers )
@@ -135,7 +135,7 @@ public class AppSelectPlayer extends JDialog
 		{
 			for( Integer id : this.playerIDs )
 			{
-				Player player = ConfigApp.getPlayerDB( id );
+				Player player = ConfigApp.dbGetPlayer( id );
 				
 				if( player != null && !player.isAnonymous() )
 				{
@@ -396,7 +396,7 @@ public class AppSelectPlayer extends JDialog
 								{
 									if( playerID != Player.ANONYMOUS_PLAYER_ID )
 									{
-										ConfigApp.delPlayerDB( playerID );
+										ConfigApp.dbRemovePlayer( playerID );
 										tm.removeRow( s );
 									}
 								} 
@@ -458,7 +458,7 @@ public class AppSelectPlayer extends JDialog
 					
 					try
 					{
-						int userId = ConfigApp.addPlayerDB( userName, null );
+						int userId = ConfigApp.dbAddPlayer( userName, null );
 						Player user = new Player( userId, userName, null); 
 						
 						addUserToTable( user );

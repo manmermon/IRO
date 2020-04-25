@@ -44,8 +44,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import GUI.combobox.JColorComboBox;
@@ -314,7 +312,7 @@ public class SettingPanel extends JPanel
 			
 			try
 			{
-				ConfigApp.updatePlayerDB( this._player );
+				ConfigApp.dbUpdatePlayer( this._player );
 			} 
 			catch (SQLException ex)
 			{
@@ -364,7 +362,7 @@ public class SettingPanel extends JPanel
 					
 					this._player.getImg().setImage( newImg );
 					
-					ConfigApp.updatePlayerDB( this._player );
+					ConfigApp.dbUpdatePlayer( this._player );
 					
 					updatePlayerImage( b );
 				}
@@ -401,10 +399,11 @@ public class SettingPanel extends JPanel
 				panel.setLayout( new GridLayout( 0, 1 ) );
 				
 				String title = par.get_ID().getCaption( Language.getCurrentLanguage() );			
-				panel.setBorder( BorderFactory.createTitledBorder( title ));
+				panel.setBorder( BorderFactory.createTitledBorder( title ));				
+				panel.setToolTipText( title );
 				
 				TranslateComponents.add( panel, par.get_ID() );
-				
+								
 				panel.add( comp );
 				
 				Dimension d = super.getSize();

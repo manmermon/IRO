@@ -60,6 +60,9 @@ public class SelectSongPanel extends JPanel
 	 * 
 	 */
 	private static final long serialVersionUID = -4212736396179567663L;
+	
+	private static SelectSongPanel ssp = null;
+	
 	private JPanel contentPanel;
 	private JPanel panelSelectControl;
 	private JPanel panelMusicList;
@@ -82,9 +85,17 @@ public class SelectSongPanel extends JPanel
 	
 	private Pattern pattern = null;
 	
-	private Player _player = null;
+	public static SelectSongPanel getInstance()
+	{
+		if( ssp == null )
+		{
+			ssp = new SelectSongPanel();
+		}
+		
+		return ssp;
+	}
 	
-	public SelectSongPanel( )
+	private SelectSongPanel( )
 	{		
 		super.setLayout( new BorderLayout() );
 		
@@ -134,16 +145,18 @@ public class SelectSongPanel extends JPanel
 		}
 	}
 	
-	public void setPlayer(Player player)
-	{
-		this._player = player;
-	}
-	
-	private void updateSelectedSong()
+	public void updateSelectedSong()
 	{
 		JTable t = this.gettableSongList();
 		
-		Settings cfg = ConfigApp.getPlayerSetting( this._player );
+		Player player = ConfigApp.getFirstPlayer();
+		
+		Settings cfg = null;
+		
+		if( player != null )
+		{
+			cfg = ConfigApp.getPlayerSetting( player );
+		}
 		
 		if( cfg != null )
 		{
@@ -176,24 +189,6 @@ public class SelectSongPanel extends JPanel
 				}
 			}
 		}
-	}
-	
-	public String[] getSongList()
-	{
-		String[] songs;
-		
-		JTable t = getSelectedSongTable();
-		
-		int rows = t.getRowCount();
-		
-		songs = new String[ rows ];
-		
-		for( int i = 0; i < rows; i++ )
-		{
-			songs[ i ] = t.getValueAt( i, 0 ).toString();
-		}
-		
-		return songs;
 	}
 	
 	private JPanel getSongInfoPanel()
@@ -554,7 +549,13 @@ public class SelectSongPanel extends JPanel
 						songs += tm.getValueAt( i, 0 ).toString() + ConfigApp.SONG_LIST_SEPARATOR; 
 					}
 					
-					Settings cfg = ConfigApp.getPlayerSetting( _player );
+					Player player = ConfigApp.getFirstPlayer();					
+					Settings cfg = null;
+					
+					if( player != null )
+					{
+						cfg = ConfigApp.getPlayerSetting( player );
+					}
 							
 					if( cfg != null )
 					{

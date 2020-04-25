@@ -37,6 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import GUI.panel.SettingPanel;
 import GUI.tabbedpanel.ClosableTabbedPanel;
@@ -105,6 +106,8 @@ public class MainAppUI extends JFrame
 	
 	private MenuScroller langMenu;
 	
+	
+	private boolean addingPlayers = false;
 		
 	/**
 	 * Create the frame.
@@ -281,21 +284,21 @@ public class MainAppUI extends JFrame
 						{
 							ConfigApp.removePlayerSetting( panel.getPlayer() );
 						}
-					}
-					else if( type == CollectionEvent.CLEAR_ELEMENT )
-					{
-						ConfigApp.loadDefaultProperties();
-						for( Player player : ConfigApp.getPlayers() )
+						
+						if( t.getTabCount() == 0 && !addingPlayers)
 						{
-							addPlayerSetting( player );
+							ConfigApp.resetSettings();
+							for( Player player : ConfigApp.getPlayers() )
+							{
+								addPlayerSetting( player );
+							}
 						}
 					}
 					else if( type == CollectionEvent.INSERT_ELEMENT )
 					{
 						if( index < 1 )
 						{
-							Player player = ((SettingPanel)t.getComponent( index ) ).getPlayer();
-							setSceneTabbedPanels( player );
+							updatePreviewLevelComponents();
 						}
 					}							
 
@@ -362,26 +365,12 @@ public class MainAppUI extends JFrame
 					List< Player > players = selplayerDialog.getSelectedPlayers();
 					
 					if( players != null && !players.isEmpty() ) 
-					{	
-						for( Player player : players )
-						{
-							try
-							{														
-								ConfigApp.loadPlayerSetting( player );
-							}
-							catch ( Exception ex) 
-							{
-								JOptionPane.showMessageDialog( ui, ex.getCause() + "\n" + ex.getMessage()
-								, Language.getLocalCaption( Language.ERROR )
-								, JOptionPane.ERROR_MESSAGE );
-							}
-							finally 
-							{
-								//GameManager.getInstance().updateSetting();
-							}
-							
-							addPlayerSetting( player );
-						}
+					{
+						addingPlayers = true;
+						
+						//
+						// Removing Anonymous players
+						//
 						
 						JTabbedPane p = getSettingFieldPanel();
 						
@@ -392,11 +381,6 @@ public class MainAppUI extends JFrame
 									&& sp.getPlayer().isAnonymous() )
 							{
 								p.removeTabAt( i );
-								
-								if( i == 0 )
-								{
-									setSceneTabbedPanels( players.get( 0 ) );
-								}
 							}
 						}
 						
@@ -413,6 +397,31 @@ public class MainAppUI extends JFrame
 						{
 							ConfigApp.removePlayerSetting( player );
 						}
+						
+						for( Player player : players )
+						{
+							try
+							{														
+								if( !ConfigApp.loadPlayerSetting( player ) )
+								{
+									ConfigApp.loadDefaultPlayerSetting( player );
+									ConfigApp.dbInsertPlayerSetting( player );
+								}
+							}
+							catch ( Exception ex) 
+							{
+								JOptionPane.showMessageDialog( ui, ex.getCause() + "\n" + ex.getMessage()
+								, Language.getLocalCaption( Language.ERROR )
+								, JOptionPane.ERROR_MESSAGE );
+							}
+							finally 
+							{
+							}
+							
+							addPlayerSetting( player );
+						}
+						
+						addingPlayers = false;
 					}
 				}
 			});
@@ -747,8 +756,16 @@ public class MainAppUI extends JFrame
 			//this.songPanel = new JPanel( new BorderLayout() );
 			this.scenePanel = new JTabbedPane();
 			
-			this.setSceneTabbedPanels( null );
-			
+			Caption cap = Language.getAllCaptions().get( Language.SONGS );			
+			this.scenePanel.addTab( cap.getCaption( Language.getCurrentLanguage() )
+								, SelectSongPanel.getInstance() );
+
+			cap = Language.getAllCaptions().get( Language.IMAGE );
+			this.scenePanel.addTab( cap.getCaption( Language.getCurrentLanguage() )
+								, SelectLevelImagePanel.getInstance() );
+
+			this.scenePanel.setSelectedIndex( 0 );
+						
 			Dimension s = new Dimension( 300, 275 );
 			this.scenePanel.setPreferredSize( s );
 		}
@@ -756,28 +773,9 @@ public class MainAppUI extends JFrame
 		return this.scenePanel;
 	}
 	
-	private void setSceneTabbedPanels( Player player )
+	private void updatePreviewLevelComponents( )
 	{
-		if( player != null )
-		{
-			JTabbedPane panel = this.getSongPanel();
-			panel.setVisible( false );
-			panel.removeAll();
-			
-			Caption cap = Language.getAllCaptions().get( Language.SONGS );			
-			panel.addTab( cap.getCaption( Language.getCurrentLanguage() )
-									, new SelectSongPanel() );
-			
-			SelectLevelImagePanel selImgs = SelectLevelImagePanel.getInstance();
-			selImgs.setVisible( false );
-			selImgs.setPlayer( player );
-			
-			cap = Language.getAllCaptions().get( Language.IMAGE );
-			panel.addTab( cap.getCaption( Language.getCurrentLanguage() )
-									, selImgs );
-			
-			panel.setSelectedIndex( 0 );
-			panel.setVisible( true );
-		}
+		SelectSongPanel.getInstance().updateSelectedSong();
+		SelectLevelImagePanel.getInstance().updatePreviewLevelImages();
 	}
 }

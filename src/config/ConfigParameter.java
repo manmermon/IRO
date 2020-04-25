@@ -220,7 +220,7 @@ public class ConfigParameter
 		{
 			try
 			{
-				ConfigApp.updatePlayerConfigDB( this._player, this._ID.getID() );
+				ConfigApp.dbUpdatePlayerSetting( this._player, this._ID.getID() );
 			} 
 			catch (SQLException ex)
 			{

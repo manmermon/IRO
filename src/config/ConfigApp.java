@@ -44,8 +44,10 @@ import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
@@ -158,104 +160,113 @@ public class ConfigApp
 	
 	private static Map< String, ConfigParameter > listGeneralConfig = new HashMap<String, ConfigParameter>();
 	
-	private static Map< Player, Settings > listUserConfig = new HashMap< Player, Settings >();
+	private static LinkedHashMap< Player, Settings > listPlayerConfig = new LinkedHashMap< Player, Settings >();
 
 	static
 	{
 		create_Key_Value();
-		loadDBFields();
+		dbLoadFields();
 	}
 
 	private static void create_Key_Value()
 	{
 		listGeneralConfig.clear();
-		listUserConfig.clear();
+		listPlayerConfig.clear();
 
-		loadDefaultProperties();
+		resetSettings();
 	}
 	
 	public static Set< Player > getPlayers()
 	{
-		return listUserConfig.keySet();
+		return listPlayerConfig.keySet();
 	}
 	
-	public static void loadPlayerSetting( Player player )
+	public static Player getFirstPlayer()
+	{
+		Player firstPlayer = null;
+		
+		Iterator< Entry< Player, Settings >  > it=  listPlayerConfig.entrySet().iterator();
+		if( it.hasNext() )
+		{
+			firstPlayer = it.next().getKey();
+		}
+		
+		return firstPlayer;
+	}
+	
+	/**
+	 * 
+	 * @param player
+	 * @return true if setting is loaded, otherwise false
+	 */
+	public static boolean loadPlayerSetting( Player player )
 	{	
+		boolean load = false;
+		
 		if( player != null )
 		{
-			Settings cfg = listUserConfig.get( player );
+			try
+			{	
+				List< Tuple< String, Object > > settings = dbGetPlayerSetting( player.getId() );
 			
-			if( cfg == null )
-			{
-				try
+				load = ( !settings.isEmpty() );
+				
+				if( load )
 				{
-					loadPlayerDefaultSetting( player );
-					
-					cfg = listUserConfig.get( player );
-					
-					if( cfg != null )
+					Settings cfg = getDefaultSettings();
+					listPlayerConfig.put( player, cfg );
+
+					for( Tuple< String, Object > par : settings )
 					{
-						List< Tuple< String, Object > > settings = getPlayerConfigDB( player.getId() );
-						
-						if( settings.isEmpty() && !player.isAnonymous() )
-						{					
-							insertPlayerConfigDB( player );
-						}
-						else
+						Object val = par.y;
+
+						ConfigParameter p = cfg.getParameter( par.x );
+						if( p != null && val != null)
 						{
-							for( Tuple< String, Object > par : settings )
+							if( p.get_type() == ParameterType.COLOR )
 							{
-								Object val = par.y;
-	
-								ConfigParameter p = cfg.getParameter( par.x );
-								if( p != null && val != null)
-								{
-									if( p.get_type() == ParameterType.COLOR )
-									{
-										val = new Color( (Integer)val );
-									}
-	
-									p.setSelectedValue( val );
-								}
+								val = new Color( (Integer)val );
 							}
+
+							p.setSelectedValue( val );
 						}
-					}
-				}
-				catch ( SQLException | ConfigParameterException ex)
-				{
-					ex.printStackTrace();
+					}					
 				}
 			}
+			catch( Exception e )
+			{
+				e.printStackTrace();
+			}
 		}
+		
+		return load;
 	}
 	
 	public static Settings getPlayerSetting( Player player )
-	{
-		loadPlayerSetting( player );
-		
-		return listUserConfig.get( player );
+	{				
+		return listPlayerConfig.get( player );
 	}
 	
 	public static void removePlayerSetting( Player player )
 	{
-		listUserConfig.remove( player );
+		listPlayerConfig.remove( player );
 	}
 	
 	public static Collection< Settings > getSettings()
 	{
-		return listUserConfig.values();
+		return listPlayerConfig.values();
 	}
 	
-	public static void loadDefaultProperties()
+	public static void resetSettings()
 	{
 		try
 		{
-			listUserConfig.clear();
+			listPlayerConfig.clear();
 			listGeneralConfig.clear();
 			
 			loadDefaultLanguage( );
 			
-			listUserConfig.put( new Player(), getDefaultSettings() );
+			loadDefaultPlayerSetting( new Player() );
 			
 		}
 		catch (Exception e) 
@@ -264,7 +275,15 @@ public class ConfigApp
 		}
 	}
 	
-	private static void loadPlayerDefaultSetting( Player player ) throws ConfigParameterException
+	public static void loadDefaultAllCurrentPlayerSettings() throws ConfigParameterException
+	{
+		for( Player player : getPlayers() )
+		{
+			loadDefaultPlayerSetting( player );
+		}
+	}	
+	
+	public static void loadDefaultPlayerSetting( Player player ) throws ConfigParameterException
 	{
 		Settings cfg = getDefaultSettings();
 			
@@ -272,18 +291,8 @@ public class ConfigApp
 		{
 			par.setPlayer( player );
 		}
-					
-		if( !player.isAnonymous() )
-		{
-			if( !listUserConfig.containsKey( player ) )
-			{
-				listUserConfig.put( player, cfg );
-			}
-		}
-		else if( listUserConfig.isEmpty() )
-		{
-			listUserConfig.put( player, cfg );
-		}
+		
+		listPlayerConfig.put( player, cfg );		
 	}
 	
 	private static Settings getDefaultSettings( ) throws ConfigParameterException
@@ -332,6 +341,30 @@ public class ConfigApp
 		return cfg;
 	}
 	
+	//
+	//
+	// Load default parameters
+	//
+	//
+	
+	private static Caption getCaptions(String wordID )
+	{
+		List< String > Langs = Language.getAvaibleLanguages();
+		
+		Caption cap = new Caption( wordID, Language.defaultLanguage, Language.getCaption( wordID, Language.defaultLanguage ) ); 
+		
+		for( int i = 1; i < Langs.size(); i++ )
+		{	
+			String lang = Langs.get( i );
+			if( !lang.equals( Language.defaultLanguage ) )
+			{
+				cap.setCaption( lang, Language.getCaption( wordID, lang ) );
+			}
+		}
+		
+		return cap;
+	}
+		
 	private static void loadDefaultLanguage(  ) throws ConfigParameterException
 	{			
 		List< String > Langs = Language.getAvaibleLanguages();
@@ -350,7 +383,7 @@ public class ConfigApp
 	
 	private static ConfigParameter loadDefaultBackgroundImage() throws ConfigParameterException
 	{	
-		Caption id = Language.getAllCaptions().get( Language.BACKGROUND );
+		Caption id = getCaptions( Language.BACKGROUND );
 		id.setID( BACKGROUND_IMAGE );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
 		par.setPriority(  Integer.MAX_VALUE );
@@ -360,7 +393,7 @@ public class ConfigApp
 	
 	private static ConfigParameter loadDefaultNoteImage() throws ConfigParameterException
 	{
-		Caption id = Language.getAllCaptions().get( Language.NOTE );
+		Caption id = getCaptions( Language.NOTE );
 		id.setID( NOTE_IMAGE );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
 		par.setPriority(  Integer.MAX_VALUE );
@@ -370,30 +403,12 @@ public class ConfigApp
 	
 	private static ConfigParameter loadDefaultSelectedController() throws ConfigParameterException
 	{
-		Caption id = Language.getAllCaptions().get( Language.CONTROLLER );
+		Caption id = getCaptions( Language.CONTROLLER );
 		id.setID( SELECTED_CONTROLLER );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
 		par.setPriority(  Integer.MAX_VALUE );
 
 		return par; 
-	}
-	
-	private static Caption getCaptions(String wordID )
-	{
-		List< String > Langs = Language.getAvaibleLanguages();
-		
-		Caption cap = new Caption( wordID, Language.defaultLanguage, Language.getCaption( wordID, Language.defaultLanguage ) ); 
-		
-		for( int i = 1; i < Langs.size(); i++ )
-		{	
-			String lang = Langs.get( i );
-			if( !lang.equals( Language.defaultLanguage ) )
-			{
-				cap.setCaption( lang, Language.getCaption( wordID, lang ) );
-			}
-		}
-		
-		return cap;
 	}
 	
 	private static ConfigParameter loadDefaultUserReactionTime( ) throws ConfigParameterException
@@ -537,7 +552,7 @@ public class ConfigApp
 	*/
 	///////////////////
 	
-	private static void loadDBFields()
+	private static void dbLoadFields()
 	{
 		tableFields = new HashMap<String, Map< String, Class > >();
 		
@@ -580,12 +595,11 @@ public class ConfigApp
 		tableFields.put( statisticTableName, fieldType );
 	}
 	
-
 	/**
 	 * Connect to a sample database
 	 * @throws SQLException 
 	 */
-	private static void connectDB() throws SQLException 
+	private static void dbConnect() throws SQLException 
 	{
 		if( conn == null || !conn.isClosed() )
 		{
@@ -593,7 +607,7 @@ public class ConfigApp
 		}
 	}
 
-	private static void closeDBConnection() throws SQLException
+	private static void dbCloseConnection() throws SQLException
 	{
 		if( conn != null )
 		{
@@ -602,7 +616,7 @@ public class ConfigApp
 		}
 	}
 
-	public static int addPlayerDB( String name, BufferedImage img ) throws SQLException
+	public static int dbAddPlayer( String name, BufferedImage img ) throws SQLException
 	{
 		String vars = "name";
 		String vals = "?";
@@ -621,7 +635,7 @@ public class ConfigApp
 
 		try  
 		{
-			connectDB();
+			dbConnect();
 			pstmt = conn.prepareStatement( sql, Statement.RETURN_GENERATED_KEYS );
 
 			pstmt.setString(1, name);
@@ -670,13 +684,13 @@ public class ConfigApp
 				pstmt.close();
 			}
 
-			closeDBConnection();        	
+			dbCloseConnection();        	
 		}
 
 		return userID;
 	}
 
-	public static void updatePlayerDB( Player user ) throws SQLException
+	public static void dbUpdatePlayer( Player user ) throws SQLException
 	{
 		if( user != null )
 		{
@@ -690,7 +704,7 @@ public class ConfigApp
 			PreparedStatement pstmt = null;
 			try  
 			{
-				connectDB();
+				dbConnect();
 				pstmt = conn.prepareStatement( sql );
 
 				pstmt.setString(1, name);
@@ -727,19 +741,19 @@ public class ConfigApp
 					pstmt.close();
 				}
 
-				closeDBConnection();        	
+				dbCloseConnection();        	
 			}	            
 		}
 	}
 
-	public static void delPlayerDB( int id ) throws SQLException
+	public static void dbRemovePlayer( int id ) throws SQLException
 	{	
 		String sql = "DELETE FROM " + userTableName + " WHERE id = ?";
 		PreparedStatement pstmt = null;
 
 		try
 		{
-			connectDB();
+			dbConnect();
 			pstmt= conn.prepareStatement( sql );
 
 			pstmt.setInt(1, id);
@@ -757,11 +771,11 @@ public class ConfigApp
 				pstmt.close();
 			}
 
-			closeDBConnection();       
+			dbCloseConnection();       
 		}
 	}
 
-	private static List< Tuple< String, Object > > getPlayerConfigDB( int userID ) throws SQLException
+	private static List< Tuple< String, Object > > dbGetPlayerSetting( int userID ) throws SQLException
 	{
 		String sql = "SELECT * FROM " + settingsTableName + " WHERE userID = " + userID;
 
@@ -772,7 +786,7 @@ public class ConfigApp
 
 		try
 		{ 
-			connectDB();
+			dbConnect();
 
 			stmt  = conn.createStatement();
 			rs    = stmt.executeQuery( sql );
@@ -836,13 +850,13 @@ public class ConfigApp
 				stmt.close();
 			}
 
-			closeDBConnection();
+			dbCloseConnection();
 		}		
 
 		return pars;
 	}
 
-	public static void insertPlayerConfigDB( Player player ) throws SQLException
+	public static void dbInsertPlayerSetting( Player player ) throws SQLException
 	{		
 		String sql = "INSERT INTO "+ settingsTableName +  "(userID";
 		String sqlValues  = "VALUES(" + player.getId();
@@ -892,7 +906,7 @@ public class ConfigApp
 	
 			try 
 			{
-				connectDB();
+				dbConnect();
 	
 				stmt  = conn.createStatement();
 				stmt.executeUpdate( sql );
@@ -908,12 +922,12 @@ public class ConfigApp
 					stmt.close();
 				}
 	
-				closeDBConnection();
+				dbCloseConnection();
 			}
 		}
 	}
 
-	public static void updatePlayerConfigDB( Player player ) throws SQLException
+	public static void dbUpdatePlayerSetting( Player player ) throws SQLException
 	{
 		String sql =  "UPDATE " + settingsTableName + " SET ";
 
@@ -921,7 +935,7 @@ public class ConfigApp
 		Map< String, Class > fields = tableFields.get( settingsTableName );
 		for( String fieldName : fields.keySet() )
 		{			
-			String value = getFieldValue( player, fieldName );			
+			String value = dbGetFieldValue( player, fieldName );			
 
 			if( value != null )
 			{			
@@ -939,7 +953,7 @@ public class ConfigApp
 
 			try 
 			{
-				connectDB();
+				dbConnect();
 
 				stmt  = conn.createStatement();
 				stmt.executeUpdate(sql );
@@ -955,12 +969,12 @@ public class ConfigApp
 					stmt.close();
 				}
 
-				closeDBConnection();
+				dbCloseConnection();
 			}
 		}
 	}
 
-	private static String getFieldValue( Player player, String fieldName )
+	private static String dbGetFieldValue( Player player, String fieldName )
 	{
 		String value = null;
 
@@ -1007,7 +1021,7 @@ public class ConfigApp
 		return value;
 	}
 
-	public static void updatePlayerConfigDB( Player player, String fieldID ) throws SQLException
+	public static void dbUpdatePlayerSetting( Player player, String fieldID ) throws SQLException
 	{
 		Map< String, Class > fields = tableFields.get( settingsTableName );
 
@@ -1017,7 +1031,7 @@ public class ConfigApp
 
 		if( add )
 		{	
-			String value = getFieldValue( player, fieldID );
+			String value = dbGetFieldValue( player, fieldID );
 			
 			add = (value != null );
 
@@ -1036,7 +1050,7 @@ public class ConfigApp
 
 			try 
 			{
-				connectDB();
+				dbConnect();
 
 				stmt  = conn.createStatement();
 				stmt.executeUpdate(sql );
@@ -1052,12 +1066,12 @@ public class ConfigApp
 					stmt.close();
 				}
 
-				closeDBConnection();
+				dbCloseConnection();
 			}
 		}
 	}
 
-	public static Player getPlayerDB( int ID ) throws SQLException, IOException
+	public static Player dbGetPlayer( int ID ) throws SQLException, IOException
 	{
 		String sql = "SELECT * FROM " + userTableName + " WHERE id = " + ID;
 
@@ -1068,7 +1082,7 @@ public class ConfigApp
 
 		try
 		{ 
-			connectDB();
+			dbConnect();
 
 			stmt  = conn.createStatement();
 			rs    = stmt.executeQuery( sql );
@@ -1111,13 +1125,13 @@ public class ConfigApp
 				stmt.close();
 			}
 
-			closeDBConnection();
+			dbCloseConnection();
 		}
 
 		return user;
 	}
 
-	public static List< Player > getAllPlayersDB() throws SQLException, IOException
+	public static List< Player > dbGetAllPlayers() throws SQLException, IOException
 	{
 		String sql = "SELECT * FROM " + userTableName;
 
@@ -1128,7 +1142,7 @@ public class ConfigApp
 
 		try
 		{ 
-			connectDB();
+			dbConnect();
 
 			stmt  = conn.createStatement();
 			rs    = stmt.executeQuery( sql );
@@ -1174,13 +1188,13 @@ public class ConfigApp
 				stmt.close();
 			}
 
-			closeDBConnection();
+			dbCloseConnection();
 		}
 
 		return users;
 	}
 
-	public static void saveStatistic() throws SQLException
+	public static void dbSaveStatistic() throws SQLException
 	{
 		int playerID = GameStatistic.getPlayerID();
 		ArrayTreeMap< LocalDateTime, GameStatistic.FieldType > register = GameStatistic.getRegister();
@@ -1200,7 +1214,7 @@ public class ConfigApp
 			
 			try 
 			{
-				connectDB();
+				dbConnect();
 
 				stmt  = conn.createStatement();
 			
@@ -1256,10 +1270,11 @@ public class ConfigApp
 					stmt.close();
 				}
 
-				closeDBConnection();
+				dbCloseConnection();
 			}
 		}
 	}
+	
 	/*
 	public static void main( String[] arg )
 	{
@@ -1281,7 +1296,7 @@ public class ConfigApp
 	//*/	
 	
 
-	private static void SetTables() throws SQLException
+	private static void dbCreateTables() throws SQLException
 	{	
 		String sqlCreateTableUser = 
 				"CREATE TABLE IF NOT EXISTS user (\n"

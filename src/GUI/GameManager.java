@@ -304,7 +304,7 @@ public class GameManager
 			}
 		}		
 		
-		ConfigApp.saveStatistic();
+		ConfigApp.dbSaveStatistic();
 		
 		MainAppUI.getInstance().setVisible( true );
 	}

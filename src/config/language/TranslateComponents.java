@@ -57,6 +57,7 @@ public class TranslateComponents
 			{
 				JPanel p = (JPanel)c;
 				p.setBorder( BorderFactory.createTitledBorder( translate ) );
+				p.setToolTipText( translate );
 			}
 			else if( c instanceof JScrollPane )
 			{

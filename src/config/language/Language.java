@@ -35,8 +35,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import config.ConfigApp;
-
 public class Language 
 {
 	public static final String DefaultFolder = "./Lang/";
@@ -78,6 +76,7 @@ public class Language
 	public static final String CLEAR = "CLEAR";
 	public static final String UP = "UP";
 	public static final String DOWN = "DOWN";
+	public static final String NONE = "NONE";
 	
 	public static final String TIME = "TIME";
 	public static final String REACTION_TIME = "REACTION_TIME";
@@ -127,6 +126,10 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( NONE, defaultLanguage, "None" );
+		cap.setCaption( esEs, "Ninguno/a");
+		captions.put( NONE, cap );
 
 		cap = new Caption( ADD_PLAYER, defaultLanguage, "Add player" );
 		cap.setCaption( esEs, "Añadir jugador");

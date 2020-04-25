@@ -29,6 +29,8 @@ import config.ConfigApp;
 import config.ConfigParameter;
 import config.Player;
 import config.Settings;
+import config.language.Caption;
+import config.language.Language;
 import exceptions.ConfigParameterException;
 import image.basicPainter2D;
 import music.IROTrack;
@@ -63,13 +65,11 @@ public class SelectLevelImagePanel extends JPanel
 	private static SelectLevelImagePanel selImgPanel = null;
 	
 	private JPanel contentPane;
-	private JPanel panelImage;
-	
+	private JPanel panelImage;	
 	private JPanel resourcesPanel;
+	private JPanel imgListPanel;
 	private JPanel previewScene;
 	
-	private Player _player;
-		
 	public static SelectLevelImagePanel getInstance()
 	{
 		if( selImgPanel == null )
@@ -95,11 +95,6 @@ public class SelectLevelImagePanel extends JPanel
 		});
 	}
 
-	public void setPlayer( Player player )
-	{
-		this._player = player;		
-	}
-	
 	private JPanel getContainerPanel()
 	{
 		if( this.contentPane == null )
@@ -125,17 +120,32 @@ public class SelectLevelImagePanel extends JPanel
 		return this.previewScene;
 	}
 	
-	private void setPreviewScene( )
+	public void updatePreviewLevelImages()
+	{
+		JPanel panel = this.getImageListPanel();
+		panel.removeAll();
+		
+		panel.add( this.getImageExpandPanel( new File( ConfigApp.BACKGROUND_SPRITE_FILE_PATH ), ConfigApp.BACKGROUND_IMAGE ) );
+		panel.add( this.getImageExpandPanel( new File( ConfigApp.NOTE_SPRITE_FILE_PATH ), ConfigApp.NOTE_IMAGE ) );
+	}
+	
+ 	private void setPreviewScene( )
 	{		
 		JPanel preview = this.getPreviewScene();
 		Dimension size = preview.getSize();
 		
-		if( size.width > 0 && size.height > 0 && this._player != null )
+		if( size.width > 0 && size.height > 0 )
 		{
 			String bgPath = null;
 			String notPath = null;
 		
-			Settings cfg = ConfigApp.getPlayerSetting( this._player );
+			Player player = ConfigApp.getFirstPlayer();
+			Settings cfg = null;
+			
+			if( player != null )
+			{
+				cfg = ConfigApp.getPlayerSetting( player );
+			}
 			
 			if( cfg != null )
 			{
@@ -286,6 +296,8 @@ public class SelectLevelImagePanel extends JPanel
 				lv.addNote( noteSprite1 );
 				lv.addNote( noteSprite2 );
 				lv.addNote( noteSprite3 );
+				
+				n++;
 			}
 			
 			preview.setVisible( false );
@@ -313,19 +325,24 @@ public class SelectLevelImagePanel extends JPanel
 		{	
 			this.resourcesPanel = new JPanel( new BorderLayout() );
 			
-			JPanel panel = new JPanel();
-			panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
-			
-			panel.add( this.getImageExpandPanel( new File( ConfigApp.BACKGROUND_SPRITE_FILE_PATH ), ConfigApp.BACKGROUND_IMAGE ) );
-			panel.add( this.getImageExpandPanel( new File( ConfigApp.NOTE_SPRITE_FILE_PATH ), ConfigApp.NOTE_IMAGE ) );
-			
-			this.resourcesPanel.add( panel, BorderLayout.NORTH );			
+			this.resourcesPanel.add( this.getImageListPanel(), BorderLayout.NORTH );			
 		}
 		
 		return this.resourcesPanel;
 	}
 	
-	public ExpandablePanel getImageExpandPanel( File folder, final String configID )
+	private JPanel getImageListPanel()
+	{
+		if( this.imgListPanel == null )
+		{
+			this.imgListPanel = new JPanel();
+			this.imgListPanel.setLayout( new BoxLayout( this.imgListPanel, BoxLayout.Y_AXIS ) );
+		}
+		
+		return this.imgListPanel;
+	}
+	
+	private ExpandablePanel getImageExpandPanel( File folder, final String configID )
 	{
 		ExpandablePanel expPanel = null;
 		
@@ -350,15 +367,61 @@ public class SelectLevelImagePanel extends JPanel
 			
 			if( files != null && files.length > 0)
 			{
+				Settings cfg = null;
+				Player player = ConfigApp.getFirstPlayer();
+				final ConfigParameter par;
+				
+				if( player != null )
+				{
+					cfg = ConfigApp.getPlayerSetting( player );
+				}
+			
+				if( cfg != null )
+				{
+					par = cfg.getParameter( configID );
+				}
+				else
+				{
+					par = null;
+				}
+				 
+				
 				expPanel =  new ExpandablePanel();
 				
 				JPanel panel = new JPanel( );
 				panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
 				
 				ButtonGroup btgr = new ButtonGroup();
+				
+				Caption cap = Language.getAllCaptions().get( Language.NONE );
+				JRadioButton b = new JRadioButton( cap.getCaption( Language.getCurrentLanguage() ) );
+				
+				b.addActionListener( new ActionListener()
+				{						
+					@Override
+					public void actionPerformed(ActionEvent e)
+					{
+						AbstractButton b = (AbstractButton)e.getSource();
+						
+						if( b.isSelected() )
+						{	
+							if( par != null )
+							{
+								par.removeSelectedValue();
+							}
+							
+							setPreviewScene();
+						}
+					}
+				});
+				
+				btgr.add( b );					
+				panel.add( b );
+				
+				boolean selectedFileFound = false;
 				for( File file : files )
 				{
-					JRadioButton b = new JRadioButton( file.getName() );
+					b = new JRadioButton( file.getName() );
 					
 					final String filePath = file.getAbsolutePath();
 					b.addActionListener( new ActionListener()
@@ -370,20 +433,15 @@ public class SelectLevelImagePanel extends JPanel
 							
 							if( b.isSelected() )
 							{
-								Settings cfg = ConfigApp.getPlayerSetting( _player );
-								if( cfg != null )
+								if( par != null )
 								{
-									ConfigParameter par = cfg.getParameter( configID );
-									if( par != null )
+									try
 									{
-										try
-										{
-											par.setSelectedValue( filePath );
-										} 
-										catch (ConfigParameterException ex)
-										{
-											ex.printStackTrace();
-										}
+										par.setSelectedValue( filePath );
+									} 
+									catch (ConfigParameterException ex)
+									{
+										ex.printStackTrace();
 									}
 								}
 								
@@ -394,15 +452,30 @@ public class SelectLevelImagePanel extends JPanel
 					
 					btgr.add( b );					
 					panel.add( b );
+					
+					if( par != null )
+					{
+						Object val = par.getSelectedValue();
+						if( val != null 
+								&&
+								val.toString().equals( filePath ) )
+						{
+							b.doClick();
+							selectedFileFound = true;
+						}
+					}
 				}
 				
 				expPanel.setText( folder.getName() );
 				expPanel.setContentPanel( panel );
 				
-				Enumeration< AbstractButton > en = btgr.getElements();
-				if( en.hasMoreElements() )
+				if( !selectedFileFound )
 				{
-					en.nextElement().doClick();
+					Enumeration< AbstractButton > en = btgr.getElements();
+					if( en.hasMoreElements() )
+					{
+						en.nextElement().doClick();
+					}
 				}
 			}
 		}
