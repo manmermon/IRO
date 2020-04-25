@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
 
 import GUI.AppIcon;
 import GUI.GameManager;
-import GUI.keyActions;
+import GUI.action.keyActions;
 import GUI.game.component.ControllerTargetBar;
 import control.controller.ControllerManager;
 

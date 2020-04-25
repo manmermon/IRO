@@ -115,7 +115,7 @@ public class GameStatistic
 	
 	public static void clearRegister()
 	{
-		playerID = Player.ANONYMOUS_USER_ID;
+		playerID = Player.ANONYMOUS_PLAYER_ID;
 		startDateTime = null;
 		register.clear();
 	}

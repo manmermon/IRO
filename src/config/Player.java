@@ -11,7 +11,7 @@ import image.icon.GeneralAppIcon;
 
 public class Player
 {
-	public static final int ANONYMOUS_USER_ID = -1;
+	public static final int ANONYMOUS_PLAYER_ID = -1;
 	
 	private int id;
 	private String name;
@@ -22,7 +22,7 @@ public class Player
 	
 	public Player()
 	{
-		this.id = ANONYMOUS_USER_ID;
+		this.id = ANONYMOUS_PLAYER_ID;
 		this.name = Language.getLocalCaption( Language.ANONYMOUS );
 		this.img = null;
 	}
@@ -36,6 +36,11 @@ public class Player
 		
 		this.img = img;
 		
+	}
+	
+	public boolean isAnonymous()
+	{
+		return this.id == ANONYMOUS_PLAYER_ID;
 	}
 	
 	public void setDefaultImage()
@@ -72,5 +77,40 @@ public class Player
 		}
 		
 		return ic;
+	}
+	
+	/*(non-Javadoc)
+	 * @see @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode()
+	{
+		
+		return (new Integer( this.id )).hashCode();
+	}
+	
+	/*(non-Javadoc)
+	 * @see @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString()
+	{
+		return this.id + ": " + this.name;
+	}
+	
+	/*(non-Javadoc)
+	 * @see @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj)
+	{
+		boolean eq = ( obj instanceof Player );
+		
+		if( eq )
+		{
+			eq = ( this.id == ((Player)obj).getId() );
+		}
+		
+		return eq;
 	}
 }

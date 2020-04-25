@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -89,6 +90,12 @@ public class ConfigApp
 	public static final String LANGUAGE = "LANGUAGE";
 	
 	public static final String PLAYER = "PLAYER";
+	
+	public static final String MULTIPLAYER = "MULTIPLAYER";
+	
+	public static final int SINGLE_PLAYER = 0;
+	public static final int LOCA_MULTIPLAYER = 1;
+	public static final int REMOTE_MULTIPLAYER = 2;
 	
 	///////////
 	//
@@ -149,7 +156,9 @@ public class ConfigApp
 	
 	////////////////////////
 	
-	private static Map< String, ConfigParameter > listUserConfig = new HashMap< String, ConfigParameter >();
+	private static Map< String, ConfigParameter > listGeneralConfig = new HashMap<String, ConfigParameter>();
+	
+	private static Map< Player, Settings > listUserConfig = new HashMap< Player, Settings >();
 
 	static
 	{
@@ -159,19 +168,80 @@ public class ConfigApp
 
 	private static void create_Key_Value()
 	{
+		listGeneralConfig.clear();
 		listUserConfig.clear();
 
 		loadDefaultProperties();
 	}
 	
-	public static ConfigParameter getParameter( String propertyID )
+	public static Set< Player > getPlayers()
 	{
-		ConfigParameter par = listUserConfig.get( propertyID );
-		
-		return par;
+		return listUserConfig.keySet();
 	}
+	
+	public static void loadPlayerSetting( Player player )
+	{	
+		if( player != null )
+		{
+			Settings cfg = listUserConfig.get( player );
+			
+			if( cfg == null )
+			{
+				try
+				{
+					loadPlayerDefaultSetting( player );
+					
+					cfg = listUserConfig.get( player );
+					
+					if( cfg != null )
+					{
+						List< Tuple< String, Object > > settings = getPlayerConfigDB( player.getId() );
+						
+						if( settings.isEmpty() && !player.isAnonymous() )
+						{					
+							insertPlayerConfigDB( player );
+						}
+						else
+						{
+							for( Tuple< String, Object > par : settings )
+							{
+								Object val = par.y;
+	
+								ConfigParameter p = cfg.getParameter( par.x );
+								if( p != null && val != null)
+								{
+									if( p.get_type() == ParameterType.COLOR )
+									{
+										val = new Color( (Integer)val );
+									}
+	
+									p.setSelectedValue( val );
+								}
+							}
+						}
+					}
+				}
+				catch ( SQLException | ConfigParameterException ex)
+				{
+					ex.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public static Settings getPlayerSetting( Player player )
+	{
+		loadPlayerSetting( player );
 		
-	public static Collection< ConfigParameter > getParameters()
+		return listUserConfig.get( player );
+	}
+	
+	public static void removePlayerSetting( Player player )
+	{
+		listUserConfig.remove( player );
+	}
+	
+	public static Collection< Settings > getSettings()
 	{
 		return listUserConfig.values();
 	}
@@ -181,23 +251,12 @@ public class ConfigApp
 		try
 		{
 			listUserConfig.clear();
+			listGeneralConfig.clear();
 			
-			loadDefaultLanguage(  );
-			loadDefaultUser(  );
-			loadDefaultUserReactionTime(  );
-			loadDefaultUserRecoverTime(  );
-			loadDefaultActionColors(  );
-			loadDefaultSongList( );
-			loadDefaultInputRange( );
+			loadDefaultLanguage( );
 			
-			loadDefaultTimeInInputTarget();
+			listUserConfig.put( new Player(), getDefaultSettings() );
 			
-			loadDefaultSelectedChannel();
-			
-			loadDefaultSelectedController();
-			
-
-			loadDefaultSceneImages();
 		}
 		catch (Exception e) 
 		{
@@ -205,56 +264,118 @@ public class ConfigApp
 		}
 	}
 	
-	private static void loadDefaultSceneImages()
+	private static void loadPlayerDefaultSetting( Player player ) throws ConfigParameterException
 	{
-		try
+		Settings cfg = getDefaultSettings();
+			
+		for( ConfigParameter par : cfg.getParameters() )
 		{
-			Caption id = Language.getAllCaptions().get( Language.BACKGROUND );
-			id.setID( BACKGROUND_IMAGE );
-			ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
-			par.setPriority(  Integer.MAX_VALUE );
-			
-			listUserConfig.put( BACKGROUND_IMAGE, par );
-			
-			
-			id = Language.getAllCaptions().get( Language.NOTE );
-			id.setID( NOTE_IMAGE );
-			par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
-			par.setPriority(  Integer.MAX_VALUE );
-			
-			listUserConfig.put( NOTE_IMAGE, par );
-		} 
-		catch (ConfigParameterException ex)
+			par.setPlayer( player );
+		}
+					
+		if( !player.isAnonymous() )
 		{
-			ex.printStackTrace();
+			if( !listUserConfig.containsKey( player ) )
+			{
+				listUserConfig.put( player, cfg );
+			}
+		}
+		else if( listUserConfig.isEmpty() )
+		{
+			listUserConfig.put( player, cfg );
 		}
 	}
 	
-	private static void loadDefaultSelectedController()
+	private static Settings getDefaultSettings( ) throws ConfigParameterException
 	{
-		try
-		{
-			Caption id = Language.getAllCaptions().get( Language.CONTROLLER );
-			id.setID( SELECTED_CONTROLLER );
-			ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
-			par.setPriority(  Integer.MAX_VALUE );
-			
-			listUserConfig.put( SELECTED_CONTROLLER, par ); 
-		} 
-		catch (ConfigParameterException ex)
-		{
-			ex.printStackTrace();
-		}
-	}
-	
-	private static void loadDefaultUser( ) throws ConfigParameterException
-	{
-		Caption id = new Caption( PLAYER, Language.defaultLanguage, Language.getCaption( Language.defaultLanguage, Language.PLAYER ) );
-		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.USER );		
-		par.setSelectedValue( new Player() );		
-		par.setPriority( Integer.MAX_VALUE );
+		Settings cfg = new Settings();
 		
-		listUserConfig.put( PLAYER, par );
+		ConfigParameter par = loadDefaultUserReactionTime( );
+		cfg.setParameter( par.get_ID().getID(), par );
+				
+		par = loadDefaultUserRecoverTime(  );
+		cfg.setParameter( par.get_ID().getID(), par );
+		
+		for( ConfigParameter p : loadDefaultActionColors(  ) )
+		{
+			cfg.setParameter( p.get_ID().getID(), par );
+		}
+		
+		par = loadDefaultSongList( );
+		cfg.setParameter( par.get_ID().getID(), par );
+		
+		for( ConfigParameter p : loadDefaultInputRange( ) )
+		{
+			cfg.setParameter( p.get_ID().getID(), p );
+		}
+				
+		par = loadDefaultTimeInInputTarget();
+		cfg.setParameter( par.get_ID().getID(), par );
+		
+		par = loadDefaultSelectedChannel();
+		cfg.setParameter( par.get_ID().getID(), par );
+		
+		par = loadDefaultSelectedController();
+		cfg.setParameter( par.get_ID().getID(), par );
+		
+		par = loadDefaultBackgroundImage();
+		cfg.setParameter( par.get_ID().getID(), par );
+		
+		par = loadDefaultNoteImage();
+		cfg.setParameter( par.get_ID().getID(), par );
+		
+		for( ConfigParameter p : loadDefaultActionColors() )
+		{
+			cfg.setParameter( p.get_ID().getID(), p );
+		}
+		
+		return cfg;
+	}
+	
+	private static void loadDefaultLanguage(  ) throws ConfigParameterException
+	{			
+		List< String > Langs = Language.getAvaibleLanguages();
+		
+		Caption id = getCaptions( Language.LANGUAGE_TXT ); 				
+		id.setID( LANGUAGE );
+		
+		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.STRING );
+		par.addAllOptions( Langs );
+		
+		par.setSelectedValue( Language.getCurrentLanguage() );
+		par.setPriority( 0 );
+		
+		listGeneralConfig.put( LANGUAGE, par );
+	}
+	
+	private static ConfigParameter loadDefaultBackgroundImage() throws ConfigParameterException
+	{	
+		Caption id = Language.getAllCaptions().get( Language.BACKGROUND );
+		id.setID( BACKGROUND_IMAGE );
+		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
+		par.setPriority(  Integer.MAX_VALUE );
+		
+		return par;
+	}
+	
+	private static ConfigParameter loadDefaultNoteImage() throws ConfigParameterException
+	{
+		Caption id = Language.getAllCaptions().get( Language.NOTE );
+		id.setID( NOTE_IMAGE );
+		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
+		par.setPriority(  Integer.MAX_VALUE );
+
+		return par;		
+	}
+	
+	private static ConfigParameter loadDefaultSelectedController() throws ConfigParameterException
+	{
+		Caption id = Language.getAllCaptions().get( Language.CONTROLLER );
+		id.setID( SELECTED_CONTROLLER );
+		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
+		par.setPriority(  Integer.MAX_VALUE );
+
+		return par; 
 	}
 	
 	private static Caption getCaptions(String wordID )
@@ -275,24 +396,8 @@ public class ConfigApp
 		return cap;
 	}
 	
-	private static void loadDefaultLanguage(  ) throws ConfigParameterException
-	{			
-		List< String > Langs = Language.getAvaibleLanguages();
-		
-		Caption id = getCaptions( Language.LANGUAGE_TXT ); 				
-		id.setID( LANGUAGE );
-		
-		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.STRING );
-		par.addAllOptions( Langs );
-		
-		par.setSelectedValue( Language.getCurrentLanguage() );
-		par.setPriority( 0 );
-		
-		listUserConfig.put( LANGUAGE, par );
-	}
-	
-	private static void loadDefaultUserReactionTime( ) throws ConfigParameterException
-	{
+	private static ConfigParameter loadDefaultUserReactionTime( ) throws ConfigParameterException
+	{		
 		Caption id = getCaptions( Language.REACTION_TIME );
 		id.setID( REACTION_TIME );
 		NumberRange rng = new NumberRange( 0.5, Double.MAX_VALUE );
@@ -300,11 +405,10 @@ public class ConfigApp
 		par.setSelectedValue( 2D );
 		par.setPriority( 2 );
 		
-		
-		listUserConfig.put( REACTION_TIME, par );
+		return par;
 	}
 	
-	private static void loadDefaultTimeInInputTarget( ) throws ConfigParameterException
+	private static ConfigParameter loadDefaultTimeInInputTarget( ) throws ConfigParameterException
 	{
 		Caption id = getCaptions( Language.TIME_INPUT_TARGET );
 		id.setID( TIME_IN_INPUT_TARGET );
@@ -313,11 +417,11 @@ public class ConfigApp
 		par.setSelectedValue( 0D );
 		par.setPriority( 6 );
 		
-		listUserConfig.put( TIME_IN_INPUT_TARGET, par );
+		return par;
 	}
 	
-	private static void loadDefaultUserRecoverTime( ) throws ConfigParameterException
-	{
+	private static ConfigParameter loadDefaultUserRecoverTime( ) throws ConfigParameterException
+	{		
 		Caption id = getCaptions( Language.RECOVER_TIME );
 		id.setID( RECOVER_TIME );
 		NumberRange rng = new NumberRange( 0.5, Double.MAX_VALUE );
@@ -325,146 +429,106 @@ public class ConfigApp
 		par.setSelectedValue( 2D );
 		par.setPriority( 3 );
 				
-		listUserConfig.put( RECOVER_TIME, par );
+		return par;
 	}
 	
-	private static void loadDefaultActionColors( )
-	{
-		try
-		{
-			List< Color > colors = new ArrayList<Color>();
-			colors.add( Color.red );
-			colors.add( Color.black );
-			colors.add( Color.white );
-			colors.add( Color.blue );
-			colors.add( Color.cyan );
-			colors.add( Color.gray );
-			colors.add( Color.green );
-			colors.add( Color.lightGray );
-			colors.add( Color.magenta );
-			colors.add( Color.orange );
-			colors.add( Color.pink );			
-			colors.add( Color.yellow );
-			
-			Caption id = getCaptions( Language.PREACTION_COLOR );
-			id.setID( PREACTION_COLOR );
-			ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
-			par.addAllOptions( colors );
-			par.setSelectedValue( Color.red );
-			par.setPriority( 7 );
-			listUserConfig.put( PREACTION_COLOR, par );
-			
-			id = getCaptions( Language.WAITING_ACTION_COLOR);
-			id.setID( WAITING_ACTION_COLOR );
-			par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
-			colors.remove( Color.blue );
-			colors.add( 0, Color.blue );
-			par.addAllOptions( colors );
-			par.setSelectedValue( Color.blue );
-			par.setPriority( 8 );
-			listUserConfig.put( WAITING_ACTION_COLOR, par );
-			
-			id = getCaptions( Language.ACTION_COLOR );
-			id.setID( ACTION_COLOR );
-			par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
-			colors.remove( Color.green );
-			colors.add( 0, Color.green );
-			par.addAllOptions( colors );
-			par.setSelectedValue( Color.green );
-			par.setPriority( 9 );
-			listUserConfig.put( ACTION_COLOR, par );
-		}
-		catch ( ConfigParameterException e) 
-		{
-			e.printStackTrace();
-		}
+	private static List< ConfigParameter > loadDefaultActionColors( )  throws ConfigParameterException
+	{	
+		List< ConfigParameter > pars = new ArrayList<ConfigParameter>();
+		
+		List< Color > colors = new ArrayList<Color>();
+		colors.add( Color.red );
+		colors.add( Color.black );
+		colors.add( Color.white );
+		colors.add( Color.blue );
+		colors.add( Color.cyan );
+		colors.add( Color.gray );
+		colors.add( Color.green );
+		colors.add( Color.lightGray );
+		colors.add( Color.magenta );
+		colors.add( Color.orange );
+		colors.add( Color.pink );			
+		colors.add( Color.yellow );
+
+		Caption id = getCaptions( Language.PREACTION_COLOR );
+		id.setID( PREACTION_COLOR );
+		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
+		par.addAllOptions( colors );
+		par.setSelectedValue( Color.red );
+		par.setPriority( 7 );
+		pars.add( par );
+
+		id = getCaptions( Language.WAITING_ACTION_COLOR);
+		id.setID( WAITING_ACTION_COLOR );
+		par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
+		colors.remove( Color.blue );
+		colors.add( 0, Color.blue );
+		par.addAllOptions( colors );
+		par.setSelectedValue( Color.blue );
+		par.setPriority( 8 );
+		pars.add( par );
+
+		id = getCaptions( Language.ACTION_COLOR );
+		id.setID( ACTION_COLOR );
+		par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
+		colors.remove( Color.green );
+		colors.add( 0, Color.green );
+		par.addAllOptions( colors );
+		par.setSelectedValue( Color.green );
+		par.setPriority( 9 );
+		pars.add( par );
+		
+		return pars;
 	}
 	
-	private static void loadDefaultSongList( )
-	{
-		try
-		{
-			Caption id = getCaptions( Language.MUSIC_LIST );
-			id.setID( SONG_LIST );
-			
-			ConfigParameter par = new ConfigParameter( id, ParameterType.SONG );
-			par.setPriority( Integer.MAX_VALUE - 1 );
-			
-			listUserConfig.put( SONG_LIST, par );
-		}
-		catch ( ConfigParameterException e) 
-		{
-			e.printStackTrace();
-		}
+	private static ConfigParameter loadDefaultSongList( ) throws ConfigParameterException
+	{	
+		Caption id = getCaptions( Language.MUSIC_LIST );
+		id.setID( SONG_LIST );
+
+		ConfigParameter par = new ConfigParameter( id, ParameterType.SONG );
+		par.setPriority( Integer.MAX_VALUE - 1 );
+
+		return par;
 	}
 	
-	private static void loadDefaultSelectedChannel()
-	{
-		try
-		{	
-			Caption id = getCaptions( Language.SELECTED_CHANNEL );
-			id.setID( INPUT_SELECTED_CHANNEL );
-						
-			NumberRange r = new NumberRange( 1D, Double.MAX_VALUE);
-			
-			ConfigParameter par = new ConfigParameter( id, r );
-			par.setSelectedValue( 1D );
-			par.setPriority( 1 );
-			
-			listUserConfig.put( INPUT_SELECTED_CHANNEL, par );
-		}
-		catch (Exception ex) 
-		{
-			ex.printStackTrace();
-		}
+	private static ConfigParameter loadDefaultSelectedChannel() throws ConfigParameterException
+	{			
+		Caption id = getCaptions( Language.SELECTED_CHANNEL );
+		id.setID( INPUT_SELECTED_CHANNEL );
+
+		NumberRange r = new NumberRange( 1D, Double.MAX_VALUE);
+
+		ConfigParameter par = new ConfigParameter( id, r );
+		par.setSelectedValue( 1D );
+		par.setPriority( 1 );
+
+		return par;
 	}
 	
-	private static void loadDefaultInputRange()
-	{
-		try
-		{	
-			Caption idMin = getCaptions( Language.MIN_INPUT_VALUE );
-			idMin.setID( INPUT_MIN_VALUE );
-			Caption idMax = getCaptions( Language.MAX_INPUT_VALUE );
-			idMax.setID( INPUT_MAX_VALUE );
-			
-			ConfigParameter parMin = new ConfigParameter( idMin, ParameterType.NUMBER );
-			parMin.setSelectedValue(  -0.7D );
-			parMin.setPriority( 4 );
-			
-			ConfigParameter parMax = new ConfigParameter( idMax, ParameterType.NUMBER );
-			parMax.setSelectedValue( 00D );
-			parMax.setPriority( 5 );
-			
-			listUserConfig.put( INPUT_MIN_VALUE, parMin );
-			listUserConfig.put( INPUT_MAX_VALUE, parMax );
-		}
-		catch (Exception ex) 
-		{
-			ex.printStackTrace();
-		}
+	private static List< ConfigParameter > loadDefaultInputRange() throws ConfigParameterException
+	{	
+		List< ConfigParameter > pars = new ArrayList<ConfigParameter>();
+		
+		Caption idMin = getCaptions( Language.MIN_INPUT_VALUE );
+		idMin.setID( INPUT_MIN_VALUE );
+		Caption idMax = getCaptions( Language.MAX_INPUT_VALUE );
+		idMax.setID( INPUT_MAX_VALUE );
+
+		ConfigParameter parMin = new ConfigParameter( idMin, ParameterType.NUMBER );
+		parMin.setSelectedValue(  -0.7D );
+		parMin.setPriority( 4 );
+
+		ConfigParameter parMax = new ConfigParameter( idMax, ParameterType.NUMBER );
+		parMax.setSelectedValue( 00D );
+		parMax.setPriority( 5 );
+
+		pars.add( parMin );
+		pars.add( parMax );
+		
+		return pars;
 	}
-	
-	/*
-	private static void loadDefaultSelectedInputChannel()
-	{
-		try
-		{
-			Caption id = Language.getAllCaptions().get( Language.SELECTED_CHANNEL );
-			id.setID( SELECTED_INPUT_CHANNEL );
-			NumberRange rng = new NumberRange( 1, Integer.MAX_VALUE );
-			ConfigParameter par = new ConfigParameter( id, rng );
-			par.add( 1D );
-			
-			listUserConfig.put( SELECTED_INPUT_CHANNEL, par );
-		}
-		catch (Exception ex) 
-		{
-			ex.printStackTrace();
-		}
-	}
-	//*/
-	
+		
 	///////////////////
 	/*
 	
@@ -499,6 +563,7 @@ public class ConfigApp
 		fieldType.put( INPUT_SELECTED_CHANNEL, Double.class );
 		fieldType.put( BACKGROUND_IMAGE, String.class );
 		fieldType.put( NOTE_IMAGE, String.class );
+		fieldType.put( TIME_IN_INPUT_TARGET, Double.class );
 
 		fieldType = new HashMap<String, Class>();
 		fieldType.put( "idSession", Integer.class );
@@ -537,71 +602,12 @@ public class ConfigApp
 		}
 	}
 
-	private static void SetTables() throws SQLException
-	{	
-		String sqlCreateTableUser = 
-				"CREATE TABLE IF NOT EXISTS user (\n"
-						+ " id integer PRIMARY KEY AUTOINCREMENT\n"
-						+ ", name text NOT NULL\n"
-						+ ", image BLOB\n"
-						+ ");";
-
-		String sqlCreateTableConfig = 
-				"CREATE TABLE IF NOT EXISTS settings (\n"
-				//+ " id integer PRIMARY KEY AUTOINCREMENT\n"
-				+ " userID integer PRIMARY KEY \n"
-				+ ", reactionTime real CHECK (reactionTime > 0)\n"
-				+ ", recoverTime real CHECK (recoverTime > 0)\n"
-				+ ", colorPreaction integer\n"
-				+ ", colorWaitingAction integer\n"
-				+ ", colorAction integer\n"
-				+ ", songs text\n"
-				+ ", minInputValue real\n"
-				+ ", maxInputValue real\n"
-				+ ", selectedChannel real"
-				+ ", backgroundImage text"
-				+ ", noteImage text"
-				+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
-				+ ");";
-
-		String sqlCreateTableSession = 
-				"CREATE TABLE IF NOT EXISTS session (\n"
-						+ " idSession integer PRIMARY KEY AUTOINCREMENT\n"
-						+ ", userID integer"
-						+ ", date integer NOT NULL\n"
-						+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
-						+ ");";
-
-		String sqlCreateTableStatistic = 
-				"CREATE TABLE IF NOT EXISTS statistic (\n"
-						+ " number integer PRIMARY KEY AUTOINCREMENT\n"
-						+ ", idSession integer\n"
-						+ ", actionID integer NOT NULL\n"
-						+ ", actionName integer NOT NULL\n"
-						+ ", time integer NOT NULL\n"						
-						+ ", FOREIGN KEY ( idSession ) REFERENCES statistic( idSession ) ON DELETE CASCADE\n"
-						+ ");";
-		
-		try ( Connection conn = DriverManager.getConnection( dbURL );
-				Statement stmt = conn.createStatement()) 
-		{
-			stmt.execute( sqlCreateTableUser );
-			stmt.execute( sqlCreateTableConfig );
-			stmt.execute( sqlCreateTableSession );
-			stmt.execute( sqlCreateTableStatistic );
-		} 
-		catch ( SQLException e ) 
-		{
-			throw e;
-		}
-	}
-
 	public static int addPlayerDB( String name, BufferedImage img ) throws SQLException
 	{
 		String vars = "name";
 		String vals = "?";
 
-		int userID = Player.ANONYMOUS_USER_ID;
+		int userID = Player.ANONYMOUS_PLAYER_ID;
 
 		if( img != null )
 		{
@@ -755,7 +761,7 @@ public class ConfigApp
 		}
 	}
 
-	public static List< Tuple< String, Object > > getPlayerConfigDB( int userID ) throws SQLException
+	private static List< Tuple< String, Object > > getPlayerConfigDB( int userID ) throws SQLException
 	{
 		String sql = "SELECT * FROM " + settingsTableName + " WHERE userID = " + userID;
 
@@ -836,73 +842,78 @@ public class ConfigApp
 		return pars;
 	}
 
-	public static void insertPlayerConfigDB( int userID ) throws SQLException
+	public static void insertPlayerConfigDB( Player player ) throws SQLException
 	{		
 		String sql = "INSERT INTO "+ settingsTableName +  "(userID";
-		String sqlValues  = "VALUES(" + userID;
+		String sqlValues  = "VALUES(" + player.getId();
 
 		Map< String, Class > fieldTable = tableFields.get( settingsTableName );
 		Iterator< String > itField = fieldTable.keySet().iterator();
 
-		while( itField.hasNext() )
-		{			
-			String fieldName = itField.next();
-
-			String value = null;
-			ConfigParameter par = ConfigApp.getParameter( fieldName );
-
-			if( par != null )
-			{
-				Object val = par.getSelectedValue();
-				if( val != null )
+		Settings cfg = ConfigApp.getPlayerSetting( player );
+		
+		if( cfg != null )
+		{		
+			while( itField.hasNext() )
+			{			
+				String fieldName = itField.next();
+	
+				String value = null;
+				ConfigParameter par = cfg.getParameter( fieldName );
+	
+				if( par != null )
 				{
-					value = val.toString();
-				}
-
-				if( par.get_type() == ConfigParameter.ParameterType.COLOR )
-				{
-					value = ((Color)val).getRGB() + "";
-				}
-				else if( par.get_type() == ParameterType.USER )
-				{
-					value = null;
-				}
-
-				if( value != null )
-				{			
-					sql += "," + fieldName;
-					sqlValues += "," + value;
+					Object val = par.getSelectedValue();
+					if( val != null )
+					{
+						value = val.toString();
+					}
+	
+					if( par.get_type() == ConfigParameter.ParameterType.COLOR )
+					{
+						value = ((Color)val).getRGB() + "";
+					}
+					else if( par.get_type() == ParameterType.USER )
+					{
+						value = null;
+					}
+	
+					if( value != null )
+					{			
+						sql += "," + fieldName;
+						sqlValues += "," + value;
+					}
 				}
 			}
-		}
-
-		sql += ") " + sqlValues + ")";
-
-		Statement stmt = null;
-
-		try 
-		{
-			connectDB();
-
-			stmt  = conn.createStatement();
-			stmt.executeUpdate( sql );
-		}
-		catch (SQLException e) 
-		{
-			throw e;			 
-		}
-		finally 
-		{
-			if( stmt != null )
+	
+			sql += ") " + sqlValues + ")";
+	
+			Statement stmt = null;
+	
+			try 
 			{
-				stmt.close();
+				connectDB();
+	
+				stmt  = conn.createStatement();
+				stmt.executeUpdate( sql );
 			}
-
-			closeDBConnection();
+			catch (SQLException e) 
+			{
+				throw e;			 
+			}
+			finally 
+			{
+				if( stmt != null )
+				{
+					stmt.close();
+				}
+	
+				closeDBConnection();
+			}
 		}
 	}
 
-	public static void updatePlayerConfigDB( int userID ) throws SQLException
+	public static void updatePlayerConfigDB( Player player ) throws SQLException
 	{
 		String sql =  "UPDATE " + settingsTableName + " SET ";
 
@@ -910,7 +921,7 @@ public class ConfigApp
 		Map< String, Class > fields = tableFields.get( settingsTableName );
 		for( String fieldName : fields.keySet() )
 		{			
-			String value = getFieldValue( fieldName );			
+			String value = getFieldValue( player, fieldName );			
 
 			if( value != null )
 			{			
@@ -922,7 +933,7 @@ public class ConfigApp
 		if( add )
 		{		
 			sql = sql.substring( 0, sql.length() - 1 );
-			sql += " WHERE userID = " + userID;
+			sql += " WHERE userID = " + player.getId();
 
 			Statement stmt = null;
 
@@ -949,39 +960,54 @@ public class ConfigApp
 		}
 	}
 
-	private static String getFieldValue( String fieldName )
+	private static String getFieldValue( Player player, String fieldName )
 	{
 		String value = null;
 
-		ConfigParameter par = ConfigApp.getParameter( fieldName );
-
-		Object val = par.getSelectedValue();
-		if( val != null )
+		Settings cfg = ConfigApp.getPlayerSetting( player );
+		
+		if( cfg != null )
 		{
-			value = val.toString();
-		}
-
-		if( par.get_type() == ConfigParameter.ParameterType.COLOR )
-		{
-			value = ((Color)val).getRGB() + "";
-		}
-		else if( par.get_type() == ParameterType.USER )
-		{
-			value = null;
-		}
-		else if( par.get_type() == ParameterType.STRING && value != null )
-		{
-			value = "\"" + value + "\"";
-		}
-		else if( par.get_type() == ParameterType.SONG && value != null )
-		{
-			value = "\"" + value + "\"";
+			ConfigParameter par = cfg.getParameter( fieldName );
+	
+			if( par != null )
+			{
+				Object val = par.getSelectedValue();
+				if( val != null )
+				{
+					value = val.toString();
+				}
+		
+				if( par.get_type() == ConfigParameter.ParameterType.COLOR )
+				{
+					value = ((Color)val).getRGB() + "";
+				}
+				else if( par.get_type() == ParameterType.USER )
+				{
+					value = null;
+				}
+				else if( par.get_type() == ParameterType.STRING && value != null )
+				{
+					value = "\"" + value + "\"";
+				}
+				else if( par.get_type() == ParameterType.SONG && value != null )
+				{
+					value = "\"" + value + "\"";
+				}
+				else if( par.get_type() == ParameterType.OTHER && value != null )
+				{
+					if( value instanceof String )
+					{
+						value = "\"" + value + "\"";
+					}
+				}
+			}
 		}
 
 		return value;
 	}
 
-	public static void updatePlayerConfigDB( int userID, String fieldID ) throws SQLException
+	public static void updatePlayerConfigDB( Player player, String fieldID ) throws SQLException
 	{
 		Map< String, Class > fields = tableFields.get( settingsTableName );
 
@@ -991,7 +1017,7 @@ public class ConfigApp
 
 		if( add )
 		{	
-			String value = getFieldValue( fieldID );
+			String value = getFieldValue( player, fieldID );
 			
 			add = (value != null );
 
@@ -1004,7 +1030,7 @@ public class ConfigApp
 
 		if( add )
 		{		
-			sql += " WHERE userID = " + userID;
+			sql += " WHERE userID = " + player.getId();
 
 			Statement stmt = null;
 
@@ -1159,7 +1185,7 @@ public class ConfigApp
 		int playerID = GameStatistic.getPlayerID();
 		ArrayTreeMap< LocalDateTime, GameStatistic.FieldType > register = GameStatistic.getRegister();
 		
-		if( playerID != Player.ANONYMOUS_USER_ID && !register.isEmpty() )
+		if( playerID != Player.ANONYMOUS_PLAYER_ID && !register.isEmpty() )
 		{
 			LocalDateTime startTime = GameStatistic.getStartDateTime();
 			
@@ -1253,6 +1279,69 @@ public class ConfigApp
 		}
 	}
 	//*/	
+	
+
+	private static void SetTables() throws SQLException
+	{	
+		String sqlCreateTableUser = 
+				"CREATE TABLE IF NOT EXISTS user (\n"
+						+ " id integer PRIMARY KEY AUTOINCREMENT\n"
+						+ ", name text NOT NULL\n"
+						+ ", image BLOB\n"
+						+ ");";
+
+		String sqlCreateTableConfig = 
+				"CREATE TABLE IF NOT EXISTS settings (\n"
+				//+ " id integer PRIMARY KEY AUTOINCREMENT\n"
+				+ " userID integer PRIMARY KEY \n"
+				+ ", reactionTime real CHECK (reactionTime > 0)\n"
+				+ ", recoverTime real CHECK (recoverTime > 0)\n"
+				+ ", colorPreaction integer\n"
+				+ ", colorWaitingAction integer\n"
+				+ ", colorAction integer\n"
+				+ ", songs text\n"
+				+ ", minInputValue real\n"
+				+ ", maxInputValue real\n"
+				+ ", timeInInputTarget real\n"
+				+ ", selectedChannel real"
+				+ ", backgroundImage text"
+				+ ", noteImage text"
+				+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
+				+ ");";
+
+		String sqlCreateTableSession = 
+				"CREATE TABLE IF NOT EXISTS session (\n"
+						+ " idSession integer PRIMARY KEY AUTOINCREMENT\n"
+						+ ", userID integer"
+						+ ", date integer NOT NULL\n"
+						+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
+						+ ");";
+
+		String sqlCreateTableStatistic = 
+				"CREATE TABLE IF NOT EXISTS statistic (\n"
+						+ " number integer PRIMARY KEY AUTOINCREMENT\n"
+						+ ", idSession integer\n"
+						+ ", actionID integer NOT NULL\n"
+						+ ", actionName integer NOT NULL\n"
+						+ ", time integer NOT NULL\n"						
+						+ ", FOREIGN KEY ( idSession ) REFERENCES statistic( idSession ) ON DELETE CASCADE\n"
+						+ ");";
+		
+		try ( Connection conn = DriverManager.getConnection( dbURL );
+				Statement stmt = conn.createStatement()) 
+		{
+			stmt.execute( sqlCreateTableUser );
+			stmt.execute( sqlCreateTableConfig );
+			stmt.execute( sqlCreateTableSession );
+			stmt.execute( sqlCreateTableStatistic );
+		} 
+		catch ( SQLException e ) 
+		{
+			throw e;
+		}
+	}
+
+
 }
 
 

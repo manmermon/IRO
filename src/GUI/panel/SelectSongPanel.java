@@ -36,6 +36,8 @@ import org.staccato.StaccatoParserListener;
 import GUI.game.screen.level.BackgroundMusic;
 import config.ConfigApp;
 import config.ConfigParameter;
+import config.Player;
+import config.Settings;
 import config.language.Language;
 import config.language.TranslateComponents;
 import control.music.MusicPlayerControl;
@@ -80,8 +82,10 @@ public class SelectSongPanel extends JPanel
 	
 	private Pattern pattern = null;
 	
+	private Player _player = null;
+	
 	public SelectSongPanel( )
-	{
+	{		
 		super.setLayout( new BorderLayout() );
 		
 		this.add( this.getSongInfoPanel(), BorderLayout.NORTH);
@@ -130,33 +134,43 @@ public class SelectSongPanel extends JPanel
 		}
 	}
 	
+	public void setPlayer(Player player)
+	{
+		this._player = player;
+	}
+	
 	private void updateSelectedSong()
 	{
 		JTable t = this.gettableSongList();
 		
-		ConfigParameter par = ConfigApp.getParameter( ConfigApp.SONG_LIST );
+		Settings cfg = ConfigApp.getPlayerSetting( this._player );
 		
-		Object songs = par.getSelectedValue();
-		
-		if( songs != null )
+		if( cfg != null )
 		{
-			String songList = songs.toString().trim().replaceAll( "\\s+", "" );
+			ConfigParameter par = cfg.getParameter( ConfigApp.SONG_LIST );
+		
+			Object songs = par.getSelectedValue();
 			
-			if( !songList.isEmpty() )
+			if( songs != null )
 			{
-				String[] list = songList.split( ConfigApp.SONG_LIST_SEPARATOR );
+				String songList = songs.toString().trim().replaceAll( "\\s+", "" );
 				
-				for( String s : list )
+				if( !songList.isEmpty() )
 				{
-					for( int i = 0; i < t.getRowCount(); i++ )
+					String[] list = songList.split( ConfigApp.SONG_LIST_SEPARATOR );
+					
+					for( String s : list )
 					{
-						String tVal = t.getValueAt( i, 0 ).toString();
-						if( s.equals( tVal ) )
+						for( int i = 0; i < t.getRowCount(); i++ )
 						{
-							t.addRowSelectionInterval( i, i );
-							moveSong( t, getSelectedSongTable(), false );
-							
-							break;
+							String tVal = t.getValueAt( i, 0 ).toString();
+							if( s.equals( tVal ) )
+							{
+								t.addRowSelectionInterval( i, i );
+								moveSong( t, getSelectedSongTable(), false );
+								
+								break;
+							}
 						}
 					}
 				}
@@ -540,15 +554,20 @@ public class SelectSongPanel extends JPanel
 						songs += tm.getValueAt( i, 0 ).toString() + ConfigApp.SONG_LIST_SEPARATOR; 
 					}
 					
-					ConfigParameter par = ConfigApp.getParameter( ConfigApp.SONG_LIST );
-											
-					try
+					Settings cfg = ConfigApp.getPlayerSetting( _player );
+							
+					if( cfg != null )
 					{
-						par.setSelectedValue( songs );
-					}
-					catch (ConfigParameterException ex)
-					{
-						ex.printStackTrace();
+						ConfigParameter par = cfg.getParameter( ConfigApp.SONG_LIST );
+												
+						try
+						{
+							par.setSelectedValue( songs );
+						}
+						catch (ConfigParameterException ex)
+						{
+							ex.printStackTrace();
+						}
 					}
 				}
 			});

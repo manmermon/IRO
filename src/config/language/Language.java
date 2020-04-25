@@ -57,6 +57,7 @@ public class Language
 	public static final String SINGLE = "SINGLE";
 	public static final String LOCAL_MULTIPLAYER = "LOCAL_MULTIPLAYER";
 	public static final String REMOTE_MULTIPLAYER = "REMOTE_MULTIPLAYER";
+	public static final String MULTIPLAYER = "MULTIPLAYER";
 	
 	public static final String SONG = "SONG";
 	public static final String SONGS = "SONGS";	
@@ -108,6 +109,7 @@ public class Language
 	public static final String CHANGE_IMAGE = "CHANGE_IMAGE";
 	public static final String REMOVE_IMAGE = "REMOVE_IMAGE";
 	
+	public static final String ADD_PLAYER = "ADD_PLAYER";
 	public static final String CHANGE_PLAYER = "CHANGE_PLAYER";
 	
 	public static final String TIME_INPUT_TARGET = "TIME_INPUT_TARGET";
@@ -125,6 +127,14 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+
+		cap = new Caption( ADD_PLAYER, defaultLanguage, "Add player" );
+		cap.setCaption( esEs, "Añadir jugador");
+		captions.put( ADD_PLAYER, cap );
+		
+		cap = new Caption( MULTIPLAYER, defaultLanguage, "Multiplayer" );
+		cap.setCaption( esEs, "Multijugador");
+		captions.put( MULTIPLAYER, cap );
 		
 		cap = new Caption( SINGLE, defaultLanguage, "Single" );
 		cap.setCaption( esEs, "Individual");

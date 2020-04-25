@@ -18,8 +18,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import GUI.TwoWayProgressBar;
 import GUI.mouseTracking;
+import GUI.progressbar.TwoWayProgressBar;
 
 /**
  * @author manuel

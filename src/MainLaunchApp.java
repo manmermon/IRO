@@ -28,8 +28,8 @@ import javax.swing.UIManager;
 
 import GUI.AppIcon;
 import GUI.MainAppUI;
-import GUI.OpeningDialog;
-import GUI.TextAreaPrintStream;
+import GUI.dialog.OpeningDialog;
+import GUI.text.TextAreaPrintStream;
 import config.ConfigApp;
 import config.language.Language;
 import control.RefreshControl;

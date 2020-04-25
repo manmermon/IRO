@@ -32,6 +32,7 @@ import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.screen.IScene;
 import config.ConfigApp;
 import config.ConfigParameter;
+import config.Settings;
 import general.ArrayTreeMap;
 import general.NumberRange;
 import image.basicPainter2D;
@@ -78,7 +79,9 @@ public class LevelFactory
 			//
 			//
 			
-			ConfigParameter par = ConfigApp.getParameter( ConfigApp.BACKGROUND_IMAGE );
+			Settings cfg = ConfigApp.getSettings().iterator().next();
+			
+			ConfigParameter par = cfg.getParameter( ConfigApp.BACKGROUND_IMAGE );
 			Object bg = par.getSelectedValue();
 			String path = null;
 			if( bg != null )
@@ -354,7 +357,7 @@ public class LevelFactory
 				backgroundPattern.add( track.getPatternTrackSheet() );
 			}
 			
-			par = ConfigApp.getParameter( ConfigApp.NOTE_IMAGE);
+			par = cfg.getParameter( ConfigApp.NOTE_IMAGE);
 			Object nt = par.getSelectedValue();
 			path = null;
 			if( nt != null )

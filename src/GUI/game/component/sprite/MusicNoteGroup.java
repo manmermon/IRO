@@ -54,12 +54,12 @@ public class MusicNoteGroup extends AbstractSprite
 	public static final int RE = 5;
 	public static final int DO = 6;
 	
+	public static enum State { NON_ACTION, WAITING_ACTION, ACTION };
+	
 	private Pentragram pentagram;
 	private double shiftVelocity; // pixel by second
 	private int shiftDirection = -1;
-	
-	private Color color ;
-	
+		
 	private boolean isSelected;
 	private boolean isPlay;
 		
@@ -92,6 +92,12 @@ public class MusicNoteGroup extends AbstractSprite
 	private long animationTime = -1;
 	private final long totalTimeAnimation = 1000; // milliseconds
 	private long timeUpdate = totalTimeAnimation / numAngles; // milliseconds
+	
+	private Color preactionColor = Color.RED;
+	private Color waitingActionColor = Color.BLUE;
+	private Color actionColor = Color.GREEN;
+	
+	private State state = State.NON_ACTION;
 	
 	public MusicNoteGroup( String track
 							, double sheetTime
@@ -151,8 +157,6 @@ public class MusicNoteGroup extends AbstractSprite
 		
 		super.screenLoc = new Point2D.Double( initLoc, noteLine * y + ( y - super.getSize().width ) / 2);
 		
-		this.color = Color.RED;		
-		
 		this.isPlay = false;
 		
 		this.isGhost = ghost;
@@ -190,6 +194,35 @@ public class MusicNoteGroup extends AbstractSprite
 				}
 			}
 		});
+	}
+	
+	public void setNonActionColor( Color c )
+	{
+		if( c != null )
+		{
+			this.preactionColor = c;
+		}
+	}
+	
+	public void setWaitingActionColor( Color c )
+	{
+		if( c != null )
+		{
+			this.waitingActionColor = c;
+		}
+	}
+	
+	public void setActionColor( Color c )
+	{
+		if( c != null )
+		{
+			this.actionColor = c;
+		}
+	}
+	
+	public void setState( State state )
+	{
+		this.state = state;
 	}
 	
 	public String getTrackID()
@@ -273,19 +306,6 @@ public class MusicNoteGroup extends AbstractSprite
 		this.shiftDirection = -this.shiftDirection;
 	}
 	
-	public void setColor( Color c )
-	{
-		this.color = c;
-	}
-	
-	/**
-	 * @return the color
-	 */
-	public Color getColor()
-	{
-		return this.color;
-	}
-	
 	public void setPlayed( boolean played )
 	{
 		this.isPlay = played;
@@ -328,6 +348,26 @@ public class MusicNoteGroup extends AbstractSprite
 		{	
 			if( !this.noteTracks.isEmpty() )
 			{	
+				Color c = preactionColor;
+				
+				switch ( this.state )
+				{
+					case WAITING_ACTION:
+					{
+						c = this.waitingActionColor;
+						break;
+					} 
+					case ACTION:
+					{
+						c = this.actionColor;
+						break;
+					}
+					default:
+					{
+						break;
+					}
+				}
+				
 				pic = basicPainter2D.copyImage( this.noteImg ); 
 				if( pic == null )
 				{				
@@ -346,7 +386,7 @@ public class MusicNoteGroup extends AbstractSprite
 					List< Byte > l = new ArrayList< Byte >();
 					l.addAll( instruments );
 					
-					pic = (BufferedImage)MusicInstrumentIcons.getInstrument( l, super.getSize().width, this.color );
+					pic = (BufferedImage)MusicInstrumentIcons.getInstrument( l, super.getSize().width, c );
 				}
 				else
 				{	
@@ -355,7 +395,7 @@ public class MusicNoteGroup extends AbstractSprite
 						pic = basicPainter2D.rotate( pic, this.currentAngle );
 					}					
 					
-					basicPainter2D.changeColorPixels( Color.BLACK, this.color, pic );
+					basicPainter2D.changeColorPixels( Color.BLACK, c, pic );
 					//basicPainter2D.changeColorPixels( Color.BLACK, this.color, 0.25F, pic );
 				}
 			}			

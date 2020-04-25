@@ -18,7 +18,7 @@ public class ConfigParameter
 	private Object _selectedValue = null;
 	private List< Object > _options = null;
 	private NumberRange _rng = null;
-	private int _userID = Player.ANONYMOUS_USER_ID;
+	private Player _player = new Player();
 	
 	private int priority = 0;
 	
@@ -179,14 +179,14 @@ public class ConfigParameter
 		this._options.clear();
 	}
 	
-	public void setUserID( int userId )
+	public void setPlayer( Player player )
 	{
-		this._userID = userId;
+		this._player = player;
 	}
 	
-	public int getUserID()
+	public Player getUserID()
 	{
-		return this._userID;
+		return this._player;
 	}
 	
 	public void clearOptions()
@@ -216,11 +216,11 @@ public class ConfigParameter
 			this._selectedValue = val;
 		}
 		
-		if( this._userID != Player.ANONYMOUS_USER_ID )
+		if( !this._player.isAnonymous() )
 		{
 			try
 			{
-				ConfigApp.updatePlayerConfigDB( this._userID, this._ID.getID() );
+				ConfigApp.updatePlayerConfigDB( this._player, this._ID.getID() );
 			} 
 			catch (SQLException ex)
 			{

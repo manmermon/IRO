@@ -54,9 +54,6 @@ public class LevelControl extends AbstractSceneControl
 {		
 	private AtomicBoolean actionDone;
 	private boolean backgroundMusicEnd = false;
-	private Color preactionColor = Color.RED;
-	private Color waitActionColor = Color.BLUE;
-	private Color actionColor = Color.GREEN;
 	
 	private boolean noteIntoFret = false;
 	
@@ -97,10 +94,6 @@ public class LevelControl extends AbstractSceneControl
 		
 		if( super.scene != null )
 		{	
-			this.preactionColor = (Color)ConfigApp.getParameter( ConfigApp.PREACTION_COLOR).getSelectedValue();
-			this.waitActionColor = (Color)ConfigApp.getParameter( ConfigApp.WAITING_ACTION_COLOR).getSelectedValue();
-			this.actionColor = (Color)ConfigApp.getParameter( ConfigApp.ACTION_COLOR).getSelectedValue();
-			
 			MusicPlayerControl.getInstance().setBackgroundMusicPatter( (((Level)this.scene).getBackgroundPattern() ) );
 			MusicPlayerControl.getInstance().addBackgroundMusicEvent( this );
 		}
@@ -159,7 +152,7 @@ public class LevelControl extends AbstractSceneControl
 						if( !note.isSelected() )
 						{
 							note.setSelected( true );
-							note.setColor( this.actionColor );
+							note.setState( GUI.game.component.sprite.MusicNoteGroup.State.ACTION );
 							
 							for( ISprite score : this.scene.getSprites( IScene.SCORE_ID, true ) )
 							{
@@ -169,14 +162,14 @@ public class LevelControl extends AbstractSceneControl
 					}
 					else if( !note.isSelected() )
 					{
-						note.setColor( this.waitActionColor );
+						note.setState( GUI.game.component.sprite.MusicNoteGroup.State.WAITING_ACTION );
 					}
 				}
 				else
 				{						
 					if( !note.isSelected() )
 					{
-						note.setColor( this.preactionColor );
+						note.setState( GUI.game.component.sprite.MusicNoteGroup.State.NON_ACTION );
 					}
 
 					if( note.isSelected() && !note.isPlayed() )

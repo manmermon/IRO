@@ -8,7 +8,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.GridLayout;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -33,15 +32,12 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
@@ -52,20 +48,17 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import GUI.GameManager;
-import GUI.JColorComboBox;
-import GUI.dialogs.AppSelectPlayer;
+import GUI.combobox.JColorComboBox;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.ConfigParameter.ParameterType;
 import config.Player;
-import config.language.Caption;
+import config.Settings;
 import config.language.Language;
 import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
 import general.ArrayTreeMap;
 import general.NumberRange;
-import general.Tuple;
 
 public class SettingPanel extends JPanel
 {
@@ -75,25 +68,33 @@ public class SettingPanel extends JPanel
 	private static final long serialVersionUID = -1219995574372606332L;
 	
 	private JPanel containerPanel = null;
-	private JTabbedPane scenePanel = null;
+	
 	
 	private JScrollPane scrollFields = null;
 	
 	private JPopupMenu playerImgPopMenu;
 		
 	private Window owner;
+	
+	private Player _player;
+	
 	/**
 	 * Create the dialog.
 	 */
-	public SettingPanel( Window owner )
+	public SettingPanel( Window owner, Player player )
 	{		
 		this.owner = owner;
 		
-		this.setLayout( new GridLayout( 2, 0 ) );
+		this._player = player;
 		
-		this.add( this.getContainerScroll()  );
+		this.setLayout( new BorderLayout() );
 		
-		this.add( this.getSongPanel() );
+		this.add( this.getContainerScroll(), BorderLayout.CENTER  );
+	}
+	
+	public Player getPlayer()
+	{
+		return this._player;
 	}
 
 	private JScrollPane getContainerScroll()	
@@ -106,35 +107,6 @@ public class SettingPanel extends JPanel
 		}
 		
 		return this.scrollFields;
-	}
-	
-	private JTabbedPane getSongPanel()
-	{
-		if( this.scenePanel == null )
-		{
-			//this.songPanel = new JPanel( new BorderLayout() );
-			this.scenePanel = new JTabbedPane();
-			
-			this.setSceneTabbedPanels();
-			
-		}
-		
-		return this.scenePanel;
-	}
-	
-	private void setSceneTabbedPanels()
-	{
-		JTabbedPane panel = this.getSongPanel();
-		panel.removeAll();
-		
-		Caption cap = Language.getAllCaptions().get( Language.SONGS );			
-		panel.addTab( cap.getCaption( Language.getCurrentLanguage() )
-								, new SelectSongPanel() );
-		
-		cap = Language.getAllCaptions().get( Language.IMAGE );
-		panel.addTab( cap.getCaption( Language.getCurrentLanguage() )
-								, new SelectLevelImagePanel() );
-		//TranslateComponents.add( this.scenePanel, cap );
 	}
 	
 	private JPanel getContainerPanel()
@@ -164,133 +136,129 @@ public class SettingPanel extends JPanel
 		JPanel subContainer = new JPanel( new GridLayout( 0, cols, 0, 0) );
 		container.add( subContainer, BorderLayout.CENTER );
 		
-		Collection< ConfigParameter > parameters = ConfigApp.getParameters();
+		Settings cfg = ConfigApp.getPlayerSetting( this._player );
 		
-		ArrayTreeMap< Integer, ConfigParameter > orderPars = new ArrayTreeMap< Integer, ConfigParameter>();
-		for( ConfigParameter p : parameters )
+		if( cfg != null )
 		{
-			orderPars.put( p.getPriority(), p );
-		}
-		
-		List< ConfigParameter > pars = new ArrayList<ConfigParameter>();
-		for( Integer t : orderPars.keySet() )			
-		{
-			for( ConfigParameter p : orderPars.get( t ) )
+			Collection< ConfigParameter > parameters = cfg.getParameters();
+			
+			ArrayTreeMap< Integer, ConfigParameter > orderPars = new ArrayTreeMap< Integer, ConfigParameter>();
+			for( ConfigParameter p : parameters )
 			{
-				pars.add( p );
+				orderPars.put( p.getPriority(), p );
 			}
-		}
-		
-		List< JPanel > listPanels = new ArrayList<JPanel>();
-		
-		JPanel containerEvenPanel = new JPanel( new BorderLayout() );
-		subContainer.add(containerEvenPanel);
-		
-		JPanel panelEven = new JPanel();
-		
-		panelEven.setLayout( new BoxLayout( panelEven, BoxLayout.Y_AXIS ) );		
-		containerEvenPanel.add( panelEven, BorderLayout.NORTH );
-		
-		listPanels.add( panelEven );
-		
-		JPanel containerOddPanel = new JPanel( new BorderLayout() );
-		subContainer.add(containerOddPanel);
-		
-		JPanel panelOdd = new JPanel();
-		panelOdd.setLayout( new BoxLayout( panelOdd, BoxLayout.Y_AXIS ) );
-		containerOddPanel.add( panelOdd, BorderLayout.NORTH );
-		listPanels.add( panelOdd );
-		
-		if( ! listPanels.isEmpty() )
-		{
-			int numPars = 0;
-			for( ConfigParameter p : pars )
+			
+			List< ConfigParameter > pars = new ArrayList<ConfigParameter>();
+			for( Integer t : orderPars.keySet() )			
 			{
-				if( p.get_type() != ParameterType.USER && p.get_type() != ParameterType.SONG )
+				for( ConfigParameter p : orderPars.get( t ) )
 				{
-					int i = numPars % listPanels.size();
-					
-					JPanel panel = listPanels.get( i );
-					
-					JPanel parPanel = this.getParamenterPanel( p );
-					
-					if( parPanel != null )
+					pars.add( p );
+				}
+			}
+			
+			List< JPanel > listPanels = new ArrayList<JPanel>();
+			
+			JPanel containerEvenPanel = new JPanel( new BorderLayout() );
+			subContainer.add(containerEvenPanel);
+			
+			JPanel panelEven = new JPanel();
+			
+			panelEven.setLayout( new BoxLayout( panelEven, BoxLayout.Y_AXIS ) );		
+			containerEvenPanel.add( panelEven, BorderLayout.NORTH );
+			
+			listPanels.add( panelEven );
+			
+			JPanel containerOddPanel = new JPanel( new BorderLayout() );
+			subContainer.add(containerOddPanel);
+			
+			JPanel panelOdd = new JPanel();
+			panelOdd.setLayout( new BoxLayout( panelOdd, BoxLayout.Y_AXIS ) );
+			containerOddPanel.add( panelOdd, BorderLayout.NORTH );
+			listPanels.add( panelOdd );
+			
+			if( ! listPanels.isEmpty() )
+			{
+				int numPars = 0;
+				for( ConfigParameter p : pars )
+				{
+					if( p.get_type() != ParameterType.USER && p.get_type() != ParameterType.SONG )
 					{
-						panel.add( parPanel );
+						int i = numPars % listPanels.size();
 						
-						numPars++;
+						JPanel panel = listPanels.get( i );
+						
+						JPanel parPanel = this.getParamenterPanel( p );
+						
+						if( parPanel != null )
+						{
+							panel.add( parPanel );
+							
+							numPars++;
+						}
 					}
 				}
 			}
+			
+			JPanel userPanel = new JPanel( new BorderLayout() );
+						
+			userPanel.add( this.getUserLabel(), BorderLayout.CENTER );
+			
+			container.add( userPanel, BorderLayout.NORTH );		
 		}
-		
-		JPanel userPanel = new JPanel( new BorderLayout() );
-					
-		userPanel.add( this.getUserLabel(), BorderLayout.CENTER );
-		
-		container.add( userPanel, BorderLayout.NORTH );		
 				
 		container.setVisible( true );
-		
-		this.setSceneTabbedPanels();
 	}
 	
 	private JPanel getUserLabel()
 	{
-		ConfigParameter par = ConfigApp.getParameter( ConfigApp.PLAYER );
-		final Player player;
-		if( par != null )
-		{
-			player = (Player)par.getSelectedValue();
-		}
-		else
-		{
-			 player = new Player();
-		}
-
 		JPanel panel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
 		
-		JLabel userName = new JLabel( player.getName() );
-		JButton btImg = new JButton( );
-		btImg.setBorder( BorderFactory.createEtchedBorder() );
-		btImg.setIcon( player.getImg( ConfigApp.playerPicSizeIcon.x, ConfigApp.playerPicSizeIcon.y ) );		
-		btImg.setBackground( Color.WHITE );
-		
-		btImg.addMouseListener( new MouseAdapter()
+		if( this._player != null )
 		{
-			@Override
-			public void mouseEntered(MouseEvent e)
-			{
-				JButton b = (JButton)e.getSource();
-				b.setBorder(BorderFactory.createLineBorder( Color.BLUE, 2 ) );
-			}
+			//JLabel userName = new JLabel( );
+			//userName.setText( this._player.getName() );
+			JButton btImg = new JButton( );
+			btImg.setBorder( BorderFactory.createEtchedBorder() );
+			btImg.setIcon(  this._player.getImg( ConfigApp.playerPicSizeIcon.x, ConfigApp.playerPicSizeIcon.y ) );		
+			btImg.setBackground( Color.WHITE );
 			
-			
-			@Override
-			public void mouseExited(MouseEvent e)
+			btImg.addMouseListener( new MouseAdapter()
 			{
-				JButton b = (JButton)e.getSource();
-				b.setBorder(BorderFactory.createEtchedBorder() );
-			} 
-		});
-		
-		btImg.addActionListener( new ActionListener()
-		{	
-			@Override
-			public void actionPerformed(ActionEvent e)
-			{
-				//if( player.getId() != User.ANONYMOUS_USER_ID )
+				@Override
+				public void mouseEntered(MouseEvent e)
 				{
 					JButton b = (JButton)e.getSource();
-					
-					getPlayerImgPopMenu().show( b, b.getLocation().x, b.getLocation().y );
+					b.setBorder(BorderFactory.createLineBorder( Color.BLUE, 2 ) );
 				}
-			}
 				
-		});
 				
-		panel.add( btImg );
-		panel.add( userName );
+				@Override
+				public void mouseExited(MouseEvent e)
+				{
+					JButton b = (JButton)e.getSource();
+					b.setBorder(BorderFactory.createEtchedBorder() );
+				} 
+			});
+			
+			btImg.addActionListener( new ActionListener()
+			{	
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					if( _player != null && !_player.isAnonymous() )
+					{
+						JButton b = (JButton)e.getSource();
+						
+						getPlayerImgPopMenu().show( b, b.getLocation().x, b.getLocation().y );
+					}
+				}
+					
+			});
+					
+			panel.add( btImg );
+			//panel.add( userName );
+		}
 		
 		return panel;
 	}
@@ -308,7 +276,7 @@ public class SettingPanel extends JPanel
 				@Override
 				public void actionPerformed(ActionEvent arg0)
 				{			
-					selectNewUserImage( (JButton)playerImgPopMenu.getInvoker() );
+					selectNewPlayerImage( (JButton)playerImgPopMenu.getInvoker() );
 				}
 			});
 			
@@ -323,172 +291,30 @@ public class SettingPanel extends JPanel
 					
 					if( act == JOptionPane.OK_OPTION )
 					{
-						removeUserImage( (JButton)playerImgPopMenu.getInvoker() );
+						removePlayerImage( (JButton)playerImgPopMenu.getInvoker() );
 					}
-				}
-			});
-			
-			JMenuItem changePlayerMenu = new JMenuItem( Language.getLocalCaption( Language.CHANGE_PLAYER ) );
-			TranslateComponents.add( changePlayerMenu, Language.getAllCaptions().get( Language.CHANGE_PLAYER ) );
-			changePlayerMenu.addActionListener( new ActionListener()
-			{				
-				@Override
-				public void actionPerformed(ActionEvent arg0)
-				{
-					AppSelectPlayer selplayerDialog = new AppSelectPlayer( owner );
-					
-					Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-					d.width /= 3;
-					d.height /= 3;
-					
-					Rectangle r = owner.getBounds();
-					
-					Rectangle bounds = new Rectangle( d );
-					bounds.setLocation( r.getLocation() );
-					
-					selplayerDialog.setBounds( bounds );
-					selplayerDialog.setVisible( true );
-					
-					Player user = selplayerDialog.getSelectedUser();
-					
-					if( user != null ) 
-					{					
-						ConfigParameter parUser = ConfigApp.getParameter( ConfigApp.PLAYER );
-						
-						Player currentUser = (Player)parUser.getSelectedValue();
-						
-						try
-						{
-							if( currentUser.getId() != user.getId() )
-							{
-								parUser.setSelectedValue( user );
-													
-								try
-								{
-									List< Tuple< String, Object > > settings = ConfigApp.getPlayerConfigDB( user.getId() );
-									
-									if( settings.isEmpty() )
-									{
-										ConfigApp.loadDefaultProperties();
-										parUser = ConfigApp.getParameter( ConfigApp.PLAYER );
-										
-										parUser.setSelectedValue( user );
-										
-										if( user.getId() != Player.ANONYMOUS_USER_ID  )
-										{
-											ConfigApp.insertPlayerConfigDB( user.getId() );
-											
-											for( ConfigParameter par : ConfigApp.getParameters() )
-											{
-												par.setUserID( user.getId() );
-											}
-										}
-									}
-									else
-									{
-										for( Tuple< String, Object > par : settings )
-										{
-											Object val = par.y;
-											
-											ConfigParameter p = ConfigApp.getParameter( par.x );
-											if( p != null )
-											{
-												p.setUserID( user.getId() );
-												
-												if( p.get_type() == ParameterType.COLOR )
-												{
-														val = new Color( (Integer)val );
-												}
-	
-												if( val != null )
-												{
-													p.setSelectedValue( val );
-												}
-											}
-										}										
-									}
-								}
-								catch ( Exception ex) 
-								{
-									JOptionPane.showMessageDialog( owner, ex.getCause() + "\n" + ex.getMessage()
-																	, Language.getLocalCaption( Language.ERROR )
-																	, JOptionPane.ERROR_MESSAGE );
-								}
-								finally 
-								{
-									GameManager.getInstance().updateSetting();
-								}
-							}
-						} 
-						catch (ConfigParameterException e1)
-						{
-							e1.printStackTrace();
-						}
-					}
-				}
-			});
-			
-			this.playerImgPopMenu.addPopupMenuListener( new PopupMenuListener()
-			{	
-				@Override
-				public void popupMenuWillBecomeVisible(PopupMenuEvent arg0)
-				{
-					changeImageMenu.setVisible( true );
-					changeImageMenu.setEnabled( true );
-					
-					removeImageMenu.setVisible( true );
-					removeImageMenu.setEnabled( true );
-					
-					ConfigParameter par = ConfigApp.getParameter( ConfigApp.PLAYER );
-					Player user = (Player)par.getSelectedValue();
-					
-					if( user.getId() == Player.ANONYMOUS_USER_ID )
-					{
-						changeImageMenu.setVisible( false );
-						changeImageMenu.setEnabled( false );
-						
-						removeImageMenu.setVisible( false );
-						removeImageMenu.setEnabled( false );
-					}
-				}
-				
-				@Override
-				public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0)
-				{
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void popupMenuCanceled(PopupMenuEvent arg0)
-				{
-					// TODO Auto-generated method stub
-					
 				}
 			});
 			
 			this.playerImgPopMenu.add( changeImageMenu );
 			this.playerImgPopMenu.add( removeImageMenu );
-			this.playerImgPopMenu.add( new JSeparator() );
-			this.playerImgPopMenu.add( changePlayerMenu );
 			
 		}
 			
 		return this.playerImgPopMenu;
 	}
 	
-	private void removeUserImage( JButton b )
+	private void removePlayerImage( JButton b )
 	{
-		Player user = (Player)ConfigApp.getParameter( ConfigApp.PLAYER ).getSelectedValue();
-		if( user.getId() != Player.ANONYMOUS_USER_ID )
+		if( this._player != null && !this._player.isAnonymous() )
 		{
-			user.setDefaultImage();
+			this._player.setDefaultImage();
 			
 			updatePlayerImage( b );
 			
 			try
 			{
-				ConfigApp.updatePlayerDB( user );
+				ConfigApp.updatePlayerDB( this._player );
 			} 
 			catch (SQLException ex)
 			{
@@ -499,10 +325,10 @@ public class SettingPanel extends JPanel
 		}
 	}
 	
-	private void selectNewUserImage( JButton b )
+	private void selectNewPlayerImage( JButton b )
 	{	
-		Player user = (Player)ConfigApp.getParameter( ConfigApp.PLAYER ).getSelectedValue();
-		if( user.getId() != Player.ANONYMOUS_USER_ID )
+		if( this._player != null 
+				&& !this._player.isAnonymous() )
 		{
 			JFileChooser jfc = new JFileChooser( "./" );
 
@@ -536,9 +362,9 @@ public class SettingPanel extends JPanel
 				{
 					BufferedImage newImg = ImageIO.read( img );
 					
-					user.getImg().setImage( newImg );
+					this._player.getImg().setImage( newImg );
 					
-					ConfigApp.updatePlayerDB( user );
+					ConfigApp.updatePlayerDB( this._player );
 					
 					updatePlayerImage( b );
 				}
@@ -555,11 +381,9 @@ public class SettingPanel extends JPanel
 	
 	private void updatePlayerImage( JButton b )
 	{
-		if( b != null )
-		{
-			Player user = (Player)ConfigApp.getParameter( ConfigApp.PLAYER ).getSelectedValue();
-			
-			b.setIcon( user.getImg( ConfigApp.playerPicSizeIcon.x, ConfigApp.playerPicSizeIcon.y ) );
+		if( b != null && this._player != null )
+		{	
+			b.setIcon( this._player.getImg( ConfigApp.playerPicSizeIcon.x, ConfigApp.playerPicSizeIcon.y ) );
 		}
 	}
 	
@@ -567,18 +391,8 @@ public class SettingPanel extends JPanel
 	{		
 		JPanel panel = null;
 		
-		if( par != null )
-		{	
-			ConfigParameter lang = ConfigApp.getParameter( ConfigApp.LANGUAGE );
-				
-			String l = Language.getCurrentLanguage();
-			
-			Object languages = lang.getSelectedValue();
-			if( languages != null )
-			{
-				l = languages.toString();
-			}
-						
+		if( par != null && this._player != null )
+		{				
 			Component comp = this.getParComponent( par );
 			
 			if( comp != null )
@@ -586,7 +400,7 @@ public class SettingPanel extends JPanel
 				panel = new JPanel();
 				panel.setLayout( new GridLayout( 0, 1 ) );
 				
-				String title = par.get_ID().getCaption( l );			
+				String title = par.get_ID().getCaption( Language.getCurrentLanguage() );			
 				panel.setBorder( BorderFactory.createTitledBorder( title ));
 				
 				TranslateComponents.add( panel, par.get_ID() );

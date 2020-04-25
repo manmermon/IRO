@@ -13,9 +13,14 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -33,14 +38,14 @@ import javax.swing.table.TableModel;
 
 import config.ConfigApp;
 import config.ConfigParameter;
+import config.Player;
+import config.Settings;
 import config.language.Caption;
 import config.language.Language;
 import config.language.TranslateComponents;
 import control.controller.ControllerManager;
 import control.controller.ControllerMetadata;
-import control.controller.LSLStreams.LSLStreamMetadata;
 import edu.ucsd.sccn.LSL;
-import exceptions.ConfigParameterException;
 
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -64,21 +69,19 @@ public class InputDevicePanel extends JPanel
 	private JSplitPane splitInputPane;
 	private JPanel panelInputDeviceList;
 	private JPanel panelInputValues;
-	
-	//private JSpinner selectChannelSpinner;
 
 	private JTable inputDeviceTable;
 	
 	private ControllerInputValuePanel inputValues = null;
 	
-	//private LSL.StreamInfo selectedLSLStream = null;
-	//private int selectedChannel = 0;
 	private LSL.StreamInfo[] lslStreamInfo = null;
 		
 	private static InputDevicePanel setInDevPanel = null;
 	
 	private static Window owner;
-	
+		
+	private final Player NON_SELECTED_PLAYER = new Player( Player.ANONYMOUS_PLAYER_ID - 1, " ", null );
+		
 	public static InputDevicePanel getInstance( Window wOwner )
 	{
 		owner = wOwner;
@@ -92,14 +95,14 @@ public class InputDevicePanel extends JPanel
 	}
 	
 	private InputDevicePanel( )
-	{	
+	{			
 		this.setLayout(new BorderLayout());		
 		this.add(this.getInputControlPanel(), BorderLayout.NORTH);
 		this.add( this.getInputDevicePanel(), BorderLayout.CENTER );
 		
 		this.updateInputs();
 	}
-	
+		
 	private JPanel getInputControlPanel()
 	{
 		if( this.inputCtrPanel == null )
@@ -110,14 +113,6 @@ public class InputDevicePanel extends JPanel
 			fl_contentPanel.setAlignment(FlowLayout.RIGHT);
 			this.inputCtrPanel.setLayout(fl_contentPanel);
 		
-			/*
-			Caption cap = Language.getAllCaptions().get( Language.SELECTED_CHANNEL );
-			JLabel lb = new JLabel( cap.getCaption( Language.getCurrentLanguage() ) );
-			TranslateComponents.add( lb, cap );
-			
-			this.inputCtrPanel.add( lb );
-			this.inputCtrPanel.add( this.getSelectedChannelSpinner() );
-			//*/
 			this.inputCtrPanel.add( this.getBtRefresh() );
 		}
 		
@@ -153,37 +148,6 @@ public class InputDevicePanel extends JPanel
 		
 		return this.btRefresh;
 	}
-
-	/*
-	private JSpinner getSelectedChannelSpinner()
-	{
-		if( this.selectChannelSpinner == null )
-		{
-			this.selectChannelSpinner  = new JSpinner();
-			this.selectChannelSpinner.setModel( new SpinnerNumberModel( 1, 1, null, 1) );
-			this.selectChannelSpinner.setEnabled( false );
-			
-			Dimension s = this.selectChannelSpinner.getPreferredSize();
-			s.width *= 2;
-			this.selectChannelSpinner.setPreferredSize( s );
-			
-			this.selectChannelSpinner.addChangeListener( new  ChangeListener()
-			{	
-				@Override
-				public void stateChanged(ChangeEvent arg0)
-				{
-					JSpinner sp = (JSpinner)arg0.getSource();
-					
-					Object val = sp.getValue();
-					
-					selectedChannel = (Integer)val;
-				}
-			});
-		}
-		
-		return this.selectChannelSpinner;
-	}
-	//*/
 	
 	private JPanel getInputDevicePanel()
 	{
@@ -238,10 +202,58 @@ public class InputDevicePanel extends JPanel
 		return panelInputValues;
 	}
 	
+	private JComboBox< Player > getPlayerCombobox( )
+	{
+		JComboBox< Player > cbb = new JComboBox<Player>();
+		
+		cbb.addItem( NON_SELECTED_PLAYER );
+		for( Player player : ConfigApp.getPlayers() )
+		{
+			cbb.addItem( player );
+		}
+		
+		return cbb;
+	}
+	
+	public void updatePlayers()
+	{
+		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
+		
+		JTable t = this.getInputDeviceTable();
+		JTableHeader th = t.getTableHeader();
+		TableColumnModel tcm = th.getColumnModel();				
+		TableColumn tc = tcm.getColumn( 0 );
+		DefaultCellEditor ed = (DefaultCellEditor)tc.getCellEditor();
+		JComboBox< Player > cbb = (JComboBox< Player >)ed.getComponent();
+		
+		for( int i = cbb.getItemCount() - 1; i >= 0; i-- )
+		{
+			Player p = cbb.getItemAt( i );
+			
+			if( !p.equals( NON_SELECTED_PLAYER ) )
+			{
+				if( !players.contains( p ) )
+				{
+					cbb.removeItemAt( i );
+					checkPlayerController( p, -1 );
+				}
+				else				
+				{
+					players.remove( p );
+				}
+			}
+		}
+		
+		for( Player p : players )
+		{
+			cbb.addItem( p );
+		}
+	}
+	
 	private JTable getInputDeviceTable()
 	{
 		if( this.inputDeviceTable == null )
-		{
+		{	
 			this.inputDeviceTable = this.getCreateJTable();
 			TableModel tm = this.createTablemodel();
 			this.inputDeviceTable.setModel( tm );
@@ -256,62 +268,43 @@ public class InputDevicePanel extends JPanel
 			for( int i = 0; i < tcm.getColumnCount() - 1; i++ )
 			{
 				TableColumn tc = tcm.getColumn( i );
-				String h = tc.getHeaderValue().toString();
+				tc.setResizable( false );
 				
-				tc.setResizable( false );	
+				String h = tc.getHeaderValue().toString();
 				int s = fm.stringWidth( h ) + 10;
+				
+				if( i == 0 )
+				{
+					tc.setCellEditor( new DefaultCellEditor( getPlayerCombobox() ) );
+					s *= 2;
+				}
+				
 				tc.setMaxWidth( s );
 				tc.setPreferredWidth( s );
 			}
 			
-			tm.addTableModelListener( new TableModelListener()
+			this.inputDeviceTable.getModel().addTableModelListener( new TableModelListener()
 			{				
 				@Override
-				public void tableChanged(TableModelEvent arg0)
+				public void tableChanged(TableModelEvent ev )
 				{
-					//JTable t = (JTable)arg0.getSource();
-					JTable t = getInputDeviceTable(); 
-					
-					int selRow = arg0.getFirstRow();
-					int selCol = arg0.getColumn();
-					
-					if( selRow >= 0 && selRow < lslStreamInfo.length )
+					if( ev.getType() == TableModelEvent.UPDATE )
 					{
-						if( selCol == 0 )
+						JTable t = inputDeviceTable;
+						
+						int row = ev.getFirstRow();
+						int col = ev.getColumn();
+						
+						if( row >= 0 && col >= 0 )
 						{
-							Boolean sel = (Boolean)t.getValueAt( selRow, selCol );
-							
-							//selectedLSLStream = null;
-							
-							//JSpinner sp = getSelectedChannelSpinner();
-							
-							ConfigParameter par = ConfigApp.getParameter( ConfigApp.SELECTED_CONTROLLER );
-							
-							try
+							if( col == 0 )
 							{
-								if( sel )						
+								Player player = (Player)t.getValueAt( row, col );
+							
+								if( player.getId() != NON_SELECTED_PLAYER.getId() )
 								{
-									//selectedLSLStream = lslStreamInfo[ selRow ];
-									
-									
-									par.setSelectedValue( new LSLStreamMetadata( lslStreamInfo[ selRow ] ) );
-									/*
-									sp.setEnabled( true );
-									SpinnerNumberModel spm = (SpinnerNumberModel)sp.getModel();
-									spm.setMaximum( selectedLSLStream.channel_count() );
-									*/
+									checkPlayerController( player, row );
 								}
-								else
-								{	
-									//selectedChannel = 0;
-									//sp.setEnabled( false );
-									
-									par.removeSelectedValue();
-								}
-							}
-							catch ( ConfigParameterException ex) 
-							{
-								ex.printStackTrace();
 							}
 						}
 					}
@@ -395,12 +388,12 @@ public class InputDevicePanel extends JPanel
 	
 	private Class[] getTableColumnTypes()
 	{
-		return new Class[]{ Boolean.class, Integer.class, String.class };
+		return new Class[]{ Player.class, Integer.class, String.class };
 	}
 	
 	private TableModel createTablemodel( )
 	{					
-		TableModel tm =  new DefaultTableModel( null, new String[] { Language.getLocalCaption( Language.SELECT )
+		TableModel tm =  new DefaultTableModel( null, new String[] { Language.getLocalCaption( Language.PLAYER )
 																	, Language.getLocalCaption( Language.CHANNELS )
 																	, Language.getLocalCaption( Language.INPUT ) } )
 							{
@@ -424,7 +417,7 @@ public class InputDevicePanel extends JPanel
 		return tm;
 	}
 	
-	private void updateInputs()
+	private void updateInputs( )
 	{
 		this.lslStreamInfo = LSL.resolve_streams();
 		
@@ -439,20 +432,33 @@ public class InputDevicePanel extends JPanel
 		
 		for( LSL.StreamInfo info : this.lslStreamInfo )
 		{
-			ConfigParameter par = ConfigApp.getParameter( ConfigApp.SELECTED_CONTROLLER );
+			Object selectedController = null;
+			Set< Player > players = ConfigApp.getPlayers();
 			
-			Object selectedController = par.getSelectedValue();
-			
-			boolean sel = (selectedController != null );
-			
-			if( sel )
+			Player selPlayer = NON_SELECTED_PLAYER;
+			for( Player p : players )
 			{
-				ControllerMetadata meta = (ControllerMetadata)selectedController;
-				
-				sel = meta.getControllerID().equals( info.uid() );
+				Settings cfg = ConfigApp.getPlayerSetting( p );
+				if( cfg != null )
+				{
+					ConfigParameter par = cfg.getParameter( ConfigApp.SELECTED_CONTROLLER );
+					selectedController = par.getSelectedValue();
+					
+					if( selectedController != null )
+					{
+						ControllerMetadata meta = (ControllerMetadata)selectedController;
+						
+						if( meta.getControllerID().equals( info.uid() ) )
+						{
+							selPlayer = p;
+							break;
+						}
+					}
+				}
 			}
+						
 			
-			Object[] row = new Object[] { sel, info.channel_count(), "  " + info.name() };
+			Object[] row = new Object[] { selPlayer, info.channel_count(), "  " + info.name() };
 			
 			tm.addRow( row );
 		}
@@ -460,7 +466,19 @@ public class InputDevicePanel extends JPanel
 		if( this.lslStreamInfo.length == 1 )
 		{
 			t.addRowSelectionInterval( 0, 0 );
-			t.setValueAt( true, 0, 0);
+			Set< Player > players = ConfigApp.getPlayers();
+			if( players.size() == 1 )
+			{
+				JTableHeader th = t.getTableHeader();
+				TableColumnModel tcm = th.getColumnModel();				
+				TableColumn tc = tcm.getColumn( 0 );
+				DefaultCellEditor ed = (DefaultCellEditor)tc.getCellEditor();
+				JComboBox cbb = (JComboBox)ed.getComponent();
+				
+				Player player = players.iterator().next();
+				cbb.setSelectedItem( player );
+				t.setValueAt( player,  0, 0 );
+			}
 		}
 	}
 
@@ -508,5 +526,46 @@ public class InputDevicePanel extends JPanel
 		panel.setVisible( true );
 	}
 
+	private void checkPlayerController( Player player, int ignoreRow )
+	{
+		JTable t = this.getInputDeviceTable();
+		
+		JTableHeader th = t.getTableHeader();
+		TableColumnModel tcm = th.getColumnModel();				
+		TableColumn tc = tcm.getColumn( 0 );
+		DefaultCellEditor ed = (DefaultCellEditor)tc.getCellEditor();
+		JComboBox cbb = (JComboBox)ed.getComponent();
+		
+		for( int i = 0; i < t.getRowCount(); i++ )
+		{
+			if( i != ignoreRow )
+			{
+				Player p = (Player)t.getValueAt( i, 0 );
+				if( p.equals( player ) )
+				{
+					t.setValueAt( NON_SELECTED_PLAYER, i, 0 );
+					//cbb.setSelectedItem( NON_SELECTED_PLAYER );
+				}
+			}
+		}
+	}
+
+	public void removePlayer( Player player )
+	{
+		if( player != null && player.getId() != NON_SELECTED_PLAYER.getId() )
+		{
+			checkPlayerController( player, -1 );
+			
+			JTable t = this.getInputDeviceTable();
+			JTableHeader th = t.getTableHeader();
+			TableColumnModel tcm = th.getColumnModel();				
+			TableColumn tc = tcm.getColumn( 0 );
+			DefaultCellEditor ed = (DefaultCellEditor)tc.getCellEditor();
+			JComboBox cbb = (JComboBox)ed.getComponent();
+			
+			cbb.removeItem( player );
+		}
+	}
 	
 }
+

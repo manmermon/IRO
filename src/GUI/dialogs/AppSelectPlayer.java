@@ -31,7 +31,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -39,7 +42,6 @@ import javax.swing.JButton;
 
 public class AppSelectPlayer extends JDialog
 {
-	private final int NON_SELECTED_USER = Player.ANONYMOUS_USER_ID - 1;
 	/**
 	 * 
 	 */
@@ -51,7 +53,7 @@ public class AppSelectPlayer extends JDialog
 	private JPanel panelUsers;
 	private JTable userTable;
 	
-	private int userID = NON_SELECTED_USER;
+	private List< Integer > playerIDs = new ArrayList< Integer >();
 
 	private JPanel panelSelectUser;
 	private JPanel panelAddRemoveUser;
@@ -80,15 +82,17 @@ public class AppSelectPlayer extends JDialog
 		scroll.getVerticalScrollBar().setUnitIncrement( ConfigApp.playerPicSizeIcon.x / 2 );
 		super.getContentPane().add( scroll, BorderLayout.CENTER);
 		
-		this.addUserToTable( new Player() );
-		
 		try
 		{
-			List< Player > users = ConfigApp.getAllPlayersDB();			
+			List< Player > allPlayers = ConfigApp.getAllPlayersDB();			
+			Set< Player > selectedPlayer = ConfigApp.getPlayers();
 			
-			for( Player user : users )
+			for( Player player : allPlayers )
 			{
-				this.addUserToTable( user );
+				if( !player.isAnonymous() && !selectedPlayer.contains( player ) )
+				{
+					this.addUserToTable( player );
+				}
 			}
 		}
 		catch (SQLException | IOException e)
@@ -124,25 +128,27 @@ public class AppSelectPlayer extends JDialog
 		}
 	}
 	
-	public Player getSelectedUser()
+	public List< Player > getSelectedPlayers()
 	{
-		Player user = null;
+		List< Player > players = new ArrayList<Player>();
 		try
 		{
-			user = ConfigApp.getPlayerDB( this.userID);
-			
-			if( this.userID == Player.ANONYMOUS_USER_ID )
+			for( Integer id : this.playerIDs )
 			{
-				user = new Player();
+				Player player = ConfigApp.getPlayerDB( id );
+				
+				if( player != null && !player.isAnonymous() )
+				{
+					players.add( player );
+				}
 			}
-			
 		} 
 		catch (SQLException | IOException e)
 		{
 			e.printStackTrace();
 		}
 		
-		return user;
+		return players;
 	}
 	
 	private JPanel getPanelSelectAction()
@@ -170,17 +176,15 @@ public class AppSelectPlayer extends JDialog
 				public void actionPerformed(ActionEvent arg0)
 				{
 					JTable t = getUserTable();
-					int sel = t.getSelectedRow();
+					int[] sel = t.getSelectedRows();
 					
-					if( sel < 0 )
+					if( sel.length > 0 )
 					{
-						userID = NON_SELECTED_USER;						
+						for( int s : sel )
+						{
+							playerIDs.add(  (int)t.getValueAt( s, 0 ) );
+						}
 					}
-					else
-					{
-						userID = (int)t.getValueAt( sel, 0 );
-					}
-					
 					dispose();
 				}
 			});
@@ -211,7 +215,7 @@ public class AppSelectPlayer extends JDialog
 			this.userTable.setModel( tm );
 						
 			this.userTable.setRowHeight( ConfigApp.playerPicSizeIcon.x + 4 );
-			this.userTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
+			this.userTable.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
 			
 			TableColumnModel cmodel = this.userTable.getColumnModel();
 			
@@ -377,36 +381,34 @@ public class AppSelectPlayer extends JDialog
 						JTable t = getUserTable();
 						DefaultTableModel tm = (DefaultTableModel)t.getModel();
 						
-						int sel = t.getSelectedRow();
+						int[] sel = t.getSelectedRows();
+						Arrays.sort( sel );
 						
-						if( sel < 0 )
+						if( sel.length > 0 )
 						{
-							userID = NON_SELECTED_USER;						
-						}
-						else
-						{
-							userID = (int)t.getValueAt( sel, 0 );
-							
-							try
+							for( int i = sel.length - 1; i >= 0;  i-- )
 							{
-								if( userID != Player.ANONYMOUS_USER_ID )
-								{
-									ConfigApp.delPlayerDB( userID );
-									tm.removeRow( sel );
-								}
+								int s = sel[ i ];
 								
-								userID = NON_SELECTED_USER;
-							} 
-							catch (SQLException e)
-							{
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-								JOptionPane.showMessageDialog( dg, e.getMessage()
-																, Language.getLocalCaption( Language.ERROR )
-																, JOptionPane.ERROR_MESSAGE );
+								int playerID = (int)t.getValueAt( s, 0 );
+								
+								try
+								{
+									if( playerID != Player.ANONYMOUS_PLAYER_ID )
+									{
+										ConfigApp.delPlayerDB( playerID );
+										tm.removeRow( s );
+									}
+								} 
+								catch (SQLException e)
+								{
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+									JOptionPane.showMessageDialog( dg, e.getMessage()
+																	, Language.getLocalCaption( Language.ERROR )
+																	, JOptionPane.ERROR_MESSAGE );
+								}
 							}
-							
-							
 						}
 						
 						t.clearSelection();
@@ -428,7 +430,7 @@ public class AppSelectPlayer extends JDialog
 				@Override
 				public void actionPerformed(ActionEvent arg0)
 				{
-					userID = NON_SELECTED_USER;
+					playerIDs.clear();
 					dispose();
 				}
 			});

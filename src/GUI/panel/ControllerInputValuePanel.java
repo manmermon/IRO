@@ -10,7 +10,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import GUI.TwoWayProgressBar;
+import GUI.progressbar.TwoWayProgressBar;
 import config.language.Language;
 import control.events.IInputControllerListener;
 

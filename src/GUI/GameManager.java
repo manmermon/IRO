@@ -158,7 +158,7 @@ public class GameManager
 			}
 		}		
 
-		ConfigParameter par = ConfigApp.getParameter( ConfigApp.SELECTED_CONTROLLER );
+		ConfigParameter par = ConfigApp.getPlayerSetting( ConfigApp.SELECTED_CONTROLLER );
 		Object ctr = par.getSelectedValue();
 
 		if( ctr == null )
@@ -187,9 +187,9 @@ public class GameManager
 
 		try
 		{
-			par = ConfigApp.getParameter( ConfigApp.PLAYER );
+			par = ConfigApp.getPlayerSetting( ConfigApp.PLAYER );
 			Object player = par.getSelectedValue();
-			int playerID = Player.ANONYMOUS_USER_ID;
+			int playerID = Player.ANONYMOUS_PLAYER_ID;
 			if( player != null )
 			{
 				playerID = ((Player)player).getId();
@@ -200,22 +200,22 @@ public class GameManager
 			this.gameWindow = new GameWindow();
 			this.gameWindow.setIconImage( MainAppUI.getInstance().getIconImage() );
 				
-			par = ConfigApp.getParameter( ConfigApp.INPUT_MIN_VALUE );
+			par = ConfigApp.getPlayerSetting( ConfigApp.INPUT_MIN_VALUE );
 			double min = ((Number)par.getSelectedValue()).doubleValue();
 	
-			par = ConfigApp.getParameter( ConfigApp.INPUT_MAX_VALUE);
+			par = ConfigApp.getPlayerSetting( ConfigApp.INPUT_MAX_VALUE);
 			double max = ((Number)par.getSelectedValue()).doubleValue();
 			
-			par = ConfigApp.getParameter( ConfigApp.TIME_IN_INPUT_TARGET);
+			par = ConfigApp.getPlayerSetting( ConfigApp.TIME_IN_INPUT_TARGET);
 			double timeTarget = ((Number)par.getSelectedValue()).doubleValue();
 			
-			par = ConfigApp.getParameter( ConfigApp.REACTION_TIME );
+			par = ConfigApp.getPlayerSetting( ConfigApp.REACTION_TIME );
 			double actionTime = ((Number)par.getSelectedValue()).doubleValue();
 	
-			par = ConfigApp.getParameter( ConfigApp.RECOVER_TIME );
+			par = ConfigApp.getPlayerSetting( ConfigApp.RECOVER_TIME );
 			double recoverTime = ((Number)par.getSelectedValue()).doubleValue();
 			
-			par = ConfigApp.getParameter( ConfigApp.INPUT_SELECTED_CHANNEL );
+			par = ConfigApp.getPlayerSetting( ConfigApp.INPUT_SELECTED_CHANNEL );
 			Object channel = par.getSelectedValue();
 			
 			if(  channel == null )
@@ -230,7 +230,7 @@ public class GameManager
 				throw new ConfigParameterException( "Selected channel out of controller's bounds [0, " + (info.channel_count() - 1 ) + "]."  );
 			}
 			
-			par = ConfigApp.getParameter( ConfigApp.SONG_LIST );
+			par = ConfigApp.getPlayerSetting( ConfigApp.SONG_LIST );
 			Object songList = par.getSelectedValue();
 			
 			if( songList == null )
