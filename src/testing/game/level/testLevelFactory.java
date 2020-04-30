@@ -1,7 +1,7 @@
 /**
  * 
  */
-package testing;
+package testing.game.level;
 
 import java.awt.Rectangle;
 import java.io.File;

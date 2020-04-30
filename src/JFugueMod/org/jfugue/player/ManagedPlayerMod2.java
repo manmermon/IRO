@@ -19,7 +19,7 @@
 
 package JFugueMod.org.jfugue.player;
 
-import org.jfugue.player.ManagedPlayer;
+import org.jfugue.player.EndOfTrackListener;
 import org.jfugue.player.ManagedPlayerListener;
 
 import java.util.List;
@@ -35,7 +35,7 @@ import javax.sound.midi.Sequence;
  * Additionally, the state of this player can be requested.
  * If you want to create a player that you can control like any standard media player, this is your class.
  */
-public class ManagedPlayerMod2 extends ManagedPlayer
+public class ManagedPlayerMod2 implements EndOfTrackListener
 {	
 	private SequencerManagerMod common;
 	private boolean started;
@@ -137,7 +137,8 @@ public class ManagedPlayerMod2 extends ManagedPlayer
     
     public void finish() 
     {
-    	common.close();
+    	common.stop();
+    	//common.close();
     	this.finished = true;
     	fireOnFinished();
     }

@@ -31,6 +31,7 @@ import config.Player;
 import config.Settings;
 import config.language.Caption;
 import config.language.Language;
+import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
 import image.basicPainter2D;
 import music.IROTrack;
@@ -283,14 +284,14 @@ public class SelectLevelImagePanel extends JPanel
 																	+ padding
 																, 0D
 																, false );
-				noteSprite3.setState( State.NON_ACTION );
+				noteSprite3.setState( State.PREACTION );
 				noteSprite3.setImage( noteImg );
 																
 				par = setting.getParameter( ConfigApp.PREACTION_COLOR );
 				c = par.getSelectedValue();
 				if( c != null )
 				{
-					noteSprite3.setNonActionColor( (Color)c);
+					noteSprite3.setPreactionColor( (Color)c);
 				}
 					
 				lv.addNote( noteSprite1 );

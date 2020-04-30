@@ -7,19 +7,19 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
-import GUI.AppIcon;
+import GUI.game.component.IPossessable;
+import config.IOwner;
 import image.basicPainter2D;
-import image.icon.GeneralAppIcon;
-import image.icon.MusicInstrumentIcons;
 
 /**
  * @author manuel
  *
  */
-public class Score extends AbstractSprite
+public class Score extends AbstractSprite implements IPossessable 
 {
 
 	private FontMetrics fontmetrics;
@@ -27,6 +27,10 @@ public class Score extends AbstractSprite
 	private int score = 0;
 	
 	private int scoreUnit = 100;
+	
+	private IOwner _player;
+	
+	private Image playerPic = null;
 	
 	/**
 	 * 
@@ -60,7 +64,7 @@ public class Score extends AbstractSprite
 		
 
 		Point loc = pen.getBounds().getLocation();
-		super.screenLoc.x = loc.x + fm.stringWidth( "0" );
+		super.screenLoc.x = loc.x + fm.stringWidth( "0" ) / 2;
 		super.screenLoc.y = loc.y + h / 8;
 		
 		
@@ -90,16 +94,23 @@ public class Score extends AbstractSprite
 													, fill
 													, null );
 		
+		
+		if( this._player != null && this.playerPic == null )
+		{
+			this.playerPic = this._player.getOwnerImage().getScaledInstance( sprite.getHeight(), sprite.getHeight(),  Image.SCALE_FAST );
+		}
+		
 		Color bg = new Color( 255, 255, 255, 140 );
-		BufferedImage img = ( BufferedImage )basicPainter2D.roundRectangle(0, 0
-																	, sprite.getWidth()
+		BufferedImage img = ( BufferedImage )basicPainter2D.roundRectangle( this.playerPic.getWidth( null ), 0
+																	, sprite.getWidth() + this.playerPic.getWidth( null )
 																	, sprite.getHeight()
 																	, this.fontmetrics.stringWidth( "0")
 																	, sprite.getHeight() 
 																	, 1 , bg, bg, null );
 		
 		//BufferedImage img = (BufferedImage)basicPainter2D.createEmptyCanva( sprite.getWidth(), sprite.getHeight(), bg );
-		basicPainter2D.composeImage( img, 0, 0, sprite );
+		basicPainter2D.composeImage( img, this.playerPic.getWidth( null ), 0, sprite );
+		basicPainter2D.composeImage( img, 0, 0, playerPic );
 				
 		return img;
 	}
@@ -112,5 +123,23 @@ public class Score extends AbstractSprite
 	public void setScoreUnit( int unit )
 	{
 		this.scoreUnit = unit;
+	}
+
+	/*(non-Javadoc)
+	 * @see @see config.IPossessable#setOwner(config.IOwner)
+	 */
+	@Override
+	public void setOwner( IOwner owner )
+	{
+		this._player = owner;
+	}
+
+	/*(non-Javadoc)
+	 * @see @see config.IPossessable#getOwner()
+	 */
+	@Override
+	public IOwner getOwner()
+	{
+		return this._player;
 	}
 }

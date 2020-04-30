@@ -1,7 +1,7 @@
 /**
  * 
  */
-package testing;
+package testing.gui;
 
 import java.io.File;
 

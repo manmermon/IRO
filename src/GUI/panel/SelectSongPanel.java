@@ -38,13 +38,17 @@ import config.ConfigApp;
 import config.ConfigParameter;
 import config.Player;
 import config.Settings;
+import config.language.Caption;
 import config.language.Language;
 import config.language.TranslateComponents;
 import control.music.MusicPlayerControl;
 import exceptions.ConfigParameterException;
 import image.basicPainter2D;
+import image.icon.GeneralAppIcon;
 
+import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequence;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -241,7 +245,14 @@ public class SelectSongPanel extends JPanel
 					if( pattern != null )
 					{
 						BackgroundMusic bgm = new BackgroundMusic();
-						bgm.setPattern( pattern );
+						try
+						{
+							bgm.setPattern( pattern );
+						}
+						catch (MidiUnavailableException | InvalidMidiDataException ex1)
+						{
+							ex1.printStackTrace();
+						}
 						
 						boolean play = ( patternCopy == null ) 
 										|| ( pattern != patternCopy );								
@@ -279,15 +290,14 @@ public class SelectSongPanel extends JPanel
 		
 		return this.btPlayStopSong;
 	}
-	
-	
+		
 	private JPanel getContainerPanel()
 	{
 		if( this.contentPanel == null )
 		{
 			this.contentPanel = new JPanel();
 			this.contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-			//this.contentPanel.setLayout(new BoxLayout( this.contentPanel, BoxLayout.X_AXIS));
+			
 			this.contentPanel.setLayout( new GridLayout( 0, 2 ) );
 						
 			this.contentPanel.add( this.getMusicListPanel() );
@@ -355,9 +365,25 @@ public class SelectSongPanel extends JPanel
 	{
 		if( this.buttonUp == null )
 		{
-			this.buttonUp = new JButton( Language.getLocalCaption( Language.UP ) );
+			this.buttonUp = new JButton( );
 			
-			TranslateComponents.add( this.buttonUp, Language.getAllCaptions().get(  Language.UP ) );
+			try
+			{
+				ImageIcon icon = new ImageIcon( basicPainter2D.triangle( 16,  2, Color.BLACK
+														, Color.LIGHT_GRAY, basicPainter2D.NORTH ) );
+				
+				Dimension d = new Dimension( icon.getIconWidth(), icon.getIconHeight() );
+				d.width += 6;
+				d.height += 6;
+				this.buttonUp.setPreferredSize( d );
+				this.buttonUp.setIcon( icon );
+			}
+			catch( Exception ex )
+			{
+				Caption cap = Language.getAllCaptions().get(  Language.UP );
+				this.buttonUp.setText( cap.getCaption( Language.getCurrentLanguage() ) );
+				TranslateComponents.add( this.buttonUp, cap );
+			}
 			
 			this.buttonUp.setAlignmentX(Component.CENTER_ALIGNMENT);
 			
@@ -379,9 +405,25 @@ public class SelectSongPanel extends JPanel
 	{
 		if( this.buttonDown == null )
 		{
-			this.buttonDown = new JButton( Language.getLocalCaption( Language.DOWN ) );
+			this.buttonDown = new JButton();
 			
-			TranslateComponents.add( this.buttonDown, Language.getAllCaptions().get(  Language.DOWN ) );
+			try
+			{
+				ImageIcon icon = new ImageIcon( basicPainter2D.triangle( 16,  2, Color.BLACK
+														, Color.LIGHT_GRAY, basicPainter2D.SOUTH ) );
+				
+				Dimension d = new Dimension( icon.getIconWidth(), icon.getIconHeight() );
+				d.width += 6;
+				d.height += 6;
+				this.buttonDown.setPreferredSize( d );
+				this.buttonDown.setIcon( icon );
+			}
+			catch( Exception ex )
+			{
+				Caption cap = Language.getAllCaptions().get( Language.DOWN );
+				this.buttonDown.setText( cap.getCaption( Language.getCurrentLanguage() ) );
+				TranslateComponents.add( this.buttonDown, cap );
+			}
 			
 			this.buttonDown.setAlignmentX(Component.CENTER_ALIGNMENT);
 			
@@ -667,7 +709,25 @@ public class SelectSongPanel extends JPanel
 	{
 		if (buttonSelect == null) 
 		{
-			buttonSelect = new JButton( ">>" );
+			buttonSelect = new JButton( );
+			
+			try
+			{
+				ImageIcon icon = new ImageIcon( basicPainter2D.triangle( 16,  2, Color.BLACK
+						, Color.LIGHT_GRAY, basicPainter2D.EAST ) );
+
+				Dimension d = new Dimension( icon.getIconWidth(), icon.getIconHeight() );
+				d.width += 6;
+				d.height += 6;
+				this.buttonSelect.setPreferredSize( d );
+				
+				this.buttonSelect.setIcon( icon );
+			}
+			catch( Exception ex )
+			{
+				this.buttonSelect.setText( ">>" );
+			}
+			
 			buttonSelect.setAlignmentX(Component.CENTER_ALIGNMENT);
 			
 			this.buttonSelect.addActionListener( new ActionListener()
@@ -689,7 +749,25 @@ public class SelectSongPanel extends JPanel
 	{
 		if (buttonRemove == null) 
 		{
-			buttonRemove = new JButton( "<<" );
+			buttonRemove = new JButton(  );
+			
+			try
+			{
+				ImageIcon icon = new ImageIcon( basicPainter2D.triangle( 16,  2, Color.BLACK
+						, Color.LIGHT_GRAY, basicPainter2D.WEST ) );
+
+				Dimension d = new Dimension( icon.getIconWidth(), icon.getIconHeight() );
+				d.width += 6;
+				d.height += 6;
+				this.buttonRemove.setPreferredSize( d );
+				
+				this.buttonRemove.setIcon( icon );
+			}
+			catch( Exception ex )
+			{
+				this.buttonSelect.setText( "<<" );
+			}
+			
 			buttonRemove.setAlignmentX(Component.CENTER_ALIGNMENT);
 			
 			this.buttonRemove.addActionListener( new ActionListener()
@@ -711,9 +789,20 @@ public class SelectSongPanel extends JPanel
 	{
 		if (btnClear == null) 
 		{
-			btnClear = new JButton( Language.getLocalCaption( Language.CLEAR ) );
+			btnClear = new JButton( );
 			
-			TranslateComponents.add( this.btnClear, Language.getAllCaptions().get( Language.CLEAR ) );
+			try
+			{
+				this.btnClear.setIcon( GeneralAppIcon.clear( 16, Color.BLACK ) );
+			}
+			catch( Exception ex )
+			{	
+				Caption cap = Language.getAllCaptions().get( Language.CLEAR );
+			
+				this.btnClear.setText( cap.getCaption( Language.getCurrentLanguage() ) );
+				
+				TranslateComponents.add( this.btnClear, cap );
+			}
 			
 			btnClear.setAlignmentX(Component.CENTER_ALIGNMENT);
 			

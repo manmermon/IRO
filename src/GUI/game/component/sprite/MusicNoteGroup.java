@@ -33,8 +33,11 @@ import java.util.TreeSet;
 import org.jfugue.midi.MidiDictionary;
 import org.jfugue.theory.Note;
 
+import GUI.game.component.IPossessable;
 import GUI.game.component.event.SpriteEvent;
 import GUI.game.component.event.SpriteEventListener;
+import config.IOwner;
+import config.Player;
 import control.music.MusicPlayerControl;
 import general.NumberRange;
 import image.basicPainter2D;
@@ -43,7 +46,7 @@ import music.IROTrack;
 import statistic.GameStatistic;
 import statistic.GameStatistic.FieldType;
 
-public class MusicNoteGroup extends AbstractSprite
+public class MusicNoteGroup extends AbstractSprite implements IPossessable
 { 	
 	public static final int REST = -1;
 	public static final int SI = 0;
@@ -54,7 +57,7 @@ public class MusicNoteGroup extends AbstractSprite
 	public static final int RE = 5;
 	public static final int DO = 6;
 	
-	public static enum State { NON_ACTION, WAITING_ACTION, ACTION };
+	public static enum State { PREACTION, WAITING_ACTION, ACTION };
 	
 	private Pentragram pentagram;
 	private double shiftVelocity; // pixel by second
@@ -75,6 +78,8 @@ public class MusicNoteGroup extends AbstractSprite
 	private Double delay = 0D;	
 	
 	private String trackID = "";
+	
+	private IOwner _player;
 	
 	//
 	//
@@ -97,7 +102,7 @@ public class MusicNoteGroup extends AbstractSprite
 	private Color waitingActionColor = Color.BLUE;
 	private Color actionColor = Color.GREEN;
 	
-	private State state = State.NON_ACTION;
+	private State state = State.PREACTION;
 	
 	public MusicNoteGroup( String track
 							, double sheetTime
@@ -172,7 +177,13 @@ public class MusicNoteGroup extends AbstractSprite
 				{
 					case SpriteEvent.ON_SCREEN:
 					{
-						GameStatistic.add( FieldType.NOTE_SHOW );
+						int playerID = Player.ANONYMOUS;
+						if( _player != null )
+						{
+							playerID = _player.getId();
+						}
+						
+						GameStatistic.add( playerID, FieldType.NOTE_SHOW );
 						
 						synchronized ( delay )
 						{
@@ -184,7 +195,18 @@ public class MusicNoteGroup extends AbstractSprite
 					}
 					case SpriteEvent.OUTPUT_SCREEN:
 					{
-						GameStatistic.add( FieldType.NOTE_REMOVE );
+						if( !isPlay )
+						{
+							MusicPlayerControl.getInstance().stopTrack( trackID );
+						}
+						
+						int playerID = Player.ANONYMOUS;
+						if( _player != null )
+						{
+							playerID = _player.getId();
+						}
+						
+						GameStatistic.add( playerID, FieldType.NOTE_REMOVE );
 						break;
 					}
 					default:
@@ -196,7 +218,7 @@ public class MusicNoteGroup extends AbstractSprite
 		});
 	}
 	
-	public void setNonActionColor( Color c )
+	public void setPreactionColor( Color c )
 	{
 		if( c != null )
 		{
@@ -473,6 +495,24 @@ public class MusicNoteGroup extends AbstractSprite
 	public double getSheetTime()
 	{
 		return this.SheetTime;
+	}
+
+	/*(non-Javadoc)
+	 * @see @see config.IPossessable#setOwner(config.IOwner)
+	 */
+	@Override
+	public void setOwner(IOwner owner)
+	{
+		this._player = owner;
+	}
+
+	/*(non-Javadoc)
+	 * @see @see config.IPossessable#getOwner()
+	 */
+	@Override
+	public IOwner getOwner()
+	{
+		return this._player;
 	}
 }
 

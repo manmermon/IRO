@@ -57,7 +57,6 @@ import config.ConfigParameter.ParameterType;
 import config.language.Caption;
 import config.language.Language;
 import exceptions.ConfigParameterException;
-import general.ArrayTreeMap;
 import general.NumberRange;
 import general.Tuple;
 import image.basicPainter2D;
@@ -142,7 +141,7 @@ public class ConfigApp
 	
 	///////////
 	
-	private static boolean test = false;
+	private static boolean test = true;
 	
 	public static boolean isTesting()
 	{
@@ -214,6 +213,7 @@ public class ConfigApp
 				if( load )
 				{
 					Settings cfg = getDefaultSettings();
+					cfg.setPlayer( player );
 					listPlayerConfig.put( player, cfg );
 
 					for( Tuple< String, Object > par : settings )
@@ -227,7 +227,7 @@ public class ConfigApp
 							{
 								val = new Color( (Integer)val );
 							}
-
+							
 							p.setSelectedValue( val );
 						}
 					}					
@@ -266,7 +266,10 @@ public class ConfigApp
 			
 			loadDefaultLanguage( );
 			
-			loadDefaultPlayerSetting( new Player() );
+			if( isTesting() )
+			{			
+				loadDefaultPlayerSetting( new Player() );
+			}
 			
 		}
 		catch (Exception e) 
@@ -286,12 +289,8 @@ public class ConfigApp
 	public static void loadDefaultPlayerSetting( Player player ) throws ConfigParameterException
 	{
 		Settings cfg = getDefaultSettings();
-			
-		for( ConfigParameter par : cfg.getParameters() )
-		{
-			par.setPlayer( player );
-		}
-		
+		cfg.setPlayer( player );
+				
 		listPlayerConfig.put( player, cfg );		
 	}
 	
@@ -621,7 +620,7 @@ public class ConfigApp
 		String vars = "name";
 		String vals = "?";
 
-		int userID = Player.ANONYMOUS_PLAYER_ID;
+		int userID = Player.ANONYMOUS;
 
 		if( img != null )
 		{
@@ -1196,81 +1195,84 @@ public class ConfigApp
 
 	public static void dbSaveStatistic() throws SQLException
 	{
-		int playerID = GameStatistic.getPlayerID();
-		ArrayTreeMap< LocalDateTime, GameStatistic.FieldType > register = GameStatistic.getRegister();
-		
-		if( playerID != Player.ANONYMOUS_PLAYER_ID && !register.isEmpty() )
+		for( int playerID : GameStatistic.getPlayerIDs() )
 		{
-			LocalDateTime startTime = GameStatistic.getStartDateTime();
-			
-			ZonedDateTime zdt = ZonedDateTime.of( startTime, ZoneId.systemDefault() );
-			
-			String sql = "INSERT INTO "+ sessionTableName +  "(userID, date) ";
-			String sqlValues  = "VALUES(" + playerID + "," + zdt.toInstant().toEpochMilli() + ")";
-
-			Statement stmt = null;
-
-			ResultSet rs = null;
-			
-			try 
+			List< Tuple< LocalDateTime, GameStatistic.FieldType > > register = GameStatistic.getRegister( playerID );
+		
+			if( playerID != Player.ANONYMOUS && !register.isEmpty() )
 			{
-				dbConnect();
-
-				stmt  = conn.createStatement();
-			
-				Integer sessionID = null;
+				LocalDateTime startTime = GameStatistic.getStartDateTime();
 				
-				if( stmt.executeUpdate( sql + sqlValues ) > 0 )
+				if( startTime != null )
 				{
-					rs = stmt.getGeneratedKeys();
-					if(rs != null && rs.next())
-					{
-						sessionID = rs.getInt( 1 );
-					}
-				}
+					ZonedDateTime zdt = ZonedDateTime.of( startTime, ZoneId.systemDefault() );
 				
-				if( sessionID != null )
-				{	
-					for( LocalDateTime t : register.keySet() )
-					{
-						List< FieldType > fields = register.get( t );
-						
-						zdt = ZonedDateTime.of( t, ZoneId.systemDefault() );
-						
-						for( FieldType f : fields )
-						{
-							sql = "INSERT INTO "+ statisticTableName +  "(idSession,actionID,actionName,time)";
-							sqlValues = " VALUES(" + sessionID 
-										+ "," + f.ordinal()
-										+ ",\"" + f.name() + "\""
-										+ "," + zdt.toInstant().toEpochMilli()
-										+ ")";
-							
-							stmt.executeUpdate( sql + sqlValues );
-						}
-					}
+					String sql = "INSERT INTO "+ sessionTableName +  "(userID, date) ";
+					String sqlValues  = "VALUES(" + playerID + "," + zdt.toInstant().toEpochMilli() + ")";
+		
+					Statement stmt = null;
+		
+					ResultSet rs = null;
 					
-					GameStatistic.clearRegister();
+					try 
+					{
+						dbConnect();
+		
+						stmt  = conn.createStatement();
+					
+						Integer sessionID = null;
+						
+						if( stmt.executeUpdate( sql + sqlValues ) > 0 )
+						{
+							rs = stmt.getGeneratedKeys();
+							if(rs != null && rs.next())
+							{
+								sessionID = rs.getInt( 1 );
+							}
+						}
+						
+						if( sessionID != null )
+						{	
+							for( Tuple< LocalDateTime, FieldType > t : register )
+							{
+								LocalDateTime time = t.x;
+								FieldType f = t.y;
+								
+								zdt = ZonedDateTime.of( time, ZoneId.systemDefault() );
+								
+								sql = "INSERT INTO "+ statisticTableName +  "(idSession,actionID,actionName,time)";
+								sqlValues = " VALUES(" + sessionID 
+												+ "," + f.ordinal()
+												+ ",\"" + f.name() + "\""
+												+ "," + zdt.toInstant().toEpochMilli()
+												+ ")";
+									
+								stmt.executeUpdate( sql + sqlValues );
+							}
+							
+							GameStatistic.clearRegister();
+						}
+						
+					}
+					catch (SQLException e) 
+					{
+						throw e;			 
+					}
+					finally 
+					{
+						if( rs != null )
+						{
+							rs.close();
+						}
+						
+						if( stmt != null )
+						{
+							stmt.close();
+						}
+		
+						dbCloseConnection();
+					}
 				}
-				
-			}
-			catch (SQLException e) 
-			{
-				throw e;			 
-			}
-			finally 
-			{
-				if( rs != null )
-				{
-					rs.close();
-				}
-				
-				if( stmt != null )
-				{
-					stmt.close();
-				}
-
-				dbCloseConnection();
 			}
 		}
 	}

@@ -5,6 +5,7 @@ import javax.swing.JOptionPane;
 import GUI.MainAppUI;
 import GUI.GameManager;
 import GUI.game.screen.IScene;
+import config.ConfigApp;
 import config.language.Language;
 import control.events.InputActionEvent;
 import control.events.InputActionListerner;
@@ -146,7 +147,7 @@ public class ScreenControl extends AbstractStoppableThread
 			{			
 				if( ev.getType() == control.events.SceneEvent.START)
 				{
-					GameStatistic.add( FieldType.GAME_START );
+					GameStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_START );
 				}		
 				else if( ev.getType() == control.events.SceneEvent.END )
 				{
@@ -158,7 +159,7 @@ public class ScreenControl extends AbstractStoppableThread
 
 					synchronized ( this )
 					{
-						GameStatistic.add( FieldType.GAME_END );
+						GameStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_END );
 
 						try
 						{
@@ -177,15 +178,16 @@ public class ScreenControl extends AbstractStoppableThread
 				}
 				else if( ev.getType() == control.events.SceneEvent.PAUSE )
 				{
-					GameStatistic.add( FieldType.GAME_PAUSE );
+					GameStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_PAUSE );
 				}
 				else if( ev.getType() == control.events.SceneEvent.RESUME )
 				{
-					GameStatistic.add( FieldType.GAME_RESUME );
+					GameStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_RESUME );
 				}
 			}
 		};
 		
+		t.setName( this.getClass().getSimpleName() + "-GameStatisticRegister" );
 		t.start();
 		
 	}

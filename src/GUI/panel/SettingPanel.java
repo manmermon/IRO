@@ -60,9 +60,6 @@ import general.NumberRange;
 
 public class SettingPanel extends JPanel
 {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -1219995574372606332L;
 	
 	private JPanel containerPanel = null;

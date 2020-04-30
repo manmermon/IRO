@@ -36,6 +36,8 @@ import java.util.concurrent.TimeoutException;
 import javax.swing.Timer;
 import javax.swing.event.EventListenerList;
 
+import org.w3c.dom.ls.LSLoadEvent;
+
 import control.controller.ControllerMetadata;
 import control.controller.IInputController;
 import control.events.IInputControllerListener;
@@ -61,14 +63,18 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 	
 	private ControllerMetadata metadata = null;
 	
-	public InputLSLStreamController( LSL.StreamInfo info) throws Exception
+	public InputLSLStreamController( LSLStreamMetadata meta ) throws Exception
 	{
-		if ( info == null )
+		if ( meta == null || meta.getControllerSetting() == null )
 		{
-			throw new IllegalArgumentException("LSL.StreamInlet is null");
+			throw new IllegalArgumentException( "LSLStreamMetadata/LSL.StreamInfo is null");
 		}
 		
-		this.metadata = new LSLStreamMetadata( info );
+		LSL.StreamInfo info = (LSL.StreamInfo)meta.getControllerSetting();
+		
+		super.setName( this.getClass().getSimpleName() + "-" + super.getId() );
+		
+		this.metadata = meta;
 		this.LSLFormatData = info.channel_format();
 
 		this.inLet = new StreamInlet( info, 360,  0, false );

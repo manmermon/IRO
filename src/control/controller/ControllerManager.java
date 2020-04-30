@@ -3,9 +3,13 @@
  */
 package control.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import config.Player;
 import control.controller.LSLStreams.InputLSLStreamController;
+import control.controller.LSLStreams.LSLStreamMetadata;
 import control.events.IInputControllerListener;
-import edu.ucsd.sccn.LSL;
 
 /**
  * @author manuel
@@ -15,55 +19,79 @@ public class ControllerManager
 {
 	private static ControllerManager ctr = null;
 	
-	private static IInputController controller = null;
+	private List< IInputController > controllers = null;
 	
 	private ControllerManager()
 	{
-		
+		controllers = new ArrayList<IInputController>();
 	}
 	
 	public static ControllerManager getInstance()
 	{
 		if( ctr == null )
 		{
-			ctr = new ControllerManager();
+			ctr = new ControllerManager();			
 		}
 		
 		return ctr;
 	}
 	
-	public void startController( LSL.StreamInfo info ) throws Exception
+	public void startController( List< ControllerMetadata > controllers ) throws Exception
 	{		
 		stopController();
 		
-		controller = new InputLSLStreamController( info );
-				
-		controller.startController();
+		for( ControllerMetadata meta : controllers )
+		{
+			switch ( meta.getControllerType() )
+			{
+				case LSLSTREAM:
+				{
+					IInputController controller = new InputLSLStreamController( (LSLStreamMetadata)meta );
+					this.controllers.add( controller );
+					break;
+				}
+				default:
+				{
+					break;
+				}
+			}		
+		}
+		
+		for( IInputController controller : this.controllers )
+		{
+			controller.startController();
+		}
 	}
 	
 	public void stopController() throws Exception
 	{
-		if( controller != null )
+		for( IInputController controller : this.controllers )
 		{
 			controller.stopController();
 		}
 		
-		controller = null;
+		this.controllers.clear();
 	}
 	
-	public void addControllerListener( IInputControllerListener listener )
+	public void addControllerListener( Player player, IInputControllerListener listener )
 	{
-		if( controller != null )
+		for( IInputController controller : this.controllers )
 		{
-			controller.addInputControllerListener( listener );
+			if( controller.getMetadataController().getPlayer().equals( player ) )
+			{
+				controller.addInputControllerListener( listener );
+			}
 		}
 	}
 	
-	public void removeControllerListener( IInputControllerListener listener )
+	public void removeControllerListener( Player player, IInputControllerListener listener )
 	{
-		if( controller != null )
+		for( IInputController controller : this.controllers )
 		{
-			controller.removeInputControllerListener( listener );
+			if( controller.getMetadataController().getPlayer().equals( player ) )
+			{
+				controller.removeInputControllerListener( listener );
+			}
 		}
 	}
 	
@@ -80,8 +108,8 @@ public class ControllerManager
 	}
 	//*/
 		
-	public IInputController getController()
+	public List< IInputController > getControllers()
 	{
-		return controller;
+		return this.controllers;
 	}
 }

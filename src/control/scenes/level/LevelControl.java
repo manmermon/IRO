@@ -21,12 +21,10 @@
 
 package control.scenes.level;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import GUI.game.component.event.FretEventListener;
 import GUI.game.component.sprite.Fret;
 import GUI.game.component.sprite.ISprite;
 import GUI.game.component.sprite.InputGoal;
@@ -34,16 +32,12 @@ import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.component.sprite.Score;
 import GUI.game.screen.IScene;
 import GUI.game.screen.level.Level;
-import config.ConfigApp;
 import control.events.BackgroundMusicEventListener;
 import control.events.InputActionEvent;
 import control.events.SceneEvent;
 import control.music.MusicPlayerControl;
 import control.scenes.AbstractSceneControl;
 import exceptions.SceneException;
-import general.ArrayTreeMap;
-import music.IROTrack;
-import control.controller.ControllerManager;
 import control.controller.KeystrokeAction;
 import control.controller.MouseStrokeAction;
 import control.events.BackgroundMusicEvent;
@@ -169,7 +163,7 @@ public class LevelControl extends AbstractSceneControl
 				{						
 					if( !note.isSelected() )
 					{
-						note.setState( GUI.game.component.sprite.MusicNoteGroup.State.NON_ACTION );
+						note.setState( GUI.game.component.sprite.MusicNoteGroup.State.PREACTION );
 					}
 
 					if( note.isSelected() && !note.isPlayed() )
@@ -267,7 +261,7 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	protected void specificCleanUp()
 	{
-		this.actionDone = null;
+		//this.actionDone = null;
 	}
 
 	/*
@@ -276,8 +270,8 @@ public class LevelControl extends AbstractSceneControl
 	 */
 	@Override
 	public void BackgroundMusicEvent( BackgroundMusicEvent event) 
-	{
-		this.backgroundMusicEnd = this.backgroundMusicEnd || event.getType() == BackgroundMusicEvent.END;
+	{		
+		this.backgroundMusicEnd = this.backgroundMusicEnd || event.getType() == BackgroundMusicEvent.END;		
 	}
 
 	/*(non-Javadoc)

@@ -46,7 +46,7 @@ public class SequencerManagerMod
 
 	public SequencerManagerMod() throws MidiUnavailableException 
 	{
-		this.sequencer = getDefaultSequencer();
+		this.sequencer = getDefaultSequencer();		
 		this.previousSynth = SynthesizerManager.getInstance().getSynthesizer();
 		endOfTrackListeners = new CopyOnWriteArrayList<EndOfTrackListener>();
 	}
@@ -102,6 +102,19 @@ public class SequencerManagerMod
 		{
 			this.sequencer.close();
 		}
+	}
+	
+	public void stop()
+	{
+		if( this.sequencer != null )
+		{
+			if( this.sequencer.isRunning() )
+			{
+				this.sequencer.stop();
+			}
+		}
+		
+		this.close();		
 	}
 	
 	public void connectSequencerToSynthesizer() throws MidiUnavailableException 

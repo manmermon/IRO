@@ -394,7 +394,7 @@ public class AppSelectPlayer extends JDialog
 								
 								try
 								{
-									if( playerID != Player.ANONYMOUS_PLAYER_ID )
+									if( playerID != Player.ANONYMOUS )
 									{
 										ConfigApp.dbRemovePlayer( playerID );
 										tm.removeRow( s );

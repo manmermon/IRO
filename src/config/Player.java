@@ -9,10 +9,8 @@ import javax.swing.ImageIcon;
 import config.language.Language;
 import image.icon.GeneralAppIcon;
 
-public class Player
-{
-	public static final int ANONYMOUS_PLAYER_ID = -1;
-	
+public class Player implements IOwner
+{	
 	private int id;
 	private String name;
 	private ImageIcon img = null;
@@ -22,7 +20,7 @@ public class Player
 	
 	public Player()
 	{
-		this.id = ANONYMOUS_PLAYER_ID;
+		this.id = ANONYMOUS;
 		this.name = Language.getLocalCaption( Language.ANONYMOUS );
 		this.img = null;
 	}
@@ -40,7 +38,7 @@ public class Player
 	
 	public boolean isAnonymous()
 	{
-		return this.id == ANONYMOUS_PLAYER_ID;
+		return this.id == ANONYMOUS;
 	}
 	
 	public void setDefaultImage()
@@ -48,11 +46,13 @@ public class Player
 		this.img = null;
 	}
 	
+	@Override
 	public int getId()
 	{
 		return id;
 	}
 	
+	@Override
 	public String getName()
 	{
 		return name;
@@ -112,5 +112,14 @@ public class Player
 		}
 		
 		return eq;
+	}
+
+	/*(non-Javadoc)
+	 * @see @see config.IOwner#getOwnerImage()
+	 */
+	@Override
+	public Image getOwnerImage()
+	{
+		return this.getImg().getImage();
 	}
 }

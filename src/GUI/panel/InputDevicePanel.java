@@ -38,6 +38,7 @@ import javax.swing.table.TableModel;
 
 import config.ConfigApp;
 import config.ConfigParameter;
+import config.ConfigParameter.ParameterType;
 import config.Player;
 import config.Settings;
 import config.language.Caption;
@@ -45,7 +46,9 @@ import config.language.Language;
 import config.language.TranslateComponents;
 import control.controller.ControllerManager;
 import control.controller.ControllerMetadata;
+import control.controller.LSLStreams.LSLStreamMetadata;
 import edu.ucsd.sccn.LSL;
+import image.icon.GeneralAppIcon;
 
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -80,7 +83,7 @@ public class InputDevicePanel extends JPanel
 	
 	private static Window owner;
 		
-	private final Player NON_SELECTED_PLAYER = new Player( Player.ANONYMOUS_PLAYER_ID - 1, " ", null );
+	private final Player NON_SELECTED_PLAYER = new Player( Player.ANONYMOUS - 1, " ", null );
 		
 	public static InputDevicePanel getInstance( Window wOwner )
 	{
@@ -128,6 +131,14 @@ public class InputDevicePanel extends JPanel
 			Caption cap = Language.getAllCaptions().get( Language.UPDATE );
 			
 			this.btRefresh.setText( cap.getCaption( Language.getCurrentLanguage() ) );
+			
+			try
+			{
+				this.btRefresh.setIcon( GeneralAppIcon.Refresh( 20, 20, Color.BLACK, null));
+			}
+			catch (Exception ex) 
+			{
+			}
 						
 			this.btRefresh.addActionListener( new ActionListener()
 			{				
@@ -291,7 +302,7 @@ public class InputDevicePanel extends JPanel
 					if( ev.getType() == TableModelEvent.UPDATE )
 					{
 						JTable t = inputDeviceTable;
-						
+					
 						int row = ev.getFirstRow();
 						int col = ev.getColumn();
 						
@@ -299,12 +310,16 @@ public class InputDevicePanel extends JPanel
 						{
 							if( col == 0 )
 							{
+								LSL.StreamInfo info = lslStreamInfo[ row ];
+								
 								Player player = (Player)t.getValueAt( row, col );
 							
 								if( player.getId() != NON_SELECTED_PLAYER.getId() )
 								{
 									checkPlayerController( player, row );
 								}
+								
+								updatePlayerControllerSetting( player, info );
 							}
 						}
 					}
@@ -330,6 +345,50 @@ public class InputDevicePanel extends JPanel
 		}
 		
 		return this.inputDeviceTable;
+	}
+	
+	private void updatePlayerControllerSetting( Player player, LSL.StreamInfo ctr )
+	{
+		try
+		{
+			for( Player pl : ConfigApp.getPlayers() )
+			{
+				Settings setplayer = ConfigApp.getPlayerSetting( pl );			
+				ConfigParameter par = setplayer.getParameter( ConfigApp.SELECTED_CONTROLLER );
+
+
+				if( par == null )
+				{
+					Caption cap = Language.getAllCaptions().get( Language.CONTROLLER );
+					cap.setID( ConfigApp.SELECTED_CONTROLLER );
+
+					par = new ConfigParameter( cap, ParameterType.OTHER );											
+				}
+
+				if( !pl.equals( player ) )
+				{
+					Object val = par.getSelectedValue();
+					if( val != null )
+					{											
+						ControllerMetadata cmeta = (ControllerMetadata)val;
+
+						if( cmeta.getControllerID().equals( ctr.uid() ) )
+						{
+							par.removeSelectedValue();
+						}
+					}
+				}
+				else
+				{
+					ControllerMetadata meta = new LSLStreamMetadata( ctr );
+					par.setSelectedValue( meta );
+				}
+			}
+		}
+		catch (Exception ex) 
+		{
+			ex.printStackTrace();
+		}
 	}
 	
 	private JTable getCreateJTable()
@@ -506,13 +565,19 @@ public class InputDevicePanel extends JPanel
 			{
 				ControllerManager.getInstance().stopController();
 				
-				ControllerManager.getInstance().startController( info );
+				List< ControllerMetadata > ctr = new ArrayList<ControllerMetadata>();
+				LSLStreamMetadata meta = new LSLStreamMetadata( info );
+				Player p = new Player();
+				meta.setPlayer( p );				
+				ctr.add( meta );
+				
+				ControllerManager.getInstance().startController( ctr );
 				
 				this.inputValues = new ControllerInputValuePanel( info.channel_count() );
 				this.inputValues.setVisible( true );
 				panel.add( this.inputValues, BorderLayout.CENTER );
 				
-				ControllerManager.getInstance().addControllerListener( this.inputValues );				
+				ControllerManager.getInstance().addControllerListener( p, this.inputValues );				
 			}
 			catch (Exception ex)
 			{

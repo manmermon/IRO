@@ -85,7 +85,6 @@ public class IROPlayer
 			player.setPattern( NotesPattern );
 						
 			this.players.put( player.getName(), player );
-			player.startThread();			
 		
 			trackID = player.getName();
 		}
@@ -111,7 +110,7 @@ public class IROPlayer
 		{
 			PlayerNote player = this.players.get( trackID );
 			if( player != null )
-			{
+			{	
 				player.stopThread( IStoppableThread.FORCE_STOP );
 			}
 		}
@@ -143,9 +142,11 @@ public class IROPlayer
 		//private Pattern musicPattern;
 		
 		private PlayerMod player;
+		private Object lock = new Object();
 		
 		public PlayerNote( ) throws MidiUnavailableException 
 		{
+			super.setName( this.getClass().getSimpleName() + "-" + super.getId() );
 			this.player = new PlayerMod();			
 			this.player.getManagedPlayer().addManagedPlayerListener( this );
 		}
@@ -168,6 +169,13 @@ public class IROPlayer
 		@Override
 		protected void postStopThread(int friendliness) throws Exception 
 		{	
+			synchronized ( this.lock )
+			{
+				if( !this.player.getManagedPlayer().isFinished() )
+				{
+					this.player.getManagedPlayer().finish();
+				}
+			}
 		}
 
 		@Override
@@ -175,11 +183,14 @@ public class IROPlayer
 		{	
 			synchronized( this )			
 			{	
-				if( !this.player.isEmpty() )
+				synchronized ( this.lock )
 				{
-					this.player.play( );
-					
-					this.wait();
+					if( !this.player.isEmpty() )
+					{
+						this.player.play( );
+						
+						this.wait();
+					}
 				}
 			}
 		}
@@ -207,7 +218,14 @@ public class IROPlayer
 		{
 			super.cleanUp();
 			
-			this.player.getManagedPlayer().finish();
+			synchronized ( this.lock )
+			{
+				if( !this.player.getManagedPlayer().isFinished() )
+				{
+					this.player.getManagedPlayer().finish();
+				}
+			}
+			
 			this.player = null;
 						
 			PlayerDead( super.getName() );
@@ -220,16 +238,22 @@ public class IROPlayer
 
 		@Override
 		public void onFinished() 
-		{	
+		{
+			synchronized ( this )
+			{
+				super.notify();
+			}
 		}
 
 		@Override
 		public void onPaused() 
 		{	
+			/*
 			synchronized ( this )
 			{
 				super.notify();
 			}
+			*/
 		}
 
 		@Override

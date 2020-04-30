@@ -1,20 +1,24 @@
 package GUI.game.screen.level;
 
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
 import javax.swing.event.EventListenerList;
 
 import org.jfugue.pattern.Pattern;
-import org.jfugue.player.Player;
+import org.jfugue.player.ManagedPlayerListener;
 
+import JFugueMod.org.jfugue.player.PlayerMod;
 import control.events.BackgroundMusicEvent;
 import control.events.BackgroundMusicEventListener;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 
-public class BackgroundMusic extends AbstractStoppableThread
+public class BackgroundMusic extends AbstractStoppableThread implements ManagedPlayerListener
 {
 	public static final double NON_DELAY = 0.0;
 	
-	private Player player;
+	private PlayerMod player;
 	
 	private Pattern pattern;
 	private double delay;
@@ -23,7 +27,9 @@ public class BackgroundMusic extends AbstractStoppableThread
 	
 	public BackgroundMusic() 
 	{
-		this.player = new Player();
+		super.setName( this.getClass().getSimpleName() );
+		this.player = new PlayerMod();
+		this.player.getManagedPlayer().addManagedPlayerListener( this );
 		
 		pattern = new Pattern();
 		delay = NON_DELAY;
@@ -31,9 +37,10 @@ public class BackgroundMusic extends AbstractStoppableThread
 		this.listenerList = new EventListenerList();
 	}
 		
-	public void setPattern(Pattern pattern) 
+	public void setPattern(Pattern pattern) throws MidiUnavailableException, InvalidMidiDataException 
 	{
 		this.pattern = pattern;
+		this.player.load( pattern );
 	}
 	
 	public Pattern getPattern() 
@@ -63,7 +70,13 @@ public class BackgroundMusic extends AbstractStoppableThread
 		{
 			if( this.player != null )
 			{
-				this.player.getManagedPlayer().finish();
+				try
+				{
+					this.player.getManagedPlayer().finish();
+				}
+				catch (Exception ex) 
+				{
+				}
 			}
 		}
 	}
@@ -78,11 +91,11 @@ public class BackgroundMusic extends AbstractStoppableThread
 				this.wait( (long)( 1000L * this.delay ) );
 			}
 			
-			this.fireSceneEvent( BackgroundMusicEvent.START );
+			this.fireSceneEvent( BackgroundMusicEvent.START );						
+			this.player.play( );
 			
-			this.player.play( this.pattern );
-			
-			this.fireSceneEvent( BackgroundMusicEvent.END );
+			//this.fireSceneEvent( BackgroundMusicEvent.END );
+			//*/
 			
 			this.wait();
 		}
@@ -94,7 +107,17 @@ public class BackgroundMusic extends AbstractStoppableThread
 		if( !( e instanceof InterruptedException ) )
 		{
 			super.runExceptionManager( e );
-		}		
+		}	
+	}
+	
+	/*(non-Javadoc)
+	 * @see @see stoppableThread.AbstractStoppableThread#finallyManager()
+	 */
+	@Override
+	protected void finallyManager()
+	{
+		super.stopThread = true;
+		this.fireSceneEvent( BackgroundMusicEvent.END );
 	}
 	
 	@Override
@@ -126,5 +149,67 @@ public class BackgroundMusic extends AbstractStoppableThread
 		{
 			listeners[ i ].BackgroundMusicEvent( event );
 		}
+	}
+
+	/*(non-Javadoc)
+	 * @see @see org.jfugue.player.ManagedPlayerListener#onStarted(javax.sound.midi.Sequence)
+	 */
+	@Override
+	public void onStarted(Sequence sequence)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/*(non-Javadoc)
+	 * @see @see org.jfugue.player.ManagedPlayerListener#onFinished()
+	 */
+	@Override
+	public void onFinished()
+	{
+		synchronized ( this )
+		{
+			super.notify();
+		}
+	}
+
+	/*(non-Javadoc)
+	 * @see @see org.jfugue.player.ManagedPlayerListener#onPaused()
+	 */
+	@Override
+	public void onPaused()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/*(non-Javadoc)
+	 * @see @see org.jfugue.player.ManagedPlayerListener#onResumed()
+	 */
+	@Override
+	public void onResumed()
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/*(non-Javadoc)
+	 * @see @see org.jfugue.player.ManagedPlayerListener#onSeek(long)
+	 */
+	@Override
+	public void onSeek(long tick)
+	{
+		// TODO Auto-generated method stub
+		
+	}
+
+	/*(non-Javadoc)
+	 * @see @see org.jfugue.player.ManagedPlayerListener#onReset()
+	 */
+	@Override
+	public void onReset()
+	{
+		// TODO Auto-generated method stub
+		
 	}
 }

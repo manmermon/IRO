@@ -4,6 +4,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.event.EventListenerList;
 
+import GUI.game.component.IPossessable;
+import config.IOwner;
 import control.ScreenControl;
 import control.events.IInputControllerListener;
 import control.events.InputActionEvent;
@@ -13,7 +15,7 @@ import general.NumberRange;
 import statistic.GameStatistic;
 import statistic.GameStatistic.FieldType;
 
-public class ControllerActionChecker implements IInputControllerListener  
+public class ControllerActionChecker implements IInputControllerListener, IPossessable 
 {	
 	public int selectedChannel = 0;
 	
@@ -34,6 +36,9 @@ public class ControllerActionChecker implements IInputControllerListener
 	
 	private int statistic = 0;
 	private boolean recoverLevelReported = false;
+	
+	private IOwner owner = null;
+	private int ownerID = IOwner.ANONYMOUS;
 	
  	public ControllerActionChecker( int selChannel, NumberRange inputThreshold, double time ) 
 	{
@@ -117,7 +122,8 @@ public class ControllerActionChecker implements IInputControllerListener
 				{
 					if( this.statistic == 0 )
 					{
-						GameStatistic.add( FieldType.CONTROLER_LEVEL_REACH );
+						GameStatistic.add( this.ownerID, FieldType.CONTROLER_LEVEL_REACH );
+						
 						this.statistic++;
 					}
 	
@@ -139,7 +145,7 @@ public class ControllerActionChecker implements IInputControllerListener
 					{	
 						if( this.statistic == 1 )
 						{
-							GameStatistic.add( FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
+							GameStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
 							this.statistic++;
 						}
 	
@@ -159,7 +165,7 @@ public class ControllerActionChecker implements IInputControllerListener
 				{
 					if( this.statistic > 0 )
 					{
-						GameStatistic.add( FieldType.CONTROLLER_MAINTAIN_LEVEL_FINISH );
+						GameStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_FINISH );
 						this.statistic = 0;
 					}
 					
@@ -178,13 +184,13 @@ public class ControllerActionChecker implements IInputControllerListener
 					
 					if( !this.recoverLevelReach.getAndSet( true ) )
 					{
-						GameStatistic.add( FieldType.CONTROLLER_RESTORED_LEVEL );
+						GameStatistic.add( this.ownerID, FieldType.CONTROLLER_RESTORED_LEVEL );
 						
 						this.recoverLevelReported = true;
 					}
 					else if( !this.recoverLevelReported )
 					{
-						GameStatistic.add( FieldType.CONTROLER_RECOVER_LEVEL_REACH );
+						GameStatistic.add( this.ownerID, FieldType.CONTROLER_RECOVER_LEVEL_REACH );
 					}				
 				}
 				
@@ -199,6 +205,7 @@ public class ControllerActionChecker implements IInputControllerListener
 							ScreenControl.getInstance().setUpdateLevelInputGoal( tp );
 						};
 					};
+					t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal");
 					t.start();
 				}
 				else if( this.enabledController )
@@ -214,6 +221,7 @@ public class ControllerActionChecker implements IInputControllerListener
 							ScreenControl.getInstance().setUpdateLevelInputGoal( 0 );
 						};
 					};
+					t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal" );
 					t.start();
 				}
 					
@@ -245,5 +253,27 @@ public class ControllerActionChecker implements IInputControllerListener
 		{
 			listeners[ i ].InputAction( event );
 		}
+	}
+
+	/*(non-Javadoc)
+	 * @see @see GUI.game.component.IPossessable#setOwner(config.IOwner)
+	 */
+	@Override
+	public void setOwner(IOwner owner)
+	{
+		this.owner = owner;
+		if( owner != null )
+		{
+			this.ownerID = this.owner.getId();
+		}
+	}
+
+	/*(non-Javadoc)
+	 * @see @see GUI.game.component.IPossessable#getOwner()
+	 */
+	@Override
+	public IOwner getOwner()
+	{
+		return this.owner;
 	}
 }

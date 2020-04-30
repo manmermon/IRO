@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public class Settings
 {
+	private Player player;
 	private Map< String, ConfigParameter > listUserConfig = new HashMap< String, ConfigParameter >();
 	
 	/**
@@ -22,8 +23,29 @@ public class Settings
 	{
 	}
 	
-	public ConfigParameter getParameter( String propertyID )
+	/**
+	 * @param player the player to set
+	 */
+	public void setPlayer(Player player)
 	{
+		this.player = player;
+		
+		for( ConfigParameter par : listUserConfig.values() )
+		{
+			par.setPlayer( player );
+		}
+	}
+	
+	/**
+	 * @return the player
+	 */
+	public Player getPlayer()
+	{
+		return this.player;
+	}
+	
+	public ConfigParameter getParameter( String propertyID )
+	{	
 		ConfigParameter par = listUserConfig.get( propertyID );
 		
 		return par;
@@ -35,6 +57,8 @@ public class Settings
 		{
 			if( par != null )
 			{
+				par.setPlayer( this.player );
+				
 				this.listUserConfig.put( propertyID, par );
 			}
 			else

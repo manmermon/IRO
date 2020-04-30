@@ -216,7 +216,7 @@ public class ConfigParameter
 			this._selectedValue = val;
 		}
 		
-		if( !this._player.isAnonymous() )
+		if( this._player != null && !this._player.isAnonymous() )
 		{
 			try
 			{

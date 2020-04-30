@@ -4,9 +4,12 @@
 package statistic;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 import config.Player;
 import general.ArrayTreeMap;
+import general.Tuple;
 
 /**
  * @author manuel
@@ -70,34 +73,39 @@ public class GameStatistic
 	//
 	//**********************
 	
-	private static int playerID;
 	private static LocalDateTime startDateTime;  
 	
-	private static ArrayTreeMap< LocalDateTime, FieldType > register = new ArrayTreeMap<LocalDateTime, FieldType>();
+	private static ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType > > register = new ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType> >();
 	
 	/**
 	 * 
 	 */
-	public static void setPlayerID( int id )
+	public static void startRegister()
 	{
-		playerID = id;
-		
 		startDateTime = LocalDateTime.now();
 		
 		register.clear();
 	}
 	
-	public static synchronized void add( FieldType field )
+	public static synchronized void add( Integer playerID, FieldType field )
 	{
-		register.put( LocalDateTime.now(), field );
+		register.put(  playerID, new Tuple< LocalDateTime, FieldType >( LocalDateTime.now(), field ) );
+	}
+	
+	public static synchronized void add( Set< Player > players, FieldType field )
+	{
+		for( Player player : players )
+		{
+			register.put(  player.getId(), new Tuple< LocalDateTime, FieldType >( LocalDateTime.now(), field ) );
+		}
 	}
 	
 	/**
 	 * @return the playerID
 	 */
-	public static int getPlayerID()
+	public static Set< Integer > getPlayerIDs()
 	{
-		return playerID;
+		return register.keySet();
 	}
 	
 	/**
@@ -108,14 +116,18 @@ public class GameStatistic
 		return startDateTime;
 	}
 		
-	public static ArrayTreeMap< LocalDateTime, FieldType > getRegister()
+	public Set< Integer > getRegisteredPlayerIDs()
 	{
-		return register;
+		return register.keySet();
+	}
+	
+	public static List< Tuple< LocalDateTime, FieldType > > getRegister( int playerID )
+	{
+		return register.get( playerID );
 	}
 	
 	public static void clearRegister()
 	{
-		playerID = Player.ANONYMOUS_PLAYER_ID;
 		startDateTime = null;
 		register.clear();
 	}

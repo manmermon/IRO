@@ -37,7 +37,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
 
 import GUI.panel.SettingPanel;
 import GUI.tabbedpanel.ClosableTabbedPanel;
@@ -285,7 +284,9 @@ public class MainAppUI extends JFrame
 							ConfigApp.removePlayerSetting( panel.getPlayer() );
 						}
 						
-						if( t.getTabCount() == 0 && !addingPlayers)
+						if( t.getTabCount() == 0 
+								&& !addingPlayers
+								&& ConfigApp.isTesting() )
 						{
 							ConfigApp.resetSettings();
 							for( Player player : ConfigApp.getPlayers() )

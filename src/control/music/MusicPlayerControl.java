@@ -213,6 +213,24 @@ public class MusicPlayerControl extends AbstractStoppableThread
 		}
 	}
 	
+	public void stopTrack( String trackID )
+	{
+		synchronized( this )
+		{
+			synchronized( this.sync )
+			{
+				try
+				{
+					this.iroPlayer.stopTrack( trackID );
+				} 
+				catch (Exception ex)
+				{
+					ex.printStackTrace();
+				}
+			}
+		}
+	}
+	
 	public void playTrack( String trackID )
 	{
 		synchronized( this )

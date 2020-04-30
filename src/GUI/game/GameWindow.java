@@ -13,16 +13,21 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import GUI.AppIcon;
 import GUI.GameManager;
 import GUI.action.keyActions;
 import GUI.game.component.ControllerTargetBar;
+import config.Player;
 import control.controller.ControllerManager;
 
 /**
@@ -38,15 +43,21 @@ public class GameWindow extends JFrame
 	private static final long serialVersionUID = 4360081921411943013L;
 	private JPanel contentPane;
 	private JPanel gamePanel;
-	private JPanel targetControllerPanel;
 	
-	private ControllerTargetBar targetControllerIndicator;
+	private Map< Player,  ControllerTargetBar > targetControllerIndicators;
 	
 	/**
 	 * Create the frame.
 	 */
-	public GameWindow()
+	public GameWindow( List< Player > players )
 	{
+		if( players == null || players.isEmpty() )
+		{
+			throw new IllegalArgumentException( "Player list is null or empty." );
+		}
+		
+		this.targetControllerIndicators = new HashMap<Player, ControllerTargetBar>();
+		
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize(); 
 		Insets ins = Toolkit.getDefaultToolkit().getScreenInsets( this.getGraphicsConfiguration() );
 		
@@ -61,7 +72,7 @@ public class GameWindow extends JFrame
 		
 		super.setResizable( false );
 		
-		super.setContentPane( this.getContainerPanel() );
+		super.setContentPane( this.getContainerPanel( players ) );
 		
 		super.setBounds( bounds );
 		
@@ -115,18 +126,66 @@ public class GameWindow extends JFrame
 		return r;
 	}
 	
-	private JPanel getContainerPanel()
+	private JPanel getContainerPanel( List< Player > players )
 	{
 		if( this.contentPane == null )
 		{
 			this.contentPane = new JPanel();
 			
 			this.contentPane = new JPanel();
-			//this.contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-			this.contentPane.setLayout(new BorderLayout(0, 0));
+			
+			this.contentPane.setLayout( new BorderLayout( 0, 0 ) );
+			
+			String[] distributions = new String[] { BorderLayout.SOUTH
+													, BorderLayout.NORTH
+													, BorderLayout.WEST
+													, BorderLayout.EAST };
 			
 			this.contentPane.add( this.getGamePanel(), BorderLayout.CENTER );
-			this.contentPane.add( this.getTargetControllerPanel(), BorderLayout.SOUTH );
+			
+			Map< String, JPanel > panelDistribution = new HashMap< String, JPanel >();
+			for( int i = 0; i < players.size(); i++ )
+			{
+				Player player = players.get( i );
+				
+				int index = i % distributions.length;
+				String dist = distributions[ index ];
+
+				ControllerTargetBar ctgb = getTargetControllerIndicator();
+				Dimension preSize = ctgb.getPreferredSize();			
+				int s = preSize.height;
+				
+				int axis = BoxLayout.X_AXIS;
+				
+				if( dist.equals( BorderLayout.WEST ) 
+						|| dist.equals( BorderLayout.EAST ) )
+				{
+					axis = BoxLayout.Y_AXIS;
+					
+					int aux = preSize.height;
+					preSize.height = preSize.width;
+					preSize.width = aux;
+				}
+
+				JLabel playerIco = new JLabel();
+				playerIco.setIcon( player.getImg( s, s ) );
+				
+				JPanel controllerPanel = panelDistribution.get( dist );
+				if( controllerPanel == null )
+				{
+					controllerPanel = new JPanel();
+					
+					controllerPanel.setLayout( new BoxLayout( controllerPanel, axis ) );
+					panelDistribution.put( dist, controllerPanel );
+					
+					this.contentPane.add( controllerPanel, dist );
+				}
+				
+				controllerPanel.add( playerIco );
+				controllerPanel.add( ctgb );
+				
+				this.targetControllerIndicators.put( player, ctgb );
+			}
 		}
 		
 		return this.contentPane;
@@ -141,37 +200,21 @@ public class GameWindow extends JFrame
 		
 		return this.gamePanel;
 	}
-	
-	private JPanel getTargetControllerPanel()
-	{
-		if( this.targetControllerPanel == null )
-		{
-			this.targetControllerPanel = new JPanel( new BorderLayout() );
-			
-			this.targetControllerPanel.add( this.getTargetControllerIndicator(), BorderLayout.CENTER );
-			
-		}
 		
-		return this.targetControllerPanel;
-	}
-	
 	private ControllerTargetBar getTargetControllerIndicator()
-	{
-		if( this.targetControllerIndicator == null )
-		{
-			this.targetControllerIndicator = new ControllerTargetBar( 0 );
-			Dimension d = this.targetControllerIndicator.getPreferredSize();
-			d.height *= 2;
+	{		
+		ControllerTargetBar targetControllerIndicator = new ControllerTargetBar( 0 );
+		Dimension d = targetControllerIndicator.getPreferredSize();
+		d.height *= 2;
 			
-			this.targetControllerIndicator.setPreferredSize( d );
-		}
+		targetControllerIndicator.setPreferredSize( d );		
 		
-		return this.targetControllerIndicator;
+		return targetControllerIndicator;
 	}	
 	
-	public void setTargetInputValues( double min, double max )
-	{	
-		ControllerTargetBar lpi = this.getTargetControllerIndicator();
+	public void setTargetInputValues( Player player, double min, double max )
+	{
+		ControllerTargetBar lpi = this.targetControllerIndicators.get( player );
 		
 		double distance = Math.abs( max - min ) / 4 ;
 		
@@ -184,6 +227,11 @@ public class GameWindow extends JFrame
 	
 	public void putControllerListener()
 	{
-		ControllerManager.getInstance().addControllerListener( this.getTargetControllerIndicator() );
+		for( Player player : this.targetControllerIndicators.keySet() )
+		{
+			ControllerTargetBar ctb = this.targetControllerIndicators.get( player );
+			
+			ControllerManager.getInstance().addControllerListener( player, ctb );
+		}
 	}
 }

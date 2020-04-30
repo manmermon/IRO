@@ -24,13 +24,13 @@ package GUI;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
 
 import GUI.game.GameWindow;
 import GUI.game.component.Frame;
@@ -39,6 +39,7 @@ import GUI.game.screen.level.LevelFactory;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.Player;
+import config.Settings;
 import control.ScreenControl;
 import control.controller.ControllerActionChecker;
 import control.controller.ControllerManager;
@@ -70,12 +71,7 @@ public class GameManager
 		
 		return manager;
 	}
-	
-	public void updateSetting()
-	{
-		MainAppUI.getInstance().loadSetting();
-	}
-	
+		
 	public void setGameFrame( Frame fr )
 	{
 		synchronized ( this.sync )
@@ -157,82 +153,130 @@ public class GameManager
 				this.gameWindow = null;
 			}
 		}		
-
-		ConfigParameter par = ConfigApp.getPlayerSetting( ConfigApp.SELECTED_CONTROLLER );
-		Object ctr = par.getSelectedValue();
-
-		if( ctr == null )
+		
+		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
+		
+		this.gameWindow = new GameWindow( players );
+		this.gameWindow.setIconImage( MainAppUI.getInstance().getIconImage() );
+		
+		ControllerMetadata[] controllers = new ControllerMetadata[ players.size() ];
+		
+		for( int i = 0; i < players.size(); i++ ) 
 		{
-			throw new ConfigParameterException( "Non controller selected." );
-		}
+			Player player = players.get( i );
+			
+			Settings setting = ConfigApp.getPlayerSetting( player );
+			ConfigParameter par = setting.getParameter( ConfigApp.SELECTED_CONTROLLER );
+			Object ctr = par.getSelectedValue();
 
-		ControllerMetadata meta = (ControllerMetadata)ctr;
-
-		LSL.StreamInfo[] streams = LSL.resolve_streams();
-
-		LSL.StreamInfo info = null;
-		for( LSL.StreamInfo str : streams )
-		{
-			if( str.uid().equals( meta.getControllerID() ) )
+			if( ctr != null )
 			{
-				info = str;
-				break;
+				controllers[ i ] = (ControllerMetadata)ctr;				
+			}
+		}
+		
+		for( int i = 0; i < players.size(); i++ ) 
+		{
+			if( controllers[ i ] == null )
+			{
+				throw new ConfigParameterException( "Player " + players.get( i ).getName() 
+													+ ": controller non found." );
 			}
 		}
 
-		if( info == null )
+		LSL.StreamInfo[] streams = LSL.resolve_streams();
+		LSL.StreamInfo[] lslInfos = new LSL.StreamInfo[ controllers.length ];
+		for( int i = 0; i < controllers.length; i++ )
+		{			
+			ControllerMetadata meta = controllers[ i ];
+			
+			checkLSLInfo:
+			for( LSL.StreamInfo str : streams )
+			{
+				if( str.uid().equals( meta.getControllerID() ) )
+				{
+					lslInfos[ i ] = str;
+					break checkLSLInfo;
+				}
+			}
+		}
+
+		for( int i = 0; i < lslInfos.length; i++ )
 		{
-			throw new IOException( "Controller not found." );
+			LSL.StreamInfo info = lslInfos[ i ];
+			
+			if( info == null )
+			{
+				throw new IOException( "Player " + players.get( i ).getName() + ": controller not found." );
+			}
 		}
 
 		try
 		{
-			par = ConfigApp.getPlayerSetting( ConfigApp.PLAYER );
-			Object player = par.getSelectedValue();
-			int playerID = Player.ANONYMOUS_PLAYER_ID;
-			if( player != null )
-			{
-				playerID = ((Player)player).getId();
-			}
-					
-			GameStatistic.setPlayerID( playerID );
+			List< ControllerMetadata > ctrs = new ArrayList<ControllerMetadata>();
 			
-			this.gameWindow = new GameWindow();
-			this.gameWindow.setIconImage( MainAppUI.getInstance().getIconImage() );
+			for( int i = 0; i < players.size(); i++ )
+			{
+				//
+				// REACTION TIMES
+				//
 				
-			par = ConfigApp.getPlayerSetting( ConfigApp.INPUT_MIN_VALUE );
-			double min = ((Number)par.getSelectedValue()).doubleValue();
-	
-			par = ConfigApp.getPlayerSetting( ConfigApp.INPUT_MAX_VALUE);
-			double max = ((Number)par.getSelectedValue()).doubleValue();
-			
-			par = ConfigApp.getPlayerSetting( ConfigApp.TIME_IN_INPUT_TARGET);
-			double timeTarget = ((Number)par.getSelectedValue()).doubleValue();
-			
-			par = ConfigApp.getPlayerSetting( ConfigApp.REACTION_TIME );
-			double actionTime = ((Number)par.getSelectedValue()).doubleValue();
-	
-			par = ConfigApp.getPlayerSetting( ConfigApp.RECOVER_TIME );
-			double recoverTime = ((Number)par.getSelectedValue()).doubleValue();
-			
-			par = ConfigApp.getPlayerSetting( ConfigApp.INPUT_SELECTED_CHANNEL );
-			Object channel = par.getSelectedValue();
-			
-			if(  channel == null )
-			{
-				throw new ConfigParameterException( "Non input channel selected." );
+				Player player = players.get( i );
+				
+				Settings setting = ConfigApp.getPlayerSetting( player);
+				
+				//
+				// CONTROLLER
+				//
+				
+				ControllerMetadata cmeta = controllers[ i ];
+				
+				ConfigParameter par = setting.getParameter( ConfigApp.INPUT_MIN_VALUE );
+				double min = ((Number)par.getSelectedValue()).doubleValue();
+		
+				par = setting.getParameter( ConfigApp.INPUT_MAX_VALUE);
+				double max = ((Number)par.getSelectedValue()).doubleValue();
+				
+				par = setting.getParameter( ConfigApp.TIME_IN_INPUT_TARGET);
+				double timeTarget = ((Number)par.getSelectedValue()).doubleValue();
+				
+				par = setting.getParameter( ConfigApp.INPUT_SELECTED_CHANNEL );
+				int ch = ((Number)par.getSelectedValue()).intValue() - 1;
+				
+				if( ch < 0 || ch >= cmeta.getNumberOfChannels() )
+				{
+					throw new ConfigParameterException( "Selected channel out of controller's bounds [0, " + (cmeta.getNumberOfChannels() - 1 ) + "]."  );
+				}
+
+				cmeta.setPlayer( player );
+				cmeta.setRecoverInputLevel( min );
+				cmeta.setTargetTimeInLevelAction( timeTarget );
+				cmeta.setActionInputLevel( new NumberRange( max, Double.POSITIVE_INFINITY ));
+				
+				this.gameWindow.setTargetInputValues( player, min, max);
+				
+				ctrs.add( cmeta );
 			}
 			
-			int ch = ((Number)channel).intValue() - 1;
-			
-			if( ch < 0 || ch >= info.channel_count() )
+			ControllerManager.getInstance().startController( ctrs );
+			for( ControllerMetadata cmeta : ctrs )
 			{
-				throw new ConfigParameterException( "Selected channel out of controller's bounds [0, " + (info.channel_count() - 1 ) + "]."  );
+				NumberRange rng = new NumberRange( cmeta.getRecoverInputLevel(), cmeta.getActionInputLevel().getMin() );
+				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
+																				, rng, cmeta.getTargetTimeInLevelAction( ) );
+				ControllerManager.getInstance().addControllerListener( cmeta.getPlayer(), actCheck );
+				actCheck.addInputActionListerner( ScreenControl.getInstance() );
 			}
 			
-			par = ConfigApp.getPlayerSetting( ConfigApp.SONG_LIST );
-			Object songList = par.getSelectedValue();
+			this.gameWindow.putControllerListener();
 			
+			
+			
+			Player firstPlayer = ConfigApp.getFirstPlayer();
+			
+			Settings setplayer = ConfigApp.getPlayerSetting( firstPlayer );
+			ConfigParameter par = setplayer.getParameter( ConfigApp.SONG_LIST );
+			Object songList = par.getSelectedValue();			
 			if( songList == null )
 			{
 				throw new ConfigParameterException( "Non songs selected." );
@@ -244,8 +288,6 @@ public class GameManager
 			{
 				throw new ConfigParameterException( "Non songs selected." );
 			}
-			
-			this.gameWindow.setTargetInputValues(min, max);
 	
 			this.fullScreen( false );		
 	
@@ -255,18 +297,16 @@ public class GameManager
 			
 			this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() + ": " + fileSong.getName() );
 			
-			Level level = LevelFactory.getLevel( fileSong, screenBounds, actionTime, recoverTime );
+			List< Settings > settings = new ArrayList<Settings>();
+			for( Player player : ConfigApp.getPlayers() )
+			{
+				settings.add( ConfigApp.getPlayerSetting( player ) );
+			}
+			
+			Level level = LevelFactory.getLevel( fileSong, screenBounds, settings );
 	
 			ScreenControl.getInstance().setScene( level );
 	
-			ControllerManager.getInstance().startController( info );
-	
-			ControllerActionChecker actCheck = new ControllerActionChecker( ch, new NumberRange( min, max ), timeTarget );
-			ControllerManager.getInstance().addControllerListener( actCheck );
-			actCheck.addInputActionListerner( ScreenControl.getInstance() );
-			
-			this.gameWindow.putControllerListener();
-			
 			MainAppUI.getInstance().setVisible( false );
 			
 			this.gameWindow.setVisible( true );

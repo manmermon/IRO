@@ -38,7 +38,7 @@ import org.staccato.StaccatoParser;
  * This Player uses a ManagedPlayer but does not expose any of the ManagedPlayer's 
  * ability to be managed. 
  */
-public class PlayerMod 
+public class PlayerMod  
 {
 	private StaccatoParser staccatoParser;
 	private MidiParserListener midiParserListener;
@@ -135,7 +135,7 @@ public class PlayerMod
 				PlayerMod.this.play( );
 			}
 		};
-		
+		thread.setName( this.getClass().getSimpleName() + "-" + thread.getId() );		
 		thread.start();
 	}
 	
@@ -143,7 +143,7 @@ public class PlayerMod
 	 * Returns the ManagedPlayer behind this Player. You can start, pause, stop, resume, and seek a ManagedPlayer.
 	 * @see ManagedPlayer
 	 */
-	public ManagedPlayer getManagedPlayer() 
+	public ManagedPlayerMod2 getManagedPlayer() 
 	{
 		return this.managedPlayer;
 	}

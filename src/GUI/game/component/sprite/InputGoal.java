@@ -8,6 +8,8 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
+import GUI.game.component.IPossessable;
+import config.IOwner;
 import image.basicPainter2D;
 import image.icon.GeneralAppIcon;
 
@@ -15,7 +17,7 @@ import image.icon.GeneralAppIcon;
  * @author manuel
  *
  */
-public class InputGoal extends AbstractSprite
+public class InputGoal extends AbstractSprite implements IPossessable
 {
 
 	private Double percentage = 0D;
@@ -30,6 +32,7 @@ public class InputGoal extends AbstractSprite
 	
 	private BufferedImage reachedTarget = null;
 	
+	private IOwner _player;
 	
 	/**
 	 * 
@@ -130,6 +133,24 @@ public class InputGoal extends AbstractSprite
 				this.isSetStartTime = false;
 			}
 		}
+	}
+
+	/*(non-Javadoc)
+	 * @see @see GUI.game.component.IPossessable#setOwner(config.IOwner)
+	 */
+	@Override
+	public void setOwner(IOwner owner)
+	{
+		this._player = owner;
+	}
+
+	/*(non-Javadoc)
+	 * @see @see GUI.game.component.IPossessable#getOwner()
+	 */
+	@Override
+	public IOwner getOwner()
+	{
+		return this._player;
 	}
 	
 }

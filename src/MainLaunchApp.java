@@ -111,21 +111,23 @@ public class MainLaunchApp
 		
 		Dimension openDim = new Dimension( 500, 200 );
 		
-		MainAppUI ui = MainAppUI.getInstance();
-		
 		Toolkit t = Toolkit.getDefaultToolkit();
 		Dimension dm = t.getScreenSize();
-		Insets pad = t.getScreenInsets( ui.getGraphicsConfiguration() );
 		
 		OpeningDialog open = new OpeningDialog( openDim 
 												,  AppIcon.appIcon( 128 )
 												, ConfigApp.shortNameApp
 												, "<html><center><h1>Opening " + ConfigApp.fullNameApp + ".<br>Wait please...</h1></center></html>" 
 												, Color.WHITE );
-		open.setVisible( false );
+		
 		open.setDefaultCloseOperation( OpeningDialog.DISPOSE_ON_CLOSE );
 				
 		open.setLocation( dm.width / 2 - openDim.width / 2, dm.height / 2 - openDim.height / 2 );
+		open.setVisible( true );
+		
+		MainAppUI ui = MainAppUI.getInstance();		
+
+		Insets pad = t.getScreenInsets( ui.getGraphicsConfiguration() );
 		
 		ui.setIconImage( AppIcon.appIcon( 128 ) );
 		ui.setTitle(  ConfigApp.fullNameApp + " - " + ConfigApp.shortNameApp );

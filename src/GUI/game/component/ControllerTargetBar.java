@@ -9,9 +9,6 @@ import java.awt.Color;
 import javax.swing.JPanel;
 
 import GUI.progressbar.LevelProgressIndicator;
-import GUI.progressbar.TwoWayProgressBar;
-import config.ConfigApp;
-import config.ConfigParameter;
 import control.events.IInputControllerListener;
 
 /**
