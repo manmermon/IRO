@@ -276,7 +276,7 @@ public class SelectLevelImagePanel extends JPanel
 				tr.addNote( 0, new Note( n + "" ) );
 				notes.add( tr );
 				MusicNoteGroup noteSprite3 = new MusicNoteGroup( "Test3"
-																, 0				
+																, 0
 																, notes
 																, IScene.NOTE_ID
 																, pen

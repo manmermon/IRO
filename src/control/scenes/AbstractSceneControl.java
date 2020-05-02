@@ -121,7 +121,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 			this.scene.updateLevel();
 			this.setFrame( this.scene.getScene() );
 			
-			this.updatedLoopAfterSetScene();
+			this.updatedLoopAfterUpdateScene();
 			//*/
 		}		
 	}
@@ -348,7 +348,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 	/**
 	 * 
 	 */
-	protected abstract void updatedLoopAfterSetScene();
+	protected abstract void updatedLoopAfterUpdateScene();
 	
 	/**
 	 * 

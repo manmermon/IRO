@@ -32,6 +32,8 @@ public class Score extends AbstractSprite implements IPossessable
 	
 	private Image playerPic = null;
 	
+	private final String scoreFormat = "%06d";
+
 	/**
 	 * 
 	 */
@@ -67,6 +69,7 @@ public class Score extends AbstractSprite implements IPossessable
 		super.screenLoc.x = loc.x + fm.stringWidth( "0" ) / 2;
 		super.screenLoc.y = loc.y + h / 8;
 		
+		super.spriteSize.width = fm.stringWidth( String.format( this.scoreFormat,  this.score ) );
 		
 		this.fontmetrics = fm;
 	}
@@ -88,11 +91,11 @@ public class Score extends AbstractSprite implements IPossessable
 		Color border = Color.RED;
 		Color fill = Color.ORANGE;
 		
-		String txt = String.format( "%06d", this.score );
+		String txt = String.format( this.scoreFormat, this.score );
 		BufferedImage sprite = (BufferedImage)basicPainter2D.text( txt, this.fontmetrics
-													, border
-													, fill
-													, null );
+																	, border
+																	, fill
+																	, null );
 		
 		
 		if( this._player != null && this.playerPic == null )
@@ -131,7 +134,17 @@ public class Score extends AbstractSprite implements IPossessable
 	@Override
 	public void setOwner( IOwner owner )
 	{
+		if( this._player != null && this._player.getOwnerImage() != null )
+		{
+			super.spriteSize.width -= this._player.getOwnerImage().getWidth( null );
+		}
+				
 		this._player = owner;
+		
+		if( this._player != null && this._player.getOwnerImage() != null )
+		{
+			super.spriteSize.width += this._player.getOwnerImage().getWidth( null );
+		}
 	}
 
 	/*(non-Javadoc)

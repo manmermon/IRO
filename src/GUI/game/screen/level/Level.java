@@ -37,17 +37,24 @@ public class Level extends Scene
 	private int BPM;
 	
 	private BackgroundMusic backgroundMusic;
+	private List< BackgroundMusic > playerMusic;
 	
 	public Level( Dimension sceneSize ) 
 	{
 		super( sceneSize );
 		
+		this.playerMusic = new ArrayList<BackgroundMusic>();
 		this.BPM = MidiDefaults.DEFAULT_TEMPO_BEATS_PER_MINUTE;
 	}
 
 	public void setBackgroundPattern( BackgroundMusic backgroundPattern ) 
 	{
 		this.backgroundMusic = backgroundPattern;
+	}
+	
+	public void setPlayerSheetMusic( List< BackgroundMusic > playerSheets )
+	{
+		this.playerMusic.addAll( playerSheets );
 	}
 	
 	public BackgroundMusic getBackgroundPattern() 

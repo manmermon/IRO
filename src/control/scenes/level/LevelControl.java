@@ -22,7 +22,9 @@
 package control.scenes.level;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import GUI.game.component.sprite.Fret;
@@ -50,7 +52,7 @@ public class LevelControl extends AbstractSceneControl
 	private boolean backgroundMusicEnd = false;
 	
 	private boolean noteIntoFret = false;
-	
+		
 	/**
 	 * @throws SceneException 
 	 * 
@@ -85,7 +87,7 @@ public class LevelControl extends AbstractSceneControl
 	protected void preStart() throws Exception 
 	{
 		super.preStart();
-		
+				
 		if( super.scene != null )
 		{	
 			MusicPlayerControl.getInstance().setBackgroundMusicPatter( (((Level)this.scene).getBackgroundPattern() ) );
@@ -114,7 +116,7 @@ public class LevelControl extends AbstractSceneControl
 	 * @see @see control.scenes.AbstractSceneControl#updatedLoopAfterSetScene()
 	 */
 	@Override
-	protected void updatedLoopAfterSetScene() 
+	protected void updatedLoopAfterUpdateScene() 
 	{		
 		List< ISprite > FRET = this.scene.getSprites( IScene.FRET_ID, true );
 		List< ISprite > Notes = this.scene.getSprites( IScene.NOTE_ID, true );
@@ -130,6 +132,7 @@ public class LevelControl extends AbstractSceneControl
 
 			boolean noteInFret = false;
 			
+			Map< String, Double > nt = new HashMap<String, Double>();
 			for( ISprite __Note : Notes )
 			{
 				MusicNoteGroup note = (MusicNoteGroup) __Note;
@@ -168,9 +171,13 @@ public class LevelControl extends AbstractSceneControl
 
 					if( note.isSelected() && !note.isPlayed() )
 					{
+						// TODO
+						/*
 						note.setPlayed( true );
 						
-						noteTracks.add( note.getTrackID() );							
+						nt.put( note.getTrackID(), note.getSheetTime() );
+						noteTracks.add( note.getTrackID() );
+						*/							
 					}
 				}					
 			}
@@ -182,8 +189,13 @@ public class LevelControl extends AbstractSceneControl
 			if( !noteTracks.isEmpty() )
 			{	
 				try
-				{
+				{	
 					MusicPlayerControl.getInstance().playTracks( noteTracks );
+					double t = MusicPlayerControl.getInstance().getBackgroundMusicTime();
+					for( String s : noteTracks )
+					{
+						System.out.println("LevelControl.updatedLoopAfterSetScene()  backMusicTime " + t + " - note time (" + s +"): " + nt.get( s ) );
+					}
 				} 
 				catch (Exception ex)
 				{

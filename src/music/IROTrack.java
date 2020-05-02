@@ -53,6 +53,26 @@ public class IROTrack
 		
 	}
 	
+	public boolean isRestTrack()
+	{
+		boolean rest = true;
+		
+		loopNotes:
+		for( List< Note > Notes : this.notes.values() )
+		{
+			for( Note note : Notes )
+			{
+				rest = note.isRest();
+				if( !rest )
+				{
+					break loopNotes;
+				}
+			}
+		}
+		
+		return rest;
+	}
+	
 	/*
 	public void setStartTrackTimeInSheet( double initTrackTime )
 	{

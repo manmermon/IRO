@@ -77,6 +77,16 @@ public class testReadMidi
 		for (Track track : MidiSystem.getSequence( midiMusicSheelFile ).getTracks() )  
 		{   
 			System.out.println("Track " + trackNumber + ": size = " + track.size() + ", ticks = " +track.ticks() );
+			for( int i = 0; i < track.size(); i++ )
+			{
+				System.out.println( "-> " + track.get( i ).getMessage());
+			}
+			System.out.println();
+		}
+		
+		for (Track track : MidiSystem.getSequence( midiMusicSheelFile ).getTracks() )  
+		{   
+			System.out.println("Track " + trackNumber + ": size = " + track.size() + ", ticks = " +track.ticks() );
 			System.out.println();
 			
 			ArrayTreeMap< Integer, MidiEvent > eventsByChannel = new ArrayTreeMap< Integer, MidiEvent >();

@@ -12,7 +12,7 @@ import music.IROTrack;
 public class LevelMusicSheetSegment 
 {
 	private ArrayTreeMap< NumberRange, IROTrack > segments;
-
+	
 	public LevelMusicSheetSegment() 
 	{
 		this.segments = new ArrayTreeMap< NumberRange, IROTrack >();
@@ -96,6 +96,16 @@ public class LevelMusicSheetSegment
 			NumberRange timeRng = this.getTimeSegment( time );
 			track = new IROTrack( trackID );
 			
+			NumberRange r =  this.segments.getFirstKey();
+			if( r != null )
+			{
+				List< IROTrack > refTrack = this.segments.get( r );
+				if( refTrack != null && !refTrack.isEmpty() )
+				{
+					track.setTempo( refTrack.get( 0 ).getTempo() );
+				}
+			}
+			
 			track.setVoice( this.segments.get( timeRng ).size() );
 			
 			this.segments.put( timeRng, track );
@@ -129,6 +139,23 @@ public class LevelMusicSheetSegment
 		}
 		
 		return first;
+	}
+	
+	public List< String > getFirstTracks()
+	{
+		List< String > tracks = new ArrayList<String>();
+		
+		NumberRange firstKey = this.segments.getFirstKey();
+		if( firstKey != null )
+		{
+			List< IROTrack > trackList = this.segments.get( firstKey );
+			for( IROTrack tr : trackList )
+			{
+				tracks.add( tr.getID() );
+			}
+		}
+		
+		return tracks;
 	}
 	
 	public ArrayTreeMap<NumberRange, IROTrack> getSegments() 

@@ -6,6 +6,7 @@ package GUI.game.component.sprite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 import GUI.game.component.IPossessable;
@@ -41,16 +42,28 @@ public class InputGoal extends AbstractSprite implements IPossessable
 	{
 		super( id );
 		
-		super.spriteSize = new Dimension( pen.getRailHeight(), pen.getRailHeight() ); 
+		this.setSize( new Dimension( pen.getRailHeight(), pen.getRailHeight() ) ); 
 		double centerX = pen.getScreenLocation().x + pen.getPentragramWidth() / 2;
 		
-		super.screenLoc.x = centerX - super.spriteSize.width / 2;
-		super.screenLoc.y = pen.getScreenLocation().y + pen.getRailHeight() / 2;
+		this.setScreenLocation(new Point2D.Double( centerX - super.spriteSize.width / 2
+													, pen.getScreenLocation().y + pen.getRailHeight() / 2 ) );
+
+		
+	}
+	
+	/*(non-Javadoc)
+	 * @see @see GUI.game.component.sprite.AbstractSprite#setSize(java.awt.Dimension)
+	 */
+	@Override
+	public void setSize(Dimension size)
+	{
+		// TODO Auto-generated method stub
+		super.setSize(size);
 		
 		this.reachedTarget = (BufferedImage)basicPainter2D.circle( 0, 0
-																	, super.spriteSize.width
-																	, Color.WHITE, null );
-
+																, super.spriteSize.width
+																, Color.WHITE, null );
+		
 		basicPainter2D.composeImage( this.reachedTarget, 0, 0 
 									, GeneralAppIcon.Correct()
 												.getImage()

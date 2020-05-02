@@ -2,10 +2,8 @@ package tools;
 
 import java.util.List;
 
-import org.jfugue.midi.MidiDefaults;
 import org.jfugue.midi.MidiDictionary;
 import org.jfugue.pattern.Pattern;
-import org.jfugue.theory.Chord;
 import org.jfugue.theory.Note;
 
 import general.ArrayTreeMap;

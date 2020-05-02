@@ -25,6 +25,8 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	
 	private EventListenerList listenerList;
 	
+	private Object lock = new Object();
+	
 	public BackgroundMusic() 
 	{
 		super.setName( this.getClass().getSimpleName() );
@@ -70,12 +72,29 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 		{
 			if( this.player != null )
 			{
-				try
+				synchronized ( this.lock )
 				{
-					this.player.getManagedPlayer().finish();
-				}
-				catch (Exception ex) 
-				{
+					final PlayerMod playerCopy = player;
+					
+					Thread t = new Thread()
+					{
+						/*(non-Javadoc)
+						 * @see @see java.lang.Thread#run()
+						 */
+						@Override
+						public void run()
+						{
+							try
+							{
+								playerCopy.getManagedPlayer().finish();
+							}
+							catch (Exception ex)
+							{
+							}
+						}
+					};
+					t.setName( "backgroundMusic.postStopThread.player.getManagedPlayer.finish" );
+					t.start();
 				}
 			}
 		}
@@ -90,9 +109,9 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 			{
 				this.wait( (long)( 1000L * this.delay ) );
 			}
-			
-			this.fireSceneEvent( BackgroundMusicEvent.START );						
+									
 			this.player.play( );
+			this.fireSceneEvent( BackgroundMusicEvent.START );
 			
 			//this.fireSceneEvent( BackgroundMusicEvent.END );
 			//*/
@@ -101,6 +120,23 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 		}
 	}
 	
+	public double getCurrentMusicPosition()
+	{
+		long microsec  = 0;
+		synchronized ( this.lock )
+		{
+			try
+			{
+				microsec = this.player.getManagedPlayer().getMicrosecondPosition();
+			} catch (NullPointerException ex)
+			{
+			}
+			
+		}		
+		
+		return microsec / 1e6D;
+	}
+		
 	@Override
 	protected void runExceptionManager(Exception e) 
 	{
@@ -125,8 +161,27 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	{
 		super.cleanUp();
 		
-		this.player.getManagedPlayer().finish();
-		this.player = null;		
+		synchronized ( this.lock )
+		{
+			final PlayerMod playercopy = this.player;
+			this.player = null;
+			
+			Thread t = new Thread()
+			{
+				/*(non-Javadoc)
+				 * @see @see stoppableThread.AbstractStoppableThread#run()
+				 */
+				@Override
+				public synchronized void run()
+				{
+					playercopy.getManagedPlayer().finish();
+				}
+			};
+			
+			t.setName( "Background.player.getManagedPlayer.finish" );
+			
+			t.start();
+		}		
 	}
 	
 	public void addBackgroundMusicEventListener( BackgroundMusicEventListener listener) 
@@ -179,8 +234,6 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	@Override
 	public void onPaused()
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	/*(non-Javadoc)
@@ -188,9 +241,7 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	 */
 	@Override
 	public void onResumed()
-	{
-		// TODO Auto-generated method stub
-		
+	{	
 	}
 
 	/*(non-Javadoc)
@@ -199,8 +250,6 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	@Override
 	public void onSeek(long tick)
 	{
-		// TODO Auto-generated method stub
-		
 	}
 
 	/*(non-Javadoc)
@@ -209,7 +258,5 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	@Override
 	public void onReset()
 	{
-		// TODO Auto-generated method stub
-		
 	}
 }

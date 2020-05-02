@@ -29,6 +29,8 @@ import java.util.logging.Logger;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.Track;
 
 /**
  * This is player that can be "managed" - e.g., started, stopped, paused, resumed, seeked, and finished.
@@ -108,6 +110,36 @@ public class ManagedPlayerMod2 implements EndOfTrackListener
 		common.getSequencer().start();
 	}
 	
+	public int getNumberOfTracks()
+	{
+		Sequencer sequencer = common.getSequencer();
+		return sequencer.getSequence().getTracks().length;
+	}
+	
+	public Track[] getTracks()
+	{
+		Sequencer sequencer = common.getSequencer();
+		return sequencer.getSequence().getTracks();
+	}
+	
+	public boolean muteTrack( int t, boolean mute )
+	{
+		boolean ok = true;
+		int iT = t;
+		int end = iT + 1;
+		if( t < 0 )
+		{
+			iT = 0;
+			end = this.getNumberOfTracks();
+		}
+		
+		for( ; iT < end ; iT++ )
+		{
+			common.getSequencer().setTrackMute( iT, mute );
+			ok = ok && common.getSequencer().getTrackMute( iT );
+		}
+		return ok;
+	}
 	
     /**
      * To resume play, @see resume()
@@ -160,6 +192,16 @@ public class ManagedPlayerMod2 implements EndOfTrackListener
     public long getTickPosition() 
     {
     	return common.getSequencer().getTickPosition();
+    }
+    
+    public long getMicrosecondPosition()
+    {
+    	return common.getSequencer().getMicrosecondPosition();
+    }
+    
+    public long getMicrosecondLength()
+    {
+    	return common.getSequencer().getMicrosecondLength();
     }
 
 	public boolean isStarted() 

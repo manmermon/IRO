@@ -9,10 +9,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -37,6 +37,7 @@ import config.ConfigParameter;
 import config.Settings;
 import general.ArrayTreeMap;
 import general.NumberRange;
+import general.Tuple;
 import image.basicPainter2D;
 import io.IROMusicParserListener;
 import music.MusicSheet;
@@ -61,6 +62,684 @@ public class LevelFactory
 		return makeLevel( music, screenBounds, playerTimes );
 	}
 
+
+	private static Level makeLevel( MusicSheet music
+								, Rectangle screenBounds
+								, List< Settings > playerSettings )
+	{
+		Level lv = null;
+		if( music != null && music.getNumberOfTracks() > 0 )
+		{
+			Dimension screenSize = screenBounds.getSize();
+
+			int tempo = music.getTempo();
+
+			lv = new Level( screenSize );
+			lv.setBPM( tempo );
+
+
+			//
+			//
+			// IMAGES
+			//
+			//
+
+			Settings cfg = ConfigApp.getSettings().iterator().next();
+
+			ConfigParameter par = cfg.getParameter( ConfigApp.BACKGROUND_IMAGE );
+			Object bg = par.getSelectedValue();
+			String path = null;
+			if( bg != null )
+			{
+				path = bg.toString();
+			}
+
+			Background back = new Background( screenSize, IScene.BACKGROUND_ID );
+			back.setZIndex( -1 );
+			lv.addBackgroud( back );
+			if( path != null )
+			{
+				try
+				{
+					Image img = ImageIO.read( new File( path ) );
+
+					img = img.getScaledInstance( back.getBounds().width
+							, back.getBounds().height
+							, Image.SCALE_SMOOTH );
+
+					back.setImage( (BufferedImage)basicPainter2D.copyImage( img ) );
+				}
+				catch (IOException ex)
+				{	
+				}
+			}		
+
+
+			Pentragram pen = new Pentragram( screenSize, IScene.PENTRAGRAM_ID );
+			pen.setZIndex( 0 );
+			lv.addPentagram( pen );
+
+			Fret fret = new Fret( pen, IScene.FRET_ID );
+			fret.setZIndex( 2 );
+			Point2D.Double loc = new Point2D.Double();
+			loc.x = lv.getSize().width / 2;
+			loc.y = 0;
+			fret.setScreenLocation( loc );
+			lv.addFret( fret );
+
+			int wayWidth = ( screenSize.width - (int)fret.getScreenLocation().x );
+			
+			//
+			//
+			// NOTES
+			//
+			//
+
+			final double timeQuarter = 60D / tempo;
+			final double timeWhole = 4 * timeQuarter;
+
+			Pattern backgroundPattern = new Pattern();
+			backgroundPattern.setTempo( tempo );			
+
+			//
+			//
+			// Music sheet segmentation 
+			//
+			//
+			
+			Set< NumberRange > times = new TreeSet< NumberRange >();
+			double musicDuration = 0;		
+			for( IROTrack track : music.getTracks() )
+			{
+				ArrayTreeMap< Double, Note > NOTES = track.getTrackNotes();
+
+				for( Double noteTrackTime : NOTES.keySet() )
+				{
+					List< Note > Notes = NOTES.get( noteTrackTime );
+
+					Iterator< Note > itNotes = Notes.iterator();
+
+					double maxNoteDur = 0;
+					boolean isRestNote = false; 
+					while( itNotes.hasNext() )
+					{
+						Note note = itNotes.next();		
+						
+						isRestNote = note.isRest() | isRestNote;
+					
+						if( maxNoteDur < note.getDuration() )
+						{
+							maxNoteDur = note.getDuration();
+						}
+					}
+					
+					NumberRange rng = new NumberRange( noteTrackTime * timeWhole, ( noteTrackTime + maxNoteDur ) * timeWhole );
+					
+					if( !isRestNote )
+					{
+						times.add( rng );
+					}
+
+					if( rng.getMax() > musicDuration )
+					{
+						musicDuration = rng.getMax();
+					}
+				}
+			}
+
+			//
+			//
+			// Player-Segment
+			//
+			//
+			
+			if( playerSettings != null && !playerSettings.isEmpty() )
+			{	
+				int numberOfPlayers = playerSettings.size();
+				
+				LevelMusicSheetSegment[] musicPlayers = new LevelMusicSheetSegment[ numberOfPlayers ];
+				
+				for( int i = 0; i < musicPlayers.length; i++ )
+				{
+					musicPlayers[ i ] = new LevelMusicSheetSegment();
+				}
+
+				int player = 0;
+				NumberRange crng = null;				
+				double initTrackTime = 0;
+				HashMap< Integer, NumberRange > currentTimeRange = new HashMap<Integer, NumberRange>();
+				int[] noteLocation = new int[ numberOfPlayers ];
+				boolean added = false;
+				NumberRange r = null;
+				boolean getNext = true;
+				List< NumberRange > timeListCopy = new ArrayList<NumberRange>( times );
+				boolean[] assignedNotes = new boolean[ timeListCopy.size() ];
+				
+				//
+				//
+				// Set Player-Segment
+				//
+				//
+				
+				setNotes:
+				while( true )
+				{	
+					int indexNote = noteLocation[ player ];
+					
+					if( getNext )
+					{	
+						do
+						{
+							indexNote = noteLocation[ player ];
+							noteLocation[ player ]++;
+						}
+						while( indexNote < assignedNotes.length 
+								&& assignedNotes[ indexNote ] );
+						
+						if( indexNote < timeListCopy.size() )
+						{
+							r = timeListCopy.get( indexNote );
+						}
+						else
+						{
+							r = null;
+						}
+					}
+					
+					getNext = true;
+					
+					if( r != null )
+					{
+						if( r.getMin() >= initTrackTime )
+						{
+							if( crng == null )
+							{
+								crng = new NumberRange( initTrackTime, r.getMin() + MIN_PLAYER_NOTE_TRACK );
+								currentTimeRange.put( player, crng );
+							}
+							
+							if( !added )
+							{
+								if( crng.within( r.getMin() ) )
+								{
+									added = true;
+									assignedNotes[ indexNote ] = true;
+									musicPlayers[ player  ].addNewSegments( new NumberRange( crng.getMin() / timeWhole
+																								, crng.getMax() / timeWhole ) );
+								}
+								
+								if( !added )
+								{
+									if( r.getMax() > crng.getMax() )
+									{
+										crng = new NumberRange( crng.getMax(), r.getMax() + MIN_PLAYER_NOTE_TRACK );
+										currentTimeRange.put( player, crng );
+									}
+							 
+									if( crng.within( r.getMin() ) )
+									{
+										added = true;
+										musicPlayers[ player  ].addNewSegments( new NumberRange( crng.getMin() / timeWhole
+																									, crng.getMax() / timeWhole ) );
+									}
+								}							
+	
+								r = null;
+							}
+							else if( r.getMin() > crng.getMax() )
+							{
+								added = false;
+								getNext = false;
+								player++;
+								initTrackTime = crng.getMax();
+								crng = null;
+									
+								if( player >= numberOfPlayers )
+								{
+									player = 0;								
+								}
+									
+								NumberRange ctr = currentTimeRange.get( player );
+								Settings playerSetting = playerSettings.get( player );
+								
+								double reactionTime = ((Number)playerSetting.getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
+								double recoverTime = ((Number)playerSetting.getParameter( ConfigApp.RECOVER_TIME ).getSelectedValue()).doubleValue();
+								if( ctr != null 
+										&&
+										( ctr.getMax() 
+												+ reactionTime 
+												+ recoverTime 
+												- MIN_PLAYER_NOTE_TRACK ) > initTrackTime ) 
+								{
+									initTrackTime = ctr.getMax() + recoverTime + reactionTime - MIN_PLAYER_NOTE_TRACK;
+								}							
+							}
+							else
+							{
+								assignedNotes[ indexNote ] = true;
+							}
+						}
+					}
+					else
+					{						
+						boolean end = false;
+						for( int index : noteLocation )
+						{
+							end = end | ( index >= timeListCopy.size() ) ;
+						}
+						
+						if( end )
+						{
+							break setNotes;
+						}
+					}
+				}
+				
+				ArrayTreeMap< Integer, Tuple< String, NumberRange > > playerSheetRests = new ArrayTreeMap<Integer, Tuple< String, NumberRange> >();
+				
+				for( IROTrack track : music.getTracks() )
+				{
+					ArrayTreeMap< Double, Note > NOTES = track.getTrackNotes();
+					ArrayTreeMap< Double, Note > copyNotes = new ArrayTreeMap< Double, Note >( );
+					copyNotes.putAll( NOTES );
+
+					if( NOTES != null && NOTES.size() > 0 )
+					{
+						for( Double noteTrackTime : NOTES.keySet() )
+						{
+							List< Note > Notes = NOTES.get( noteTrackTime );
+
+							if( !Notes.isEmpty() )
+							{
+								double maxNoteDur = 0;
+
+								Iterator< Note > itNotes = Notes.iterator();
+
+								boolean isRest = true;
+								
+								while( itNotes.hasNext() )
+								{
+									Note note = itNotes.next();
+									
+									isRest = isRest && note.isRest();
+
+									if( maxNoteDur < note.getDuration() )
+									{
+										maxNoteDur = note.getDuration();
+									}
+								}
+								
+								for( int iplayer = 0; iplayer < musicPlayers.length; iplayer++ )
+								{
+									LevelMusicSheetSegment msplayer  = musicPlayers[ iplayer ];
+									
+									if( !isRest && msplayer.existMusicSegmentInTime( noteTrackTime ) )
+									{							
+										msplayer.addNewTrack( noteTrackTime, track.getID() );
+	
+										msplayer.addNotes( noteTrackTime, track.getID(), Notes );
+	
+										Note restNote = Note.createRest( maxNoteDur );
+										
+										copyNotes.remove( noteTrackTime );
+										copyNotes.put( noteTrackTime, restNote );
+									}
+									else
+									{
+										playerSheetRests.put( iplayer, new Tuple< String, NumberRange>( track.getID(), new NumberRange( noteTrackTime, noteTrackTime + maxNoteDur ) ) );
+									}
+								}
+							}
+						}
+					}
+
+					NOTES.clear();
+					NOTES.putAll( copyNotes );
+				}
+
+				for( LevelMusicSheetSegment msplayer : musicPlayers )
+				{
+					msplayer.setTracksTempo( music.getTempo() );
+				}
+
+				for( IROTrack track : music.getTracks() )
+				{				
+					for( LevelMusicSheetSegment msplayer : musicPlayers )
+					{
+						msplayer.setTrackInstrument( track.getID(), track.getInstrument() );
+					}
+					
+					backgroundPattern.add( track.getPatternTrackSheet() );
+				}
+				backgroundPattern = backgroundPattern.atomize();
+					
+				//
+				//
+				// Note sprites
+				//
+				//
+				
+				par = cfg.getParameter( ConfigApp.NOTE_IMAGE);
+				Object nt = par.getSelectedValue();
+				path = null;
+				if( nt != null )
+				{
+					path = nt.toString();
+				}
+
+				BufferedImage noteImg = null;
+				Color bgc = new Color( 255, 255, 255, 140 );
+				
+				double maxNumNotes = Integer.MIN_VALUE;
+				for( LevelMusicSheetSegment lmss : musicPlayers )
+				{
+					if( lmss.getSegments().size() > maxNumNotes )
+					{
+						maxNumNotes = lmss.getSegments().size();
+					}
+				}
+								
+				Point2D.Double prevScoreLoc = null; 
+				for( int indexMusicSheetPlayers = 0; indexMusicSheetPlayers < musicPlayers.length; indexMusicSheetPlayers++ )
+				{	
+					Settings playerSetting = playerSettings.get( indexMusicSheetPlayers );
+					Color actColor = (Color)playerSetting.getParameter( ConfigApp.ACTION_COLOR ).getSelectedValue();
+					Color preActColor = (Color)playerSetting.getParameter( ConfigApp.PREACTION_COLOR ).getSelectedValue();
+					Color waitActColor = (Color)playerSetting.getParameter( ConfigApp.WAITING_ACTION_COLOR ).getSelectedValue();
+					
+					LevelMusicSheetSegment msplayer = musicPlayers[ indexMusicSheetPlayers ];
+
+					int nNotes = msplayer.getSegments().size();
+					Score score = new Score( IScene.SCORE_ID, pen, (int)( 100 * maxNumNotes / nNotes ) );
+					score.setZIndex( IScene.PLANE_SCORE );
+					score.setOwner( playerSetting.getPlayer() );
+					
+					if( prevScoreLoc != null )
+					{
+						Point2D.Double scloc = score.getScreenLocation();
+						scloc.y = prevScoreLoc.y;
+						Dimension scDim = score.getSize();
+						scloc.y += scDim.getHeight();
+						score.setScreenLocation( scloc );
+					}
+					
+					prevScoreLoc = score.getScreenLocation();
+					
+					lv.add( score, score.getZIndex() );
+					
+					InputGoal goal = new InputGoal( IScene.INPUT_TARGET_ID, pen );
+					goal.setZIndex( IScene.PLANE_INPUT_TARGET );
+					Point2D.Double goalLoc = new Point2D.Double();
+					goalLoc.y = prevScoreLoc.y;
+					goalLoc.x = prevScoreLoc.x + score.getSize().width + 5;
+					goal.setScreenLocation( goalLoc );
+					int goalSize = score.getSize().height;
+					goal.setSize( new Dimension( goalSize, goalSize ) );
+					lv.add( goal, goal.getZIndex() );
+					
+					double reactionTime = ((Number)playerSettings.get( indexMusicSheetPlayers ).getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
+					double vel = fret.getFretWidth() / reactionTime;
+					
+					for( NumberRange rng : msplayer.getSegments().keySet() )
+					{						
+						double timeTrackOnScreen = rng.getMin() * timeWhole;
+						
+						String trackID = "";
+
+						List< IROTrack > Tracks = msplayer.getSegments().get( rng );
+
+						for( IROTrack track : Tracks )
+						{
+							trackID += track.getID() + "_";
+						}
+						
+						/*
+						double shift = Double.MAX_VALUE;
+						for( IROTrack track : Tracks )
+						{					
+							trackID += track.getID() + "_";
+
+							Double auxShift = Collections.min( track.getTrackNotes().keySet() );
+							if( auxShift < shift )
+							{
+								shift = auxShift;
+							}
+						}
+
+						if( shift < Double.MAX_VALUE && shift != 0D )
+						{
+							for( IROTrack track : Tracks )
+							{	
+								track.shiftNoteTime( -shift );
+							}
+						}
+						*/
+						
+						double pad  = wayWidth + vel * timeTrackOnScreen;
+						int screenPos = (int)( fret.getScreenLocation().x + pad ) ;
+
+
+						MusicNoteGroup noteSprite = new MusicNoteGroup( trackID
+																		, timeTrackOnScreen //+ startDelay
+																		, Tracks
+																		, IScene.NOTE_ID
+																		, pen
+																		, screenPos
+																		, vel
+																		, false
+																		);
+						
+						noteSprite.setActionColor( actColor );
+						noteSprite.setPreactionColor( preActColor );
+						noteSprite.setWaitingActionColor( waitActColor );
+						noteSprite.setOwner( playerSetting.getPlayer() );
+
+						if( noteImg == null )
+						{
+							if( path != null )
+							{
+								try
+								{
+									Image img = ImageIO.read( new File( path ) );
+
+									Dimension s = noteSprite.getBounds().getSize();
+									noteImg = (BufferedImage)basicPainter2D.circle( 0, 0, s.width, bgc, null );
+									noteImg = (BufferedImage)basicPainter2D.composeImage( noteImg, 0, 0
+											, basicPainter2D.copyImage( 
+													img.getScaledInstance( noteImg.getWidth() 
+															, noteImg.getHeight()
+															, Image.SCALE_SMOOTH ) ) );
+								}
+								catch (Exception ex) 
+								{
+								}
+							}
+						}
+						noteSprite.setImage( noteImg );
+
+						noteSprite.setZIndex( IScene.PLANE_NOTE );
+						lv.addNote( noteSprite );
+					}
+				}
+				
+				
+				//
+				//
+				// Set rests in player's music sheet
+				//
+				//
+				
+				for( Integer iplayer : playerSheetRests.keySet() )
+				{
+					LevelMusicSheetSegment msplayer = musicPlayers[ iplayer ];
+					
+					for( Tuple< String, NumberRange > tRest : playerSheetRests.get( iplayer ) )
+					{
+						String trackID = tRest.x;						
+						NumberRange restRange = tRest.y;
+						double noteTrackTime = restRange.getMin();
+						List< Note > restList = new ArrayList<Note>();
+						restList.add( Note.createRest( restRange.getRangeLength() ) );
+						
+						if(  !msplayer.existMusicSegmentInTime( restRange.getMin() ) )
+						{			
+							msplayer.addNewSegments( new NumberRange( restRange.getMin(), restRange.getMax() ) );
+						}
+						
+						msplayer.addNewTrack( noteTrackTime, trackID );
+						msplayer.addNotes( noteTrackTime, trackID, restList );
+					}
+				}
+				
+				//
+				//
+				// Start delay
+				//
+				//
+				
+				double startDealy = Double.POSITIVE_INFINITY;
+				double refReactTime = 1D;
+				double adjustment = 0.079687D;
+				for( Settings playerSetting : playerSettings )
+				{
+					double reactionTime = ((Number)playerSetting.getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
+					double vel = fret.getFretWidth() / reactionTime;
+					double delay = wayWidth / vel;
+					if( delay < startDealy )
+					{
+						refReactTime = reactionTime;
+						startDealy = delay;
+					}
+				}
+				
+				startDealy +=  ( adjustment * refReactTime ); 
+				
+				//
+				//
+				// Set delay
+				//
+				//
+				
+				for( LevelMusicSheetSegment msplayer : musicPlayers  )
+				{
+					for( NumberRange rng : msplayer.getSegments().keySet() )
+					{	
+						List< IROTrack > Tracks = msplayer.getSegments().get( rng );
+
+						for( IROTrack track : Tracks )
+						{	
+							track.shiftNoteTime( startDealy );
+						}
+					}
+					
+					List< String > firstTracks = msplayer.getFirstTracks();
+					
+					List< Note > trackRestNote = new ArrayList< Note >();
+					trackRestNote.add( Note.createRest( startDealy ) );
+					
+					if( !msplayer.existMusicSegmentInTime( 0 ) )
+					{		
+						msplayer.addNewSegments( new NumberRange( 0, startDealy / timeWhole ) );
+					}
+					
+					for( String track : firstTracks )
+					{
+						msplayer.addNewTrack( 0, track );									
+						msplayer.addNotes( 0, track, trackRestNote );
+					} 
+				}
+				
+				
+				//
+				//
+				// Set player's pattern
+				//
+				//				
+				
+				Pattern[] playerPatterns = new Pattern[ numberOfPlayers ];
+				for( int iplayer = 0; iplayer < musicPlayers.length; iplayer++ )
+				{
+					LevelMusicSheetSegment msplayer = musicPlayers[ iplayer ];
+					Pattern pat = new Pattern();
+					
+					Map< String, IROTrack > auxTracks = new HashMap<String, IROTrack >();
+					for( NumberRange kr : msplayer.getSegments().keySet() )
+					{
+						List< IROTrack > tracks = msplayer.getSegments().get( kr );
+												
+						for( IROTrack tr : tracks )
+						{
+							IROTrack aux = auxTracks.get( tr.getID() );
+							if( aux == null )
+							{
+								auxTracks.put( tr.getID(), tr );
+							}
+							else
+							{
+								for( Double t : tr.getTrackNotes().keySet() )
+								{
+									List< Note > notes = tr.getTrackNotes().get( t );
+									aux.addNotes( t,notes );
+								}
+							}
+						}
+					}
+					
+					for( IROTrack tr : auxTracks.values() )
+					{
+						pat.add( tr.getPatternTrackSheet() );
+					}
+					pat = pat.atomize();
+					playerPatterns[ iplayer ] = pat;
+				}				
+				
+				
+				BackgroundMusic backMusic = null;
+				
+				try
+				{
+					backMusic = new BackgroundMusic();
+					backMusic.setPattern( backgroundPattern );
+				}
+				catch ( Exception ex) 
+				{
+					ex.printStackTrace();
+				}
+
+				lv.setBackgroundPattern( backMusic );
+				
+				List< BackgroundMusic > playerBgMusicSheets = new ArrayList<BackgroundMusic>();
+				
+				try
+				{	
+					for( Pattern pt : playerPatterns )
+					{
+						BackgroundMusic playerbgMusic = new BackgroundMusic();
+						playerbgMusic.setPattern( pt );
+						
+						playerBgMusicSheets.add( playerbgMusic );
+					}					
+				}
+				catch ( Exception ex) 
+				{
+					ex.printStackTrace();
+				}
+				
+
+				lv.setPlayerSheetMusic( playerBgMusicSheets );
+			}
+
+			for( ISprite sp : lv.getAllSprites( false ) )
+			{
+				sp.setFrameBounds( screenBounds );
+			}
+		}
+
+		return lv;
+	}
+	//*/
+
+	/*
 	private static Level makeLevel( MusicSheet music
 								, Rectangle screenBounds
 								, List< Settings > playerSettings )
@@ -184,7 +863,8 @@ public class LevelFactory
 				int numberOfPlayers = playerSettings.size();
 				
 				LevelMusicSheetSegment[] musicSheetPlayers = new LevelMusicSheetSegment[ numberOfPlayers ];
-				for( int i = 0; i < numberOfPlayers; i++ )
+				
+				for( int i = 0; i < musicSheetPlayers.length; i++ )
 				{
 					musicSheetPlayers[ i ] = new LevelMusicSheetSegment();
 				}
@@ -313,7 +993,6 @@ public class LevelFactory
 						}
 					}
 				}
-
 				
 				for( IROTrack track : music.getTracks() )
 				{
@@ -405,15 +1084,17 @@ public class LevelFactory
 					}
 				}
 				
+				double startDelay = Double.POSITIVE_INFINITY;
+				
 				Point2D.Double prevScoreLoc = null; 
-				for( int i = 0; i < musicSheetPlayers.length; i++ )
+				for( int indexMusicSheetPlayers = 0; indexMusicSheetPlayers < musicSheetPlayers.length; indexMusicSheetPlayers++ )
 				{	
-					Settings playerSetting = playerSettings.get( i );
+					Settings playerSetting = playerSettings.get( indexMusicSheetPlayers );
 					Color actColor = (Color)playerSetting.getParameter( ConfigApp.ACTION_COLOR ).getSelectedValue();
 					Color preActColor = (Color)playerSetting.getParameter( ConfigApp.PREACTION_COLOR ).getSelectedValue();
 					Color waitActColor = (Color)playerSetting.getParameter( ConfigApp.WAITING_ACTION_COLOR ).getSelectedValue();
 					
-					LevelMusicSheetSegment msplayer = musicSheetPlayers[ i ];
+					LevelMusicSheetSegment msplayer = musicSheetPlayers[ indexMusicSheetPlayers ];
 
 					int nNotes = msplayer.getSegments().size();
 					Score score = new Score( IScene.SCORE_ID, pen, (int)( 100 * maxNumNotes / nNotes ) );
@@ -439,19 +1120,22 @@ public class LevelFactory
 					goalLoc.y = prevScoreLoc.y;
 					goalLoc.x = prevScoreLoc.x + score.getSize().width + 5;
 					goal.setScreenLocation( goalLoc );
-					int goalW = score.getSize().width;
-					goal.setSize( new Dimension( goalW, goalW ) );
+					int goalSize = score.getSize().height;
+					goal.setSize( new Dimension( goalSize, goalSize ) );
 					lv.add( goal, goal.getZIndex() );
+					
+					double reactionTime = ((Number)playerSettings.get( indexMusicSheetPlayers ).getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
+					double vel = fret.getFretWidth() / reactionTime;
 					
 					for( NumberRange rng : msplayer.getSegments().keySet() )
 					{	
-						double initTimeTrack = rng.getMin() * timeWhole;
-
+						double timeTrackOnScreen = rng.getMin() * timeWhole;
+						double shift = Double.MAX_VALUE;
+						
 						String trackID = "";
 
 						List< IROTrack > Tracks = msplayer.getSegments().get( rng );
 
-						double shift = Double.MAX_VALUE;
 						for( IROTrack track : Tracks )
 						{					
 							trackID += track.getID() + "_";
@@ -463,7 +1147,7 @@ public class LevelFactory
 							}
 						}
 
-						if( shift < Double.MAX_VALUE )
+						if( shift < Double.MAX_VALUE && shift != 0D )
 						{
 							for( IROTrack track : Tracks )
 							{	
@@ -471,13 +1155,19 @@ public class LevelFactory
 							}
 						}
 
-						double reactionTime = ((Number)playerSettings.get( i ).getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
-						double vel = fret.getFretWidth() / reactionTime;
+						shift = ( shift == Double.MAX_VALUE ? 0D : shift );
 
-						int screenPos = (int)fret.getScreenLocation().x + wayWidth + (int)( vel * initTimeTrack ) ;
+						double pad  = wayWidth + vel * timeTrackOnScreen;
+						int screenPos = (int)( fret.getScreenLocation().x + pad ) ;
 
+						if( startDelay > ( pad / vel ) )
+						{
+							startDelay = pad / vel;
+						}
+						
 						MusicNoteGroup noteSprite = new MusicNoteGroup( trackID
-																		, initTimeTrack //+ startDelay
+																		, timeTrackOnScreen //+ startDelay
+																		, shift * timeWhole
 																		, Tracks
 																		, IScene.NOTE_ID
 																		, pen
@@ -513,21 +1203,18 @@ public class LevelFactory
 						}
 						noteSprite.setImage( noteImg );
 
-						noteSprite.setZIndex( 1 );
+						noteSprite.setZIndex( IScene.PLANE_NOTE );
 						lv.addNote( noteSprite );
 					}
 				}
 				
-				double reactionTime = ((Number)playerSettings.get( 0 ).getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
-				double reactVel = fret.getFretWidth() / reactionTime;
-				double startDelay = wayWidth / reactVel;
-
 				BackgroundMusic backMusic = null;
 				
 				try
 				{
 					backMusic = new BackgroundMusic();
 					backMusic.setPattern( backgroundPattern );
+					
 					backMusic.setDelay( startDelay );
 				}
 				catch ( Exception ex) 
@@ -1160,45 +1847,4 @@ public class LevelFactory
 		return lv;
 	}
 	//*/
-
-	private class PlayerTimeRange
-	{
-		private int player;
-		private NumberRange actionRange;
-		private NumberRange recoverRange;
-		
-		/**
-		 * 
-		 */
-		public PlayerTimeRange( int id, NumberRange actRng, NumberRange recRng )
-		{
-			this.player = id;
-			this.actionRange = actRng;
-			this.recoverRange = recRng;
-		}
-		
-		/**
-		 * @return the player
-		 */
-		public int getPlayer()
-		{
-			return this.player;
-		}
-		
-		/**
-		 * @return the NumberRange
-		 */
-		public NumberRange getActionTimeRange()
-		{
-			return this.actionRange;
-		}
-		
-		/**
-		 * @return the NumberRange
-		 */
-		public NumberRange getRecoverTimeRange()
-		{
-			return this.recoverRange;
-		}
-	}
 }

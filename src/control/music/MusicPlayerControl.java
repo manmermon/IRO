@@ -20,6 +20,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	private static MusicPlayerControl mpctr = null;
 	
 	private AtomicBoolean isPlay = new AtomicBoolean( false );
+	private boolean isBackPlay = false;
 	
 	private long startTime = -1;
 	
@@ -97,11 +98,19 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			{						
 				this.backgroundMusic.startThread();
 			}
+						
+			this.startTime = System.nanoTime();
 			
 			this.isPlay.set( true );
-			
-			this.startTime = System.nanoTime();
 		}
+	}
+	
+	/**
+	 * @return the isPlayBackgroundMusic
+	 */
+	public boolean isPlayBackgroundMusic()
+	{
+		return this.isBackPlay;
 	}
 	
 	public void stopMusic( ) throws Exception 
@@ -115,10 +124,11 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			}
 			
 			if( this.backgroundMusic != null )
-			{						
+			{	
 				this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
 			}
 			
+			this.isBackPlay = false;
 			this.isPlay.set( false );
 		}
 	}
@@ -126,6 +136,30 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	public double getPlayTime()
 	{
 		return ( System.nanoTime() - this.startTime ) / 1e9D;
+	}
+	
+	public double getBackgroundMusicTime()
+	{
+		double t = Double.NaN;
+		
+		if( this.backgroundMusic != null )
+		{
+			t = this.backgroundMusic.getCurrentMusicPosition();
+		}
+		
+		return t;
+	}
+	
+	public double getBackgroundMusicStartDelay()
+	{
+		double d = Double.NaN;
+		
+		if( this.backgroundMusic != null )
+		{
+			d = this.backgroundMusic.getDelay();
+		}
+		
+		return d;
 	}
 	
 	public boolean isPlay()

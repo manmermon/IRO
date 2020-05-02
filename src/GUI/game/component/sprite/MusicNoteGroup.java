@@ -74,8 +74,10 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	
 	private BufferedImage noteImg = null;
 	
-	private Double SheetTime = Double.NaN;	
-	private Double delay = 0D;	
+	private Double timeOnScreen = Double.NaN;	
+	
+	private Double prevMusicTime = 0.0;
+	private Double delay = 0D;
 	
 	private String trackID = "";
 	
@@ -103,12 +105,13 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	private Color actionColor = Color.GREEN;
 	
 	private State state = State.PREACTION;
-	
+		
 	public MusicNoteGroup( String track
-							, double sheetTime
+							, double timeScreen
 							, List< IROTrack > Notes
 							, String noteID, Pentragram pen
-							, int initLoc , double shiftVel
+							, int initLoc 
+							, double shiftVel
 							, boolean ghost ) 
 	{
 		super( noteID );
@@ -121,7 +124,6 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		this.pentagram = pen;		
 		this.shiftVelocity = shiftVel;
 			
-		
 		int y = this.pentagram.getRailHeight();
 				
 		Dimension d = new Dimension();
@@ -166,7 +168,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		
 		this.isGhost = ghost;
 		
-		this.SheetTime = sheetTime;
+		this.timeOnScreen = timeScreen;
 		
 		super.addSpriteEventListener( new SpriteEventListener()
 		{	
@@ -188,7 +190,11 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 						synchronized ( delay )
 						{
 							MusicPlayerControl.getInstance().loadTracks( trackID, getNotes() );
-							delay = ( SheetTime - MusicPlayerControl.getInstance().getPlayTime() );
+							
+							prevMusicTime = MusicPlayerControl.getInstance().getBackgroundMusicTime();
+							
+							time = System.nanoTime();
+							delay += ( timeOnScreen - MusicPlayerControl.getInstance().getPlayTime());
 						}						
 						
 						break;
@@ -433,32 +439,39 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	@Override
 	protected void updateSpecificSprite() 
 	{
-		double t = 0;
-		
-		if( time >= 0 )
-		{
-			t = ( System.nanoTime() - this.time ) / 1e9D;
-		}
-		
-		if( this.previousLocation == null )
-		{
-			this.previousLocation = new Point2D.Double( super.screenLoc.x, super.screenLoc.y );
-		}
-		
-		double gradient = this.shiftVelocity * this.shiftDirection;
-		double update = t * gradient;
 		synchronized ( this.delay )
-		{			
+		{
+			double t = 0;
+
+			if( time >= 0 )
+			{
+				t = ( System.nanoTime() - this.time ) / 1e9D;
+			}
+
+			this.time = System.nanoTime();
+
+			double currentTime = MusicPlayerControl.getInstance().getBackgroundMusicTime();
+
+			double ctt = ( currentTime - prevMusicTime ); 
+
+			if( ctt != 0D )
+			{
+				t = ctt;
+			}
+			prevMusicTime = currentTime;
+
+			double gradient = this.shiftVelocity * this.shiftDirection;
+			double update = t * gradient;
+
 			update += -this.delay * gradient;				
+						
 			this.delay = 0D;
-		}		
-		
-		this.previousLocation = this.getNoteLocation();
-		
-		super.screenLoc.x += update;
-				
-		this.time = System.nanoTime();
-		
+			
+			this.previousLocation = this.getNoteLocation();
+			
+			super.screenLoc.x += update;
+		}			
+						
 		if( this.animationTime < 0 )
 		{
 			this.animationTime = System.currentTimeMillis();
@@ -489,13 +502,6 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		return this.isGhost;
 	}
 	
-	/**
-	 * @return the sheetTime
-	 */
-	public double getSheetTime()
-	{
-		return this.SheetTime;
-	}
 
 	/*(non-Javadoc)
 	 * @see @see config.IPossessable#setOwner(config.IOwner)

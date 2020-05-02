@@ -37,7 +37,7 @@ public class SceneControlManager
 	 * @return
 	 * @throws Exception
 	 */
-	public ISceneControl getSceneControl( IScene scene ) throws Exception
+	public ISceneControl setSceneControl( IScene scene ) throws Exception
 	{
 		ISceneControl ctr = null;
 		if( scene instanceof Level )

@@ -30,7 +30,7 @@ public class MenuScreenControl extends AbstractSceneControl
 	 * @see @see control.scenes.AbstractSceneControl#updatedLoopAfterSetScene()
 	 */
 	@Override
-	protected void updatedLoopAfterSetScene()
+	protected void updatedLoopAfterUpdateScene()
 	{	
 	}
 

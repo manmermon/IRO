@@ -137,10 +137,14 @@ public class IROPlayer
 		}
 	}
 		
+	//
+	//
+	//
+	//
+	//
+	
 	private class PlayerNote extends AbstractStoppableThread implements ManagedPlayerListener  
 	{	
-		//private Pattern musicPattern;
-		
 		private PlayerMod player;
 		private Object lock = new Object();
 		
@@ -164,33 +168,40 @@ public class IROPlayer
 		@Override
 		protected void preStopThread(int friendliness) throws Exception 
 		{	
-		}
-
-		@Override
-		protected void postStopThread(int friendliness) throws Exception 
-		{	
-			synchronized ( this.lock )
+			synchronized ( this )
 			{
-				if( !this.player.getManagedPlayer().isFinished() )
+				if( this.player != null && !this.player.getManagedPlayer().isFinished() )
 				{
-					this.player.getManagedPlayer().finish();
+					Thread t = new Thread()
+					{
+						@Override
+						public void run()
+						{
+							player.getManagedPlayer().finish();
+						}
+					};
+					
+					t.setName( "player.getManagedPlayer.finish" );
+					t.start();
 				}
 			}
 		}
 
 		@Override
+		protected void postStopThread(int friendliness) throws Exception 
+		{	
+		}
+
+		@Override
 		protected void runInLoop() throws Exception 
 		{	
-			synchronized( this )			
-			{	
-				synchronized ( this.lock )
+			synchronized ( this )
+			{
+				if( !this.player.isEmpty() )
 				{
-					if( !this.player.isEmpty() )
-					{
-						this.player.play( );
-						
-						this.wait();
-					}
+					this.player.play( );
+
+					this.wait();
 				}
 			}
 		}
@@ -218,10 +229,11 @@ public class IROPlayer
 		{
 			super.cleanUp();
 			
-			synchronized ( this.lock )
+			synchronized ( this )
 			{
 				if( !this.player.getManagedPlayer().isFinished() )
 				{
+					this.player.getManagedPlayer().removeManagedPlayerListener( this );
 					this.player.getManagedPlayer().finish();
 				}
 			}

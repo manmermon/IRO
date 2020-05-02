@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.jfugue.midi.MidiDictionary;
 import org.jfugue.parser.ParserListenerAdapter;
-import org.jfugue.theory.Chord;
 import org.jfugue.theory.Note;
 
 import general.ArrayTreeMap;
@@ -37,8 +36,6 @@ public class IROMusicParserListener extends ParserListenerAdapter
     { 
         String instrumentNames = MidiDictionary.INSTRUMENT_BYTE_TO_STRING.get(instrument);
         
-        //System.out.println("Midi2AsciiParserListener.onInstrumentParsed() " + instrumentNames + " track " + this.currentTrack.getID() );
-        
         this.currentTrack.setInstrument( instrumentNames );
     }
     
@@ -55,13 +52,9 @@ public class IROMusicParserListener extends ParserListenerAdapter
     {
     	super.onTrackChanged( track );
     	
-    	//this.checkReleasedNotes();
-    	
     	String trackID = IROTrack.TRACK_ID_DEFAULT_PREFIX + track;
     	
     	this.sheet.createNewTrack( trackID );
-    	
-    	//System.out.println("Midi2AsciiParserListener.onTrackChanged() " + trackID );
     	
     	this.currentTrack = this.sheet.getTrack( trackID );    	
     }
@@ -71,42 +64,27 @@ public class IROMusicParserListener extends ParserListenerAdapter
     {   
     	super.onNoteParsed( note );
     	
-    	//System.out.println("Midi2AsciiParserListener.onNoteParsed() " + note );
     	List< Note > noteList = new ArrayList< Note >();
     	noteList.add( note );
     	this.trackNotes.put( this.currentTrack.getID(), new Tuple< Double, List< Note >>( this.trackBeatTimeNote, noteList ) );
 		this.trackBeatTimeNote = DEFAULT_BEAT_TIME_NOTE;
-    	
-		/*
-    	if( note.toStringWithoutDuration().equals( "R" ) )
-    	{    	
-    		this.currentTrack.addNotes( note );
-    	}
-    	else
-    	{
-    		this.releasedNotes.put( this.currentTrack.getID(), new Tuple( this.trackBeatTimeNote, note ) );
-    	}
-    	*/
-    		
     }
    
+    /*
     @Override
     public void onNotePressed(Note note) 
     {
     	super.onNotePressed(note);
-    	
-    	//System.out.println("Midi2AsciiParserListener.onNotePressed() " + note );
-    	
-    	//this.checkReleasedNotes();
     }
+    //*/
     
+    /*
     @Override
     public void onNoteReleased(Note note) 
     {
     	super.onNoteReleased(note);
-    	
-    	//System.out.println("Midi2AsciiParserListener.onNoteReleased() " + note );
     }
+    //*/
     
     /*
     private void checkReleasedNotes()
@@ -115,12 +93,10 @@ public class IROMusicParserListener extends ParserListenerAdapter
     	{    		
     		this.currentTrack.addNotes( this.releasedNotes.get( this.currentTrack.getID() ) );
     		
-    		//System.out.println("Midi2AsciiParserListener.checkReleasedNotes() " + this.releasedNotes );
-    		
     		this.releasedNotes.emptyArray( this.currentTrack.getID() );
     	}
     }
-    */
+    //*/
     
     public MusicSheet getSheet() 
     {
@@ -130,8 +106,6 @@ public class IROMusicParserListener extends ParserListenerAdapter
     @Override
     public void afterParsingFinished() 
     {
-    	//this.checkReleasedNotes();
-    	
     	for( String trackID : this.trackNotes.keySet() )
     	{
     		List< Tuple< Double, List< Note > > > NOTES = this.trackNotes.get( trackID );
@@ -198,63 +172,69 @@ public class IROMusicParserListener extends ParserListenerAdapter
     	super.afterParsingFinished();
     }
     
+    /*
     @Override
-    public void onBarLineParsed(long id) {
-    	// TODO Auto-generated method stub
+    public void onBarLineParsed(long id) 
+    {
     	super.onBarLineParsed(id);
-    	System.out.println("Midi2AsciiParserListener.onBarLineParsed()");
     }
+    //*/
     
+    /*
     @Override
-    public void onChannelPressureParsed(byte pressure) {
-    	// TODO Auto-generated method stub
+    public void onChannelPressureParsed(byte pressure) 
+    {
     	super.onChannelPressureParsed(pressure);
-    	System.out.println("Midi2AsciiParserListener.onChannelPressureParsed()");
     }
+    //*/
     
+    /*
     @Override
-    public void onChordParsed(Chord chord) {
-    	// TODO Auto-generated method stub
+    public void onChordParsed(Chord chord) 
+    {
     	super.onChordParsed(chord);
-    	
-    	System.out.println("Midi2AsciiParserListener.onChordParsed() " ) ;
     }
+    //*/
     
+    /*
     @Override
-    public void onControllerEventParsed(byte controller, byte value) {
-    	// TODO Auto-generated method stub
+    public void onControllerEventParsed(byte controller, byte value) 
+    {
     	super.onControllerEventParsed(controller, value);
-    	Note n = new Note(value);
-    	//System.out.println("Midi2AsciiParserListener.onControllerEventParsed() " + controller + " - "+ n.toString() );
     }
+    //*/
     
+    /*
     @Override
-    public void onFunctionParsed(String id, Object message) {
-    	// TODO Auto-generated method stub
+    public void onFunctionParsed(String id, Object message) 
+    {
     	super.onFunctionParsed(id, message);
-    	System.out.println("Midi2AsciiParserListener.onFunctionParsed()");
     }
-        
+    //*/
+     
+    /*
     @Override
-    public void onLayerChanged(byte layer) {
-    	// TODO Auto-generated method stub
+    public void onLayerChanged(byte layer) 
+    {
     	super.onLayerChanged(layer);
-    	System.out.println("Midi2AsciiParserListener.onLayerChanged()");
     }
+    //*/
     
+    /*
     @Override
-    public void onLyricParsed(String lyric) {
-    	// TODO Auto-generated method stub
+    public void onLyricParsed(String lyric) 
+    {
     	super.onLyricParsed(lyric);
-    	System.out.println();
     }
+    //*/
     
+    /*
     @Override
-    public void onMarkerParsed(String marker) {
-    	// TODO Auto-generated method stub
+    public void onMarkerParsed(String marker) 
+    {
     	super.onMarkerParsed(marker);
-    	System.out.println("Midi2AsciiParserListener.onMarkerParsed()");
     }
+    //*/
     
     /*
     @Override
@@ -265,54 +245,48 @@ public class IROMusicParserListener extends ParserListenerAdapter
     }
     */
     
+    /*
     @Override
-    public void onPitchWheelParsed(byte lsb, byte msb) {
-    	// TODO Auto-generated method stub
+    public void onPitchWheelParsed(byte lsb, byte msb) 
+    {
     	super.onPitchWheelParsed(lsb, msb);
-    	System.out.println("Midi2AsciiParserListener.onPitchWheelParsed()");
     }
     
     @Override
-    public void onPolyphonicPressureParsed(byte key, byte pressure) {
-    	// TODO Auto-generated method stub
+    public void onPolyphonicPressureParsed(byte key, byte pressure) 
+    {
     	super.onPolyphonicPressureParsed(key, pressure);
-    	System.out.println("Midi2AsciiParserListener.onPolyphonicPressureParsed()");
     }
     
     @Override
-    public void onSystemExclusiveParsed(byte... bytes) {
-    	// TODO Auto-generated method stub
+    public void onSystemExclusiveParsed(byte... bytes) 
+    {
     	super.onSystemExclusiveParsed(bytes);
-    	System.out.println("Midi2AsciiParserListener.onSystemExclusiveParsed()");
     }
     
     @Override
-    public void onTimeSignatureParsed(byte numerator, byte powerOfTwo) {
-    	// TODO Auto-generated method stub
-    	super.onTimeSignatureParsed(numerator, powerOfTwo);
-    	//System.out.println("Midi2AsciiParserListener.onTimeSignatureParsed() " + numerator + ", " + powerOfTwo );
+    public void onTimeSignatureParsed(byte numerator, byte powerOfTwo) 
+    {
+    	super.onTimeSignatureParsed(numerator, powerOfTwo);    	
     }
     
     @Override
-    public void onTrackBeatTimeBookmarked(String timeBookmarkId) {
-    	// TODO Auto-generated method stub
+    public void onTrackBeatTimeBookmarked(String timeBookmarkId) 
+    {
     	super.onTrackBeatTimeBookmarked(timeBookmarkId);
-    	System.out.println("Midi2AsciiParserListener.onTrackBeatTimeBookmarked()");
     }
     
     @Override
-    public void onTrackBeatTimeBookmarkRequested(String timeBookmarkId) {
-    	// TODO Auto-generated method stub
+    public void onTrackBeatTimeBookmarkRequested(String timeBookmarkId) 
+    {
     	super.onTrackBeatTimeBookmarkRequested(timeBookmarkId);
-    	System.out.println("Midi2AsciiParserListener.onTrackBeatTimeBookmarkRequested()");
     }
+    //*/
     
     @Override
     public void onTrackBeatTimeRequested(double time) 
     {
-    	// TODO Auto-generated method stub
     	super.onTrackBeatTimeRequested(time);
     	this.trackBeatTimeNote = time;
-    	//System.out.println("Midi2AsciiParserListener.onTrackBeatTimeRequested() " + time);
     }
 }

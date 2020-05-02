@@ -105,7 +105,7 @@ public class ScreenControl extends AbstractStoppableThread
 				this.sceneCtrl = null;
 			}
 			
-			ISceneControl sceneCtr = SceneControlManager.getInstance().getSceneControl( scene );
+			ISceneControl sceneCtr = SceneControlManager.getInstance().setSceneControl( scene );
 						
 			if( sceneCtr == null )
 			{
