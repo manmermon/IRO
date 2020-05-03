@@ -613,6 +613,7 @@ public class LevelFactory
 				}
 				
 				startDealy +=  ( adjustment * refReactTime ); 
+				//startDealy /= timeWhole;
 				
 				//
 				//
@@ -620,6 +621,7 @@ public class LevelFactory
 				//
 				//
 				
+				/*
 				for( LevelMusicSheetSegment msplayer : musicPlayers  )
 				{
 					for( NumberRange rng : msplayer.getSegments().keySet() )
@@ -648,7 +650,7 @@ public class LevelFactory
 						msplayer.addNotes( 0, track, trackRestNote );
 					} 
 				}
-				
+				//*/
 				
 				//
 				//
@@ -700,6 +702,7 @@ public class LevelFactory
 				{
 					backMusic = new BackgroundMusic();
 					backMusic.setPattern( backgroundPattern );
+					backMusic.setDelay( startDealy );
 				}
 				catch ( Exception ex) 
 				{
@@ -708,16 +711,19 @@ public class LevelFactory
 
 				lv.setBackgroundPattern( backMusic );
 				
-				List< BackgroundMusic > playerBgMusicSheets = new ArrayList<BackgroundMusic>();
+				Map< Integer, BackgroundMusic > playerBgMusicSheets = new HashMap< Integer, BackgroundMusic >();
 				
 				try
 				{	
-					for( Pattern pt : playerPatterns )
+					for( int i = 0; i < playerPatterns.length; i++ )
 					{
+						Settings setPl = playerSettings.get( i );
+						Pattern pt = playerPatterns[ i ]; 
 						BackgroundMusic playerbgMusic = new BackgroundMusic();
 						playerbgMusic.setPattern( pt );
+						playerbgMusic.setDelay( startDealy );
 						
-						playerBgMusicSheets.add( playerbgMusic );
+						playerBgMusicSheets.put( setPl.getPlayer().getId(), playerbgMusic );
 					}					
 				}
 				catch ( Exception ex) 

@@ -64,7 +64,6 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	private int shiftDirection = -1;
 		
 	private boolean isSelected;
-	private boolean isPlay;
 		
 	private boolean isGhost = false;
 	
@@ -81,7 +80,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	
 	private String trackID = "";
 	
-	private IOwner _player;
+	private IOwner _player = new Player();
 	
 	//
 	//
@@ -164,8 +163,6 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		
 		super.screenLoc = new Point2D.Double( initLoc, noteLine * y + ( y - super.getSize().width ) / 2);
 		
-		this.isPlay = false;
-		
 		this.isGhost = ghost;
 		
 		this.timeOnScreen = timeScreen;
@@ -189,8 +186,6 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 						
 						synchronized ( delay )
 						{
-							MusicPlayerControl.getInstance().loadTracks( trackID, getNotes() );
-							
 							prevMusicTime = MusicPlayerControl.getInstance().getBackgroundMusicTime();
 							
 							time = System.nanoTime();
@@ -201,11 +196,6 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 					}
 					case SpriteEvent.OUTPUT_SCREEN:
 					{
-						if( !isPlay )
-						{
-							MusicPlayerControl.getInstance().stopTrack( trackID );
-						}
-						
 						int playerID = Player.ANONYMOUS;
 						if( _player != null )
 						{
@@ -328,22 +318,27 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	{
 		return this.noteTracks;
 	}
+	
+	public double getDuration()
+	{
+		double dur = 0;
+		
+		for( IROTrack tr : this.noteTracks )
+		{
+			if( dur < tr.getTrackDuration() )
+			{
+				dur = tr.getTrackDuration();
+			}
+		}
+		
+		return dur;
+	}
 		
 	public void toggleDirection()
 	{
 		this.shiftDirection = -this.shiftDirection;
 	}
-	
-	public void setPlayed( boolean played )
-	{
-		this.isPlay = played;
-	}
-	
-	public boolean isPlayed()
-	{
-		return this.isPlay;
-	}
-	
+		
 	public void setSelected( boolean selected )
 	{
 		this.isSelected = selected;
@@ -508,8 +503,13 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	 */
 	@Override
 	public void setOwner(IOwner owner)
-	{
+	{		
 		this._player = owner;
+		
+		if( this._player == null )
+		{
+			this._player = new Player();
+		}
 	}
 
 	/*(non-Javadoc)

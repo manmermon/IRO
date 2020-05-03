@@ -27,11 +27,15 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	
 	private Object lock = new Object();
 	
-	public BackgroundMusic() 
+	private MuteThread muteThread = null;
+	
+ 	public BackgroundMusic() 
 	{
 		super.setName( this.getClass().getSimpleName() );
 		this.player = new PlayerMod();
 		this.player.getManagedPlayer().addManagedPlayerListener( this );
+		
+		this.muteThread = new MuteThread( this.player );
 		
 		pattern = new Pattern();
 		delay = NON_DELAY;
@@ -100,6 +104,17 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 		}
 	}
 
+	/*(non-Javadoc)
+	 * @see @see stoppableThread.AbstractStoppableThread#startUp()
+	 */
+	@Override
+	protected void startUp() throws Exception
+	{
+		super.startUp();
+		
+		this.muteThread.startThread();
+	}
+	
 	@Override
 	protected void runInLoop() throws Exception 
 	{	
@@ -120,6 +135,17 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 		}
 	}
 	
+	public void mute( double time )
+	{
+		synchronized ( this.lock )
+		{
+			if( this.muteThread != null )
+			{
+				this.muteThread.mutePlayer( time );
+			}
+		}
+	}
+	
 	public double getCurrentMusicPosition()
 	{
 		long microsec  = 0;
@@ -128,10 +154,9 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 			try
 			{
 				microsec = this.player.getManagedPlayer().getMicrosecondPosition();
-			} catch (NullPointerException ex)
-			{
 			}
-			
+			catch (NullPointerException ex)
+			{}
 		}		
 		
 		return microsec / 1e6D;
@@ -163,6 +188,9 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 		
 		synchronized ( this.lock )
 		{
+			this.muteThread.stopThread( IStoppableThread.FORCE_STOP );
+			this.muteThread = null;
+			
 			final PlayerMod playercopy = this.player;
 			this.player = null;
 			
@@ -258,5 +286,130 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	@Override
 	public void onReset()
 	{
+	}
+
+	//////////////////////////
+	//
+	//
+	// Mute player thread
+	//
+	//
+	private class MuteThread extends AbstractStoppableThread
+	{
+		private PlayerMod player;
+		
+		private double muteTime = 0D;
+		private boolean isMute = false;
+
+		public MuteThread( PlayerMod player )
+		{
+			this.player = player;
+		}
+
+		/*(non-Javadoc)
+		 * @see @see stoppableThread.AbstractStoppableThread#preStopThread(int)
+		 */
+		@Override
+		protected void preStopThread(int friendliness) throws Exception
+		{	
+		}
+
+		/*(non-Javadoc)
+		 * @see @see stoppableThread.AbstractStoppableThread#postStopThread(int)
+		 */
+		@Override
+		protected void postStopThread(int friendliness) throws Exception
+		{	
+		}
+
+		/*(non-Javadoc)
+		 * @see @see stoppableThread.AbstractStoppableThread#startUp()
+		 */
+		@Override
+		protected void startUp() throws Exception
+		{
+			super.startUp();
+			
+			super.stopThread = super.stopThread || ( this.player == null );
+		}
+		
+		/*(non-Javadoc)
+		 * @see @see stoppableThread.AbstractStoppableThread#runInLoop()
+		 */
+		@Override
+		protected void runInLoop() throws Exception
+		{
+			synchronized ( this )
+			{
+				if( this.muteTime <= 0D )
+				{					
+					if( this.isMute )
+					{
+						this.player.getManagedPlayer().muteTrack( -1,  false );
+						this.isMute = false;
+					}
+					
+					super.wait();
+				}
+			}
+			
+			double time = 0;
+			synchronized ( this )
+			{ 
+				time = this.muteTime; 
+				this.muteTime = 0D;
+				this.isMute = true;
+			}	
+			
+			this.player.getManagedPlayer().muteTrack( -1,  true );
+						
+			synchronized ( this )
+			{
+				super.wait( (long)( time  * 1000 ) );
+			}			
+		}
+		
+		/*(non-Javadoc)
+		 * @see @see stoppableThread.AbstractStoppableThread#cleanUp()
+		 */
+		@Override
+		protected void cleanUp() throws Exception
+		{
+			this.player = null;
+			
+			super.cleanUp();
+		}
+		
+		/*(non-Javadoc)
+		 * @see @see stoppableThread.AbstractStoppableThread#runExceptionManager(java.lang.Exception)
+		 */
+		@Override
+		protected void runExceptionManager(Exception e)
+		{
+			if( !( e instanceof InterruptedException ) )
+			{
+				super.runExceptionManager(e);
+			}
+		}
+		
+		public void mutePlayer( double time )
+		{
+			synchronized ( this )
+			{
+				if( time > 0 )
+				{
+					this.muteTime = time;
+					
+					if( !this.isMute )
+					{
+						super.notify();
+					}
+					else
+					{
+						super.interrupt();
+					}
+				}
+			}
+		}
 	}
 }

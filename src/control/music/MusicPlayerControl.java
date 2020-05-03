@@ -1,21 +1,23 @@
 package control.music;
 
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import GUI.game.screen.level.BackgroundMusic;
 import control.events.BackgroundMusicEventListener;
-import music.IROTrack;
-import music.player.IROPlayer;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 
 public class MusicPlayerControl extends AbstractStoppableThread 
 {	
-	private IROPlayer iroPlayer;
-	
 	private BackgroundMusic backgroundMusic = null;
+	private Map< Integer, BackgroundMusic > playerMusicSheets = null;
+	
+	private ConcurrentHashMap< Integer, Double > mutePlayerSheet = null;
 	
 	private static MusicPlayerControl mpctr = null;
 	
@@ -25,14 +27,13 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	private long startTime = -1;
 	
 	private Object sync = new Object();
-	
-	private ConcurrentLinkedQueue< String > playtrackIDList;
-	
+		
 	private MusicPlayerControl( )
 	{	
 		super.setName( this.getClass().getSimpleName() );	
 		
-		this.playtrackIDList = new ConcurrentLinkedQueue<String>();
+		this.playerMusicSheets = new HashMap<Integer, BackgroundMusic>();
+		this.mutePlayerSheet = new ConcurrentHashMap< Integer, Double>();
 		
 		try
 		{
@@ -64,6 +65,19 @@ public class MusicPlayerControl extends AbstractStoppableThread
 		this.backgroundMusic = backgroundMusicPattern;				
 	}
 	
+	public void setPlayerMusicSheets( Map< Integer, BackgroundMusic > playerSheets )
+	{
+		if( !this.playerMusicSheets.isEmpty() )
+		{
+			for( BackgroundMusic pbgm : this.playerMusicSheets.values() )
+			{
+				pbgm.stopThread( IStoppableThread.FORCE_STOP );
+			}
+		}
+		
+		this.playerMusicSheets.putAll( playerSheets );
+	}
+	
 	public void addBackgroundMusicEvent( BackgroundMusicEventListener listener ) 
 	{	
 		if( this.backgroundMusic != null )
@@ -85,21 +99,20 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	public void startMusic( ) throws Exception 
 	{
 		synchronized( this.sync )
-		{
-			if( this.iroPlayer != null )
-			{
-				this.iroPlayer.stop();
-				this.iroPlayer = null;
-			}
+		{	
+			this.mutePlayerSheet.clear();
 			
-			this.iroPlayer = new IROPlayer();
+			this.startTime = System.nanoTime();
+			
+			for( BackgroundMusic playerSheet : this.playerMusicSheets.values() )
+			{
+				playerSheet.startThread();
+			}
 			
 			if( this.backgroundMusic != null )
 			{						
 				this.backgroundMusic.startThread();
 			}
-						
-			this.startTime = System.nanoTime();
 			
 			this.isPlay.set( true );
 		}
@@ -117,11 +130,11 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	{
 		synchronized( this.sync )
 		{
-			if( this.iroPlayer != null )
+			for( BackgroundMusic playerSheet : this.playerMusicSheets.values() )
 			{
-				this.iroPlayer.stop();
-				this.iroPlayer = null;
+				playerSheet.stopThread( IStoppableThread.FORCE_STOP );
 			}
+			this.playerMusicSheets.clear();
 			
 			if( this.backgroundMusic != null )
 			{	
@@ -176,19 +189,23 @@ public class MusicPlayerControl extends AbstractStoppableThread
 		synchronized ( this )
 		{
 			super.wait();
-			
-			synchronized( this.sync )
+		}
+		
+		synchronized( this.sync )
+		{
+			Enumeration< Integer > players = this.mutePlayerSheet.keys();
+			while( players.hasMoreElements() )
 			{
-				if( this.iroPlayer != null )
-				{
-					while( !this.playtrackIDList.isEmpty() )
-					{						
-						String trackID = this.playtrackIDList.poll();
-						this.iroPlayer.play( trackID );
-					}
-					
-				}
+				int iPlayer = players.nextElement();
+				
+				Double muteTime = this.mutePlayerSheet.get( iPlayer );
+				
+				BackgroundMusic playerSheet = this.playerMusicSheets.get( iPlayer );
+				
+				playerSheet.mute( muteTime );
 			}
+			
+			this.mutePlayerSheet.clear();
 		}
 	}
 	
@@ -208,80 +225,32 @@ public class MusicPlayerControl extends AbstractStoppableThread
 				
 		synchronized( this )
 		{
+			for( BackgroundMusic bg : this.playerMusicSheets.values() )
+			{
+				bg.stopThread( IStoppableThread.FORCE_STOP );
+			}
+			this.mutePlayerSheet.clear();
+			
 			if( this.backgroundMusic != null )
 			{
 				this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
 				this.backgroundMusic = null;
 			}
 			
-			if( this.iroPlayer != null )
-			{
-				this.iroPlayer.stop();
-			}
-			
-			this.playtrackIDList.clear();
-			
-			this.iroPlayer = null;
+			this.mutePlayerSheet.clear();						
 		}	
 	}
 	
-	public void loadTrack( IROTrack track )
+	public void mutePlayerSheet( int player, double time )
 	{
 		synchronized( this )
 		{
 			synchronized( this.sync )
 			{
-				this.iroPlayer.loadTrack( track );
+				this.mutePlayerSheet.put( player, time );
+				
+				super.notify();
 			}
-		}
-	}
-	
-	public void loadTracks( String trackID, List< IROTrack > tracks )
-	{
-		synchronized( this )
-		{
-			synchronized( this.sync )
-			{
-				this.iroPlayer.loadTracks( trackID, tracks );
-			}
-		}
-	}
-	
-	public void stopTrack( String trackID )
-	{
-		synchronized( this )
-		{
-			synchronized( this.sync )
-			{
-				try
-				{
-					this.iroPlayer.stopTrack( trackID );
-				} 
-				catch (Exception ex)
-				{
-					ex.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	public void playTrack( String trackID )
-	{
-		synchronized( this )
-		{
-			this.playtrackIDList.add( trackID );
-			
-			super.notify();
-		}
-	}
-	
-	public void playTracks( List< String > trackIDs )
-	{
-		synchronized( this )
-		{
-			this.playtrackIDList.addAll( trackIDs );
-			
-			super.notify();
 		}
 	}
 }

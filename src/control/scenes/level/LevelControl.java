@@ -21,12 +21,10 @@
 
 package control.scenes.level;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import GUI.game.component.event.FretEventListener;
 import GUI.game.component.sprite.Fret;
 import GUI.game.component.sprite.ISprite;
 import GUI.game.component.sprite.InputGoal;
@@ -46,7 +44,7 @@ import control.events.BackgroundMusicEvent;
 
 public class LevelControl extends AbstractSceneControl 
 							implements BackgroundMusicEventListener
-										//, FretEventListener
+										, FretEventListener
 {		
 	private AtomicBoolean actionDone;
 	private boolean backgroundMusicEnd = false;
@@ -90,8 +88,13 @@ public class LevelControl extends AbstractSceneControl
 				
 		if( super.scene != null )
 		{	
-			MusicPlayerControl.getInstance().setBackgroundMusicPatter( (((Level)this.scene).getBackgroundPattern() ) );
+			Level lv = (Level)this.scene;
+			lv.getFret().addFretEventListener( this );
+			
+			MusicPlayerControl.getInstance().setBackgroundMusicPatter( lv.getBackgroundPattern() );
 			MusicPlayerControl.getInstance().addBackgroundMusicEvent( this );
+			
+			MusicPlayerControl.getInstance().setPlayerMusicSheets( lv.getPlayerSheets() );
 		}
 		else
 		{
@@ -118,21 +121,17 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	protected void updatedLoopAfterUpdateScene() 
 	{		
-		List< ISprite > FRET = this.scene.getSprites( IScene.FRET_ID, true );
+		Level lv = (Level)this.scene;
+		Fret fret = lv.getFret();
+		
 		List< ISprite > Notes = this.scene.getSprites( IScene.NOTE_ID, true );
 
-		if( FRET != null 
-				&& Notes != null
-				&& !FRET.isEmpty() 
+		if( fret != null 
+				&& Notes != null 
 				&& !Notes.isEmpty() )
 		{
-			Fret fret = (Fret)FRET.get( 0 );
-
-			List< String > noteTracks = new ArrayList<String>();
-
 			boolean noteInFret = false;
 			
-			Map< String, Double > nt = new HashMap<String, Double>();
 			for( ISprite __Note : Notes )
 			{
 				MusicNoteGroup note = (MusicNoteGroup) __Note;
@@ -166,18 +165,7 @@ public class LevelControl extends AbstractSceneControl
 				{						
 					if( !note.isSelected() )
 					{
-						note.setState( GUI.game.component.sprite.MusicNoteGroup.State.PREACTION );
-					}
-
-					if( note.isSelected() && !note.isPlayed() )
-					{
-						// TODO
-						/*
-						note.setPlayed( true );
-						
-						nt.put( note.getTrackID(), note.getSheetTime() );
-						noteTracks.add( note.getTrackID() );
-						*/							
+						note.setState( GUI.game.component.sprite.MusicNoteGroup.State.PREACTION );						
 					}
 				}					
 			}
@@ -185,24 +173,6 @@ public class LevelControl extends AbstractSceneControl
 			this.noteIntoFret = noteInFret;
 
 			this.actionDone.set( false );
-
-			if( !noteTracks.isEmpty() )
-			{	
-				try
-				{	
-					MusicPlayerControl.getInstance().playTracks( noteTracks );
-					double t = MusicPlayerControl.getInstance().getBackgroundMusicTime();
-					for( String s : noteTracks )
-					{
-						System.out.println("LevelControl.updatedLoopAfterSetScene()  backMusicTime " + t + " - note time (" + s +"): " + nt.get( s ) );
-					}
-				} 
-				catch (Exception ex)
-				{
-					// TODO Auto-generated catch block
-					ex.printStackTrace();
-				}					
-			}				
 		}
 	}
 	
@@ -298,7 +268,6 @@ public class LevelControl extends AbstractSceneControl
 	/*(non-Javadoc)
 	 * @see @see GUI.game.component.event.FretEventListener#FretEvent(GUI.game.component.event.FretEvent)
 	 */
-	/*
 	@Override
 	public void FretEvent(GUI.game.component.event.FretEvent ev)
 	{
@@ -306,17 +275,18 @@ public class LevelControl extends AbstractSceneControl
 		
 		if( note != null && !note.isGhost() )
 		{
-			if( ev.getType() == GUI.game.component.event.FretEvent.NOTE_ENTERED )
+			if( ev.getType() == GUI.game.component.event.FretEvent.NOTE_EXITED )
 			{
-				ControllerManager.getInstance().setEnableControllerListener( true );
-			}
-			else if( ev.getType() == GUI.game.component.event.FretEvent.NOTE_EXITED )
-			{
-				ControllerManager.getInstance().setEnableControllerListener( false );
+				if( !note.isGhost() && !note.isSelected() )
+				{
+					int player = note.getOwner().getId();
+					double time = note.getDuration();
+					
+					MusicPlayerControl.getInstance().mutePlayerSheet( player, time );
+				}
 			}
 		}
 	}
-	//*/
 
 	public void updateInputGoal( double percentage )
 	{

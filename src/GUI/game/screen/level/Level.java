@@ -22,7 +22,9 @@ package GUI.game.screen.level;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jfugue.midi.MidiDefaults;
 
@@ -37,13 +39,13 @@ public class Level extends Scene
 	private int BPM;
 	
 	private BackgroundMusic backgroundMusic;
-	private List< BackgroundMusic > playerMusic;
+	private Map< Integer, BackgroundMusic > playerMusics;
 	
 	public Level( Dimension sceneSize ) 
 	{
 		super( sceneSize );
 		
-		this.playerMusic = new ArrayList<BackgroundMusic>();
+		this.playerMusics = new HashMap< Integer, BackgroundMusic>();
 		this.BPM = MidiDefaults.DEFAULT_TEMPO_BEATS_PER_MINUTE;
 	}
 
@@ -52,14 +54,19 @@ public class Level extends Scene
 		this.backgroundMusic = backgroundPattern;
 	}
 	
-	public void setPlayerSheetMusic( List< BackgroundMusic > playerSheets )
+	public void setPlayerSheetMusic( Map< Integer, BackgroundMusic > playerSheets )
 	{
-		this.playerMusic.addAll( playerSheets );
+		this.playerMusics.putAll( playerSheets );
+	}
+	
+	public Map< Integer, BackgroundMusic > getPlayerSheets()
+	{
+		return this.playerMusics;
 	}
 	
 	public BackgroundMusic getBackgroundPattern() 
 	{
-		return backgroundMusic;
+		return this.backgroundMusic;
 	}
 	
 	public void addBackgroud( ISprite sprite )
