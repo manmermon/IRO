@@ -44,7 +44,6 @@ import control.ScreenControl;
 import control.controller.ControllerActionChecker;
 import control.controller.ControllerManager;
 import control.controller.ControllerMetadata;
-import control.music.MusicPlayerControl;
 import edu.ucsd.sccn.LSL;
 import exceptions.ConfigParameterException;
 import general.NumberRange;
@@ -309,6 +308,8 @@ public class GameManager
 			ScreenControl.getInstance().setScene( level );
 	
 			MainAppUI.getInstance().setVisible( false );
+			
+			GameStatistic.startRegister();
 			
 			this.gameWindow.setVisible( true );
 			

@@ -582,7 +582,7 @@ public class ConfigApp
 		fieldType = new HashMap<String, Class>();
 		fieldType.put( "idSession", Integer.class );
 		fieldType.put( "userID", Integer.class );
-		fieldType.put( "date", Integer.class );
+		//fieldType.put( "date", Integer.class );
 		tableFields.put( sessionTableName, fieldType );
 		
 		fieldType = new HashMap<String, Class>();
@@ -1195,20 +1195,22 @@ public class ConfigApp
 
 	public static void dbSaveStatistic() throws SQLException
 	{
+		LocalDateTime startTime = GameStatistic.getStartDateTime();
+		
 		for( int playerID : GameStatistic.getPlayerIDs() )
 		{
 			List< Tuple< LocalDateTime, GameStatistic.FieldType > > register = GameStatistic.getRegister( playerID );
 		
 			if( playerID != Player.ANONYMOUS && !register.isEmpty() )
-			{
-				LocalDateTime startTime = GameStatistic.getStartDateTime();
-				
+			{	
 				if( startTime != null )
 				{
 					ZonedDateTime zdt = ZonedDateTime.of( startTime, ZoneId.systemDefault() );
 				
-					String sql = "INSERT INTO "+ sessionTableName +  "(userID, date) ";
-					String sqlValues  = "VALUES(" + playerID + "," + zdt.toInstant().toEpochMilli() + ")";
+					long sessionID = zdt.toInstant().toEpochMilli();
+					
+					String sql = "INSERT INTO "+ sessionTableName +  "(idSession, userID) ";
+					String sqlValues  = "VALUES(" + sessionID + "," + playerID + ")";
 		
 					Statement stmt = null;
 		
@@ -1219,40 +1221,28 @@ public class ConfigApp
 						dbConnect();
 		
 						stmt  = conn.createStatement();
-					
-						Integer sessionID = null;
 						
-						if( stmt.executeUpdate( sql + sqlValues ) > 0 )
+						stmt.executeUpdate( sql + sqlValues );
+						
+
+						for( Tuple< LocalDateTime, FieldType > t : register )
 						{
-							rs = stmt.getGeneratedKeys();
-							if(rs != null && rs.next())
-							{
-								sessionID = rs.getInt( 1 );
-							}
+							LocalDateTime time = t.x;
+							FieldType f = t.y;
+
+							zdt = ZonedDateTime.of( time, ZoneId.systemDefault() );
+
+							sql = "INSERT INTO "+ statisticTableName +  "(idSession,actionID,actionName,time)";
+							sqlValues = " VALUES(" + sessionID 
+									+ "," + f.ordinal()
+									+ ",\"" + f.name() + "\""
+									+ "," + zdt.toInstant().toEpochMilli()
+									+ ")";
+
+							stmt.executeUpdate( sql + sqlValues );
 						}
-						
-						if( sessionID != null )
-						{	
-							for( Tuple< LocalDateTime, FieldType > t : register )
-							{
-								LocalDateTime time = t.x;
-								FieldType f = t.y;
-								
-								zdt = ZonedDateTime.of( time, ZoneId.systemDefault() );
-								
-								sql = "INSERT INTO "+ statisticTableName +  "(idSession,actionID,actionName,time)";
-								sqlValues = " VALUES(" + sessionID 
-												+ "," + f.ordinal()
-												+ ",\"" + f.name() + "\""
-												+ "," + zdt.toInstant().toEpochMilli()
-												+ ")";
-									
-								stmt.executeUpdate( sql + sqlValues );
-							}
-							
-							GameStatistic.clearRegister();
-						}
-						
+
+						GameStatistic.clearRegister();
 					}
 					catch (SQLException e) 
 					{
@@ -1282,10 +1272,10 @@ public class ConfigApp
 	{
 		try
 		{
-			SetTables();
-			addPlayerDB( "Manuel M.", null );
-			addPlayerDB( "Luis V.", (BufferedImage)GeneralAppIcon.getSmileIcon( 9, 64, Color.BLACK, Color.RED ).getImage() );
-			addPlayerDB( "MM", (BufferedImage)GeneralAppIcon.getSmileIcon( 9, 64, Color.BLACK, Color.YELLOW ).getImage() );
+			dbCreateTables();
+			dbAddPlayer( "Manuel M.", null );
+			dbAddPlayer( "Luis V.", (BufferedImage)GeneralAppIcon.getSmileIcon( 9, 64, Color.BLACK, Color.RED ).getImage() );
+			dbAddPlayer( "MM", (BufferedImage)GeneralAppIcon.getSmileIcon( 9, 64, Color.BLACK, Color.YELLOW ).getImage() );
 
 
 
@@ -1328,9 +1318,10 @@ public class ConfigApp
 
 		String sqlCreateTableSession = 
 				"CREATE TABLE IF NOT EXISTS session (\n"
-						+ " idSession integer PRIMARY KEY AUTOINCREMENT\n"
+						+ " idSession integer NOT NULL\n"
 						+ ", userID integer"
-						+ ", date integer NOT NULL\n"
+						//+ ", date integer NOT NULL\n"
+						+ ", PRIMARY KEY (idSession, userID)"
 						+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
 						+ ");";
 
