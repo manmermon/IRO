@@ -28,7 +28,6 @@ import image.basicPainter2D;
 
 public class Pentragram extends AbstractSprite
 {
-	private Dimension dimension;
 	private int numLines = 7; 
 	private int wayHeight;
 	
@@ -36,24 +35,26 @@ public class Pentragram extends AbstractSprite
 	{
 		super( id );
 		
-		this.dimension = panelSize;
+		super.spriteSize.width = panelSize.width;
+		super.spriteSize.height = panelSize.height;
+
 		
-		this.wayHeight = this.dimension.height / this.numLines;
+		this.wayHeight = this.spriteSize.height / this.numLines;
 	}
 	
 	public int getPentagramHeigh()
 	{
-		return this.dimension.height;
+		return this.spriteSize.height;
 	}
 	
 	public int getPentragramWidth()
 	{
-		return this.dimension.width;
+		return this.spriteSize.width;
 	}
 	
 	public int getRailHeight()
 	{
-		return this.dimension.height / this.numLines;
+		return this.spriteSize.height / this.numLines;
 	}
 	
 
@@ -67,12 +68,12 @@ public class Pentragram extends AbstractSprite
 			railThinck = 1;
 		}
 		
-		BufferedImage pen = (BufferedImage)basicPainter2D.createEmptyCanva( this.dimension.width, this.dimension.height, null );
+		BufferedImage pen = (BufferedImage)basicPainter2D.createEmptyCanva( this.spriteSize.width, this.spriteSize.height, null );
 		
 		for( int i = 0; i < this.numLines; i++ )
 		{
 			basicPainter2D.line( 0, i * this.wayHeight + railLoc - railThinck / 2
-												, this.dimension.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, Color.BLACK, pen );
+												, this.spriteSize.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, Color.BLACK, pen );
 		}
 		
 		return pen;

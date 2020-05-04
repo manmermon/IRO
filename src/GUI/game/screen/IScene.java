@@ -14,6 +14,7 @@ public interface IScene
 	public static final int PLANE_NOTE = 2;
 	public static final int PLANE_SCORE = 3;
 	public static final int PLANE_INPUT_TARGET = 4;
+	public static final int PLANE_TIME = 5;
 	
 	
 	public static final String BACKGROUND_ID = "background";
@@ -22,6 +23,7 @@ public interface IScene
 	public static final String FRET_ID = "fret";
 	public static final String SCORE_ID = "score";
 	public static final String INPUT_TARGET_ID = "input";
+	public static final String TIME_ID = "time";
 	
 	public Dimension getSize();
 	

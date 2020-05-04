@@ -590,6 +590,7 @@ public class ConfigApp
 		//fieldType.put( "idSession", Integer.class );
 		fieldType.put( "actionID", Integer.class );
 		fieldType.put( "actionName", String.class );
+		fieldType.put( "userID", Integer.class );
 		fieldType.put( "time", Integer.class );	
 		tableFields.put( statisticTableName, fieldType );
 	}
@@ -1197,6 +1198,10 @@ public class ConfigApp
 	{
 		LocalDateTime startTime = GameStatistic.getStartDateTime();
 		
+		ZonedDateTime zdt = ZonedDateTime.of( startTime, ZoneId.systemDefault() );
+		
+		long sessionID = zdt.toInstant().toEpochMilli();
+		
 		for( int playerID : GameStatistic.getPlayerIDs() )
 		{
 			List< Tuple< LocalDateTime, GameStatistic.FieldType > > register = GameStatistic.getRegister( playerID );
@@ -1204,11 +1209,7 @@ public class ConfigApp
 			if( playerID != Player.ANONYMOUS && !register.isEmpty() )
 			{	
 				if( startTime != null )
-				{
-					ZonedDateTime zdt = ZonedDateTime.of( startTime, ZoneId.systemDefault() );
-				
-					long sessionID = zdt.toInstant().toEpochMilli();
-					
+				{	
 					String sql = "INSERT INTO "+ sessionTableName +  "(idSession, userID) ";
 					String sqlValues  = "VALUES(" + sessionID + "," + playerID + ")";
 		
@@ -1232,8 +1233,9 @@ public class ConfigApp
 
 							zdt = ZonedDateTime.of( time, ZoneId.systemDefault() );
 
-							sql = "INSERT INTO "+ statisticTableName +  "(idSession,actionID,actionName,time)";
+							sql = "INSERT INTO "+ statisticTableName +  "(idSession,userID,actionID,actionName,time)";
 							sqlValues = " VALUES(" + sessionID 
+									+ "," + playerID
 									+ "," + f.ordinal()
 									+ ",\"" + f.name() + "\""
 									+ "," + zdt.toInstant().toEpochMilli()
@@ -1328,7 +1330,8 @@ public class ConfigApp
 		String sqlCreateTableStatistic = 
 				"CREATE TABLE IF NOT EXISTS statistic (\n"
 						+ " number integer PRIMARY KEY AUTOINCREMENT\n"
-						+ ", idSession integer\n"
+						+ ", idSession integer NOT NULL\n"
+						+ ", userID integer NOT NULL\n"
 						+ ", actionID integer NOT NULL\n"
 						+ ", actionName integer NOT NULL\n"
 						+ ", time integer NOT NULL\n"						

@@ -30,6 +30,7 @@ import GUI.game.component.sprite.ISprite;
 import GUI.game.component.sprite.InputGoal;
 import GUI.game.component.sprite.Pentragram;
 import GUI.game.component.sprite.Score;
+import GUI.game.component.sprite.TimeSession;
 import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.screen.IScene;
 import config.ConfigApp;
@@ -95,7 +96,7 @@ public class LevelFactory
 			}
 
 			Background back = new Background( screenSize, IScene.BACKGROUND_ID );
-			back.setZIndex( -1 );
+			back.setZIndex( IScene.PLANE_BRACKGROUND );
 			lv.addBackgroud( back );
 			if( path != null )
 			{
@@ -116,16 +117,20 @@ public class LevelFactory
 
 
 			Pentragram pen = new Pentragram( screenSize, IScene.PENTRAGRAM_ID );
-			pen.setZIndex( 0 );
+			pen.setZIndex( IScene.PLANE_PENTAGRAM );
 			lv.addPentagram( pen );
 
 			Fret fret = new Fret( pen, IScene.FRET_ID );
-			fret.setZIndex( 2 );
+			fret.setZIndex( IScene.PLANE_FRET );
 			Point2D.Double loc = new Point2D.Double();
 			loc.x = lv.getSize().width / 2;
 			loc.y = 0;
 			fret.setScreenLocation( loc );
 			lv.addFret( fret );
+			
+			TimeSession time = new TimeSession( IScene.TIME_ID, pen );
+			time.setZIndex( IScene.PLANE_TIME );
+			lv.add( time, IScene.PLANE_TIME );
 
 			int wayWidth = ( screenSize.width - (int)fret.getScreenLocation().x );
 			

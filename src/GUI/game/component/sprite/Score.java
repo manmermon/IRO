@@ -10,6 +10,7 @@ import java.awt.FontMetrics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
+import java.sql.Date;
 
 import GUI.game.component.IPossessable;
 import config.IOwner;
@@ -104,12 +105,13 @@ public class Score extends AbstractSprite implements IPossessable
 		}
 		
 		Color bg = new Color( 255, 255, 255, 140 );
-		BufferedImage img = ( BufferedImage )basicPainter2D.roundRectangle( this.playerPic.getWidth( null ), 0
-																	, sprite.getWidth() + this.playerPic.getWidth( null )
-																	, sprite.getHeight()
-																	, this.fontmetrics.stringWidth( "0")
-																	, sprite.getHeight() 
-																	, 1 , bg, bg, null );
+		BufferedImage img = ( BufferedImage )basicPainter2D.createEmptyCanva( sprite.getWidth() + this.playerPic.getWidth( null ), sprite.getHeight(), null );
+		basicPainter2D.roundRectangle( this.playerPic.getWidth( null ), 0
+										, sprite.getWidth() 
+										, sprite.getHeight() 
+										, this.fontmetrics.stringWidth( "0")
+										, sprite.getHeight() 
+										, 1 , bg, bg, img );
 		
 		//BufferedImage img = (BufferedImage)basicPainter2D.createEmptyCanva( sprite.getWidth(), sprite.getHeight(), bg );
 		basicPainter2D.composeImage( img, this.playerPic.getWidth( null ), 0, sprite );
