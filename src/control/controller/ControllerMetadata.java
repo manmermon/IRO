@@ -16,6 +16,8 @@ public interface ControllerMetadata
 	
 	public ControllerType getControllerType();
 	
+	public double getSamplingRate();
+	
 	public Object getControllerSetting();
 	
 	public String getControllerID();

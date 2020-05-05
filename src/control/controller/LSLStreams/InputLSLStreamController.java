@@ -36,8 +36,6 @@ import java.util.concurrent.TimeoutException;
 import javax.swing.Timer;
 import javax.swing.event.EventListenerList;
 
-import org.w3c.dom.ls.LSLoadEvent;
-
 import control.controller.ControllerMetadata;
 import control.controller.IInputController;
 import control.events.IInputControllerListener;

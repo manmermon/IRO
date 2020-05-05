@@ -98,12 +98,14 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 	public void InputControllerEvent( InputControllerEvent ev )
 	{
 		double[] values = ev.getInputValues();
-				
+		
 		if( values != null 
 				&& this.selectedChannel >= 0 
 				&& this.selectedChannel < values.length
 		  )
 		{
+			GameStatistic.addControllerData( ownerID, values );
+			
 			double data = values[ this.selectedChannel ];
 			double timerPercentage = 0;
 

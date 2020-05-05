@@ -196,6 +196,7 @@ public class GameWindow extends JFrame
 		if( this.gamePanel == null )
 		{
 			this.gamePanel = new JPanel( new BorderLayout() );
+			this.gamePanel.setDoubleBuffered( true );
 		}
 		
 		return this.gamePanel;

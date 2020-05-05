@@ -35,7 +35,7 @@ public class Frame extends JPanel
 {
 	private static final long serialVersionUID = 1L;
 	private BufferedImage scene = null;
-	private ISceneControl ctrl = null;
+	//private ISceneControl ctrl = null;
 		
 	public Frame( ) 
 	{
@@ -44,6 +44,7 @@ public class Frame extends JPanel
 		super.setFocusable( true );
 	}
 		
+	/*
 	public void setSceneControl( ISceneControl ctr )
 	{
 		synchronized( this )
@@ -51,6 +52,7 @@ public class Frame extends JPanel
 			this.ctrl = ctr;
 		}
 	}
+	*/
 	
 	public void setScene( BufferedImage img )
 	{

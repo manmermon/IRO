@@ -29,6 +29,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.DoubleBuffer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -45,6 +46,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,7 +58,9 @@ import javax.swing.ImageIcon;
 import config.ConfigParameter.ParameterType;
 import config.language.Caption;
 import config.language.Language;
+import control.controller.ControllerMetadata;
 import exceptions.ConfigParameterException;
+import general.ConvertTo;
 import general.NumberRange;
 import general.Tuple;
 import image.basicPainter2D;
@@ -583,6 +587,12 @@ public class ConfigApp
 		fieldType.put( "idSession", Integer.class );
 		fieldType.put( "userID", Integer.class );
 		//fieldType.put( "date", Integer.class );
+		fieldType.put( "controllerName", String.class );
+		fieldType.put( "controllerSamplingRate", Double.class );
+		fieldType.put( "controllerMinValueTarget", Double.class );
+		fieldType.put( "controllerMaxValueTarget", Double.class );
+		fieldType.put( "controllerTimeTarget", Double.class );
+		fieldType.put( "controllerData", DoubleBuffer.class );
 		tableFields.put( sessionTableName, fieldType );
 		
 		fieldType = new HashMap<String, Class>();
@@ -1194,80 +1204,119 @@ public class ConfigApp
 		return users;
 	}
 
-	public static void dbSaveStatistic() throws SQLException
+	public static void dbSaveStatistic() throws SQLException, IOException
 	{
 		LocalDateTime startTime = GameStatistic.getStartDateTime();
 		
-		ZonedDateTime zdt = ZonedDateTime.of( startTime, ZoneId.systemDefault() );
-		
-		long sessionID = zdt.toInstant().toEpochMilli();
-		
-		for( int playerID : GameStatistic.getPlayerIDs() )
+		if( startTime != null )
 		{
-			List< Tuple< LocalDateTime, GameStatistic.FieldType > > register = GameStatistic.getRegister( playerID );
-		
-			if( playerID != Player.ANONYMOUS && !register.isEmpty() )
+			ZonedDateTime zdt = ZonedDateTime.of( startTime, ZoneId.systemDefault() );
+			
+			long sessionID = zdt.toInstant().toEpochMilli();
+			
+			for( int playerID : GameStatistic.getPlayerIDs() )
 			{	
-				if( startTime != null )
-				{	
-					String sql = "INSERT INTO "+ sessionTableName +  "(idSession, userID) ";
-					String sqlValues  = "VALUES(" + sessionID + "," + playerID + ")";
-		
-					Statement stmt = null;
-		
-					ResultSet rs = null;
+				List< Tuple< LocalDateTime, GameStatistic.FieldType > > register = GameStatistic.getRegister( playerID );
+			
+				if( playerID != Player.ANONYMOUS && !register.isEmpty() )
+				{
+					ControllerMetadata cmeta = GameStatistic.getControllerSetting( playerID );
+					LinkedList< Double[] > cData = GameStatistic.getControllerData( playerID );
+					//TODO
+
+					String sql = "INSERT INTO "+ sessionTableName  + " ("  
+							+ " idSession"
+							+ ", userID"
+							+ ", controllerName"
+							+ ", controllerSamplingRate"
+							+ ", controllerMinValueTarget"
+							+ ", controllerMaxValueTarget"
+							+ ", controllerTimeTarget"
+							+ ", controllerData) ";
+
 					
+					sql += "VALUES(" + sessionID + "," + playerID + ",\"" + cmeta.getName() + "\""
+										+ "," + cmeta.getSamplingRate() + "," + cmeta.getRecoverInputLevel()
+										+ "," + cmeta.getActionInputLevel().getMin() + "," + cmeta.getTargetTimeInLevelAction()
+										+ ", ?) ";
+
+					
+					PreparedStatement pstmt = null;
+					Statement stmt = null;					
+
 					try 
 					{
 						dbConnect();
-		
-						stmt  = conn.createStatement();
-						
-						stmt.executeUpdate( sql + sqlValues );
-						
 
+						pstmt = conn.prepareStatement( sql );
+						
+						byte[] data = null;
+						if( !cData.isEmpty() )
+						{
+							data = readControllerData( cData );
+						}
+						pstmt.setBytes( 1, data );
+
+						pstmt.executeUpdate( );
+
+						stmt = conn.createStatement();
+
+						sql = "INSERT INTO "+ statisticTableName +  " (idSession,userID,actionID,actionName,time) VALUES ";
+						
 						for( Tuple< LocalDateTime, FieldType > t : register )
 						{
 							LocalDateTime time = t.x;
 							FieldType f = t.y;
 
-							zdt = ZonedDateTime.of( time, ZoneId.systemDefault() );
-
-							sql = "INSERT INTO "+ statisticTableName +  "(idSession,userID,actionID,actionName,time)";
-							sqlValues = " VALUES(" + sessionID 
-									+ "," + playerID
-									+ "," + f.ordinal()
-									+ ",\"" + f.name() + "\""
-									+ "," + zdt.toInstant().toEpochMilli()
-									+ ")";
-
-							stmt.executeUpdate( sql + sqlValues );
+							zdt = ZonedDateTime.of( time, ZoneId.systemDefault() );							
+							sql += "(" + sessionID 
+											+ "," + playerID
+											+ "," + f.ordinal()
+											+ ",\"" + f.name() + "\""
+											+ "," + zdt.toInstant().toEpochMilli()
+											+ ")\n ,";							
 						}
 
+						sql = sql.substring( 0, sql.length() - 1 );
+						
+						stmt.executeUpdate( sql );
+						
 						GameStatistic.clearRegister();
 					}
-					catch (SQLException e) 
+					catch (SQLException | IOException e) 
 					{
 						throw e;			 
 					}
 					finally 
 					{
-						if( rs != null )
+						if( pstmt != null )
 						{
-							rs.close();
+							pstmt.close();
 						}
 						
 						if( stmt != null )
 						{
 							stmt.close();
 						}
-		
+
 						dbCloseConnection();
 					}
 				}
 			}
 		}
 	}
+	
+	private static byte[] readControllerData( LinkedList< Double[] > data ) throws IOException 
+	{
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        
+        for( Double[] d : data ) 
+        {	
+        	bos.write( ConvertTo.DoubleArray2byteArray( d ) );
+        }
+        
+        return bos.toByteArray();
+    }
 	
 	/*
 	public static void main( String[] arg )
@@ -1293,25 +1342,25 @@ public class ConfigApp
 	private static void dbCreateTables() throws SQLException
 	{	
 		String sqlCreateTableUser = 
-				"CREATE TABLE IF NOT EXISTS user (\n"
-						+ " id integer PRIMARY KEY AUTOINCREMENT\n"
-						+ ", name text NOT NULL\n"
-						+ ", image BLOB\n"
+				"CREATE TABLE IF NOT EXISTS user ("
+						+ " id integer PRIMARY KEY AUTOINCREMENT"
+						+ ", name text NOT NULL"
+						+ ", image BLOB"
 						+ ");";
 
 		String sqlCreateTableConfig = 
-				"CREATE TABLE IF NOT EXISTS settings (\n"
-				//+ " id integer PRIMARY KEY AUTOINCREMENT\n"
-				+ " userID integer PRIMARY KEY \n"
-				+ ", reactionTime real CHECK (reactionTime > 0)\n"
-				+ ", recoverTime real CHECK (recoverTime > 0)\n"
-				+ ", colorPreaction integer\n"
-				+ ", colorWaitingAction integer\n"
-				+ ", colorAction integer\n"
-				+ ", songs text\n"
-				+ ", minInputValue real\n"
-				+ ", maxInputValue real\n"
-				+ ", timeInInputTarget real\n"
+				"CREATE TABLE IF NOT EXISTS settings ("
+				//+ " id integer PRIMARY KEY AUTOINCREMENT"
+				+ " userID integer PRIMARY KEY "
+				+ ", reactionTime real CHECK (reactionTime > 0)"
+				+ ", recoverTime real CHECK (recoverTime > 0)"
+				+ ", colorPreaction integer"
+				+ ", colorWaitingAction integer"
+				+ ", colorAction integer"
+				+ ", songs text"
+				+ ", minInputValue real"
+				+ ", maxInputValue real"
+				+ ", timeInInputTarget real"
 				+ ", selectedChannel real"
 				+ ", backgroundImage text"
 				+ ", noteImage text"
@@ -1319,23 +1368,29 @@ public class ConfigApp
 				+ ");";
 
 		String sqlCreateTableSession = 
-				"CREATE TABLE IF NOT EXISTS session (\n"
-						+ " idSession integer NOT NULL\n"
-						+ ", userID integer"
-						//+ ", date integer NOT NULL\n"
+				"CREATE TABLE IF NOT EXISTS session ("
+						+ " idSession integer NOT NULL" // Session date
+						+ ", userID integer NOT NULL"
+						+ ", controllerName text NOT NULL"
+						+ ", controllerSamplingRate real NOT NULL"
+						+ ", controllerMinValueTarget real NOT NULL"
+						+ ", controllerMaxValueTarget real NOT NULL"
+						+ ", controllerTimeTarget real NOT NULL"
+						+ ", controllerData BLOB"
+						//+ ", date integer NOT NULL"
 						+ ", PRIMARY KEY (idSession, userID)"
 						+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
 						+ ");";
 
 		String sqlCreateTableStatistic = 
-				"CREATE TABLE IF NOT EXISTS statistic (\n"
-						+ " number integer PRIMARY KEY AUTOINCREMENT\n"
-						+ ", idSession integer NOT NULL\n"
-						+ ", userID integer NOT NULL\n"
-						+ ", actionID integer NOT NULL\n"
-						+ ", actionName integer NOT NULL\n"
-						+ ", time integer NOT NULL\n"						
-						+ ", FOREIGN KEY ( idSession ) REFERENCES statistic( idSession ) ON DELETE CASCADE\n"
+				"CREATE TABLE IF NOT EXISTS statistic ("
+						+ " number integer PRIMARY KEY AUTOINCREMENT"
+						+ ", idSession integer NOT NULL"
+						+ ", userID integer NOT NULL"
+						+ ", actionID integer NOT NULL"
+						+ ", actionName integer NOT NULL"
+						+ ", time integer NOT NULL"						
+						+ ", FOREIGN KEY ( idSession ) REFERENCES statistic( idSession ) ON DELETE CASCADE"
 						+ ");";
 		
 		try ( Connection conn = DriverManager.getConnection( dbURL );

@@ -4,11 +4,16 @@
 package statistic;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import config.Player;
+import control.controller.ControllerMetadata;
 import general.ArrayTreeMap;
+import general.ConvertTo;
 import general.Tuple;
 
 /**
@@ -66,7 +71,6 @@ public class GameStatistic
 		//, CONTROLER_LEVEL_REACH_WITHOUT_RECOVER_LEVEL // El control (mando) alcanza el nivel objetivo para generar una acción sin haber caído por debajo del nivel de recuperación
 	};
 	
-	
 	//**********************
 	//
 	// Variables
@@ -77,6 +81,10 @@ public class GameStatistic
 	
 	private static ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType > > register = new ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType> >();
 	
+	private static Map< Integer, ControllerMetadata > controllerSettings = new HashMap< Integer, ControllerMetadata >();
+	
+	private static Map< Integer, LinkedList< Double[] > > controllerData = new HashMap< Integer, LinkedList< Double[] > >();
+	
 	/**
 	 * 
 	 */
@@ -85,9 +93,39 @@ public class GameStatistic
 		startDateTime = LocalDateTime.now();
 		
 		register.clear();
+		controllerSettings.clear();
+		controllerData.clear();
 	}
 	
-	public static synchronized void add( Integer playerID, FieldType field )
+	public static synchronized void addControllerSetting( int playerID, ControllerMetadata meta )
+	{
+		if( meta != null )
+		{
+			controllerSettings.put(  playerID, meta );
+			if( controllerData.get( playerID ) == null )
+			{
+				LinkedList< Double[] > cd = new LinkedList<Double[]>();
+				controllerData.put( playerID, cd );
+			}
+		}
+	}
+	
+	public static synchronized void addControllerData( int playerID, double[] ctrData )
+	{
+		if( ctrData != null && ctrData.length > 0 )
+		{
+			LinkedList< Double[] > cd = controllerData.get( playerID );
+			if( cd == null )
+			{
+				cd = new LinkedList<Double[]>();				
+			}
+			
+			cd.add( ConvertTo.doubleArray2DoubleArray( ctrData ) );
+			controllerData.put( playerID, cd );				
+		}
+	}
+	
+	public static synchronized void add( int playerID, FieldType field )
 	{
 		register.put(  playerID, new Tuple< LocalDateTime, FieldType >( LocalDateTime.now(), field ) );
 	}
@@ -126,9 +164,22 @@ public class GameStatistic
 		return register.get( playerID );
 	}
 	
+	public static ControllerMetadata getControllerSetting( int playerID )
+	{
+		return controllerSettings.get( playerID );
+	}
+	
+	public static LinkedList< Double[] > getControllerData( int playerID )
+	{
+		return controllerData.get( playerID );
+	}
+	
 	public static void clearRegister()
 	{
 		startDateTime = null;
+		
 		register.clear();
+		controllerSettings.clear();
+		controllerData.clear();
 	}
 }

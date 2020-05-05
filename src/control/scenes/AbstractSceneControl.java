@@ -202,7 +202,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 	 */
 	protected void setFrame( Frame fr )
 	{
-		fr.setSceneControl( this );
+		//fr.setSceneControl( this );
 		
 		fr.setRequestFocusEnabled( true );
 		

@@ -154,6 +154,9 @@ public class GameManager
 			}
 		}		
 		
+		GameStatistic.startRegister();
+		
+		
 		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
 		
 		this.gameWindow = new GameWindow( players );
@@ -253,6 +256,8 @@ public class GameManager
 				cmeta.setTargetTimeInLevelAction( timeTarget );
 				cmeta.setActionInputLevel( new NumberRange( max, Double.POSITIVE_INFINITY ));
 				
+				GameStatistic.addControllerSetting( player.getId(), cmeta );
+				
 				this.gameWindow.setTargetInputValues( player, min, max);
 				
 				ctrs.add( cmeta );
@@ -264,6 +269,7 @@ public class GameManager
 				NumberRange rng = new NumberRange( cmeta.getRecoverInputLevel(), cmeta.getActionInputLevel().getMin() );
 				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
 																				, rng, cmeta.getTargetTimeInLevelAction( ) );
+				actCheck.setOwner( cmeta.getPlayer() );
 				ControllerManager.getInstance().addControllerListener( cmeta.getPlayer(), actCheck );
 				actCheck.addInputActionListerner( ScreenControl.getInstance() );
 			}
@@ -308,8 +314,6 @@ public class GameManager
 			ScreenControl.getInstance().setScene( level );
 	
 			MainAppUI.getInstance().setVisible( false );
-			
-			GameStatistic.startRegister();
 			
 			this.gameWindow.setVisible( true );
 			

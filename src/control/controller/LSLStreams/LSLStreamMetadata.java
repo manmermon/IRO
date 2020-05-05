@@ -189,5 +189,14 @@ public class LSLStreamMetadata implements ControllerMetadata
 	public Object getControllerSetting()
 	{
 		return this.info;
+	}
+
+	/*(non-Javadoc)
+	 * @see @see control.controller.ControllerMetadata#getSamplingRate()
+	 */
+	@Override
+	public double getSamplingRate()
+	{
+		return this.info.nominal_srate();
 	}	
 }
