@@ -13,8 +13,8 @@ import control.events.SceneEventListener;
 import control.scenes.ISceneControl;
 import control.scenes.level.LevelControl;
 import exceptions.SceneException;
-import statistic.GameStatistic;
-import statistic.GameStatistic.FieldType;
+import statistic.RegistrarStatistic;
+import statistic.RegistrarStatistic.FieldType;
 import stoppableThread.AbstractStoppableThread;
 
 public class ScreenControl extends AbstractStoppableThread 
@@ -147,7 +147,7 @@ public class ScreenControl extends AbstractStoppableThread
 			{			
 				if( ev.getType() == control.events.SceneEvent.START)
 				{
-					GameStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_START );
+					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_START );
 				}		
 				else if( ev.getType() == control.events.SceneEvent.END )
 				{
@@ -159,7 +159,7 @@ public class ScreenControl extends AbstractStoppableThread
 
 					synchronized ( this )
 					{
-						GameStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_END );
+						RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_END );
 
 						try
 						{
@@ -178,11 +178,11 @@ public class ScreenControl extends AbstractStoppableThread
 				}
 				else if( ev.getType() == control.events.SceneEvent.PAUSE )
 				{
-					GameStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_PAUSE );
+					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_PAUSE );
 				}
 				else if( ev.getType() == control.events.SceneEvent.RESUME )
 				{
-					GameStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_RESUME );
+					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_RESUME );
 				}
 			}
 		};

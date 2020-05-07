@@ -10,11 +10,11 @@ import java.awt.FontMetrics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
-import java.sql.Date;
 
 import GUI.game.component.IPossessable;
 import config.IOwner;
 import image.basicPainter2D;
+import statistic.RegistrarStatistic;
 
 /**
  * @author manuel
@@ -123,6 +123,11 @@ public class Score extends AbstractSprite implements IPossessable
 	public void incrementScore()
 	{
 		this.score += this.scoreUnit;
+		
+		if( this._player != null )
+		{
+			RegistrarStatistic.setPlayerScore( this._player.getId(), score );
+		}
 	}
 	
 	public void setScoreUnit( int unit )

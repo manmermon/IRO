@@ -8,6 +8,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -37,6 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
@@ -57,13 +60,14 @@ import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
 import general.ArrayTreeMap;
 import general.NumberRange;
+import statistic.GameSessionStatistic;
+import statistic.StatisticGraphic;
 
 public class SettingPanel extends JPanel
 {
 	private static final long serialVersionUID = -1219995574372606332L;
 	
 	private JPanel containerPanel = null;
-	
 	
 	private JScrollPane scrollFields = null;
 	
@@ -291,9 +295,38 @@ public class SettingPanel extends JPanel
 				}
 			});
 			
+			final JMenuItem playerStatisticMenu = new JMenuItem( Language.getLocalCaption( Language.STATISTIC ) );
+			TranslateComponents.add( playerStatisticMenu, Language.getAllCaptions().get( Language.STATISTIC ) );
+			playerStatisticMenu.addActionListener( new ActionListener()
+			{				
+				@Override
+				public void actionPerformed(ActionEvent arg0)
+				{	
+					Rectangle bounds = new Rectangle();
+					Dimension s = Toolkit.getDefaultToolkit().getScreenSize();
+					bounds.setSize( (3 * s.width )/ 4, (3 * s.height ) / 4 );
+					
+					try
+					{
+						List<GameSessionStatistic> sessions = ConfigApp.dbGetPlayerStatistic( _player.getId() );
+
+						StatisticGraphic.showSessionStatistic( owner, sessions, _player, bounds);
+					}
+					catch (SQLException | IOException ex)
+					{
+						ex.printStackTrace();
+						JOptionPane.showMessageDialog( owner, ex.getCause() + " " + ex.getMessage()
+														, Language.getLocalCaption( Language.ERROR )
+														, JOptionPane.ERROR_MESSAGE );
+					}
+					
+				}
+			});
+			
 			this.playerImgPopMenu.add( changeImageMenu );
 			this.playerImgPopMenu.add( removeImageMenu );
-			
+			this.playerImgPopMenu.add( new JSeparator( JSeparator.HORIZONTAL ) );
+			this.playerImgPopMenu.add( playerStatisticMenu );			
 		}
 			
 		return this.playerImgPopMenu;

@@ -20,7 +20,7 @@ import general.Tuple;
  * @author manuel
  *
  */
-public class GameStatistic
+public class RegistrarStatistic
 {
 	//**********************
 	//
@@ -77,7 +77,9 @@ public class GameStatistic
 	//
 	//**********************
 	
-	private static LocalDateTime startDateTime;  
+	private static LocalDateTime startDateTime;
+	
+	private static Map< Integer, Double > sessionScore = new HashMap<Integer, Double>();
 	
 	private static ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType > > register = new ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType> >();
 	
@@ -90,11 +92,26 @@ public class GameStatistic
 	 */
 	public static void startRegister()
 	{
-		startDateTime = LocalDateTime.now();
+		clearRegister();
 		
-		register.clear();
-		controllerSettings.clear();
-		controllerData.clear();
+		startDateTime = LocalDateTime.now();
+	}
+	
+	public static void setPlayerScore( int player, double score )
+	{
+		sessionScore.put( player, score );
+	}
+	
+	public static double getPlayerScore( int player )
+	{
+		Double score = sessionScore.get( player );
+		
+		if( score == null )
+		{
+			score = 0D;
+		}
+		
+		return score;
 	}
 	
 	public static synchronized void addControllerSetting( int playerID, ControllerMetadata meta )
@@ -181,5 +198,6 @@ public class GameStatistic
 		register.clear();
 		controllerSettings.clear();
 		controllerData.clear();
+		sessionScore.clear();
 	}
 }

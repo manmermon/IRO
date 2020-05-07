@@ -57,6 +57,7 @@ public class Language
 	public static final String REMOTE_MULTIPLAYER = "REMOTE_MULTIPLAYER";
 	public static final String MULTIPLAYER = "MULTIPLAYER";
 	
+	public static final String OTHERS = "OTHERS";
 	public static final String SONG = "SONG";
 	public static final String SONGS = "SONGS";	
 	public static final String NAME = "NAME";
@@ -78,6 +79,9 @@ public class Language
 	public static final String DOWN = "DOWN";
 	public static final String NONE = "NONE";
 	
+	public static final String STATISTIC = "STATISTIC";
+	public static final String SESSION = "SESSION";
+	public static final String SESSIONS = "SESSIONS";
 	public static final String TIME = "TIME";
 	public static final String REACTION_TIME = "REACTION_TIME";
 	public static final String RECOVER_TIME = "RECOVER_TIME";
@@ -126,6 +130,26 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( OTHERS, defaultLanguage, "Others" );
+		cap.setCaption( esEs, "Otros");
+		captions.put( OTHERS, cap );
+		
+		cap = new Caption( TIME, defaultLanguage, "Time" );
+		cap.setCaption( esEs, "Tiempo");
+		captions.put( TIME, cap );
+		
+		cap = new Caption( STATISTIC, defaultLanguage, "Statistic" );
+		cap.setCaption( esEs, "Estadística");
+		captions.put( STATISTIC, cap );
+		
+		cap = new Caption( SESSIONS, defaultLanguage, "Sessions" );
+		cap.setCaption( esEs, "Sesiones");
+		captions.put( SESSIONS, cap );
+		
+		cap = new Caption( SESSION, defaultLanguage, "Session" );
+		cap.setCaption( esEs, "Sesión");
+		captions.put( SESSION, cap );
 		
 		cap = new Caption( NONE, defaultLanguage, "None" );
 		cap.setCaption( esEs, "Ninguno/a");

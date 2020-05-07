@@ -47,7 +47,7 @@ import control.controller.ControllerMetadata;
 import edu.ucsd.sccn.LSL;
 import exceptions.ConfigParameterException;
 import general.NumberRange;
-import statistic.GameStatistic;
+import statistic.RegistrarStatistic;
 import stoppableThread.IStoppableThread;
 
 public class GameManager 
@@ -154,7 +154,7 @@ public class GameManager
 			}
 		}		
 		
-		GameStatistic.startRegister();
+		RegistrarStatistic.startRegister();
 		
 		
 		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
@@ -256,7 +256,7 @@ public class GameManager
 				cmeta.setTargetTimeInLevelAction( timeTarget );
 				cmeta.setActionInputLevel( new NumberRange( max, Double.POSITIVE_INFINITY ));
 				
-				GameStatistic.addControllerSetting( player.getId(), cmeta );
+				RegistrarStatistic.addControllerSetting( player.getId(), cmeta );
 				
 				this.gameWindow.setTargetInputValues( player, min, max);
 				

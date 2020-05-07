@@ -12,7 +12,7 @@ import general.NumberRange;
  */
 public interface ControllerMetadata
 {
-	public enum ControllerType { LSLSTREAM };
+	public enum ControllerType { UNKNOWN, LSLSTREAM };
 	
 	public ControllerType getControllerType();
 	

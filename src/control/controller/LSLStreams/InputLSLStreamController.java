@@ -26,6 +26,7 @@ import edu.ucsd.sccn.LSL;
 import edu.ucsd.sccn.LSL.StreamInlet;
 import exceptions.UnsupportedDataTypeException;
 import general.ConvertTo;
+import general.Pair;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 
@@ -60,6 +61,8 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 	private EventListenerList listenerList;
 	
 	private ControllerMetadata metadata = null;
+	
+	private double dataTime;
 	
 	public InputLSLStreamController( LSLStreamMetadata meta ) throws Exception
 	{
@@ -199,7 +202,7 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 				this.timer.stop();
 			}
 			
-			this.fireInputControllerEvent( data );
+			this.fireInputControllerEvent( data, this.dataTime );
 			
 			if (this.timer != null)
 			{
@@ -223,15 +226,14 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 	private double[] readData() throws Exception
 	{
 		double[] out = null;
-		double time = 0D;
-		
+				
 		switch (this.LSLFormatData)
 		{
 			case( LSL.ChannelFormat.int8 ):
 			{	
-				time = this.inLet.pull_sample( this.byteData, this.blockTimer );
+				dataTime = this.inLet.pull_sample( this.byteData, this.blockTimer );
 				
-				if( time > 0 )
+				if( dataTime > 0 )
 				{
 					out = ConvertTo.ByteArray2DoubleArray( this.byteData );
 				}
@@ -240,9 +242,9 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 			}
 			case( LSL.ChannelFormat.int16 ):
 			{
-				time = this.inLet.pull_sample( this.shortData, this.blockTimer );
+				dataTime = this.inLet.pull_sample( this.shortData, this.blockTimer );
 				
-				if( time > 0 )
+				if( dataTime > 0 )
 				{
 					out = ConvertTo.NumberArray2DoubleArray( ConvertTo.shortArray2ShortArray( this.shortData ) );
 				}
@@ -251,9 +253,9 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 			}
 			case( LSL.ChannelFormat.int32 ):
 			{					
-				time = this.inLet.pull_sample( this.intData, this.blockTimer );
+				dataTime = this.inLet.pull_sample( this.intData, this.blockTimer );
 				
-				if( time > 0 )
+				if( dataTime > 0 )
 				{
 					out = ConvertTo.NumberArray2DoubleArray( ConvertTo.intArray2IntegerArray( this.intData ) );
 				}
@@ -261,9 +263,9 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 			}
 			case( LSL.ChannelFormat.float32 ):
 			{
-				time = this.inLet.pull_sample( this.floatData, this.blockTimer );
+				dataTime = this.inLet.pull_sample( this.floatData, this.blockTimer );
 				
-				if( time > 0 )
+				if( dataTime > 0 )
 				{
 					out = ConvertTo.NumberArray2DoubleArray( ConvertTo.floatArray2FloatArray( this.floatData ) );
 				}
@@ -272,9 +274,9 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 			}
 			case( LSL.ChannelFormat.double64 ):
 			{
-				time = this.inLet.pull_sample( this.doubleData, this.blockTimer );
+				dataTime = this.inLet.pull_sample( this.doubleData, this.blockTimer );
 				
-				if( time > 0 )
+				if( dataTime > 0 )
 				{
 					out = this.doubleData;
 				}
@@ -390,9 +392,9 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 	 * 
 	 * @param typeEvent
 	 */
-	protected void fireInputControllerEvent( double[] values )
+	protected void fireInputControllerEvent( double[] values, double time )
 	{
-		InputControllerEvent event = new InputControllerEvent( this, values );
+		InputControllerEvent event = new InputControllerEvent( this, values, time );
 
 		IInputControllerListener[] listeners = this.listenerList.getListeners( IInputControllerListener.class );
 

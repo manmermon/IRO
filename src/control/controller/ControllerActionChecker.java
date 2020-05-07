@@ -12,8 +12,8 @@ import control.events.InputActionEvent;
 import control.events.InputActionListerner;
 import control.events.InputControllerEvent;
 import general.NumberRange;
-import statistic.GameStatistic;
-import statistic.GameStatistic.FieldType;
+import statistic.RegistrarStatistic;
+import statistic.RegistrarStatistic.FieldType;
 
 public class ControllerActionChecker implements IInputControllerListener, IPossessable 
 {	
@@ -98,13 +98,17 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 	public void InputControllerEvent( InputControllerEvent ev )
 	{
 		double[] values = ev.getInputValues();
+		double time = ev.getTime();
 		
 		if( values != null 
 				&& this.selectedChannel >= 0 
 				&& this.selectedChannel < values.length
 		  )
 		{
-			GameStatistic.addControllerData( ownerID, values );
+			double[] vt = new double[ values.length + 1 ];
+			System.arraycopy( values, 0, vt, 0, values.length );
+			vt[ vt.length -1 ] = time;
+			RegistrarStatistic.addControllerData( ownerID, vt );
 			
 			double data = values[ this.selectedChannel ];
 			double timerPercentage = 0;
@@ -124,7 +128,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 				{
 					if( this.statistic == 0 )
 					{
-						GameStatistic.add( this.ownerID, FieldType.CONTROLER_LEVEL_REACH );
+						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLER_LEVEL_REACH );
 						
 						this.statistic++;
 					}
@@ -147,7 +151,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 					{	
 						if( this.statistic == 1 )
 						{
-							GameStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
 							this.statistic++;
 						}
 	
@@ -167,7 +171,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 				{
 					if( this.statistic > 0 )
 					{
-						GameStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_FINISH );
+						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_FINISH );
 						this.statistic = 0;
 					}
 					
@@ -186,13 +190,13 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 					
 					if( !this.recoverLevelReach.getAndSet( true ) )
 					{
-						GameStatistic.add( this.ownerID, FieldType.CONTROLLER_RESTORED_LEVEL );
+						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RESTORED_LEVEL );
 						
 						this.recoverLevelReported = true;
 					}
 					else if( !this.recoverLevelReported )
 					{
-						GameStatistic.add( this.ownerID, FieldType.CONTROLER_RECOVER_LEVEL_REACH );
+						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLER_RECOVER_LEVEL_REACH );
 					}				
 				}
 				

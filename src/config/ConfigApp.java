@@ -26,9 +26,12 @@ package config;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,6 +45,8 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,8 +70,9 @@ import general.NumberRange;
 import general.Tuple;
 import image.basicPainter2D;
 import image.icon.GeneralAppIcon;
-import statistic.GameStatistic;
-import statistic.GameStatistic.FieldType;
+import statistic.GameSessionStatistic;
+import statistic.RegistrarStatistic;
+import statistic.RegistrarStatistic.FieldType;
 
 public class ConfigApp 
 {
@@ -587,12 +593,15 @@ public class ConfigApp
 		fieldType.put( "idSession", Integer.class );
 		fieldType.put( "userID", Integer.class );
 		//fieldType.put( "date", Integer.class );
+		fieldType.put( "score", Long.class );
 		fieldType.put( "controllerName", String.class );
 		fieldType.put( "controllerSamplingRate", Double.class );
+		fieldType.put( "controllerNumberOfChannel", Integer.class );
+		fieldType.put( "controllerChannel", Integer.class );
 		fieldType.put( "controllerMinValueTarget", Double.class );
 		fieldType.put( "controllerMaxValueTarget", Double.class );
 		fieldType.put( "controllerTimeTarget", Double.class );
-		fieldType.put( "controllerData", DoubleBuffer.class );
+		fieldType.put( "controllerData", DoubleBuffer.class );		
 		tableFields.put( sessionTableName, fieldType );
 		
 		fieldType = new HashMap<String, Class>();
@@ -1206,7 +1215,7 @@ public class ConfigApp
 
 	public static void dbSaveStatistic() throws SQLException, IOException
 	{
-		LocalDateTime startTime = GameStatistic.getStartDateTime();
+		LocalDateTime startTime = RegistrarStatistic.getStartDateTime();
 		
 		if( startTime != null )
 		{
@@ -1214,31 +1223,41 @@ public class ConfigApp
 			
 			long sessionID = zdt.toInstant().toEpochMilli();
 			
-			for( int playerID : GameStatistic.getPlayerIDs() )
+			for( int playerID : RegistrarStatistic.getPlayerIDs() )
 			{	
-				List< Tuple< LocalDateTime, GameStatistic.FieldType > > register = GameStatistic.getRegister( playerID );
+				List< Tuple< LocalDateTime, RegistrarStatistic.FieldType > > register = RegistrarStatistic.getRegister( playerID );
 			
 				if( playerID != Player.ANONYMOUS && !register.isEmpty() )
 				{
-					ControllerMetadata cmeta = GameStatistic.getControllerSetting( playerID );
-					LinkedList< Double[] > cData = GameStatistic.getControllerData( playerID );
+					ControllerMetadata cmeta = RegistrarStatistic.getControllerSetting( playerID );
+					LinkedList< Double[] > cData = RegistrarStatistic.getControllerData( playerID );
+					double score = RegistrarStatistic.getPlayerScore( playerID );
 					//TODO
 
 					String sql = "INSERT INTO "+ sessionTableName  + " ("  
-							+ " idSession"
-							+ ", userID"
-							+ ", controllerName"
-							+ ", controllerSamplingRate"
-							+ ", controllerMinValueTarget"
-							+ ", controllerMaxValueTarget"
-							+ ", controllerTimeTarget"
-							+ ", controllerData) ";
-
+									+ " idSession"
+									+ ", userID"
+									+ ", score"
+									+ ", controllerName"
+									+ ", controllerNumberOfChannel"
+									+ ", controllerChannel"
+									+ ", controllerSamplingRate"
+									+ ", controllerMinValueTarget"
+									+ ", controllerMaxValueTarget"
+									+ ", controllerTimeTarget"
+									+ ", controllerData) ";
 					
-					sql += "VALUES(" + sessionID + "," + playerID + ",\"" + cmeta.getName() + "\""
-										+ "," + cmeta.getSamplingRate() + "," + cmeta.getRecoverInputLevel()
-										+ "," + cmeta.getActionInputLevel().getMin() + "," + cmeta.getTargetTimeInLevelAction()
-										+ ", ?) ";
+					sql += "VALUES(" + sessionID 
+								+ "," + playerID
+								+ "," + score
+								+ ",\"" + cmeta.getName() + "\""
+								+ "," + cmeta.getNumberOfChannels()
+								+ "," + cmeta.getSelectedChannel()
+								+ "," + cmeta.getSamplingRate() 
+								+ "," + cmeta.getRecoverInputLevel()
+								+ "," + cmeta.getActionInputLevel().getMin() 
+								+ "," + cmeta.getTargetTimeInLevelAction()
+								+ ", ?) ";
 
 					
 					PreparedStatement pstmt = null;
@@ -1281,7 +1300,7 @@ public class ConfigApp
 						
 						stmt.executeUpdate( sql );
 						
-						GameStatistic.clearRegister();
+						RegistrarStatistic.clearRegister();
 					}
 					catch (SQLException | IOException e) 
 					{
@@ -1317,6 +1336,115 @@ public class ConfigApp
         
         return bos.toByteArray();
     }
+	
+	public static List< GameSessionStatistic > dbGetPlayerStatistic( int player ) throws SQLException, IOException
+	{
+		List< GameSessionStatistic > stat = new ArrayList< GameSessionStatistic >();
+		
+		Statement stmt = null;
+		ResultSet rs = null;
+		
+		try
+		{
+			dbConnect();
+			
+			String sqlSession = "SELECT * FROM " + sessionTableName + " WHERE userID = " + player;
+			String sqlStatistic = "SELECT * FROM " + statisticTableName + " WHERE idSession = ";
+			
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery( sqlSession );
+			
+			List< Long > sessionIDS = new ArrayList< Long >();
+			while( rs.next() )
+			{           	
+				long sessionID = rs.getLong( "idSession" );
+				sessionIDS.add( sessionID );
+				
+				int nch = rs.getInt( "controllerNumberOfChannel" );
+
+				GameSessionStatistic gss = new GameSessionStatistic( sessionID );
+				gss.addPlayer( player );
+				gss.setControllerName( player, rs.getString( "controllerName" ) );
+				gss.setSamplingRate( player, rs.getDouble( "controllerSamplingRate" ) );
+				gss.setNumberOfChannels(player, nch );
+				gss.setSelectedChannel(player, rs.getInt( "controllerChannel" ) );					
+				gss.setActionLevel(player, new NumberRange( rs.getDouble( "controllerMaxValueTarget" ), Double.POSITIVE_INFINITY ) );
+				gss.setRecoverLevel( player,rs.getDouble("controllerMinValueTarget" ) );
+				gss.setTargetTimeInLevelAction(player, rs.getDouble( "controllerTimeTarget" ) );
+
+				InputStream input = rs.getBinaryStream( "controllerData" );
+				if( input != null )
+				{
+					BufferedInputStream bis = new BufferedInputStream( input );
+	
+					List< Double[] > data = new ArrayList< Double[] >();					
+					byte[] byteData = new byte[ ( nch + 1 ) * Double.BYTES ];
+					
+					while( bis.read( byteData ) > 0 )
+					{
+						data.add( ConvertTo.doubleArray2DoubleArray( ConvertTo.ByteArray2DoubleArray( byteData ) ) );
+					}
+	
+					Double[][] dataMatrix = new Double[ data.size() ][ nch + 1 ];
+					for( int i = 0; i < data.size(); i++ )
+					{
+						dataMatrix[ i ] = data.get( i );
+					}
+					gss.setSessionControllerData( player, dataMatrix );
+
+				}
+				stat.add( gss );
+			}
+			
+
+			for( int i = 0; i < sessionIDS.size(); i++ )
+			{
+				Long sessionID = sessionIDS.get( i );
+				rs = stmt.executeQuery( sqlStatistic + sessionID );
+				GameSessionStatistic gss = stat.get( i );
+				
+				while( rs.next() )
+				{
+					//int act = rs2.getInt( "actionID" );
+					String actName = rs.getString( "actionName" );
+					long actTime = rs.getLong( "time" );
+					
+					gss.addGameEvent( actTime, player, actName );
+				}
+			}
+			
+		}
+		catch ( SQLException | IOException ex ) 
+		{
+			throw ex;
+		}
+		finally 
+		{
+			if( rs != null )
+			{
+				rs.close();
+			}
+
+			if( stmt != null )
+			{
+				stmt.close();
+			}
+			
+			dbCloseConnection();
+		}
+		
+		Collections.sort( stat, new Comparator< GameSessionStatistic >()
+									{
+										@Override
+										public int compare(GameSessionStatistic o1, GameSessionStatistic o2)
+										{
+											return o1.getSessionDate().compareTo( o2.getSessionDate() );
+										}
+									}
+		);
+		
+		return stat;
+	}
 	
 	/*
 	public static void main( String[] arg )
@@ -1371,11 +1499,14 @@ public class ConfigApp
 				"CREATE TABLE IF NOT EXISTS session ("
 						+ " idSession integer NOT NULL" // Session date
 						+ ", userID integer NOT NULL"
+						+ ", score integer NOT NULL"
 						+ ", controllerName text NOT NULL"
 						+ ", controllerSamplingRate real NOT NULL"
+						+ ", controllerNumberOfChannel integer NOT NULL"
+						+ ", controllerChannel integer NOT NULL"
 						+ ", controllerMinValueTarget real NOT NULL"
 						+ ", controllerMaxValueTarget real NOT NULL"
-						+ ", controllerTimeTarget real NOT NULL"
+						+ ", controllerTimeTarget real NOT NULL"						
 						+ ", controllerData BLOB"
 						//+ ", date integer NOT NULL"
 						+ ", PRIMARY KEY (idSession, userID)"
@@ -1388,7 +1519,7 @@ public class ConfigApp
 						+ ", idSession integer NOT NULL"
 						+ ", userID integer NOT NULL"
 						+ ", actionID integer NOT NULL"
-						+ ", actionName integer NOT NULL"
+						+ ", actionName text NOT NULL"
 						+ ", time integer NOT NULL"						
 						+ ", FOREIGN KEY ( idSession ) REFERENCES statistic( idSession ) ON DELETE CASCADE"
 						+ ");";

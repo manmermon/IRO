@@ -31,8 +31,8 @@ import GUI.game.component.event.FretEvent;
 import GUI.game.component.event.FretEventListener;
 import config.Player;
 import image.basicPainter2D;
-import statistic.GameStatistic;
-import statistic.GameStatistic.FieldType;
+import statistic.RegistrarStatistic;
+import statistic.RegistrarStatistic.FieldType;
 
 public class Fret extends AbstractSprite
 {
@@ -183,12 +183,12 @@ public class Fret extends AbstractSprite
 		{
 			case FretEvent.NOTE_ENTERED:
 			{
-				GameStatistic.add( playerID, FieldType.NOTE_ENTER_FRET );
+				RegistrarStatistic.add( playerID, FieldType.NOTE_ENTER_FRET );
 				break;
 			}
 			case FretEvent.NOTE_EXITED:
 			{
-				GameStatistic.add( playerID, FieldType.NOTE_EXIT_FRET );
+				RegistrarStatistic.add( playerID, FieldType.NOTE_EXIT_FRET );
 				break;
 			}
 			default:
