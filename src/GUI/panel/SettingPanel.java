@@ -60,8 +60,8 @@ import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
 import general.ArrayTreeMap;
 import general.NumberRange;
-import statistic.GameSessionStatistic;
-import statistic.StatisticGraphic;
+import statistic.chart.GameSessionStatistic;
+import statistic.chart.StatisticGraphic;
 
 public class SettingPanel extends JPanel
 {

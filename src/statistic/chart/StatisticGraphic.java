@@ -1,7 +1,7 @@
 /**
  * 
  */
-package statistic;
+package statistic.chart;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -16,6 +16,7 @@ import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.swing.JDialog;
@@ -55,12 +56,13 @@ public class StatisticGraphic
 		
 		// Create Chart
 		SimpleDateFormat format = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
-		XYChart chart = new XYChartBuilder().width( size.width )
-				.height( size.height )
-				.title( player.getName() + " - " + format.format( session.getSessionDate() ) )
-				.xAxisTitle( Language.getLocalCaption( Language.TIME ) + " (s)")
-				.yAxisTitle( "" )
-				.build();
+		XYChart chart = new XYChartBuilder()
+						.width( size.width )
+						.height( size.height )
+						.title( player.getName() + " - " + format.format( session.getSessionDate() ) )
+						.xAxisTitle( Language.getLocalCaption( Language.TIME ) + " (s)")
+						.yAxisTitle( "" )
+						.build();
 
 		// Customize Chart
 		chart.getStyler().setLegendPosition( LegendPosition.OutsideE );
@@ -73,18 +75,26 @@ public class StatisticGraphic
 		XChartPanel< XYChart > chartPanel = new XChartPanel< XYChart>( chart );
 
 		Pair< ControllerMetadataExtenderAdapter, Double[][] > ctr = session.getControllerData( player.getId() );
-		double startSession = session.getStartSessionInMillis() / 1e3D;
+		//double startSession = session.getStartSessionInMillis() / 1e3D;
 
+		Double startSession = null;
+		
 		int ch = ctr.getX1().getSelectedChannel();
 		Double[][] data = ctr.getX2();
+		
 		if( data != null )
 		{
 			int dataLen = data.length;
 			int numChannels = data[ 0 ].length;
 			double[] xAxis = new double[ dataLen ];			
-	
+			
 			for( int i = 0; i < dataLen; i++ )
-			{	
+			{
+				if( startSession == null )
+				{
+					startSession = data[ i ] [ numChannels - 1 ];
+				}
+				
 				xAxis[ i ] = ( data[ i ] [ numChannels - 1 ] - startSession );
 			}
 	

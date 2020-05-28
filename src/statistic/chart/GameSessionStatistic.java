@@ -1,7 +1,7 @@
 /**
  * 
  */
-package statistic;
+package statistic.chart;
 
 import java.util.Date;
 import java.util.HashMap;

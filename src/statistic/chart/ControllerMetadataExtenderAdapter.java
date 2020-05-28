@@ -1,12 +1,9 @@
 /**
  * 
  */
-package statistic;
+package statistic.chart;
 
-import config.Player;
 import control.controller.ControllerMetadataAdapter;
-import control.controller.ControllerMetadata.ControllerType;
-import general.NumberRange;
 
 /**
  * @author manuel

@@ -28,10 +28,9 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -70,7 +69,7 @@ import general.NumberRange;
 import general.Tuple;
 import image.basicPainter2D;
 import image.icon.GeneralAppIcon;
-import statistic.GameSessionStatistic;
+import statistic.chart.GameSessionStatistic;
 import statistic.RegistrarStatistic;
 import statistic.RegistrarStatistic.FieldType;
 
@@ -84,7 +83,9 @@ public class ConfigApp
 
 	public static final String appDateRange = "2019-" + buildDate.get( Calendar.YEAR );
 
-	private static final String DB_PATH = "./user/db/data.db";
+	private static final String DB_FOLDER = "./user/db/";
+	private static final String DB_FILENAME = "data.db";
+	private static final String DB_PATH = DB_FOLDER + DB_FILENAME;
 	
 	public static final String SONG_FILE_PATH = "./sheets/";
 	public static final String BACKGROUND_SPRITE_FILE_PATH = "./resources/background/";
@@ -1467,6 +1468,23 @@ public class ConfigApp
 	//*/	
 	
 
+	public static boolean checkDBFile() throws SQLException, IOException
+	{
+		File dbFile = new File( DB_PATH );
+		
+		boolean created = !dbFile.exists();
+		
+		if( created )
+		{
+			dbFile = new File( DB_FOLDER );
+			dbFile.mkdirs();
+			
+			dbCreateTables();
+		}
+		
+		return created;
+	}
+	
 	private static void dbCreateTables() throws SQLException
 	{	
 		String sqlCreateTableUser = 
@@ -1508,6 +1526,7 @@ public class ConfigApp
 						+ ", controllerMaxValueTarget real NOT NULL"
 						+ ", controllerTimeTarget real NOT NULL"						
 						+ ", controllerData BLOB"
+						
 						//+ ", date integer NOT NULL"
 						+ ", PRIMARY KEY (idSession, userID)"
 						+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"

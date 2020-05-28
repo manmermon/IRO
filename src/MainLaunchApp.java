@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
@@ -34,7 +35,6 @@ import config.ConfigApp;
 import config.language.Language;
 import control.RefreshControl;
 import control.ScreenControl;
-import control.controller.ControllerActionChecker;
 
 public class MainLaunchApp
 {
@@ -156,10 +156,17 @@ public class MainLaunchApp
 		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 		Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gd.getDefaultConfiguration());
 		ui.setLocation( insets.left + 1, insets.top + 1 );
-
+		
 		ui.setVisible(true);
 		
 		open.dispose();
+		
+		if( ConfigApp.checkDBFile() )
+		{
+			JOptionPane.showMessageDialog( ui, "Database file no found. A new one was created."
+										, "Database", JOptionPane.WARNING_MESSAGE);
+		}
+		
 		
 		return ui;
 	}
