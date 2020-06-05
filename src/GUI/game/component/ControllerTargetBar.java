@@ -27,6 +27,8 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 	
 	private int selectedChannel = 0;
 	
+	private boolean enableCtr = true;
+	
 	/**
 	 * 
 	 */
@@ -69,7 +71,8 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 	{
 		double[] data = ev.getInputValues();
 		
-		if( data != null 
+		if( this.enableCtr 
+				&& data != null 
 				&& data.length > 0 
 				&& this.selectedChannel >= 0 
 				&& this.selectedChannel < data.length )
@@ -78,6 +81,13 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 			
 			this.pgbar.setValue( value );
 		}
+	}
+
+	@Override
+	public void setEnableInputController( boolean enable) 
+	{
+		
+		this.enableCtr = enable;
 	}
 
 	/*(non-Javadoc)

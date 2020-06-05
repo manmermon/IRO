@@ -86,7 +86,7 @@ public class GameWindow extends JFrame
 			{
 				try
 				{
-					GameManager.getInstance().stopLevel( );
+					GameManager.getInstance().stopLevel( false );
 				} 
 				catch (Exception ex)
 				{

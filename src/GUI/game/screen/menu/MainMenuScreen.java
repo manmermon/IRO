@@ -15,7 +15,7 @@ import control.controller.IInputable;
 import control.events.InputActionEvent;
 import image.basicPainter2D;
 
-public class MainMenuScreen extends Scene implements IInputable
+public class MainMenuScreen extends Scene implements IInputable, IGameMenu
 {
 	private final String BUTTON_SPRITE_ID = "BUTTON_ID";
 	

@@ -251,7 +251,7 @@ public class LevelControl extends AbstractSceneControl
 	 * @see @see control.events.BackgroundMusicEventListener#BackgroundMusicEvent(control.events.BackgroundMusicEvent)
 	 */
 	@Override
-	public void BackgroundMusicEvent( BackgroundMusicEvent event) 
+	public void BackgroundMusicEvent( BackgroundMusicEvent event ) 
 	{		
 		this.backgroundMusicEnd = this.backgroundMusicEnd || event.getType() == BackgroundMusicEvent.END;		
 	}

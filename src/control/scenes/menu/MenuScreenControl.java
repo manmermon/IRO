@@ -1,15 +1,13 @@
 package control.scenes.menu;
 
 import GUI.game.screen.IScene;
-import GUI.game.screen.menu.MainMenuScreen;
-import control.controller.KeystrokeAction;
-import control.controller.MouseStrokeAction;
+import GUI.game.screen.menu.IGameMenu;
 import control.events.InputActionEvent;
 import control.scenes.AbstractSceneControl;
 import exceptions.SceneException;
 
 public class MenuScreenControl extends AbstractSceneControl
-{	
+{		
 	/*(non-Javadoc)
 	 * @see @see control.scenes.AbstractSceneControl#specificCleanUp()
 	 */
@@ -48,14 +46,6 @@ public class MenuScreenControl extends AbstractSceneControl
 	@Override
 	protected void setInputables( IScene scene )
 	{
-		MouseStrokeAction mouse = new MouseStrokeAction();
-		
-		scene.getScene().addMouseListener( mouse );		
-		scene.getScene().addMouseMotionListener( mouse );
-		
-		KeystrokeAction keyboard = new KeystrokeAction();
-		
-		scene.getScene().addKeyListener( keyboard );	
 	}
 
 	/*(non-Javadoc)
@@ -64,7 +54,7 @@ public class MenuScreenControl extends AbstractSceneControl
 	@Override
 	protected Class getSceneClass()
 	{
-		return MainMenuScreen.class;
+		return IGameMenu.class;
 	}
 
 	/*(non-Javadoc)

@@ -6,6 +6,8 @@ package GUI.game.component.sprite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -38,17 +40,25 @@ public class InputGoal extends AbstractSprite implements IPossessable
 	/**
 	 * 
 	 */
-	public InputGoal( String id, Pentragram pen  )
+	public InputGoal( String id, int size, Rectangle bounds )
 	{
 		super( id );
 		
+		super.setSize( new Dimension( size, size ) );
+		
+		/*
 		this.setSize( new Dimension( pen.getRailHeight(), pen.getRailHeight() ) ); 
 		double centerX = pen.getScreenLocation().x + pen.getPentragramWidth() / 2;
 		
 		this.setScreenLocation(new Point2D.Double( centerX - super.spriteSize.width / 2
 													, pen.getScreenLocation().y + pen.getRailHeight() / 2 ) );
-
+		*/
 		
+		double centerX = bounds.getCenterX();
+		Point loc = bounds.getLocation();
+		
+		this.setScreenLocation(new Point2D.Double( centerX - super.spriteSize.width / 2
+													, loc.y + size / 2 ) );		
 	}
 	
 	/*(non-Javadoc)

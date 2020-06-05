@@ -22,6 +22,7 @@
 package GUI.game.component.sprite;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -36,28 +37,31 @@ import statistic.RegistrarStatistic.FieldType;
 
 public class Fret extends AbstractSprite
 {
-	private Pentragram pentagram;
-	
+	//private Pentragram pentagram;	
 	private Polygon fret;
 	
 	private int fretWidth = 100;
 
 	private Color fretFillColor;
 	
-	public Fret( Pentragram pen, String id ) 
+	public Fret( String id, Dimension size ) 
 	{
 		super( id );
 		
-		this.pentagram = pen;
 		
-		this.fretWidth = pentagram.getPentragramWidth() / 3;
+		//this.fretWidth = pentagram.getPentragramWidth() / 3;
+		this.fretWidth = size.width;
 		
 		this.fret = new Polygon();
 		
 		this.fret.addPoint( 0, 0 );
-		this.fret.addPoint( fretWidth, 0 );
-		this.fret.addPoint( fretWidth, this.pentagram.getPentagramHeigh() );
+		this.fret.addPoint( this.fretWidth, 0 );
+		/*
+		this.fret.addPoint( this.fretWidth, this.pentagram.getPentagramHeigh() );
 		this.fret.addPoint( 0, this.pentagram.getPentagramHeigh() );
+		*/
+		this.fret.addPoint( this.fretWidth, size.height );
+		this.fret.addPoint( 0, size.height );
 		
 		this.fretFillColor = new Color( 255, 255, 255, 160 );		
 	}

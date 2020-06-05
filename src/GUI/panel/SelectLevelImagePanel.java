@@ -31,7 +31,6 @@ import config.Player;
 import config.Settings;
 import config.language.Caption;
 import config.language.Language;
-import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
 import image.basicPainter2D;
 import music.IROTrack;
@@ -192,7 +191,9 @@ public class SelectLevelImagePanel extends JPanel
 			pen.setZIndex( 0 );
 			lv.addPentagram( pen );
 			
-			Fret fret = new Fret( pen, IScene.FRET_ID );
+			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() );
+			//Fret fret = new Fret( pen, IScene.FRET_ID );
+			Fret fret = new Fret( IScene.FRET_ID, sizeFret );
 			fret.setZIndex( 2 );
 			Point2D.Double loc = new Point2D.Double();
 			loc.x = lv.getSize().width / 2;
@@ -212,7 +213,8 @@ public class SelectLevelImagePanel extends JPanel
 																, 0
 																, notes
 																, IScene.NOTE_ID
-																, pen
+																//, pen
+																, pen.getRailHeight()
 																, (int)fret.getScreenLocation().x + padding
 																, 0D
 																, false );
@@ -255,7 +257,8 @@ public class SelectLevelImagePanel extends JPanel
 																, 0
 																, notes
 																, IScene.NOTE_ID
-																, pen
+																//, pen
+																, pen.getRailHeight()
 																, (int)fret.getScreenLocation().x 
 																	+ padding 
 																	+ noteSprite1.getBounds().width
@@ -279,7 +282,8 @@ public class SelectLevelImagePanel extends JPanel
 																, 0
 																, notes
 																, IScene.NOTE_ID
-																, pen
+																//, pen
+																, pen.getRailHeight()
 																, ( size.width + (int)fret.getBounds().getMaxX() ) / 2   
 																	+ padding
 																, 0D

@@ -163,7 +163,7 @@ public class ScreenControl extends AbstractStoppableThread
 
 						try
 						{
-							GameManager.getInstance().stopLevel( );
+							GameManager.getInstance().stopLevel( true );
 						}
 						catch (Exception ex)
 						{

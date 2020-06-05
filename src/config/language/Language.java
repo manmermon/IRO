@@ -79,6 +79,10 @@ public class Language
 	public static final String DOWN = "DOWN";
 	public static final String NONE = "NONE";
 	
+	public static final String NEXT  = "Next";
+	public static final String STOP  = "STOP";
+	public static final String END  = "END";
+	
 	public static final String STATISTIC = "STATISTIC";
 	public static final String SESSION = "SESSION";
 	public static final String SESSIONS = "SESSIONS";
@@ -130,6 +134,18 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( NEXT, defaultLanguage, "Next" );
+		cap.setCaption( esEs, "Siguiente");
+		captions.put( NEXT, cap );
+		
+		cap = new Caption( STOP, defaultLanguage, "Stop" );
+		cap.setCaption( esEs, "Parar");
+		captions.put( STOP, cap );
+		
+		cap = new Caption( END, defaultLanguage, "End" );
+		cap.setCaption( esEs, "Finalizar");
+		captions.put( END, cap );
 		
 		cap = new Caption( OTHERS, defaultLanguage, "Others" );
 		cap.setCaption( esEs, "Otros");

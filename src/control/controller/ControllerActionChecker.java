@@ -40,6 +40,8 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 	private IOwner owner = null;
 	private int ownerID = IOwner.ANONYMOUS;
 	
+	private boolean enableCheck = true;
+	
  	public ControllerActionChecker( int selChannel, NumberRange inputThreshold, double time ) 
 	{
 		//super.setName( this.getClass().getSimpleName() );
@@ -100,7 +102,8 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 		double[] values = ev.getInputValues();
 		double time = ev.getTime();
 		
-		if( values != null 
+		if( this.enableCheck 
+				&& values != null 
 				&& this.selectedChannel >= 0 
 				&& this.selectedChannel < values.length
 		  )
@@ -281,5 +284,11 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 	public IOwner getOwner()
 	{
 		return this.owner;
+	}
+
+	@Override
+	public void setEnableInputController(boolean enable)
+	{
+		this.enableCheck = enable;
 	}
 }

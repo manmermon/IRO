@@ -37,6 +37,7 @@ public abstract class Scene implements IScene, SpriteEventListener
 		this.removeSprite = new ArrayList< ISprite>();
 		
 		this.frame = new Frame();
+		this.frame.setLayout( null );
 		this.frame.setSize( sceneSize );
 	}
 	

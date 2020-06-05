@@ -2,9 +2,11 @@ package control;
 
 import GUI.game.screen.IScene;
 import GUI.game.screen.level.Level;
+import GUI.game.screen.menu.IGameMenu;
 import GUI.game.screen.menu.MainMenuScreen;
 import control.scenes.ISceneControl;
 import control.scenes.level.LevelControl;
+import control.scenes.menu.MenuScreenControl;
 
 public class SceneControlManager  
 {
@@ -45,9 +47,10 @@ public class SceneControlManager
 			ctr = new LevelControl();				
 			ctr.setScene( scene );
 		}
-		else if( scene instanceof MainMenuScreen )
+		else if( scene instanceof IGameMenu )
 		{
-			
+			ctr = new MenuScreenControl();
+			ctr.setScene( scene );
 		}
 		
 		return ctr;			

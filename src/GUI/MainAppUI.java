@@ -711,7 +711,7 @@ public class MainAppUI extends JFrame
 						JButton b = (JButton)e.getSource();
 						b.requestFocus();
 												
-						GameManager.getInstance().playLevel();
+						GameManager.getInstance().startGame();
 					} 
 					catch (Exception ex)
 					{

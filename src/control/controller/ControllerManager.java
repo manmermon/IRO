@@ -95,18 +95,16 @@ public class ControllerManager
 		}
 	}
 	
-	/*
 	public void setEnableControllerListener( boolean ena )
 	{
-		if( controller != null )
+		for( IInputController controller : this.controllers )
 		{
 			for( IInputControllerListener listener : controller.getListener() )
 			{
-				listener.enableProcessInputControllerEvent( ena );
+				listener.setEnableInputController( ena );
 			}
 		}
 	}
-	//*/
 		
 	public List< IInputController > getControllers()
 	{

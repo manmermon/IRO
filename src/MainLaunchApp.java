@@ -35,6 +35,7 @@ import config.ConfigApp;
 import config.language.Language;
 import control.RefreshControl;
 import control.ScreenControl;
+import image.icon.GeneralAppIcon;
 
 public class MainLaunchApp
 {
@@ -45,8 +46,15 @@ public class MainLaunchApp
 	{
 		try 
 		{
-			UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
-			//UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName() );
+			String OS = System.getProperty("os.name").toLowerCase();
+			if( (OS.contains("nix") || OS.contains("nux") || OS.contains("aix")) )
+			{
+				UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName() );
+			}
+			else
+			{
+				UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+			}
 		} 
 		catch (Exception e) 
 		{
@@ -196,10 +204,12 @@ public class MainLaunchApp
 
 		final JDialog p = new JDialog();
 
-		Icon icono = UIManager.getIcon( "OptionPane.warningIcon" );
 		
-		int w = icono.getIconWidth();
-		int h = icono.getIconHeight();
+		//Icon icono = UIManager.getIcon( "OptionPane.warningIcon" );
+		Icon icon = GeneralAppIcon.Warning( 16, Color.ORANGE );
+					
+		int w = icon.getIconWidth();
+		int h = icon.getIconHeight();
 		
 		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice gd = ge.getDefaultScreenDevice();
@@ -207,9 +217,9 @@ public class MainLaunchApp
 		
 		BufferedImage img = gc.createCompatibleImage( w, h, BufferedImage.TYPE_INT_ARGB ); 
 		Graphics2D g = img.createGraphics();
-		icono.paintIcon( null, g, 0, 0 );
+		icon.paintIcon( null, g, 0, 0 );
 		p.setIconImage( img );
-
+		
 		p.setTitle( "Problem" );
 		
 		if( fatalError )
@@ -218,6 +228,11 @@ public class MainLaunchApp
 		}
 		
 		Dimension d = new Dimension( (int)( wd * 1.25D ), fm.getHeight() * 10 );
+		if( d.width >= Toolkit.getDefaultToolkit().getScreenSize().width )
+		{
+			d.width = (int)( Toolkit.getDefaultToolkit().getScreenSize().width * 0.8 ) ;
+		}
+		
 		p.setSize( d );
 
 		Point pos = ge.getCenterPoint();

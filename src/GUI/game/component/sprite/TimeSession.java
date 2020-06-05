@@ -9,7 +9,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.Date;
 
 import control.music.MusicPlayerControl;
 import image.basicPainter2D;
@@ -25,11 +24,11 @@ public class TimeSession extends AbstractSprite
 	/**
 	 * @param idSprite
 	 */
-	public TimeSession( String idSprite, Pentragram pen )
+	public TimeSession( String idSprite, int h, Rectangle bounds )
 	{
 		super( idSprite );
 		
-		int h = pen.getRailHeight() / 2;
+		//int h = pen.getRailHeight() / 2;
 		
 		super.spriteSize.height = h;
 		
@@ -51,11 +50,10 @@ public class TimeSession extends AbstractSprite
 		}
 		
 
-		Date date = new Date();
+		//Date date = new Date();
 		super.spriteSize.width = fm.stringWidth( "0:00:00" );
 		super.spriteSize.height = fm.getHeight();
 		
-		Rectangle bounds = pen.getBounds();
 		super.screenLoc.x = bounds.getMaxX() - fm.stringWidth( "0" ) / 2 - super.spriteSize.width;
 		super.screenLoc.y = bounds.getMinY() + h / 8;
 		

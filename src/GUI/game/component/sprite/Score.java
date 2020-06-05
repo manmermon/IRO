@@ -38,15 +38,30 @@ public class Score extends AbstractSprite implements IPossessable
 	/**
 	 * 
 	 */
-	public Score( String id, Pentragram pen, int scoreUnitValue )
+	public Score( String id, int value, int scoreUnitValue, int h, Point loc )
 	{
 		super( id );
 		
+		this.score = value;		
+		
 		this.scoreUnit = scoreUnitValue;
 		
-		int h = pen.getRailHeight() / 2;
+		//int h = pen.getRailHeight() / 2;
 		
 		super.spriteSize.height = h;
+
+		this.setFontSize();
+
+		//Point loc = pen.getBounds().getLocation();
+		super.screenLoc.x = loc.x + this.fontmetrics.stringWidth( "0" ) / 2;
+		super.screenLoc.y = loc.y + h / 8;
+		
+		super.spriteSize.width = this.fontmetrics.stringWidth( String.format( this.scoreFormat,  this.score ) );
+	}
+	
+	private void setFontSize()
+	{
+		int h = super.spriteSize.height;
 		
 		Canvas cv = new Canvas();
 		
@@ -65,16 +80,9 @@ public class Score extends AbstractSprite implements IPossessable
 			fm = cv.getFontMetrics( f );
 		}
 		
-
-		Point loc = pen.getBounds().getLocation();
-		super.screenLoc.x = loc.x + fm.stringWidth( "0" ) / 2;
-		super.screenLoc.y = loc.y + h / 8;
-		
-		super.spriteSize.width = fm.stringWidth( String.format( this.scoreFormat,  this.score ) );
-		
 		this.fontmetrics = fm;
 	}
-	
+		
 	/*(non-Javadoc)
 	 * @see @see GUI.game.component.sprite.AbstractSprite#updateSpecificSprite()
 	 */

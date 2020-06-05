@@ -67,7 +67,7 @@ public class Frame extends JPanel
 		//super.setVisible( false );
 		
 		super.paintComponent( g );
-
+		
 		if( this.scene != null )
 		{
 			Dimension size = super.getSize();
@@ -82,8 +82,8 @@ public class Frame extends JPanel
 		}
 		
 		getToolkit().sync();		
-		g.dispose();		
-
+		//g.dispose();		
+	
 		super.revalidate();
 		//super.setVisible( true );
 	}

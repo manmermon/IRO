@@ -38,6 +38,8 @@ public class ControllerInputValuePanel extends JPanel implements IInputControlle
 	
 	private String format = "%.2f";
 	
+	private boolean enaCtr = true;
+	
 	public ControllerInputValuePanel( int channels ) throws Exception
 	{
 		this.containerInputValuePanel = new JPanel();
@@ -105,7 +107,7 @@ public class ControllerInputValuePanel extends JPanel implements IInputControlle
 	{
 		double[] data = ev.getInputValues();
 		
-		if( data != null )
+		if( this.enaCtr && data != null )
 		{
 			for( int i = 0; i < data.length; i++ )
 			{
@@ -158,6 +160,12 @@ public class ControllerInputValuePanel extends JPanel implements IInputControlle
 				}
 			}		
 		}
+	}
+
+	@Override
+	public void setEnableInputController(boolean enable) 
+	{
+		this.enaCtr = enable;
 	}
 
 	/*(non-Javadoc)

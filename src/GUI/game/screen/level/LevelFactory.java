@@ -120,7 +120,9 @@ public class LevelFactory
 			pen.setZIndex( IScene.PLANE_PENTAGRAM );
 			lv.addPentagram( pen );
 
-			Fret fret = new Fret( pen, IScene.FRET_ID );
+			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() ); 
+			//Fret fret = new Fret( pen, IScene.FRET_ID );
+			Fret fret = new Fret( IScene.FRET_ID, sizeFret );
 			fret.setZIndex( IScene.PLANE_FRET );
 			Point2D.Double loc = new Point2D.Double();
 			loc.x = lv.getSize().width / 2;
@@ -128,7 +130,11 @@ public class LevelFactory
 			fret.setScreenLocation( loc );
 			lv.addFret( fret );
 			
-			TimeSession time = new TimeSession( IScene.TIME_ID, pen );
+			
+			int hTS = pen.getRailHeight() / 2;
+			Rectangle bounds = pen.getBounds();			
+			//TimeSession time = new TimeSession( IScene.TIME_ID, pen );
+			TimeSession time = new TimeSession( IScene.TIME_ID, hTS, bounds );
 			time.setZIndex( IScene.PLANE_TIME );
 			lv.add( time, IScene.PLANE_TIME );
 
@@ -455,7 +461,7 @@ public class LevelFactory
 					LevelMusicSheetSegment msplayer = musicPlayers[ indexMusicSheetPlayers ];
 
 					int nNotes = msplayer.getSegments().size();
-					Score score = new Score( IScene.SCORE_ID, pen, (int)( 100 * maxNumNotes / nNotes ) );
+					Score score = new Score( IScene.SCORE_ID, 0, (int)( 100 * maxNumNotes / nNotes ), pen.getRailHeight() / 2, pen.getBounds().getLocation() );
 					score.setZIndex( IScene.PLANE_SCORE );
 					score.setOwner( playerSetting.getPlayer() );
 					
@@ -472,7 +478,8 @@ public class LevelFactory
 					
 					lv.add( score, score.getZIndex() );
 					
-					InputGoal goal = new InputGoal( IScene.INPUT_TARGET_ID, pen );
+					//InputGoal goal = new InputGoal( IScene.INPUT_TARGET_ID, pen );
+					InputGoal goal = new InputGoal( IScene.INPUT_TARGET_ID, pen.getRailHeight(), pen.getBounds() );
 					goal.setZIndex( IScene.PLANE_INPUT_TARGET );
 					Point2D.Double goalLoc = new Point2D.Double();
 					goalLoc.y = prevScoreLoc.y;
@@ -528,7 +535,8 @@ public class LevelFactory
 																		, timeTrackOnScreen //+ startDelay
 																		, Tracks
 																		, IScene.NOTE_ID
-																		, pen
+																		//, pen
+																		, pen.getRailHeight()
 																		, screenPos
 																		, vel
 																		, false

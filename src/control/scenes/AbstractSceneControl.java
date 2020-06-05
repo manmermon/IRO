@@ -1,25 +1,17 @@
 package control.scenes;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.swing.JButton;
 import javax.swing.event.EventListenerList;
 
 import GUI.GameManager;
 import GUI.game.component.Frame;
-import GUI.game.component.sprite.Background;
 import GUI.game.screen.IScene;
 import control.controller.IInputable;
 import control.events.InputActionEvent;
 import control.events.SceneEvent;
 import control.events.SceneEventListener;
 import exceptions.SceneException;
-import image.basicPainter2D;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 
@@ -138,7 +130,8 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 			throw new SceneException( "Scene null" );
 		}
 		
-		if( !this.sceneClass.equals( scene.getClass() ) )
+		//if( !this.sceneClass.equals( scene.getClass() ) )
+		if( !IScene.class.isAssignableFrom( this.sceneClass ) ) 
 		{
 			throw new SceneException( "Scene class incorrect. Scene expected " + this.sceneClass );
 		}
@@ -298,6 +291,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 
 		this.specificCleanUp();
 		
+		/*
 		this.scene.removeAllSprites();
 		Background fin = new Background( this.scene.getSize(), "FIN" ) 
 		{				
@@ -327,6 +321,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 		this.scene = null;
 		
 		this.listenerList = null;		
+		//*/
 	}
 
 	/**

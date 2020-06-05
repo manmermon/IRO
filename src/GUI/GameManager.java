@@ -27,6 +27,9 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -36,6 +39,7 @@ import GUI.game.GameWindow;
 import GUI.game.component.Frame;
 import GUI.game.screen.level.Level;
 import GUI.game.screen.level.LevelFactory;
+import GUI.game.screen.menu.MenuGameResults;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.Player;
@@ -47,6 +51,7 @@ import control.controller.ControllerMetadata;
 import edu.ucsd.sccn.LSL;
 import exceptions.ConfigParameterException;
 import general.NumberRange;
+import general.Tuple;
 import statistic.RegistrarStatistic;
 import stoppableThread.IStoppableThread;
 
@@ -58,6 +63,8 @@ public class GameManager
 	private mouseTracking autoHideMenu = null;
 	
 	private Object sync = new Object();
+	
+	private LinkedList< String > leveSongs = new LinkedList<String>();
 	
 	private GameManager() 
 	{ }
@@ -143,7 +150,7 @@ public class GameManager
 		}
 	}
 
-	public void playLevel() throws Exception 
+	public void startGame( ) throws Exception 
 	{
 		synchronized ( this.sync )
 		{
@@ -156,7 +163,8 @@ public class GameManager
 		
 		RegistrarStatistic.startRegister();
 		
-		
+		this.setLevelSongs();
+				
 		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
 		
 		this.gameWindow = new GameWindow( players );
@@ -264,6 +272,7 @@ public class GameManager
 			}
 			
 			ControllerManager.getInstance().startController( ctrs );
+			
 			for( ControllerMetadata cmeta : ctrs )
 			{
 				NumberRange rng = new NumberRange( cmeta.getRecoverInputLevel(), cmeta.getActionInputLevel().getMin() );
@@ -273,51 +282,20 @@ public class GameManager
 				ControllerManager.getInstance().addControllerListener( cmeta.getPlayer(), actCheck );
 				actCheck.addInputActionListerner( ScreenControl.getInstance() );
 			}
-			
+						
 			this.gameWindow.putControllerListener();
 			
+			ControllerManager.getInstance().setEnableControllerListener( false );
 			
-			
-			Player firstPlayer = ConfigApp.getFirstPlayer();
-			
-			Settings setplayer = ConfigApp.getPlayerSetting( firstPlayer );
-			ConfigParameter par = setplayer.getParameter( ConfigApp.SONG_LIST );
-			Object songList = par.getSelectedValue();			
-			if( songList == null )
-			{
-				throw new ConfigParameterException( "Non songs selected." );
-			}
-			
-			String[] songs = songList.toString().split( ConfigApp.SONG_LIST_SEPARATOR );
-			
-			if( songs.length == 0 )
-			{
-				throw new ConfigParameterException( "Non songs selected." );
-			}
-	
 			this.fullScreen( false );		
-	
-			Rectangle screenBounds = this.gameWindow.getSceneBounds();		
 			
-			File fileSong = new File( songs[ 0 ] );
+			File fileSong = new File( this.leveSongs.poll() );
 			
-			this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() + ": " + fileSong.getName() );
-			
-			List< Settings > settings = new ArrayList<Settings>();
-			for( Player player : ConfigApp.getPlayers() )
-			{
-				settings.add( ConfigApp.getPlayerSetting( player ) );
-			}
-			
-			Level level = LevelFactory.getLevel( fileSong, screenBounds, settings );
-	
-			ScreenControl.getInstance().setScene( level );
-	
 			MainAppUI.getInstance().setVisible( false );
 			
-			this.gameWindow.setVisible( true );
-			
-			ScreenControl.getInstance().startScene();
+			this.setLevel( fileSong );			
+
+			this.gameWindow.setVisible( true );			
 		}
 		catch( Exception ex )
 		{
@@ -334,24 +312,137 @@ public class GameManager
 		
 	}
 
-	public synchronized void stopLevel( ) throws Exception
+	private synchronized void setLevelSongs() throws ConfigParameterException
+	{
+		this.leveSongs.clear();
+		
+		Player firstPlayer = ConfigApp.getFirstPlayer();
+		Settings setplayer = ConfigApp.getPlayerSetting( firstPlayer );
+		ConfigParameter par = setplayer.getParameter( ConfigApp.SONG_LIST );
+
+		Object songList = par.getSelectedValue();			
+		if( songList == null )
+		{
+			throw new ConfigParameterException( "Non songs selected." );
+		}
+
+		String[] songs = songList.toString().split( ConfigApp.SONG_LIST_SEPARATOR );
+
+		if( songs.length == 0 )
+		{
+			throw new ConfigParameterException( "Non songs selected." );
+		}			
+		else
+		{
+			this.leveSongs.clear();
+
+			for( String s : songs )
+			{
+				this.leveSongs.add( s );
+			}
+		}
+	}
+
+	private void setLevel( File fileSong ) throws Exception
+	{
+		Rectangle screenBounds = this.gameWindow.getSceneBounds();
+		
+		List< Settings > settings = new ArrayList<Settings>();
+		for( Player player : ConfigApp.getPlayers() )
+		{
+			settings.add( ConfigApp.getPlayerSetting( player ) );
+		}
+		
+		Level level = LevelFactory.getLevel( fileSong, screenBounds, settings );
+	
+		this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() + ": " + fileSong.getName() );
+		
+		ControllerManager.getInstance().setEnableControllerListener( true );
+		
+		ScreenControl.getInstance().setScene( level );
+	
+		ScreenControl.getInstance().startScene();
+	}
+	
+	public synchronized boolean hasNextLevel()
+	{
+		return !this.leveSongs.isEmpty();
+	}
+	
+	public void nextLevel() throws Exception
+	{
+		if( !this.leveSongs.isEmpty() && this.gameWindow != null )
+		{
+			ScreenControl.getInstance().stopScene();
+			
+			this.gameWindow.getGamePanel().setVisible( false );
+			
+			this.gameWindow.getGamePanel().removeAll();
+			
+			this.setLevel( new File( this.leveSongs.poll() ) );
+			
+			this.gameWindow.getGamePanel().setVisible( true );
+		}
+		else
+		{
+			this.stopLevel( false );
+		}
+	}
+	
+	
+	public synchronized void stopLevel( boolean nextLevel ) throws Exception
 	{
 		ScreenControl.getInstance().stopScene();
-		ControllerManager.getInstance().stopController();
-					
-		synchronized( this.sync )
+		//ControllerManager.getInstance().stopController();
+		ControllerManager.getInstance().setEnableControllerListener( false );
+		
+		if( nextLevel )
 		{
-			if( this.gameWindow != null )
+			List< Tuple< Player, Double > > scores = new ArrayList< Tuple< Player, Double > >();
+			
+			for( Player p : ConfigApp.getPlayers() )
 			{
-				this.gameWindow.setVisible( false );
-				this.gameWindow = null;
-				
-				System.gc();
+				scores.add( new Tuple< Player, Double>( p, RegistrarStatistic.getPlayerScore( p.getId() ) ) );
 			}
-		}		
+			
+			Collections.sort( scores, new Comparator< Tuple< Player, Double > >() 
+										{							
+											@Override
+											public int compare( Tuple< Player, Double > t0, Tuple< Player, Double > t1 ) 
+											{
+												int eq = (int)( Math.signum( t0.y - t1.y ) );
+												return eq;
+											}
+										});
+			
+			this.gameWindow.getGamePanel().setVisible( false );
+			
+			this.gameWindow.getGamePanel().removeAll();
+						
+			ScreenControl.getInstance().setScene( new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
+																		, scores, this.hasNextLevel(), true ) );
+			
+			this.gameWindow.getGamePanel().setVisible( true );
+		}
 		
-		ConfigApp.dbSaveStatistic();
-		
-		MainAppUI.getInstance().setVisible( true );
+		if( !nextLevel )
+		{
+			ControllerManager.getInstance().stopController();
+			
+			synchronized( this.sync )
+			{
+				if( this.gameWindow != null )
+				{
+					this.gameWindow.setVisible( false );
+					this.gameWindow = null;
+					
+					System.gc();
+				}
+			}		
+			
+			ConfigApp.dbSaveStatistic();
+			
+			MainAppUI.getInstance().setVisible( true );
+		}
 	}
 }

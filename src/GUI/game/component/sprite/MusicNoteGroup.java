@@ -59,7 +59,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	
 	public static enum State { PREACTION, WAITING_ACTION, ACTION };
 	
-	private Pentragram pentagram;
+	//private Pentragram pentagram;
 	private double shiftVelocity; // pixel by second
 	private int shiftDirection = -1;
 		
@@ -108,7 +108,9 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	public MusicNoteGroup( String track
 							, double timeScreen
 							, List< IROTrack > Notes
-							, String noteID, Pentragram pen
+							, String noteID
+							//, Pentragram pen
+							, int railHeight
 							, int initLoc 
 							, double shiftVel
 							, boolean ghost ) 
@@ -120,10 +122,11 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		this.noteTracks = new ArrayList< IROTrack >();
 		this.noteTracks.addAll( Notes );	
 						
-		this.pentagram = pen;		
+		//this.pentagram = pen;		
 		this.shiftVelocity = shiftVel;
 			
-		int y = this.pentagram.getRailHeight();
+		//int y = this.pentagram.getRailHeight();
+		int y = railHeight;
 				
 		Dimension d = new Dimension();
 		d.width = y;
