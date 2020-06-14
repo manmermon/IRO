@@ -4,14 +4,20 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JPanel;
@@ -33,6 +39,8 @@ import org.jfugue.pattern.Pattern;
 import org.staccato.StaccatoParser;
 import org.staccato.StaccatoParserListener;
 
+import GUI.GameManager;
+import GUI.dialog.InfoDialog;
 import GUI.game.screen.level.BackgroundMusic;
 import config.ConfigApp;
 import config.ConfigParameter;
@@ -73,7 +81,9 @@ public class SelectSongPanel extends JPanel
 	private JPanel panelSelectedSongs;
 	private JPanel panelUpDownControl;
 	private JPanel panelMoveCtr;
+	private JPanel panelSessionSongsInfo;
 	private JPanel panelSongInfo;
+	private JPanel panelTotalSongTimeInfo;
 	
 	private JTable tableSongList;
 	private JTable tableSelectedSongList;
@@ -86,8 +96,12 @@ public class SelectSongPanel extends JPanel
 	private JButton btPlayStopSong;
 	
 	private JLabel lbSongInfo;
+	private JLabel lbTotalSongTimeInfo;	
 	
 	private Pattern pattern = null;
+	
+	
+	private long sessionTime = 0L;
 	
 	public static SelectSongPanel getInstance()
 	{
@@ -103,7 +117,7 @@ public class SelectSongPanel extends JPanel
 	{		
 		super.setLayout( new BorderLayout() );
 		
-		this.add( this.getSongInfoPanel(), BorderLayout.NORTH);
+		this.add( this.getSessiongSongsInfoPanel(), BorderLayout.NORTH);
 		this.add( this.getContainerPanel(), BorderLayout.CENTER);
 		
 		File f = new File( ConfigApp.SONG_FILE_PATH );
@@ -138,10 +152,11 @@ public class SelectSongPanel extends JPanel
 					tm.addRow( new String[] { file } );
 				}						
 				
-				t.setRowSelectionInterval( 0, 0 );
-				moveSong( t, getSelectedSongTable(), false );
+				//t.setRowSelectionInterval( 0, 0 );
+				//moveSong( t, getSelectedSongTable(), false );				
+				//copySong( t, getSelectedSongTable(), false );
 				
-				this.updateSelectedSong();				
+				//this.updateSelectedSong();				
 			}
 		}
 		catch( Exception e)
@@ -184,7 +199,8 @@ public class SelectSongPanel extends JPanel
 							if( s.equals( tVal ) )
 							{
 								t.addRowSelectionInterval( i, i );
-								moveSong( t, getSelectedSongTable(), false );
+								//moveSong( t, getSelectedSongTable(), false );
+								copySong( t, getSelectedSongTable() );
 								
 								break;
 							}
@@ -195,7 +211,20 @@ public class SelectSongPanel extends JPanel
 		}
 	}
 	
-	private JPanel getSongInfoPanel()
+	private JPanel getSessiongSongsInfoPanel()
+	{
+		if( this.panelSessionSongsInfo == null )
+		{
+			this.panelSessionSongsInfo = new JPanel( new BorderLayout() );
+			
+			this.panelSessionSongsInfo.add( this.getCurrentSongInfoPanel(), BorderLayout.CENTER );
+			this.panelSessionSongsInfo.add( this.getTotalSongTimeInfoPanel(), BorderLayout.EAST );
+		}
+		
+		return this.panelSessionSongsInfo;
+	}
+	
+	private JPanel getCurrentSongInfoPanel()
 	{
 		if( this.panelSongInfo == null )
 		{
@@ -205,11 +234,46 @@ public class SelectSongPanel extends JPanel
 			
 			TranslateComponents.add( this.panelSongInfo, Language.getAllCaptions().get( Language.SONG ) );	
 			
-			this.panelSongInfo.add( this.getSongInfoLabel(), BorderLayout.CENTER );
 			this.panelSongInfo.add( this.getPlayStopSongButton(), BorderLayout.WEST);
+			this.panelSongInfo.add( this.getSongInfoLabel(), BorderLayout.CENTER );
 		}
 		
 		return this.panelSongInfo;
+		
+	}
+	
+	private JPanel getTotalSongTimeInfoPanel()
+	{
+		if( this.panelTotalSongTimeInfo == null )
+		{
+			this.panelTotalSongTimeInfo = new JPanel( new FlowLayout() );
+			
+			this.panelTotalSongTimeInfo.setBorder( BorderFactory.createTitledBorder( Language.getLocalCaption( Language.SESSION ) ) );
+			
+			TranslateComponents.add( this.panelTotalSongTimeInfo, Language.getAllCaptions().get( Language.SESSION ) );	
+			
+			this.panelTotalSongTimeInfo.add( this.getTotalSongTimeLabel() );
+		}
+		
+		return this.panelTotalSongTimeInfo;
+	}
+	
+	private JLabel getTotalSongTimeLabel()
+	{
+		if( this.lbTotalSongTimeInfo == null )
+		{
+			this.lbTotalSongTimeInfo = new JLabel();
+						
+			this.updateSessionTime();
+		}
+		
+		return this.lbTotalSongTimeInfo;
+	}
+	
+	private void updateSessionTime()
+	{
+		String time = this.time2Text( this.sessionTime );
+		this.lbTotalSongTimeInfo.setText( time );
 	}
 	
 	private JLabel getSongInfoLabel()
@@ -611,13 +675,33 @@ public class SelectSongPanel extends JPanel
 						{
 							ex.printStackTrace();
 						}
-					}
+					}										
 				}
 			});
 			
 		}
 		
 		return this.tableSelectedSongList;
+	}
+	
+	private long getSongTime( File midiMusicSheelFile ) throws Exception
+	{	
+		StaccatoParserListener listener = new StaccatoParserListener();
+		
+		MidiParser parser = new MidiParser();
+		parser.addParserListener( listener );
+		parser.parse( MidiSystem.getSequence( midiMusicSheelFile ) );
+		
+		StaccatoParser staccatoParser = new StaccatoParser();
+		MidiParserListener midiParserListener = new MidiParserListener();
+		staccatoParser.addParserListener( midiParserListener );
+		staccatoParser.parse( listener.getPattern() );
+		
+		pattern = listener.getPattern();
+		
+		Sequence sequence = midiParserListener.getSequence();
+			
+		return sequence.getMicrosecondLength(); //micros
 	}
 	
 	private void addSelectionListenerTable( final JTable table)
@@ -645,31 +729,14 @@ public class SelectSongPanel extends JPanel
 							
 							File midiMusicSheelFile = new File( song );
 							
-							StaccatoParserListener listener = new StaccatoParserListener();
-							
-							MidiParser parser = new MidiParser();
-							parser.addParserListener( listener );
-							parser.parse( MidiSystem.getSequence( midiMusicSheelFile ) );
-							
-							StaccatoParser staccatoParser = new StaccatoParser();
-							MidiParserListener midiParserListener = new MidiParserListener();
-							staccatoParser.addParserListener( midiParserListener );
-							staccatoParser.parse( listener.getPattern() );
-							
-							pattern = listener.getPattern();
-							
-							Sequence sequence = midiParserListener.getSequence();
-								
-							long millis = sequence.getMicrosecondLength(); //micros
-							String time = String.format("%02d:%02d:%02d", 
-													TimeUnit.MICROSECONDS.toHours(millis),
-													TimeUnit.MICROSECONDS.toMinutes(millis) -  
-													TimeUnit.HOURS.toMinutes(TimeUnit.MICROSECONDS.toHours(millis)), // The change is in this line
-													TimeUnit.MICROSECONDS.toSeconds(millis) - 
-													TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(millis)));
+							long millis = getSongTime( midiMusicSheelFile );
+							String time = time2Text( millis );
 						
+							/*
 							info = midiMusicSheelFile.getName() + "; " + time + "; " + Language.getLocalCaption( Language.TRACK ) 
 									+ " " + sequence.getTracks().length;
+							*/
+							info = midiMusicSheelFile.getName() + "; " + time + "; ";
 							
 						}
 						catch( Exception ex )
@@ -683,6 +750,19 @@ public class SelectSongPanel extends JPanel
 				}
 			});
 		}
+	}
+	
+	private String time2Text( long millis )
+	{	
+		
+		String time = String.format("%02d:%02d:%02d", 
+								TimeUnit.MICROSECONDS.toHours(millis),
+								TimeUnit.MICROSECONDS.toMinutes(millis) -  
+								TimeUnit.HOURS.toMinutes(TimeUnit.MICROSECONDS.toHours(millis)), // The change is in this line
+								TimeUnit.MICROSECONDS.toSeconds(millis) - 
+								TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(millis)));
+		
+		return time;
 	}
 	
 	private JPanel getPanelControl() 
@@ -738,7 +818,8 @@ public class SelectSongPanel extends JPanel
 					JTable tSelectedSong = getSelectedSongTable();
 					JTable tSongList = gettableSongList();
 					
-					moveSong( tSongList, tSelectedSong, false );				
+					//moveSong( tSongList, tSelectedSong, false );				
+					copySong( tSongList, tSelectedSong );
 				}
 			});
 		}
@@ -776,9 +857,88 @@ public class SelectSongPanel extends JPanel
 				public void actionPerformed(ActionEvent arg0)
 				{
 					JTable tSelectedSong = getSelectedSongTable();
-					JTable tSongList = gettableSongList();
+					//JTable tSongList = gettableSongList();
+					DefaultTableModel tSongList = (DefaultTableModel)gettableSongList().getModel();
 					
-					moveSong( tSelectedSong, tSongList, true );
+					
+					//moveSong( tSelectedSong, tSongList, true );
+					
+					if( tSelectedSong.getRowCount() > 0 )
+					{
+						int[] rows = tSelectedSong.getSelectedRows();
+						Arrays.sort( rows );
+						
+						DefaultTableModel tm = (DefaultTableModel)tSelectedSong.getModel();
+						
+						TreeSet< String > fileErrorList = new TreeSet<  String >();
+						
+						for( int i = rows.length - 1; i >= 0; i-- )
+						{
+							String song = tm.getValueAt( rows[ i ], 0 ).toString() ;
+							
+							try
+							{	
+								sessionTime -= getSongTime( new File( song ) );
+							}
+							catch (Exception e) 
+							{
+								fileErrorList.add( song );
+							}
+							
+							tm.removeRow( rows[ i ] );							
+						}			
+						
+						if( !fileErrorList.isEmpty() )
+						{
+							for( String f : fileErrorList )
+							{
+								for( int i = 0; i < tSongList.getRowCount(); i++ )
+								{
+									String v = tSongList.getValueAt( i, 0 ).toString().toLowerCase();
+									
+									if( v.equals( f.toLowerCase() ) )
+									{
+										tSongList.removeRow( i );
+										break;
+									}
+								}
+								
+								for( int i = tm.getRowCount() - 1; i >= 0; i-- )
+								{
+									String v = tm.getValueAt( i, 0 ).toString().toLowerCase();
+									
+									if( v.equals( f.toLowerCase() ) )
+									{
+										tSongList.removeRow( i );
+									}
+								}
+							}
+								
+							sessionTime = 0;
+							for( int i = 0; i < tm.getRowCount(); i++ )
+							{
+								String song = tm.getValueAt( rows[ i ], 0 ).toString() ;
+								try 
+								{
+									sessionTime += getSongTime( new File( song ) );
+								} 
+								catch (Exception e) 
+								{
+								}								
+							}
+							
+							updateSessionTime();
+							
+							InfoDialog dg = new InfoDialog( GameManager.getInstance().getCurrentWindow()
+															, Language.getLocalCaption( Language.FILE_ERROR ), true );
+							Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+							d.width /= 2;
+							d.height /= 2;
+							dg.setSize( d );
+							dg.setVisible( true );
+							 
+						}
+					}
 				}
 			});
 		}
@@ -812,13 +972,21 @@ public class SelectSongPanel extends JPanel
 				public void actionPerformed(ActionEvent arg0)
 				{
 					JTable tsel = getSelectedSongTable();
-					JTable tlist = gettableSongList();
+					//JTable tlist = gettableSongList();
 					
 					if( tsel.getRowCount() > 0 )
 					{
 						tsel.addRowSelectionInterval( 0, tsel.getRowCount() - 1 );
 						
-						moveSong( tsel, tlist, true );					
+						//moveSong( tsel, tlist, true );
+						DefaultTableModel tm = (DefaultTableModel)tsel.getModel();
+						for( int r = tm.getRowCount() - 1; r >= 0; r-- )
+						{
+							tm.removeRow( r );
+						}
+					
+						sessionTime = 0;
+						updateSessionTime();
 					}
 				}
 			});
@@ -826,6 +994,7 @@ public class SelectSongPanel extends JPanel
 		return btnClear;
 	}
 	
+	/*
 	private void moveSong( JTable source, JTable dest, boolean sortDest )
 	{
 		DefaultTableModel tmSource = (DefaultTableModel)source.getModel();
@@ -881,6 +1050,44 @@ public class SelectSongPanel extends JPanel
 			}
 		}
 	}
+	*/
+	
+	private void copySong( JTable source, JTable dest )
+	{
+		DefaultTableModel tmDest = (DefaultTableModel)dest.getModel();
+		
+		int[] selIndex = source.getSelectedRows();
+		Arrays.sort( selIndex );
+		
+		if( selIndex.length > 0 )
+		{			
+			for( int i = selIndex.length - 1; i >= 0; i-- )
+			{
+				int index = selIndex[ i ];
+				
+				String song = source.getValueAt( index, 0 ).toString();
+			
+				try 
+				{
+					this.sessionTime += this.getSongTime( new File( song ) );
+					
+					tmDest.addRow( new String[] { song } );
+				} 
+				catch (Exception e) 
+				{
+					InfoDialog d = new InfoDialog( GameManager.getInstance().getCurrentWindow(), e.getMessage() + "\n" + e.getCause(), true );
+					Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+					size.width /= 2;
+					size.height /= 2;
+					d.setSize( size );
+					d.setVisible( true );
+				}								
+			}
+			
+			this.updateSessionTime();
+		}
+	}
+	
 	
 	private void moveSong( JTable source, int shift )
 	{

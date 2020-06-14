@@ -232,8 +232,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 					};
 					t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal" );
 					t.start();
-				}
-					
+				}					
 			}
 		}
 	}

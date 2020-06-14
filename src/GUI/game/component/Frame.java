@@ -21,46 +21,34 @@
 
 package GUI.game.component;
 
-import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
-import control.scenes.ISceneControl;
-
 public class Frame extends JPanel
 {
 	private static final long serialVersionUID = 1L;
-	private BufferedImage scene = null;
-	//private ISceneControl ctrl = null;
-		
+	
+    // The image that will contain everything that has been drawn on
+    // bufferGraphics.
+    private BufferedImage scene = null;
+    		
 	public Frame( ) 
 	{
-		super.setDoubleBuffered( true );	
+		super.setDoubleBuffered( true );
 		
 		super.setFocusable( true );
 	}
-		
-	/*
-	public void setSceneControl( ISceneControl ctr )
-	{
-		synchronized( this )
-		{
-			this.ctrl = ctr;
-		}
-	}
-	*/
 	
 	public void setScene( BufferedImage img )
 	{
 		this.scene = img;
 		
-		this.repaint();		
+		this.repaint();
 	}
 	
+	/*
 	@Override
 	public void paintComponent( Graphics g )
 	{
@@ -70,21 +58,53 @@ public class Frame extends JPanel
 		
 		if( this.scene != null )
 		{
-			Dimension size = super.getSize();
+			//Dimension size = super.getSize();
 			
-			Image img = new BufferedImage( size.width, size.height,  BufferedImage.TYPE_INT_ARGB );
+			//Image img = new BufferedImage( size.width, size.height,  BufferedImage.TYPE_INT_ARGB );
 
-			Graphics2D gr = (Graphics2D)img.getGraphics();
-			gr.drawImage( this.scene, 0, 0, null);
-			gr.dispose();
+			//Graphics2D gr = (Graphics2D)img.getGraphics();
+			//gr.drawImage( this.scene, 0, 0, null);
+			//gr.dispose();
 			
-			g.drawImage( img, 0, 0, null );
+			//g.drawImage( img, 0, 0, null );
+			
+			g.drawImage( this.scene, 0, 0, null );			
 		}
 		
-		getToolkit().sync();		
+		//super.repaint();
+		
+		
+		//getToolkit().sync();		
 		//g.dispose();		
 	
-		super.revalidate();
-		//super.setVisible( true );
+		//super.revalidate();
+		//super.setVisible( true );		
 	}
+	*/
+	
+	@Override
+	public void paintComponent( Graphics g )
+	{		
+		super.paintComponent( g );
+		
+		if( this.scene != null )
+		{
+			g.drawImage( this.scene, 0, 0, null );			
+		}				
+		
+		super.getToolkit().sync();		
+		
+	}
+	
+	/*
+	@Override
+	public void paint(Graphics g) 
+    {
+		if( this.scene != null )
+		{
+			g.drawImage( this.scene, 0, 0, null );			
+		}
+    } 
+	*/
+	
 }

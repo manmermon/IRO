@@ -87,6 +87,7 @@ public class GameManager
 			{
 				this.gameWindow.getGamePanel().setVisible( false );
 				
+				this.gameWindow.getGamePanel().removeAll();
 				this.gameWindow.getGamePanel().add( fr );
 				
 				this.gameWindow.getGamePanel().setVisible( true );
@@ -148,6 +149,17 @@ public class GameManager
 				}
 			}
 		}
+	}
+	
+	public JFrame getCurrentWindow()
+	{
+		JFrame w = this.gameWindow;
+		if( w == null )
+		{
+			w = MainAppUI.getInstance();
+		}
+		
+		return w;
 	}
 
 	public void startGame( ) throws Exception 

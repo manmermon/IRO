@@ -42,6 +42,7 @@ import general.Tuple;
 import image.basicPainter2D;
 import io.IROMusicParserListener;
 import music.MusicSheet;
+import statistic.RegistrarStatistic;
 import music.IROTrack;
 
 public class LevelFactory 
@@ -461,7 +462,15 @@ public class LevelFactory
 					LevelMusicSheetSegment msplayer = musicPlayers[ indexMusicSheetPlayers ];
 
 					int nNotes = msplayer.getSegments().size();
-					Score score = new Score( IScene.SCORE_ID, 0, (int)( 100 * maxNumNotes / nNotes ), pen.getRailHeight() / 2, pen.getBounds().getLocation() );
+					
+					Double sc = RegistrarStatistic.getPlayerScore( playerSetting.getPlayer().getId() );
+					
+					if( sc == null )
+					{
+						sc = 0D;
+					}
+					
+					Score score = new Score( IScene.SCORE_ID, sc.intValue(), (int)( 100 * maxNumNotes / nNotes ), pen.getRailHeight() / 2, pen.getBounds().getLocation() );
 					score.setZIndex( IScene.PLANE_SCORE );
 					score.setOwner( playerSetting.getPlayer() );
 					

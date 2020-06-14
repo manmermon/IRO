@@ -78,7 +78,7 @@ public class TimeSession extends AbstractSprite
 		
 		int hh = (int)( t / 3600 );
 		double mm = t / 60;
-		int ss = (int)( t - mm );
+		int ss = ((int) t ) % 60;
 		
 		String text = "";
 		if( hh > 0 )

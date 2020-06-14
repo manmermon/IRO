@@ -126,6 +126,8 @@ public class Language
 	public static final String BACKGROUND = "BACKGROUND";
 	public static final String NOTE = "NOTE";
 	
+	public static final String FILE_ERROR = "FILE_ERROR";
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
@@ -134,6 +136,10 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( FILE_ERROR, defaultLanguage, "File(s) not found." );
+		cap.setCaption( esEs, "Archivo(s) no encontrado(s).");
+		captions.put( FILE_ERROR, cap );
 		
 		cap = new Caption( NEXT, defaultLanguage, "Next" );
 		cap.setCaption( esEs, "Siguiente");

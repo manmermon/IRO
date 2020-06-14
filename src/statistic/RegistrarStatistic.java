@@ -102,7 +102,7 @@ public class RegistrarStatistic
 		sessionScore.put( player, score );
 	}
 	
-	public static double getPlayerScore( int player )
+	public static Double getPlayerScore( int player )
 	{
 		Double score = sessionScore.get( player );
 		
