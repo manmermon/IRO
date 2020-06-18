@@ -1,14 +1,23 @@
 package tools;
 
+import java.io.File;
 import java.util.List;
 
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.Sequence;
+
 import org.jfugue.midi.MidiDictionary;
+import org.jfugue.midi.MidiParser;
+import org.jfugue.midi.MidiParserListener;
 import org.jfugue.pattern.Pattern;
+import org.jfugue.player.Player;
 import org.jfugue.theory.Note;
+import org.staccato.StaccatoParser;
+import org.staccato.StaccatoParserListener;
 
 import general.ArrayTreeMap;
 
-public class PatternTools 
+public class MusicSheetTools 
 {
 	public static final String NOTE_COMBINATION_SYMBOL = "+";
 	public static final String TIME_SYMBOL = "@";
@@ -165,5 +174,47 @@ public class PatternTools
 		pat.setLayer( layer );
 		
 		return pat;
+	}
+	
+	public static long getSongTime( File midiMusicSheelFile ) throws Exception
+	{	
+		StaccatoParserListener listener = new StaccatoParserListener();
+		
+		MidiParser parser = new MidiParser();
+		parser.addParserListener( listener );
+		parser.parse( MidiSystem.getSequence( midiMusicSheelFile ) );
+		
+		StaccatoParser staccatoParser = new StaccatoParser();
+		MidiParserListener midiParserListener = new MidiParserListener();
+		staccatoParser.addParserListener( midiParserListener );
+		staccatoParser.parse( listener.getPattern() );
+		
+		Sequence sequence = midiParserListener.getSequence();
+			
+		return sequence.getMicrosecondLength(); //micros
+	}
+	
+	public static long getSongTime( Pattern musicPattern ) throws Exception
+	{	
+		Player p = new Player();
+		Sequence sequence = p.getSequence( musicPattern );
+			
+		return sequence.getMicrosecondLength(); //micros
+	}
+	
+	public static Pattern getPatternFromMidi( File midi ) throws Exception
+	{
+		StaccatoParserListener listener = new StaccatoParserListener();
+		
+		MidiParser parser = new MidiParser();
+		parser.addParserListener( listener );
+		parser.parse( MidiSystem.getSequence( midi ) );
+		
+		StaccatoParser staccatoParser = new StaccatoParser();
+		MidiParserListener midiParserListener = new MidiParserListener();
+		staccatoParser.addParserListener( midiParserListener );
+		staccatoParser.parse( listener.getPattern() );
+		
+		return listener.getPattern();
 	}
 }

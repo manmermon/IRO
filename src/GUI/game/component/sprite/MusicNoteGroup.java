@@ -452,7 +452,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 
 			double ctt = ( currentTime - prevMusicTime ); 
 
-			if( ctt != 0D )
+			if( ctt > 0D )
 			{
 				t = ctt;
 			}

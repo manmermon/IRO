@@ -116,9 +116,9 @@ public class testGameMenu extends JFrame {
 					res.add( new Tuple<Player, Double>( p, v ) );
 				}
 				
-				MenuGameResults mgr = new MenuGameResults( this.frame.getSize(), res, true, true );
+				MenuGameResults mgr = new MenuGameResults( this.frame.getSize(), this.frame.getBounds(), res, true, true );
 			
-				this.frame.add( mgr.getScene(), BorderLayout.CENTER );  
+				this.frame.add( mgr.getMenuFrame(), BorderLayout.CENTER );  
 				
 				break;
 			}

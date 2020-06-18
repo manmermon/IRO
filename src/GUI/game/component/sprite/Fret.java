@@ -44,6 +44,8 @@ public class Fret extends AbstractSprite
 
 	private Color fretFillColor;
 	
+	private BufferedImage fretImg = null;
+	
 	public Fret( String id, Dimension size ) 
 	{
 		super( id );
@@ -148,11 +150,16 @@ public class Fret extends AbstractSprite
 		return (BufferedImage)basicPainter2D.outlinePolygon( xs, ys, 2, Color.BLACK, null );
 		//*/
 		
-		Rectangle r = this.fret.getBounds();
+		if( this.fretImg == null )
+		{
+			Rectangle r = this.fret.getBounds();
+			
+			this.fretImg = (BufferedImage)basicPainter2D.rectangle( r.width, r.height, 3
+																, this.fretFillColor
+																, this.fretFillColor );
+		}
 		
-		return (BufferedImage)basicPainter2D.rectangle( r.width, r.height, 3
-														, this.fretFillColor
-														, this.fretFillColor );
+		return this.fretImg; 
 	}
 
 	/*

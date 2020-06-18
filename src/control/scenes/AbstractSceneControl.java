@@ -1,5 +1,6 @@
 package control.scenes;
 
+import java.awt.image.BufferedImage;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.event.EventListenerList;
@@ -193,6 +194,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 	 * 
 	 * @param fr
 	 */
+	/*
 	protected void setFrame( Frame fr )
 	{
 		//fr.setSceneControl( this );
@@ -202,6 +204,11 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 		GameManager.getInstance().setGameFrame( fr );
 		
 		fr.requestFocusInWindow();
+	}
+	*/
+	protected void setFrame( BufferedImage frame )
+	{
+		GameManager.getInstance().setGameFrame( frame );		
 	}
 
 	/*

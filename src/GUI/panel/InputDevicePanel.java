@@ -476,7 +476,7 @@ public class InputDevicePanel extends JPanel
 		return tm;
 	}
 	
-	private void updateInputs( )
+	public void updateInputs( )
 	{
 		this.lslStreamInfo = LSL.resolve_streams();
 		

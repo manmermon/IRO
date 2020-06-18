@@ -21,9 +21,11 @@
 
 package GUI;
 
+import java.awt.BorderLayout;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -73,12 +75,13 @@ public class GameManager
 	{
 		if( manager == null )
 		{
-			manager = new GameManager();
+			manager = new GameManager();		
 		}
 		
 		return manager;
 	}
-		
+	
+	/*
 	public void setGameFrame( Frame fr )
 	{
 		synchronized ( this.sync )
@@ -92,6 +95,15 @@ public class GameManager
 				
 				this.gameWindow.getGamePanel().setVisible( true );
 			}
+		}		
+	}
+	*/
+	
+	public void setGameFrame( BufferedImage fr)
+	{
+		synchronized ( this.sync )
+		{
+			this.gameWindow.getGamePanel().setScene( fr );			
 		}		
 	}
 		
@@ -430,9 +442,13 @@ public class GameManager
 			this.gameWindow.getGamePanel().setVisible( false );
 			
 			this.gameWindow.getGamePanel().removeAll();
-						
-			ScreenControl.getInstance().setScene( new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
-																		, scores, this.hasNextLevel(), true ) );
+			
+			MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
+													, this.gameWindow.getSceneBounds()
+													, scores, this.hasNextLevel(), true );
+			//ScreenControl.getInstance().setScene( mr );
+			
+			this.gameWindow.getGamePanel().add( mr.getMenuFrame(), BorderLayout.CENTER );
 			
 			this.gameWindow.getGamePanel().setVisible( true );
 		}

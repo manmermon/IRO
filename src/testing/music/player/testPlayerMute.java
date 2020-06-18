@@ -19,7 +19,7 @@ import JFugueMod.org.jfugue.player.PlayerMod;
 import io.IROMusicParserListener;
 import music.IROTrack;
 import music.MusicSheet;
-import tools.PatternTools;
+import tools.MusicSheetTools;
 
 /**
  * @author manuel

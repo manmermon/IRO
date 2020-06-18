@@ -8,7 +8,7 @@ import org.jfugue.midi.MidiDictionary;
 import org.jfugue.pattern.Pattern;
 import org.jfugue.theory.Note;
 
-import tools.PatternTools;
+import tools.MusicSheetTools;
 
 public class IROChord 
 {
@@ -100,6 +100,6 @@ public class IROChord
 	{
 		List< List< Note > > aux = new ArrayList< List< Note > >();
 		aux.add( this.notes );
-		return PatternTools.createPattern( this.tempo, this.voice, this.layer, this.instrument, aux ).toString();
+		return MusicSheetTools.createPattern( this.tempo, this.voice, this.layer, this.instrument, aux ).toString();
 	}
 }

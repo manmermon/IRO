@@ -25,6 +25,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,18 +130,19 @@ public class MainAppUI extends JFrame
 		
 		super.setJMenuBar( this.getGameMenuBar() );
 		super.setContentPane( this.getMainPanel() );
-		
-		/*
-		this.multiplayerGroup = new ButtonGroup();
-		this.multiplayerGroup.add( this.getSinglePlayerBt() );
-		this.multiplayerGroup.add( this.getLocalMultiplayerPlayerBt() );
-		this.multiplayerGroup.add( this.getRemoteMultiplayerPlayerBt() );
-		//*/
-		
+				
 		for( Player player : ConfigApp.getPlayers() )
 		{
 			this.addPlayerSetting( player );
 		}	
+		
+		super.addComponentListener( new ComponentAdapter() 
+		{
+			public void componentShown(ComponentEvent e) 
+			{
+				InputDevicePanel.getInstance( ui ).updateInputs();
+			};
+		});
 	}
 	
 	private JMenuBar getGameMenuBar()

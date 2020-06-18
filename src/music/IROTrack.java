@@ -11,7 +11,7 @@ import org.jfugue.pattern.Pattern;
 import org.jfugue.theory.Note;
 
 import general.ArrayTreeMap;
-import tools.PatternTools;
+import tools.MusicSheetTools;
 
 public class IROTrack 
 {	
@@ -352,7 +352,7 @@ public class IROTrack
 	
 	public Pattern getPatternTrackSheet()
 	{	
-		return PatternTools.createPattern( this.tempo, this.voiceID, this.instrument, this.notes );
+		return MusicSheetTools.createPattern( this.tempo, this.voiceID, this.instrument, this.notes );
 	}
 	
 	public String toString()

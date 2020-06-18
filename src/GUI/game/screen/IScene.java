@@ -1,6 +1,7 @@
 package GUI.game.screen;
 
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 import java.util.List;
 
 import GUI.game.component.Frame;
@@ -9,7 +10,7 @@ import GUI.game.component.sprite.ISprite;
 public interface IScene 
 {
 	public static final int PLANE_BRACKGROUND = -1;
-	public static final int PLANE_PENTAGRAM = 0;	 
+	public static final int PLANE_STAVE = 0;	 
 	public static final int PLANE_FRET = 1;
 	public static final int PLANE_NOTE = 2;
 	public static final int PLANE_SCORE = 3;
@@ -18,7 +19,7 @@ public interface IScene
 	
 	
 	public static final String BACKGROUND_ID = "background";
-	public static final String PENTRAGRAM_ID = "pentagram";
+	public static final String STAVE_ID = "stave";
 	public static final String NOTE_ID = "note";
 	public static final String FRET_ID = "fret";
 	public static final String SCORE_ID = "score";
@@ -43,5 +44,6 @@ public interface IScene
 		
 	public void updateLevel();
 	
-	public Frame getScene();	
+	//public Frame getScene();	
+	public BufferedImage getScene();
 }

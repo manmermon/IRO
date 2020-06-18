@@ -162,7 +162,7 @@ public class Language
 		captions.put( TIME, cap );
 		
 		cap = new Caption( STATISTIC, defaultLanguage, "Statistic" );
-		cap.setCaption( esEs, "Estadística");
+		cap.setCaption( esEs, "Estad�stica");
 		captions.put( STATISTIC, cap );
 		
 		cap = new Caption( SESSIONS, defaultLanguage, "Sessions" );
@@ -170,7 +170,7 @@ public class Language
 		captions.put( SESSIONS, cap );
 		
 		cap = new Caption( SESSION, defaultLanguage, "Session" );
-		cap.setCaption( esEs, "Sesión");
+		cap.setCaption( esEs, "Sesi�n");
 		captions.put( SESSION, cap );
 		
 		cap = new Caption( NONE, defaultLanguage, "None" );
@@ -178,7 +178,7 @@ public class Language
 		captions.put( NONE, cap );
 
 		cap = new Caption( ADD_PLAYER, defaultLanguage, "Add player" );
-		cap.setCaption( esEs, "Añadir jugador");
+		cap.setCaption( esEs, "A�adir jugador");
 		captions.put( ADD_PLAYER, cap );
 		
 		cap = new Caption( MULTIPLAYER, defaultLanguage, "Multiplayer" );
@@ -230,7 +230,7 @@ public class Language
 		captions.put( SELECTED_SONG_LIST, cap );
 		
 		cap = new Caption( SONG, defaultLanguage, "Song" );
-		cap.setCaption( esEs, "Canción" );
+		cap.setCaption( esEs, "Canci�n" );
 		captions.put( SONG, cap );
 		
 		cap = new Caption( SONGS, defaultLanguage, "Songs" );
@@ -246,7 +246,7 @@ public class Language
 		captions.put( NAME, cap );
 		
 		cap = new Caption( ANONYMOUS, defaultLanguage, "Anonymous" ) ;
-		cap.setCaption( esEs, "Anónimo" );
+		cap.setCaption( esEs, "An�nimo" );
 		captions.put( ANONYMOUS, cap );
 		
 		cap = new Caption( SELECT, defaultLanguage, "Select" );
@@ -270,11 +270,11 @@ public class Language
 		captions.put( DELETE, cap );
 		
 		cap = new Caption( REMOVE_PLAYER_MSG, defaultLanguage, "All player data will be remove. Continue?" );
-		cap.setCaption( esEs, "Se eliminarán todos los datos del jugador. ¿Desea continuar?" );
+		cap.setCaption( esEs, "Se eliminar�n todos los datos del jugador. ¿Desea continuar?" );
 		captions.put( REMOVE_PLAYER_MSG, cap );
 		
 		cap = new Caption( REMOVE_PLAYER_IMAGE_MSG, defaultLanguage, "Image will be remove. Continue?" );
-		cap.setCaption( esEs, "Se eliminarán la imagen del jugador. ¿Desea continuar?" );
+		cap.setCaption( esEs, "Se eliminar�n la imagen del jugador. �Desea continuar?" );
 		captions.put( REMOVE_PLAYER_IMAGE_MSG, cap );
 		
 		cap = new Caption( WARNING, defaultLanguage, "Warning" );
@@ -302,23 +302,23 @@ public class Language
 		captions.put( DOWN, cap );
 		
 		cap = new Caption( REACTION_TIME, defaultLanguage, "Reaction time (s)" );
-		cap.setCaption( esEs, "Tiempo de reacción (s)" );
+		cap.setCaption( esEs, "Tiempo de reacci�n (s)" );
 		captions.put( REACTION_TIME, cap );
 		
 		cap = new Caption( RECOVER_TIME, defaultLanguage, "Recovering time (s)" );
-		cap.setCaption( esEs, "Tiempo de recuperación (s)" );
+		cap.setCaption( esEs, "Tiempo de recuperaci�n (s)" );
 		captions.put( RECOVER_TIME, cap );
 		
 		cap = new Caption( PREACTION_COLOR, defaultLanguage, "Pre-action" );
-		cap.setCaption( esEs, "Pre-acción" );
+		cap.setCaption( esEs, "Pre-acci�n" );
 		captions.put( PREACTION_COLOR, cap );
 		
 		cap = new Caption( ACTION_COLOR, defaultLanguage, "Action" );
-		cap.setCaption( esEs, "Acción" );
+		cap.setCaption( esEs, "Acci�n" );
 		captions.put( ACTION_COLOR, cap );
 		
 		cap = new Caption( WAITING_ACTION_COLOR, defaultLanguage, "Waiting-action" );
-		cap.setCaption( esEs, "Esperando acción" );
+		cap.setCaption( esEs, "Esperando acci�n" );
 		captions.put( WAITING_ACTION_COLOR, cap );
 		
 		cap = new Caption( INPUT, defaultLanguage, "Input" );
@@ -330,19 +330,19 @@ public class Language
 		captions.put( VALUE, cap );
 		
 		cap = new Caption( MINIMUM, defaultLanguage, "Minimum" );
-		cap.setCaption( esEs, "Mínimo" );
+		cap.setCaption( esEs, "M�nimo" );
 		captions.put( MINIMUM, cap );
 		
 		cap = new Caption( MAXIMUM, defaultLanguage, "Maximum" );
-		cap.setCaption( esEs, "Máximo" );
+		cap.setCaption( esEs, "M�ximo" );
 		captions.put( MAXIMUM, cap );
 		
 		cap = new Caption( MIN_INPUT_VALUE, defaultLanguage, "Min. input value" );
-		cap.setCaption( esEs, "Mín. valor de entrada" );
+		cap.setCaption( esEs, "M�n. valor de entrada" );
 		captions.put( MIN_INPUT_VALUE, cap );
 		
 		cap = new Caption( MAX_INPUT_VALUE, defaultLanguage, "Max. input value" );
-		cap.setCaption( esEs, "Máx. valor de entrada" );
+		cap.setCaption( esEs, "M�x. valor de entrada" );
 		captions.put( MAX_INPUT_VALUE, cap );
 		
 		cap = new Caption( UPDATE, defaultLanguage, "Update" );

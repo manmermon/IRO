@@ -178,6 +178,7 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	protected void finallyManager()
 	{
 		super.stopThread = true;
+		System.out.println("BackgroundMusic.finallyManager()");
 		this.fireSceneEvent( BackgroundMusicEvent.END );
 	}
 	

@@ -209,7 +209,8 @@ public class LevelControl extends AbstractSceneControl
 	 */
 	@Override
 	protected void setInputables(IScene scene)
-	{			
+	{	
+		/*
 		MouseStrokeAction mouse = new MouseStrokeAction();
 		
 		scene.getScene().addMouseListener( mouse );		
@@ -217,7 +218,8 @@ public class LevelControl extends AbstractSceneControl
 		
 		KeystrokeAction keyboard = new KeystrokeAction();
 		
-		scene.getScene().addKeyListener( keyboard );		
+		scene.getScene().addKeyListener( keyboard );
+		*/		
 	}
 		
 	/*
@@ -253,7 +255,8 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	public void BackgroundMusicEvent( BackgroundMusicEvent event ) 
 	{		
-		this.backgroundMusicEnd = this.backgroundMusicEnd || event.getType() == BackgroundMusicEvent.END;		
+		this.backgroundMusicEnd = this.backgroundMusicEnd || event.getType() == BackgroundMusicEvent.END;
+		System.out.println("LevelControl.BackgroundMusicEvent() " + this.backgroundMusicEnd);
 	}
 
 	/*(non-Javadoc)

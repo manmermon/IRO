@@ -46,6 +46,8 @@ public class Frame extends JPanel
 		this.scene = img;
 		
 		this.repaint();
+		
+		super.requestFocusInWindow();
 	}
 	
 	/*
@@ -92,8 +94,8 @@ public class Frame extends JPanel
 			g.drawImage( this.scene, 0, 0, null );			
 		}				
 		
-		super.getToolkit().sync();		
-		
+		//super.getToolkit().sync();
+		//g.dispose();		
 	}
 	
 	/*

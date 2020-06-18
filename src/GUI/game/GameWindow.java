@@ -27,6 +27,7 @@ import javax.swing.KeyStroke;
 import GUI.GameManager;
 import GUI.action.keyActions;
 import GUI.game.component.ControllerTargetBar;
+import GUI.game.component.Frame;
 import config.Player;
 import control.controller.ControllerManager;
 
@@ -42,7 +43,7 @@ public class GameWindow extends JFrame
 	 */
 	private static final long serialVersionUID = 4360081921411943013L;
 	private JPanel contentPane;
-	private JPanel gamePanel;
+	private Frame gamePanel;
 	
 	private Map< Player,  ControllerTargetBar > targetControllerIndicators;
 	
@@ -54,7 +55,7 @@ public class GameWindow extends JFrame
 		if( players == null || players.isEmpty() )
 		{
 			throw new IllegalArgumentException( "Player list is null or empty." );
-		}
+		}		
 		
 		this.targetControllerIndicators = new HashMap<Player, ControllerTargetBar>();
 		
@@ -76,6 +77,8 @@ public class GameWindow extends JFrame
 		
 		super.setBounds( bounds );
 		
+		super.setIgnoreRepaint( true  );
+				
 		super.addWindowListener( new WindowAdapter()
 		{
 			/*(non-Javadoc)
@@ -119,7 +122,8 @@ public class GameWindow extends JFrame
 	public Rectangle getSceneBounds()
 	{
 		Dimension size = this.getSceneSize();
-		Point loc = super.getLocation();
+		//Point loc = super.getLocation();
+		Point loc = new Point();
 		
 		Rectangle r = new Rectangle( loc , size );
 				
@@ -191,12 +195,15 @@ public class GameWindow extends JFrame
 		return this.contentPane;
 	}
 	
-	public JPanel getGamePanel()
+	public Frame getGamePanel()
 	{
 		if( this.gamePanel == null )
 		{
-			this.gamePanel = new JPanel( new BorderLayout() );
+			this.gamePanel = new Frame();
+			
+			this.gamePanel.setLayout( new BorderLayout() );
 			this.gamePanel.setDoubleBuffered( true );
+			this.gamePanel.setIgnoreRepaint( true );
 		}
 		
 		return this.gamePanel;

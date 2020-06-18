@@ -25,20 +25,25 @@ public abstract class Scene implements IScene, SpriteEventListener
 	private List< ISprite > removeSprite;
 	
 	protected Dimension size;
-	protected Frame frame;
+	protected Rectangle frameBounds;
+	//protected Frame frame;
 		
-	public Scene( Dimension sceneSize ) 
+	public Scene( Dimension sceneSize, Rectangle FrameBounds ) 
 	{
-		this.size = new Dimension( sceneSize ); 
+		this.size = new Dimension( sceneSize );
+		this.frameBounds = new Rectangle( FrameBounds );
+		
 		this.SPRITES = new ArrayTreeMap< Integer, ISprite >();
 		
 		this.SPRITES_By_ID = new ArrayTreeMap< String, ISprite >();
 		
 		this.removeSprite = new ArrayList< ISprite>();
 		
+		/*
 		this.frame = new Frame();
 		this.frame.setLayout( null );
 		this.frame.setSize( sceneSize );
+		*/
 	}
 	
 	@Override
@@ -88,7 +93,7 @@ public abstract class Scene implements IScene, SpriteEventListener
 				this.SPRITES_By_ID.clear();
 			}
 			
-			this.frame.removeAll();
+			//this.frame.removeAll();
 		}		
 	}
 	
@@ -108,7 +113,7 @@ public abstract class Scene implements IScene, SpriteEventListener
 		{
 			List< ISprite > sprites = new ArrayList< ISprite >();
 			
-			Rectangle sceneLoc = this.frame.getBounds();
+			Rectangle sceneLoc = this.frameBounds;
 			
 			List< ISprite > sprs = this.SPRITES_By_ID.get( idSprite );
 			if( sprs != null )
@@ -187,9 +192,10 @@ public abstract class Scene implements IScene, SpriteEventListener
 		}
 	}
 	
+	/*
 	@Override
 	public Frame getScene()
-	{
+	 * {
 		synchronized ( this.SPRITES )
 		{
 			Image scene = basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
@@ -209,9 +215,13 @@ public abstract class Scene implements IScene, SpriteEventListener
 	
 					if( r.contains( loc ) )
 					{
+						long t = System.nanoTime();
+						
 						BufferedImage spr = pic.getSprite();
 					
 						basicPainter2D.composeImage( scene, (int)loc.x, (int)loc.y, spr );
+						
+						System.out.println("Scene.getScene() " + pic.getID() + " " + ( System.nanoTime() - t ) / 1e6D );
 					}
 				}
 			}
@@ -219,6 +229,39 @@ public abstract class Scene implements IScene, SpriteEventListener
 			this.frame.setScene( (BufferedImage)scene );
 			
 			return this.frame;
+		}
+	}
+	*/
+	
+	@Override
+	public BufferedImage getScene()
+	{
+		synchronized ( this.SPRITES )
+		{
+			BufferedImage scene = (BufferedImage)basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
+			
+			List< Integer > drawIndexes = new ArrayList< Integer >( this.SPRITES.keySet() );
+			Collections.sort( drawIndexes );
+			
+			Rectangle r = this.frameBounds;
+			
+			for( Integer index : drawIndexes )
+			{
+				List< ISprite > PICs = this.SPRITES.get( index );
+				
+				for( ISprite pic : PICs )
+				{	
+					Point2D.Double loc = pic.getScreenLocation();
+	
+					if( r.contains( loc ) )
+					{
+						BufferedImage spr = pic.getSprite();
+						basicPainter2D.composeImage( scene, (int)loc.x, (int)loc.y, spr );						
+					}
+				}
+			}
+			
+			return scene;
 		}
 	}
 	

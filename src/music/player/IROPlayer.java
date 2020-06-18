@@ -17,7 +17,7 @@ import JFugueMod.org.jfugue.player.PlayerMod;
 import music.IROTrack;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
-import tools.PatternTools;
+import tools.MusicSheetTools;
 
 public class IROPlayer 
 {
@@ -79,7 +79,7 @@ public class IROPlayer
 		{	
 			List< List< Note > > noteList = new ArrayList< List< Note > >();
 			noteList.add( NOTES );
-			Pattern NotesPattern = PatternTools.createPattern( bpm, voice, layer, instrument, noteList );
+			Pattern NotesPattern = MusicSheetTools.createPattern( bpm, voice, layer, instrument, noteList );
 			
 			PlayerNote player = new PlayerNote();
 			player.setPattern( NotesPattern );

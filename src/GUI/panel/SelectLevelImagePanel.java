@@ -18,11 +18,12 @@ import javax.swing.border.EmptyBorder;
 
 import org.jfugue.theory.Note;
 
+import GUI.game.component.Frame;
 import GUI.game.component.sprite.Background;
 import GUI.game.component.sprite.Fret;
 import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.component.sprite.MusicNoteGroup.State;
-import GUI.game.component.sprite.Pentragram;
+import GUI.game.component.sprite.Stave;
 import GUI.game.screen.IScene;
 import GUI.game.screen.level.Level;
 import config.ConfigApp;
@@ -164,7 +165,7 @@ public class SelectLevelImagePanel extends JPanel
 				}
 			}
 				
-			Level lv = new Level( size );
+			Level lv = new Level( size, preview.getBounds() );
 			
 			Background back = new Background( size, IScene.BACKGROUND_ID );
 			back.setZIndex( -1 );
@@ -187,7 +188,7 @@ public class SelectLevelImagePanel extends JPanel
 			}
 			
 	
-			Pentragram pen = new Pentragram( size, IScene.PENTRAGRAM_ID );
+			Stave pen = new Stave( size, IScene.STAVE_ID );
 			pen.setZIndex( 0 );
 			lv.addPentagram( pen );
 			
@@ -307,7 +308,11 @@ public class SelectLevelImagePanel extends JPanel
 			
 			preview.setVisible( false );
 			preview.removeAll();
-			preview.add( lv.getScene(), BorderLayout.CENTER );
+			
+			Frame fr = new Frame();
+			fr.setScene(  lv.getScene() );
+			
+			preview.add( fr, BorderLayout.CENTER );
 			preview.setVisible( true );			
 		}
 	}

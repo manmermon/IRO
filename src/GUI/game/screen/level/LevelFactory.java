@@ -28,7 +28,7 @@ import GUI.game.component.sprite.Background;
 import GUI.game.component.sprite.Fret;
 import GUI.game.component.sprite.ISprite;
 import GUI.game.component.sprite.InputGoal;
-import GUI.game.component.sprite.Pentragram;
+import GUI.game.component.sprite.Stave;
 import GUI.game.component.sprite.Score;
 import GUI.game.component.sprite.TimeSession;
 import GUI.game.component.sprite.MusicNoteGroup;
@@ -43,6 +43,7 @@ import image.basicPainter2D;
 import io.IROMusicParserListener;
 import music.MusicSheet;
 import statistic.RegistrarStatistic;
+import tools.MusicSheetTools;
 import music.IROTrack;
 
 public class LevelFactory 
@@ -76,7 +77,7 @@ public class LevelFactory
 
 			int tempo = music.getTempo();
 
-			lv = new Level( screenSize );
+			lv = new Level( screenSize, screenBounds );
 			lv.setBPM( tempo );
 
 
@@ -117,8 +118,8 @@ public class LevelFactory
 			}		
 
 
-			Pentragram pen = new Pentragram( screenSize, IScene.PENTRAGRAM_ID );
-			pen.setZIndex( IScene.PLANE_PENTAGRAM );
+			Stave pen = new Stave( screenSize, IScene.STAVE_ID );
+			pen.setZIndex( IScene.PLANE_STAVE );
 			lv.addPentagram( pen );
 
 			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() ); 
@@ -539,7 +540,6 @@ public class LevelFactory
 						double pad  = wayWidth + vel * timeTrackOnScreen;
 						int screenPos = (int)( fret.getScreenLocation().x + pad ) ;
 
-
 						MusicNoteGroup noteSprite = new MusicNoteGroup( trackID
 																		, timeTrackOnScreen //+ startDelay
 																		, Tracks
@@ -740,7 +740,7 @@ public class LevelFactory
 					for( int i = 0; i < playerPatterns.length; i++ )
 					{
 						Settings setPl = playerSettings.get( i );
-						Pattern pt = playerPatterns[ i ]; 
+						Pattern pt = playerPatterns[ i ];
 						BackgroundMusic playerbgMusic = new BackgroundMusic();
 						playerbgMusic.setPattern( pt );
 						playerbgMusic.setDelay( startDealy );

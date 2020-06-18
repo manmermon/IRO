@@ -47,15 +47,13 @@ public class Background extends AbstractSprite
 	@Override
 	public BufferedImage getSprite() 
 	{
-		Image back = this.pic;
-		
-		if( back == null )
+		if( this.pic == null )
 		{
 			Dimension size = super.getSize();
-			basicPainter2D.createEmptyCanva( size.width, size.height, Color.WHITE );
+			this.pic = (BufferedImage)basicPainter2D.createEmptyCanva( size.width, size.height, Color.WHITE );			
 		}
 		
-		return (BufferedImage)back;
+		return this.pic;
 	}
 
 	@Override

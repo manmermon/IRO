@@ -5,6 +5,7 @@ package GUI.game.component.sprite;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Image;
@@ -57,6 +58,19 @@ public class Score extends AbstractSprite implements IPossessable
 		super.screenLoc.y = loc.y + h / 8;
 		
 		super.spriteSize.width = this.fontmetrics.stringWidth( String.format( this.scoreFormat,  this.score ) );
+	}
+	
+	@Override
+	public Dimension getSize() 
+	{
+		Dimension d = super.getSize();
+		
+		if( this._player != null && this.playerPic == null )
+		{
+			d.width += d.height;
+		}
+		
+		return d;
 	}
 	
 	private void setFontSize()
@@ -158,7 +172,7 @@ public class Score extends AbstractSprite implements IPossessable
 		
 		if( this._player != null && this._player.getOwnerImage() != null )
 		{
-			super.spriteSize.width += this._player.getOwnerImage().getWidth( null );
+			super.spriteSize.width += this._player.getOwnerImage().getWidth( null );			
 		}
 	}
 

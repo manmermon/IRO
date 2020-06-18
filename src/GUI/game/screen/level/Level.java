@@ -21,6 +21,7 @@
 package GUI.game.screen.level;
 
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,7 @@ import org.jfugue.midi.MidiDefaults;
 
 import GUI.game.component.sprite.Fret;
 import GUI.game.component.sprite.ISprite;
-import GUI.game.component.sprite.Pentragram;
+import GUI.game.component.sprite.Stave;
 import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.screen.Scene;
 
@@ -41,9 +42,9 @@ public class Level extends Scene
 	private BackgroundMusic backgroundMusic;
 	private Map< Integer, BackgroundMusic > playerMusics;
 	
-	public Level( Dimension sceneSize ) 
+	public Level( Dimension sceneSize, Rectangle frameBounds ) 
 	{
-		super( sceneSize );
+		super( sceneSize, frameBounds );
 		
 		this.playerMusics = new HashMap< Integer, BackgroundMusic>();
 		this.BPM = MidiDefaults.DEFAULT_TEMPO_BEATS_PER_MINUTE;
@@ -81,11 +82,11 @@ public class Level extends Scene
 		super.add( sprite, PLANE_NOTE );
 	}
 	
-	public void addPentagram( Pentragram sprite )
+	public void addPentagram( Stave sprite )
 	{
-		sprite.setZIndex( PLANE_PENTAGRAM );
-		super.SPRITES.remove( PLANE_PENTAGRAM );
-		super.add( sprite, PLANE_PENTAGRAM );
+		sprite.setZIndex( PLANE_STAVE );
+		super.SPRITES.remove( PLANE_STAVE );
+		super.add( sprite, PLANE_STAVE );
 	}
 	
 	public void addFret( Fret sprite )
@@ -102,11 +103,11 @@ public class Level extends Scene
 		return (Fret)fret.get( 0 );
 	}
 	
-	public Pentragram getPentagram()
+	public Stave getPentagram()
 	{
-		List< ISprite > pen = this.SPRITES.get( PLANE_PENTAGRAM );
+		List< ISprite > pen = this.SPRITES.get( PLANE_STAVE );
 		
-		return (Pentragram)pen.get( 0 ); 
+		return (Stave)pen.get( 0 ); 
 	}
 	
 	public List< MusicNoteGroup > getNotes()

@@ -53,6 +53,8 @@ import control.music.MusicPlayerControl;
 import exceptions.ConfigParameterException;
 import image.basicPainter2D;
 import image.icon.GeneralAppIcon;
+import music.MusicSheet;
+import tools.MusicSheetTools;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiSystem;
@@ -686,22 +688,9 @@ public class SelectSongPanel extends JPanel
 	
 	private long getSongTime( File midiMusicSheelFile ) throws Exception
 	{	
-		StaccatoParserListener listener = new StaccatoParserListener();
-		
-		MidiParser parser = new MidiParser();
-		parser.addParserListener( listener );
-		parser.parse( MidiSystem.getSequence( midiMusicSheelFile ) );
-		
-		StaccatoParser staccatoParser = new StaccatoParser();
-		MidiParserListener midiParserListener = new MidiParserListener();
-		staccatoParser.addParserListener( midiParserListener );
-		staccatoParser.parse( listener.getPattern() );
-		
-		pattern = listener.getPattern();
-		
-		Sequence sequence = midiParserListener.getSequence();
+		this.pattern = MusicSheetTools.getPatternFromMidi( midiMusicSheelFile );
 			
-		return sequence.getMicrosecondLength(); //micros
+		return MusicSheetTools.getSongTime( this.pattern ); //micros
 	}
 	
 	private void addSelectionListenerTable( final JTable table)

@@ -26,20 +26,23 @@ import java.awt.image.BufferedImage;
 
 import image.basicPainter2D;
 
-public class Pentragram extends AbstractSprite
+public class Stave extends AbstractSprite
 {
 	private int numLines = 7; 
 	private int wayHeight;
 	
-	public Pentragram( Dimension panelSize, String id ) 
+	private BufferedImage stave = null;
+	
+	public Stave( Dimension panelSize, String id ) 
 	{
 		super( id );
 		
 		super.spriteSize.width = panelSize.width;
 		super.spriteSize.height = panelSize.height;
-
 		
 		this.wayHeight = this.spriteSize.height / this.numLines;
+		
+		this.createStaveImg();
 	}
 	
 	public int getPentagramHeigh()
@@ -57,9 +60,7 @@ public class Pentragram extends AbstractSprite
 		return this.spriteSize.height / this.numLines;
 	}
 	
-
-	@Override
-	public BufferedImage getSprite() 
+	private void createStaveImg()
 	{
 		int railLoc = this.wayHeight / 2;
 		int railThinck = railLoc / 10;
@@ -68,15 +69,20 @@ public class Pentragram extends AbstractSprite
 			railThinck = 1;
 		}
 		
-		BufferedImage pen = (BufferedImage)basicPainter2D.createEmptyCanva( this.spriteSize.width, this.spriteSize.height, null );
+		this.stave = (BufferedImage)basicPainter2D.createEmptyCanva( this.spriteSize.width, this.spriteSize.height, null );
 		
 		for( int i = 0; i < this.numLines; i++ )
 		{
 			basicPainter2D.line( 0, i * this.wayHeight + railLoc - railThinck / 2
-												, this.spriteSize.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, Color.BLACK, pen );
+												, this.spriteSize.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, Color.BLACK, this.stave );
 		}
-		
-		return pen;
+	}
+	
+
+	@Override
+	public BufferedImage getSprite() 
+	{	
+		return this.stave;
 	}
 
 	@Override
