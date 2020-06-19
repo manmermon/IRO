@@ -45,7 +45,7 @@ public class Background extends AbstractSprite
 	}
 	
 	@Override
-	public BufferedImage getSprite() 
+	protected BufferedImage createSprite() 
 	{
 		if( this.pic == null )
 		{

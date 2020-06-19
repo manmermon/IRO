@@ -6,7 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.swing.event.EventListenerList;
 
 import GUI.GameManager;
-import GUI.game.component.Frame;
+import GUI.game.screen.IPausable;
 import GUI.game.screen.IScene;
 import control.controller.IInputable;
 import control.events.InputActionEvent;
@@ -363,5 +363,33 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 	 * 
 	 */
 	protected abstract void setInputables( IScene scene );
+
+	@Override
+	public void setPauseScene(boolean pause) 
+	{
+		if( this.scene != null )
+		{
+			if( this.scene instanceof IPausable )
+			{
+				((IPausable)this.scene).setPause( pause );
+			}
+		}
+	}
+	
+	@Override
+	public boolean isPausedScene() 
+	{
+		boolean pause = false;
+		
+		if( this.scene != null )
+		{
+			if( this.scene instanceof IPausable )
+			{
+				pause = ((IPausable)this.scene).isPaused();
+			}
+		}
+				
+		return pause;
+	}
 	
 }

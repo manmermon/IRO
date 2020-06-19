@@ -38,8 +38,6 @@ import control.events.SceneEvent;
 import control.music.MusicPlayerControl;
 import control.scenes.AbstractSceneControl;
 import exceptions.SceneException;
-import control.controller.KeystrokeAction;
-import control.controller.MouseStrokeAction;
 import control.events.BackgroundMusicEvent;
 
 public class LevelControl extends AbstractSceneControl 
@@ -124,7 +122,7 @@ public class LevelControl extends AbstractSceneControl
 		Level lv = (Level)this.scene;
 		Fret fret = lv.getFret();
 		
-		List< ISprite > Notes = this.scene.getSprites( IScene.NOTE_ID, true );
+		List< ISprite > Notes = this.scene.getSprites( Level.NOTE_ID, true );
 
 		if( fret != null 
 				&& Notes != null 
@@ -150,7 +148,7 @@ public class LevelControl extends AbstractSceneControl
 							note.setSelected( true );
 							note.setState( GUI.game.component.sprite.MusicNoteGroup.State.ACTION );
 							
-							for( ISprite score : this.scene.getSprites( IScene.SCORE_ID, true ) )
+							for( ISprite score : this.scene.getSprites( Level.SCORE_ID, true ) )
 							{
 								((Score)score).incrementScore();
 							}							
@@ -185,7 +183,7 @@ public class LevelControl extends AbstractSceneControl
 	{
 		synchronized( this )
 		{
-			if( this.scene.getNumberOfSprites( IScene.NOTE_ID ) < 1 
+			if( this.scene.getNumberOfSprites( Level.NOTE_ID ) < 1 
 					&& this.backgroundMusicEnd )
 			{		
 				super.stopThread = true;
@@ -256,7 +254,6 @@ public class LevelControl extends AbstractSceneControl
 	public void BackgroundMusicEvent( BackgroundMusicEvent event ) 
 	{		
 		this.backgroundMusicEnd = this.backgroundMusicEnd || event.getType() == BackgroundMusicEvent.END;
-		System.out.println("LevelControl.BackgroundMusicEvent() " + this.backgroundMusicEnd);
 	}
 
 	/*(non-Javadoc)
@@ -295,7 +292,7 @@ public class LevelControl extends AbstractSceneControl
 	{
 		if( this.scene != null )
 		{
-			List< ISprite > targets = this.scene.getSprites( IScene.INPUT_TARGET_ID, true );
+			List< ISprite > targets = this.scene.getSprites( Level.INPUT_TARGET_ID, true );
 			
 			for( ISprite tg : targets )
 			{
@@ -314,5 +311,12 @@ public class LevelControl extends AbstractSceneControl
 		{
 			return this.noteIntoFret;
 		}
+	}
+	
+	@Override
+	public void setPauseScene(boolean pause) 
+	{
+		super.setPauseScene( pause );
+		MusicPlayerControl.getInstance().setPauseMusic( pause );
 	}
 }

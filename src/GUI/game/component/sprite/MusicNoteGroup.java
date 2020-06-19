@@ -94,7 +94,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	private int directionAngle = 1;	
 	private double currentAngle = 0;
 	
-	private long time = -1;	
+	//private long time = -1;	
 	private long animationTime = -1;
 	private final long totalTimeAnimation = 1000; // milliseconds
 	private long timeUpdate = totalTimeAnimation / numAngles; // milliseconds
@@ -191,7 +191,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 						{
 							prevMusicTime = MusicPlayerControl.getInstance().getBackgroundMusicTime();
 							
-							time = System.nanoTime();
+							//time = System.nanoTime();
 							delay += ( timeOnScreen - MusicPlayerControl.getInstance().getPlayTime());
 						}						
 						
@@ -366,7 +366,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	 * @see GUI.components.ISprite#getSprite()
 	 */
 	@Override
-	public BufferedImage getSprite() 
+	protected BufferedImage createSprite() 
 	{	
 		BufferedImage pic = null;
 		
@@ -441,15 +441,18 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		{
 			double t = 0;
 
+			/*
 			if( time >= 0 )
 			{
 				t = ( System.nanoTime() - this.time ) / 1e9D;
 			}
 
 			this.time = System.nanoTime();
+			*/
 
-			double currentTime = MusicPlayerControl.getInstance().getBackgroundMusicTime();
-
+			//double currentTime = MusicPlayerControl.getInstance().getBackgroundMusicTime();
+			double currentTime = MusicPlayerControl.getInstance().getPlayTime();
+			
 			double ctt = ( currentTime - prevMusicTime ); 
 
 			if( ctt > 0D )

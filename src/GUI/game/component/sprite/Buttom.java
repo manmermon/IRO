@@ -135,7 +135,7 @@ public class Buttom extends AbstractSprite implements IInputable
 	 * @see GUI.components.ISprite#getSprite()
 	 */
 	@Override
-	public BufferedImage getSprite()
+	protected BufferedImage createSprite()
 	{		
 		Image img = null;
 		if( super.spriteSize.width > 0 && super.spriteSize.height > 0 )

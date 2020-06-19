@@ -47,6 +47,8 @@ public abstract class AbstractSprite implements ISprite
 	
 	private boolean onScreen = false;
 	
+	private boolean visible = true;
+	
 	public AbstractSprite( String idSprite )
 	{		
 		if( idSprite == null || idSprite.isEmpty() )
@@ -156,11 +158,13 @@ public abstract class AbstractSprite implements ISprite
 		}
 	}
 	
+	/*
 	@Override
 	public void setFrameBounds(Rectangle bounds) 
 	{
 		this.frameBounds = bounds;
 	}
+	*/
 	
 	/*
 	 * (non-Javadoc)
@@ -200,6 +204,18 @@ public abstract class AbstractSprite implements ISprite
 		return r;
 	}
 	
+	@Override
+	public void setVisible(boolean vis) 
+	{
+		this.visible = vis;
+	} 
+	
+	@Override
+	public boolean isVisible() 
+	{	
+		return this.visible;
+	}
+	
 	protected abstract void updateSpecificSprite();
 	
 	
@@ -208,6 +224,18 @@ public abstract class AbstractSprite implements ISprite
 	 * @see GUI.components.ISprite#getSprite()
 	 */
 	@Override
-	public abstract BufferedImage getSprite();
+	public BufferedImage getSprite()
+	{
+		BufferedImage sprite = null;
+		
+		if( this.visible )
+		{
+			sprite = this.createSprite();
+		}
+		
+		return sprite;
+	}
+	
+	protected abstract BufferedImage createSprite();
 	
 }

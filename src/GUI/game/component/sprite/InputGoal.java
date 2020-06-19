@@ -95,7 +95,7 @@ public class InputGoal extends AbstractSprite implements IPossessable
 	 * @see @see GUI.game.component.sprite.AbstractSprite#getSprite()
 	 */
 	@Override
-	public BufferedImage getSprite()
+	protected BufferedImage createSprite()
 	{
 		BufferedImage sprite = null;
 		

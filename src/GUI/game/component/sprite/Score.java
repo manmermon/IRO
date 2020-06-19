@@ -16,6 +16,7 @@ import GUI.game.component.IPossessable;
 import config.IOwner;
 import image.basicPainter2D;
 import statistic.RegistrarStatistic;
+import tools.SceneTools;
 
 /**
  * @author manuel
@@ -51,7 +52,7 @@ public class Score extends AbstractSprite implements IPossessable
 		
 		super.spriteSize.height = h;
 
-		this.setFontSize();
+		this.fontmetrics = SceneTools.getFontMetricByHeight( super.spriteSize.height );
 
 		//Point loc = pen.getBounds().getLocation();
 		super.screenLoc.x = loc.x + this.fontmetrics.stringWidth( "0" ) / 2;
@@ -72,30 +73,6 @@ public class Score extends AbstractSprite implements IPossessable
 		
 		return d;
 	}
-	
-	private void setFontSize()
-	{
-		int h = super.spriteSize.height;
-		
-		Canvas cv = new Canvas();
-		
-		Font f = new Font( Font.SANS_SERIF, Font.BOLD, 12 );
-		FontMetrics fm = cv.getFontMetrics( f );
-		
-		while( fm.getHeight() < h )
-		{
-			f = new Font( f.getName(), f.getStyle(), f.getSize() + 1 );
-			fm = cv.getFontMetrics( f );
-		}
-		
-		while( fm.getHeight() > h )
-		{
-			f = new Font( f.getName(), f.getStyle(), f.getSize() - 1 );
-			fm = cv.getFontMetrics( f );
-		}
-		
-		this.fontmetrics = fm;
-	}
 		
 	/*(non-Javadoc)
 	 * @see @see GUI.game.component.sprite.AbstractSprite#updateSpecificSprite()
@@ -109,7 +86,7 @@ public class Score extends AbstractSprite implements IPossessable
 	 * @see @see GUI.game.component.sprite.AbstractSprite#getSprite()
 	 */
 	@Override
-	public BufferedImage getSprite()
+	protected BufferedImage createSprite()
 	{	  
 		Color border = Color.RED;
 		Color fill = Color.ORANGE;

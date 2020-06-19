@@ -103,7 +103,12 @@ public class GameManager
 	{
 		synchronized ( this.sync )
 		{
-			this.gameWindow.getGamePanel().setScene( fr );			
+			Frame f = this.gameWindow.getGamePanel();
+			
+			if( f != null )
+			{
+				f.setScene( fr );			
+			}
 		}		
 	}
 		
@@ -377,7 +382,7 @@ public class GameManager
 			settings.add( ConfigApp.getPlayerSetting( player ) );
 		}
 		
-		Level level = LevelFactory.getLevel( fileSong, screenBounds, settings );
+		Level level = LevelFactory.getLevel( fileSong, screenBounds.getSize(), settings );
 	
 		this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() + ": " + fileSong.getName() );
 		
@@ -444,7 +449,7 @@ public class GameManager
 			this.gameWindow.getGamePanel().removeAll();
 			
 			MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
-													, this.gameWindow.getSceneBounds()
+													//, this.gameWindow.getSceneBounds()
 													, scores, this.hasNextLevel(), true );
 			//ScreenControl.getInstance().setScene( mr );
 			
@@ -471,6 +476,17 @@ public class GameManager
 			ConfigApp.dbSaveStatistic();
 			
 			MainAppUI.getInstance().setVisible( true );
+		}
+	}
+	
+	public void togglePause()
+	{
+		if( this.gameWindow != null )
+		{
+			boolean pause = !ScreenControl.getInstance().isPausedScene();
+			
+			ScreenControl.getInstance().setPauseScene( pause );
+			ControllerManager.getInstance().setEnableControllerListener( !pause );
 		}
 	}
 }

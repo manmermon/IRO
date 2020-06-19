@@ -132,7 +132,25 @@ public class ScreenControl extends AbstractStoppableThread
 			}
 		}
 	}
+		
+	public void setPauseScene( boolean pause )
+	{
+		synchronized ( this )
+		{
+			if( this.sceneCtrl != null )
+			{
+				this.sceneCtrl.setPauseScene( pause );
+			}
+		}
+	}
 	
+	public boolean isPausedScene()
+	{
+		synchronized ( this )
+		{
+			return this.sceneCtrl.isPausedScene();
+		}
+	}
 	
 	@Override
 	public void SceneEvent( final control.events.SceneEvent ev) 

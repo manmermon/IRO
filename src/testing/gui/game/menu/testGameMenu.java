@@ -6,6 +6,7 @@ import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,9 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import GUI.game.component.Frame;
+import GUI.game.component.sprite.Pause;
+import GUI.game.screen.IScene;
+import GUI.game.screen.level.Level;
 import GUI.game.screen.menu.MenuGameResults;
 import config.Player;
 import general.Tuple;
@@ -60,7 +64,7 @@ public class testGameMenu extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		//contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 		
@@ -78,7 +82,7 @@ public class testGameMenu extends JFrame {
 		
 		JComboBox< String > comboBox = new JComboBox< String >();
 		panel.add(comboBox);
-		comboBox.setModel(new DefaultComboBoxModel(new String[] { "---", "MenuGameResults"}));
+		comboBox.setModel(new DefaultComboBoxModel(new String[] { "---", "MenuGameResults", "PauseScreen"}));
 		
 		lblNum = new JLabel("Num. ");
 		panel.add(lblNum);
@@ -116,9 +120,23 @@ public class testGameMenu extends JFrame {
 					res.add( new Tuple<Player, Double>( p, v ) );
 				}
 				
-				MenuGameResults mgr = new MenuGameResults( this.frame.getSize(), this.frame.getBounds(), res, true, true );
+				MenuGameResults mgr = new MenuGameResults( this.frame.getSize(), res, true, true );
 			
 				this.frame.add( mgr.getMenuFrame(), BorderLayout.CENTER );  
+				
+				break;
+			}
+			case "PauseScreen":
+			{
+				Pause p = new Pause( this.frame.getSize(), "Pause" );
+				Level lv = new Level( this.frame.getSize() );
+				lv.add( p, IScene.PLANE_PAUSE );
+				
+				Frame f = new Frame();
+				BufferedImage s = lv.getScene();
+				f.setScene( s );
+				
+				this.frame.add( f, BorderLayout.CENTER );
 				
 				break;
 			}

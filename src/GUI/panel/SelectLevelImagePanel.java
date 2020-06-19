@@ -24,7 +24,6 @@ import GUI.game.component.sprite.Fret;
 import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.component.sprite.MusicNoteGroup.State;
 import GUI.game.component.sprite.Stave;
-import GUI.game.screen.IScene;
 import GUI.game.screen.level.Level;
 import config.ConfigApp;
 import config.ConfigParameter;
@@ -165,10 +164,11 @@ public class SelectLevelImagePanel extends JPanel
 				}
 			}
 				
-			Level lv = new Level( size, preview.getBounds() );
+			//Level lv = new Level( size, preview.getBounds() );
+			Level lv = new Level( size );
 			
-			Background back = new Background( size, IScene.BACKGROUND_ID );
-			back.setZIndex( -1 );
+			Background back = new Background( size, Level.BACKGROUND_ID );
+			back.setZIndex( Level.PLANE_BRACKGROUND );
 			lv.addBackgroud( back );
 			if( bgPath != null )
 			{
@@ -188,13 +188,13 @@ public class SelectLevelImagePanel extends JPanel
 			}
 			
 	
-			Stave pen = new Stave( size, IScene.STAVE_ID );
+			Stave pen = new Stave( size, Level.STAVE_ID );
 			pen.setZIndex( 0 );
 			lv.addPentagram( pen );
 			
 			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() );
 			//Fret fret = new Fret( pen, IScene.FRET_ID );
-			Fret fret = new Fret( IScene.FRET_ID, sizeFret );
+			Fret fret = new Fret( Level.FRET_ID, sizeFret );
 			fret.setZIndex( 2 );
 			Point2D.Double loc = new Point2D.Double();
 			loc.x = lv.getSize().width / 2;
@@ -213,7 +213,7 @@ public class SelectLevelImagePanel extends JPanel
 				MusicNoteGroup noteSprite1 = new MusicNoteGroup( "Test1"
 																, 0
 																, notes
-																, IScene.NOTE_ID
+																, Level.NOTE_ID
 																//, pen
 																, pen.getRailHeight()
 																, (int)fret.getScreenLocation().x + padding
@@ -257,7 +257,7 @@ public class SelectLevelImagePanel extends JPanel
 				MusicNoteGroup noteSprite2 = new MusicNoteGroup( "Test2"
 																, 0
 																, notes
-																, IScene.NOTE_ID
+																, Level.NOTE_ID
 																//, pen
 																, pen.getRailHeight()
 																, (int)fret.getScreenLocation().x 
@@ -282,7 +282,7 @@ public class SelectLevelImagePanel extends JPanel
 				MusicNoteGroup noteSprite3 = new MusicNoteGroup( "Test3"
 																, 0
 																, notes
-																, IScene.NOTE_ID
+																, Level.NOTE_ID
 																//, pen
 																, pen.getRailHeight()
 																, ( size.width + (int)fret.getBounds().getMaxX() ) / 2   

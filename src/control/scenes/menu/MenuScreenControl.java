@@ -66,5 +66,4 @@ public class MenuScreenControl extends AbstractSceneControl
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }

@@ -80,7 +80,7 @@ public class Stave extends AbstractSprite
 	
 
 	@Override
-	public BufferedImage getSprite() 
+	protected BufferedImage createSprite() 
 	{	
 		return this.stave;
 	}

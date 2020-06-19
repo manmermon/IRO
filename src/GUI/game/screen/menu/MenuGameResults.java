@@ -6,7 +6,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,7 +14,6 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -28,6 +26,7 @@ import GUI.game.component.Frame;
 import GUI.game.component.sprite.Score;
 import GUI.game.screen.IScene;
 import GUI.game.screen.Scene;
+import GUI.game.screen.level.Level;
 import config.Player;
 import config.language.Language;
 import control.controller.IInputable;
@@ -53,11 +52,11 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 	/**
 	 * Create the panel.
 	 */
-	public MenuGameResults( Dimension sceneSize, Rectangle frameBounds
+	public MenuGameResults( Dimension sceneSize//, Rectangle frameBounds
 							, List< Tuple< Player, Double > > results
 							, boolean showNextBt, boolean showStopBt ) 
 	{
-		super( sceneSize, frameBounds );
+		super( sceneSize );
 		
 		this.scores = new ArrayList<Tuple<Player,Double>>( results );
 		
@@ -243,6 +242,8 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 		int w = sceneSize.width;		
 		int h =  sceneSize.height / ( this.scores.size() + 1 );
 		
+		BufferedImage s = null;
+		
 		int i = 0;
 		for( Tuple< Player, Double > score : this.scores )
 		{
@@ -252,7 +253,7 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 			while( sw > w )
 			{	
 				h -= 1;
-				sc = new Score( IScene.SCORE_ID
+				sc = new Score( Level.SCORE_ID
 								, score.y.intValue()
 								, 0
 								, h
@@ -275,12 +276,11 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 			sc.setScreenLocation( loc );			
 			i++;
 			
-			super.add( sc, PLANE_SCORE);
+			super.add( sc, Level.PLANE_SCORE);
 		}
 		
-		
-		BufferedImage s = super.getScene();
-		
+		s = super.getScene();
+	
 		return s;
 	}
 	

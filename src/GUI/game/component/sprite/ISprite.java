@@ -41,6 +41,15 @@ public interface ISprite
 	
 	/**
 	 * 
+	 * @param vis
+	 * @return
+	 */
+	public void setVisible( boolean vis );
+	
+	public boolean isVisible();
+	
+	/**
+	 * 
 	 * @return drawing order. Lower value are drawn firsts.
 	 */
 	public int getZIndex();
@@ -90,12 +99,7 @@ public interface ISprite
 	 * @return {@link Dimension} - sprite's dimension
 	 */
 	public Dimension getSize();
-		
-	/**
-	 * 
-	 * @param bounds
-	 */
-	public void setFrameBounds( Rectangle bounds );	
+			
 	
 	/**
 	 * 

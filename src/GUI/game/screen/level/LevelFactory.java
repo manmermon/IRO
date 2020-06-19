@@ -26,13 +26,12 @@ import org.jfugue.theory.Note;
 
 import GUI.game.component.sprite.Background;
 import GUI.game.component.sprite.Fret;
-import GUI.game.component.sprite.ISprite;
 import GUI.game.component.sprite.InputGoal;
 import GUI.game.component.sprite.Stave;
 import GUI.game.component.sprite.Score;
 import GUI.game.component.sprite.TimeSession;
 import GUI.game.component.sprite.MusicNoteGroup;
-import GUI.game.screen.IScene;
+import GUI.game.component.sprite.Pause;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.Settings;
@@ -43,7 +42,6 @@ import image.basicPainter2D;
 import io.IROMusicParserListener;
 import music.MusicSheet;
 import statistic.RegistrarStatistic;
-import tools.MusicSheetTools;
 import music.IROTrack;
 
 public class LevelFactory 
@@ -52,7 +50,8 @@ public class LevelFactory
 	private static final double MIN_PLAYER_NOTE_TRACK = 0.5D;
 	
 	public static Level getLevel( File midiMusicSheelFile
-									, Rectangle screenBounds
+									//, Rectangle screenBounds
+									, Dimension screenSize
 									, List< Settings > playerTimes ) throws InvalidMidiDataException, IOException
 	{			
 		IROMusicParserListener tool = new IROMusicParserListener();
@@ -62,22 +61,23 @@ public class LevelFactory
 
 		MusicSheet music = tool.getSheet();
 
-		return makeLevel( music, screenBounds, playerTimes );
+		//return makeLevel( music, screenBounds, playerTimes );
+		return makeLevel( music, screenSize, playerTimes );
 	}
 
 
 	private static Level makeLevel( MusicSheet music
-								, Rectangle screenBounds
+								//, Rectangle screenBounds
+								, Dimension screenSize
 								, List< Settings > playerSettings )
 	{
 		Level lv = null;
 		if( music != null && music.getNumberOfTracks() > 0 )
 		{
-			Dimension screenSize = screenBounds.getSize();
-
 			int tempo = music.getTempo();
 
-			lv = new Level( screenSize, screenBounds );
+			//lv = new Level( screenSize, screenBounds );
+			lv = new Level( screenSize );
 			lv.setBPM( tempo );
 
 
@@ -97,8 +97,8 @@ public class LevelFactory
 				path = bg.toString();
 			}
 
-			Background back = new Background( screenSize, IScene.BACKGROUND_ID );
-			back.setZIndex( IScene.PLANE_BRACKGROUND );
+			Background back = new Background( screenSize, Level.BACKGROUND_ID );
+			back.setZIndex( Level.PLANE_BRACKGROUND );
 			lv.addBackgroud( back );
 			if( path != null )
 			{
@@ -117,15 +117,19 @@ public class LevelFactory
 				}
 			}		
 
+			Pause pause = new Pause( screenSize, Level.PAUSE_ID );
+			pause.setZIndex( Level.PLANE_PAUSE );
+			pause.setVisible( false );
+			lv.addPause( pause );
 
-			Stave pen = new Stave( screenSize, IScene.STAVE_ID );
-			pen.setZIndex( IScene.PLANE_STAVE );
+			Stave pen = new Stave( screenSize, Level.STAVE_ID );
+			pen.setZIndex( Level.PLANE_STAVE );
 			lv.addPentagram( pen );
 
 			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() ); 
 			//Fret fret = new Fret( pen, IScene.FRET_ID );
-			Fret fret = new Fret( IScene.FRET_ID, sizeFret );
-			fret.setZIndex( IScene.PLANE_FRET );
+			Fret fret = new Fret( Level.FRET_ID, sizeFret );
+			fret.setZIndex( Level.PLANE_FRET );
 			Point2D.Double loc = new Point2D.Double();
 			loc.x = lv.getSize().width / 2;
 			loc.y = 0;
@@ -136,9 +140,9 @@ public class LevelFactory
 			int hTS = pen.getRailHeight() / 2;
 			Rectangle bounds = pen.getBounds();			
 			//TimeSession time = new TimeSession( IScene.TIME_ID, pen );
-			TimeSession time = new TimeSession( IScene.TIME_ID, hTS, bounds );
-			time.setZIndex( IScene.PLANE_TIME );
-			lv.add( time, IScene.PLANE_TIME );
+			TimeSession time = new TimeSession( Level.TIME_ID, hTS, bounds );
+			time.setZIndex( Level.PLANE_TIME );
+			lv.add( time, Level.PLANE_TIME );
 
 			int wayWidth = ( screenSize.width - (int)fret.getScreenLocation().x );
 			
@@ -471,8 +475,8 @@ public class LevelFactory
 						sc = 0D;
 					}
 					
-					Score score = new Score( IScene.SCORE_ID, sc.intValue(), (int)( 100 * maxNumNotes / nNotes ), pen.getRailHeight() / 2, pen.getBounds().getLocation() );
-					score.setZIndex( IScene.PLANE_SCORE );
+					Score score = new Score( Level.SCORE_ID, sc.intValue(), (int)( 100 * maxNumNotes / nNotes ), pen.getRailHeight() / 2, pen.getBounds().getLocation() );
+					score.setZIndex( Level.PLANE_SCORE );
 					score.setOwner( playerSetting.getPlayer() );
 					
 					if( prevScoreLoc != null )
@@ -489,8 +493,8 @@ public class LevelFactory
 					lv.add( score, score.getZIndex() );
 					
 					//InputGoal goal = new InputGoal( IScene.INPUT_TARGET_ID, pen );
-					InputGoal goal = new InputGoal( IScene.INPUT_TARGET_ID, pen.getRailHeight(), pen.getBounds() );
-					goal.setZIndex( IScene.PLANE_INPUT_TARGET );
+					InputGoal goal = new InputGoal( Level.INPUT_TARGET_ID, pen.getRailHeight(), pen.getBounds() );
+					goal.setZIndex( Level.PLANE_INPUT_TARGET );
 					Point2D.Double goalLoc = new Point2D.Double();
 					goalLoc.y = prevScoreLoc.y;
 					goalLoc.x = prevScoreLoc.x + score.getSize().width + 5;
@@ -543,7 +547,7 @@ public class LevelFactory
 						MusicNoteGroup noteSprite = new MusicNoteGroup( trackID
 																		, timeTrackOnScreen //+ startDelay
 																		, Tracks
-																		, IScene.NOTE_ID
+																		, Level.NOTE_ID
 																		//, pen
 																		, pen.getRailHeight()
 																		, screenPos
@@ -579,7 +583,7 @@ public class LevelFactory
 						}
 						noteSprite.setImage( noteImg );
 
-						noteSprite.setZIndex( IScene.PLANE_NOTE );
+						noteSprite.setZIndex( Level.PLANE_NOTE );
 						lv.addNote( noteSprite );
 					}
 				}
@@ -757,10 +761,12 @@ public class LevelFactory
 				lv.setPlayerSheetMusic( playerBgMusicSheets );
 			}
 
+			/*
 			for( ISprite sp : lv.getAllSprites( false ) )
 			{
-				sp.setFrameBounds( screenBounds );
+				sp.setFrameBounds( screenSize );
 			}
+			*/
 		}
 
 		return lv;

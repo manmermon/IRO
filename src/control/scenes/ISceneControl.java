@@ -33,6 +33,17 @@ public interface ISceneControl
 	public void setScene( IScene scene ) throws SceneException;
 	
 	/**
+	 * @param pause
+	 */
+	public void setPauseScene( boolean pause );
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public boolean isPausedScene();	
+	
+	/**
 	 * 
 	 * @throws SceneException
 	 */

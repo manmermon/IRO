@@ -142,7 +142,7 @@ public class Fret extends AbstractSprite
 	 * @see GUI.components.AbstractSprite#getSprite()
 	 */
 	@Override
-	public BufferedImage getSprite() 
+	protected BufferedImage createSprite() 
 	{		 
 		/*
 		int xs[] = new int[] { 0, this.fret.getBounds().width, this.fret.getBounds().width, 0 };

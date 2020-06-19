@@ -22,9 +22,14 @@
 package GUI.game.component;
 
 import java.awt.Graphics;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
+
+import GUI.GameManager;
 
 public class Frame extends JPanel
 {
@@ -39,6 +44,18 @@ public class Frame extends JPanel
 		super.setDoubleBuffered( true );
 		
 		super.setFocusable( true );
+		
+		super.addKeyListener( new KeyAdapter()
+		{	
+			@Override
+			public void keyPressed(KeyEvent arg0) 
+			{
+				if( arg0.getKeyCode() == KeyEvent.VK_SPACE )
+				{
+					GameManager.getInstance().togglePause();
+				}
+			}
+		} );
 	}
 	
 	public void setScene( BufferedImage img )

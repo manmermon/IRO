@@ -21,7 +21,6 @@
 package GUI.game.screen.level;
 
 import java.awt.Dimension;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,18 +32,42 @@ import GUI.game.component.sprite.Fret;
 import GUI.game.component.sprite.ISprite;
 import GUI.game.component.sprite.Stave;
 import GUI.game.component.sprite.MusicNoteGroup;
+import GUI.game.component.sprite.Pause;
+import GUI.game.screen.IPausable;
 import GUI.game.screen.Scene;
 
-public class Level extends Scene 
+public class Level extends Scene implements IPausable
 {
+	public static final int PLANE_BRACKGROUND = -1;
+	public static final int PLANE_STAVE = 0;	 
+	public static final int PLANE_FRET = 1;
+	public static final int PLANE_NOTE = 2;
+	public static final int PLANE_SCORE = 3;
+	public static final int PLANE_INPUT_TARGET = 4;
+	public static final int PLANE_TIME = 5;
+	public static final int PLANE_PAUSE = 6;
+	
+	
+	public static final String BACKGROUND_ID = "background";
+	public static final String STAVE_ID = "stave";
+	public static final String NOTE_ID = "note";
+	public static final String FRET_ID = "fret";
+	public static final String SCORE_ID = "score";
+	public static final String INPUT_TARGET_ID = "input";
+	public static final String TIME_ID = "time";
+	public static final String PAUSE_ID = "pause";
+	
 	private int BPM;
 	
 	private BackgroundMusic backgroundMusic;
 	private Map< Integer, BackgroundMusic > playerMusics;
 	
-	public Level( Dimension sceneSize, Rectangle frameBounds ) 
+	private Boolean pause = false;
+	
+	public Level( Dimension sceneSize) //, Rectangle frameBounds ) 
 	{
-		super( sceneSize, frameBounds );
+		//super( sceneSize, frameBounds );
+		super( sceneSize );
 		
 		this.playerMusics = new HashMap< Integer, BackgroundMusic>();
 		this.BPM = MidiDefaults.DEFAULT_TEMPO_BEATS_PER_MINUTE;
@@ -80,6 +103,12 @@ public class Level extends Scene
 	{
 		sprite.setZIndex( PLANE_NOTE );
 		super.add( sprite, PLANE_NOTE );
+	}
+	
+	public void addPause( Pause sprite )
+	{
+		sprite.setZIndex( PLANE_PAUSE );
+		super.add( sprite, PLANE_PAUSE );
 	}
 	
 	public void addPentagram( Stave sprite )
@@ -130,5 +159,40 @@ public class Level extends Scene
 	public int getBPM()
 	{
 		return this.BPM;
+	}
+	
+	@Override
+	public void updateLevel() 
+	{
+		synchronized ( this.pause ) 
+		{
+			if( !this.pause )
+			{
+				super.updateLevel();
+			}
+		}
+	}
+	
+	@Override
+	public void setPause( boolean pause) 
+	{
+		synchronized ( this.pause ) 
+		{
+			this.pause = pause;
+			
+			for( ISprite sp : super.getSprites( Level.PAUSE_ID, false ) )
+			{
+				sp.setVisible( this.pause );
+			}
+		}
+	}
+	
+	@Override
+	public boolean isPaused() 
+	{
+		synchronized ( this.pause )
+		{
+			return this.pause;
+		}
 	}
 }

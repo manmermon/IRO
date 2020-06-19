@@ -3,6 +3,7 @@ package GUI.game.screen;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -28,10 +29,10 @@ public abstract class Scene implements IScene, SpriteEventListener
 	protected Rectangle frameBounds;
 	//protected Frame frame;
 		
-	public Scene( Dimension sceneSize, Rectangle FrameBounds ) 
+	public Scene( Dimension sceneSize )//, Rectangle FrameBounds ) 
 	{
 		this.size = new Dimension( sceneSize );
-		this.frameBounds = new Rectangle( FrameBounds );
+		this.frameBounds = new Rectangle( new Point(), this.size ); //new Rectangle( FrameBounds );
 		
 		this.SPRITES = new ArrayTreeMap< Integer, ISprite >();
 		
@@ -251,12 +252,15 @@ public abstract class Scene implements IScene, SpriteEventListener
 				
 				for( ISprite pic : PICs )
 				{	
-					Point2D.Double loc = pic.getScreenLocation();
-	
-					if( r.contains( loc ) )
+					if( pic.isVisible() )
 					{
-						BufferedImage spr = pic.getSprite();
-						basicPainter2D.composeImage( scene, (int)loc.x, (int)loc.y, spr );						
+						Point2D.Double loc = pic.getScreenLocation();
+						
+						if( r.contains( loc ) )
+						{						
+							BufferedImage spr = pic.getSprite();
+							basicPainter2D.composeImage( scene, (int)loc.x, (int)loc.y, spr );						
+						}
 					}
 				}
 			}

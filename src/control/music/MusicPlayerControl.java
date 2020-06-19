@@ -24,9 +24,12 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	private boolean isBackPlay = false;
 	
 	private long startTime = -1;
+	private Long pauseTime = null;
+	private double pauseAdjust = 0;
 	
 	private Object sync = new Object();
-		
+	
+	
 	private MusicPlayerControl( )
 	{	
 		super.setName( this.getClass().getSimpleName() );	
@@ -142,12 +145,53 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			
 			this.isBackPlay = false;
 			this.isPlay.set( false );
+			this.pauseAdjust = 0;
+		}
+	}
+	
+	public void setPauseMusic( boolean pause )
+	{
+		synchronized ( this.sync )
+		{
+			if( pause &&  this.pauseTime == null )
+			{
+				this.pauseTime = System.nanoTime();
+			}
+			else if( this.pauseTime != null ) 
+			{	
+				this.pauseAdjust += ( System.nanoTime() - this.pauseTime ) / 1e9D;
+				
+				this.pauseTime = null;
+			}
+				
+			
+			if( this.backgroundMusic != null )
+			{
+				this.backgroundMusic.setPause( pause );
+			}
+				
+			for( BackgroundMusic playerSheet : this.playerMusicSheets.values() )
+			{
+				playerSheet.setPause( pause );
+			}
 		}
 	}
 	
 	public double getPlayTime()
-	{
-		return ( System.nanoTime() - this.startTime ) / 1e9D;
+	{		
+		synchronized ( this.sync ) 
+		{
+			double t = System.nanoTime() - this.startTime;
+			
+			if( this.pauseTime != null )
+			{
+				t = this.pauseTime - this.startTime;
+			}
+			
+			t = t / 1e9D - this.pauseAdjust;
+				
+			return t;
+		}		
 	}
 	
 	public double getBackgroundMusicTime()

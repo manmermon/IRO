@@ -72,7 +72,7 @@ public class TimeSession extends AbstractSprite
 	 * @see @see GUI.game.component.sprite.AbstractSprite#getSprite()
 	 */
 	@Override
-	public BufferedImage getSprite()
+	protected BufferedImage createSprite()
 	{
 		double t = MusicPlayerControl.getInstance().getPlayTime();
 		

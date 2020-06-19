@@ -1,20 +1,28 @@
 package GUI.game.screen.level;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequence;
+import javax.swing.Timer;
 import javax.swing.event.EventListenerList;
 
 import org.jfugue.pattern.Pattern;
 import org.jfugue.player.ManagedPlayerListener;
 
+import GUI.game.screen.IPausable;
 import JFugueMod.org.jfugue.player.PlayerMod;
 import control.events.BackgroundMusicEvent;
 import control.events.BackgroundMusicEventListener;
+import control.events.SceneEvent;
+import general.PausableTimer;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 
-public class BackgroundMusic extends AbstractStoppableThread implements ManagedPlayerListener
+public class BackgroundMusic extends AbstractStoppableThread 
+								implements ManagedPlayerListener, IPausable
 {
 	public static final double NON_DELAY = 0.0;
 	
@@ -28,6 +36,8 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	private Object lock = new Object();
 	
 	private MuteThread muteThread = null;
+	
+	private PausableTimer delayTimer = null;
 	
  	public BackgroundMusic() 
 	{
@@ -113,6 +123,33 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 		super.startUp();
 		
 		this.muteThread.startThread();
+		
+		if( this.delay > 0 )
+		{
+			this.delayTimer = new PausableTimer( (int)( this.delay * 1000 )
+					, new ActionListener() 
+						{
+							@Override
+							public void actionPerformed(ActionEvent arg0) 
+							{
+								delayTimerFinish();
+							}
+						} 
+			); 
+		}
+	}
+	
+	private void delayTimerFinish()
+	{
+		synchronized ( this )
+		{
+			synchronized ( this.lock )
+			{
+				this.delayTimer = null;
+			}
+			
+			this.notify();
+		}
 	}
 	
 	@Override
@@ -120,13 +157,21 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	{	
 		synchronized( this )
 		{
+			/*
 			if( this.delay > 0 )
 			{
 				this.wait( (long)( 1000L * this.delay ) );
 			}
+			*/
+			
+			if( this.delayTimer != null )
+			{
+				this.delayTimer.startThread();
+				this.wait();
+			}
 									
 			this.player.play( );
-			this.fireSceneEvent( BackgroundMusicEvent.START );
+			this.fireBackgroundMusicEvent( BackgroundMusicEvent.START );
 			
 			//this.fireSceneEvent( BackgroundMusicEvent.END );
 			//*/
@@ -178,8 +223,7 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	protected void finallyManager()
 	{
 		super.stopThread = true;
-		System.out.println("BackgroundMusic.finallyManager()");
-		this.fireSceneEvent( BackgroundMusicEvent.END );
+		this.fireBackgroundMusicEvent( BackgroundMusicEvent.END );
 	}
 	
 	@Override
@@ -223,7 +267,7 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 		this.listenerList.remove( BackgroundMusicEventListener.class, listener );
 	}
 	
-	private synchronized void fireSceneEvent( int typeEvent )
+	private synchronized void fireBackgroundMusicEvent( int typeEvent )
 	{
 		BackgroundMusicEvent event = new BackgroundMusicEvent( this, typeEvent );
 
@@ -289,6 +333,55 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 	{
 	}
 
+	@Override
+	public void setPause( boolean pause ) 
+	{
+		synchronized ( this.lock )
+		{
+			if( this.player != null )
+			{
+				if( this.delayTimer == null  )
+				{
+					if( pause )
+					{
+						this.player.getManagedPlayer().pause();					
+					}
+					else if( this.player.getManagedPlayer().isPaused() )
+					{
+						this.player.getManagedPlayer().resume();
+					}
+				}
+				else
+				{
+					if( pause )
+					{
+						this.delayTimer.pauseTimer();
+					}
+					else
+					{
+						this.delayTimer.resumenTimer();
+					}
+				}
+			}
+		}
+	}
+	
+	@Override
+	public boolean isPaused() 
+	{
+		synchronized ( this.lock )
+		{
+			boolean pause = this.player.getManagedPlayer().isPaused();
+
+			if( !pause && this.delayTimer != null )
+			{
+				pause = !this.delayTimer.isRunning();
+			}
+			
+			return  pause;
+		}		
+	}
+	
 	//////////////////////////
 	//
 	//
@@ -413,4 +506,5 @@ public class BackgroundMusic extends AbstractStoppableThread implements ManagedP
 			}
 		}
 	}
+
 }
