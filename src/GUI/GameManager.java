@@ -103,11 +103,9 @@ public class GameManager
 	{
 		synchronized ( this.sync )
 		{
-			Frame f = this.gameWindow.getGamePanel();
-			
-			if( f != null )
+			if( this.gameWindow != null )
 			{
-				f.setScene( fr );			
+				this.gameWindow.getGamePanel().setScene( fr );					
 			}
 		}		
 	}

@@ -117,6 +117,8 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			}
 			
 			this.isPlay.set( true );
+			this.pauseTime = null;
+			this.pauseAdjust = 0;
 		}
 	}
 	
@@ -145,7 +147,6 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			
 			this.isBackPlay = false;
 			this.isPlay.set( false );
-			this.pauseAdjust = 0;
 		}
 	}
 	
