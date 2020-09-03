@@ -2,3 +2,11 @@
 .directory
 miglayout-src.zip
 miglayout15-swing.jar
+/nbproject/private/
+build.xml
+nbproject/build-impl.xml
+nbproject/configs/MainLaunchApp.properties
+nbproject/configs/testGameMenu.properties
+nbproject/genfiles.properties
+nbproject/project.properties
+nbproject/project.xml

@@ -77,7 +77,7 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2020, 03 - 1, 29 );
+	public static final Calendar buildDate = new GregorianCalendar( 2020, 06 - 1, 22 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
@@ -105,9 +105,6 @@ public class ConfigApp
 	
 	public static final String MULTIPLAYER = "MULTIPLAYER";
 	
-	public static final int SINGLE_PLAYER = 0;
-	public static final int LOCA_MULTIPLAYER = 1;
-	public static final int REMOTE_MULTIPLAYER = 2;
 	
 	///////////
 	//

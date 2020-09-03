@@ -161,14 +161,16 @@ public class GameWindow extends JFrame
 				
 				int axis = BoxLayout.X_AXIS;
 				
-				if( dist.equals( BorderLayout.WEST ) 
-						|| dist.equals( BorderLayout.EAST ) )
+				if( dist.toLowerCase().equals( BorderLayout.WEST.toLowerCase() ) 
+						|| dist.toLowerCase().equals( BorderLayout.EAST.toLowerCase() ) )
 				{
 					axis = BoxLayout.Y_AXIS;
 					
 					int aux = preSize.height;
 					preSize.height = preSize.width;
 					preSize.width = aux;
+					
+					ctgb.setOrientation( ControllerTargetBar.VERTICAL );
 				}
 
 				JLabel playerIco = new JLabel();

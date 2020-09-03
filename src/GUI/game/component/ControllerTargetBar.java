@@ -23,6 +23,9 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 	 */
 	private static final long serialVersionUID = 9033821662920318657L;
 
+	public static final int HORIZONTAL = 0;
+	public static final int VERTICAL = 1;
+	
 	private LevelProgressIndicator pgbar = null;
 	
 	private int selectedChannel = 0;
@@ -41,6 +44,11 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 		this.pgbar = new LevelProgressIndicator( 3 );
 		this.pgbar.setPaintedText( false );
 		super.add( this.pgbar );
+	}
+	
+	public void setOrientation( int orientation )
+	{
+		this.pgbar.setOrientation( orientation );
 	}
 	
 	public void setMinimum( double min )

@@ -256,14 +256,14 @@ public class MainAppUI extends JFrame
 			
 			this.panelSettings.add( this.getPanelMenu(), BorderLayout.NORTH );
 			//this.contentPane.add( this.getSettingPanel(), BorderLayout.CENTER );			
-			this.panelSettings.add( this.getSettingFieldPanel( ), BorderLayout.CENTER );
+			this.panelSettings.add( this.getSettingFieldPanel().getTabbedPane(), BorderLayout.CENTER );
 			this.panelSettings.add( this.getSongPanel(), BorderLayout.SOUTH );
 		}
 		
 		return this.panelSettings;
 	}
 		
-	private JTabbedPane getSettingFieldPanel()
+	private ClosableTabbedPanel getSettingFieldPanel()
 	{
 		if( this.panelFields == null )
 		{
@@ -274,7 +274,8 @@ public class MainAppUI extends JFrame
 				@Override
 				public void collectionChange(CollectionEvent ev)
 				{
-					JTabbedPane t = (JTabbedPane)ev.getSource();
+					//JTabbedPane t = (JTabbedPane)ev.getSource();
+					ClosableTabbedPanel t = (ClosableTabbedPanel)ev.getSource();
 					
 					int type = ev.getEventType();
 					SettingPanel panel = (SettingPanel)ev.getElement();
@@ -316,10 +317,21 @@ public class MainAppUI extends JFrame
 	
 	private void addPlayerSetting( Player player )
 	{
-		JTabbedPane tab = this.getSettingFieldPanel();
-		
+		ClosableTabbedPanel tab = this.getSettingFieldPanel();
+				
 		SettingPanel settings = new SettingPanel( this, player );
-		tab.add( player.getName(), settings );
+		//tab.add( player.getName(), settings );
+		tab.insertTab( player.getName(), settings );
+		
+		int c = tab.getTabCount();
+		if( c < 2 )
+		{
+			tab.showTabCloseButton( false, 0 );
+		}
+		else
+		{
+			tab.showTabCloseButton( true, 0 );
+		}
 	}
 			
 	private JPanel getPanelMenu() 
@@ -376,11 +388,12 @@ public class MainAppUI extends JFrame
 						// Removing Anonymous players
 						//
 						
-						JTabbedPane p = getSettingFieldPanel();
+						//JTabbedPane p = getSettingFieldPanel();
+						ClosableTabbedPanel p = getSettingFieldPanel();
 						
 						for( int i = p.getTabCount() - 1; i >= 0; i-- )
 						{
-							SettingPanel sp = (SettingPanel)p.getComponent( i );
+							SettingPanel sp = (SettingPanel)p.getTabAt( i ); //p.getComponent( i );
 							if( sp != null 
 									&& sp.getPlayer().isAnonymous() )
 							{
