@@ -226,9 +226,9 @@ public class ConfigApp
 
 					for( Tuple< String, Object > par : settings )
 					{
-						Object val = par.y;
+						Object val = par.t2;
 
-						ConfigParameter p = cfg.getParameter( par.x );
+						ConfigParameter p = cfg.getParameter( par.t1 );
 						if( p != null && val != null)
 						{
 							if( p.get_type() == ParameterType.COLOR )
@@ -732,7 +732,7 @@ public class ConfigApp
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					try
 					{
-						BufferedImage scaleImg = basicPainter2D.copyImage( img.getScaledInstance( ConfigApp.playerPicSize.x, ConfigApp.playerPicSize.y, BufferedImage.SCALE_SMOOTH ) );
+						BufferedImage scaleImg = basicPainter2D.copyImage( img.getScaledInstance( ConfigApp.playerPicSize.t1, ConfigApp.playerPicSize.t2, BufferedImage.SCALE_SMOOTH ) );
 						ImageIO.write( scaleImg, "png", bos );
 						imageBytes = bos.toByteArray();
 					}
@@ -1282,8 +1282,8 @@ public class ConfigApp
 						
 						for( Tuple< LocalDateTime, FieldType > t : register )
 						{
-							LocalDateTime time = t.x;
-							FieldType f = t.y;
+							LocalDateTime time = t.t1;
+							FieldType f = t.t2;
 
 							zdt = ZonedDateTime.of( time, ZoneId.systemDefault() );							
 							sql += "(" + sessionID 

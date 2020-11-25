@@ -601,8 +601,8 @@ public class LevelFactory
 					
 					for( Tuple< String, NumberRange > tRest : playerSheetRests.get( iplayer ) )
 					{
-						String trackID = tRest.x;						
-						NumberRange restRange = tRest.y;
+						String trackID = tRest.t1;						
+						NumberRange restRange = tRest.t2;
 						double noteTrackTime = restRange.getMin();
 						List< Note > restList = new ArrayList<Note>();
 						restList.add( Note.createRest( restRange.getRangeLength() ) );

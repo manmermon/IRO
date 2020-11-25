@@ -115,8 +115,8 @@ public class IROMusicParserListener extends ParserListenerAdapter
     		
     		for( Tuple< Double, List< Note > > t : NOTES )
     		{	
-    			double time = t.x;
-    			List< Note > Notes = t.y;
+    			double time = t.t1;
+    			List< Note > Notes = t.t2;
     			
     			double maxNoteDur = 0.0;
     			
@@ -163,7 +163,7 @@ public class IROMusicParserListener extends ParserListenerAdapter
     		IROTrack track = this.sheet.getTrack( trackID );
     		for( Tuple< Double, List< Note > > t : NotesAndTime )
     		{
-    			track.addNotes( t.x, t.y );
+    			track.addNotes( t.t1, t.t2 );
     		}
     	}
     	

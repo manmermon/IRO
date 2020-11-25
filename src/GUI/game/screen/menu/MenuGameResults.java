@@ -254,12 +254,12 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 			{	
 				h -= 1;
 				sc = new Score( Level.SCORE_ID
-								, score.y.intValue()
+								, score.t2.intValue()
 								, 0
 								, h
 								, new Point( 0 , (int)( ( i + 0.5 ) * h ) ) );
 				
-				sc.setOwner( score.x );
+				sc.setOwner( score.t1 );
 				
 				Dimension sizeSC = sc.getSize();
 				sw = sizeSC.width;

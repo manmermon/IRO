@@ -79,7 +79,7 @@ public class AppSelectPlayer extends JDialog
 		super.getContentPane().add( this.getPanelSelectAction(), BorderLayout.SOUTH);
 		
 		JScrollPane scroll = new JScrollPane( this.getPanelUsers() );
-		scroll.getVerticalScrollBar().setUnitIncrement( ConfigApp.playerPicSizeIcon.x / 2 );
+		scroll.getVerticalScrollBar().setUnitIncrement( ConfigApp.playerPicSizeIcon.t1 / 2 );
 		super.getContentPane().add( scroll, BorderLayout.CENTER);
 		
 		try
@@ -114,11 +114,11 @@ public class AppSelectPlayer extends JDialog
 			{
 				Image img = icon.getImage();
 				
-				if( img.getWidth( null ) != ConfigApp.playerPicSizeIcon.x 
-						|| img.getHeight( null ) != ConfigApp.playerPicSizeIcon.y )
+				if( img.getWidth( null ) != ConfigApp.playerPicSizeIcon.t1 
+						|| img.getHeight( null ) != ConfigApp.playerPicSizeIcon.t2 )
 				{
-					icon = new ImageIcon( img.getScaledInstance( ConfigApp.playerPicSizeIcon.x
-																, ConfigApp.playerPicSizeIcon.x
+					icon = new ImageIcon( img.getScaledInstance( ConfigApp.playerPicSizeIcon.t1
+																, ConfigApp.playerPicSizeIcon.t1
 																, Image.SCALE_SMOOTH ) );	
 				}
 			}
@@ -214,7 +214,7 @@ public class AppSelectPlayer extends JDialog
 			DefaultTableModel tm = (DefaultTableModel)this.createTablemodel();
 			this.userTable.setModel( tm );
 						
-			this.userTable.setRowHeight( ConfigApp.playerPicSizeIcon.x + 4 );
+			this.userTable.setRowHeight( ConfigApp.playerPicSizeIcon.t1 + 4 );
 			this.userTable.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
 			
 			TableColumnModel cmodel = this.userTable.getColumnModel();
@@ -234,7 +234,7 @@ public class AppSelectPlayer extends JDialog
 				}
 				else if( colClass.isAssignableFrom( ImageIcon.class ) )
 				{
-					s = ConfigApp.playerPicSizeIcon.x + 4;
+					s = ConfigApp.playerPicSizeIcon.t1 + 4;
 				}
 				
 				tc.setResizable( false );

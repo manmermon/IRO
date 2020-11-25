@@ -219,7 +219,7 @@ public class SettingPanel extends JPanel
 			//userName.setText( this._player.getName() );
 			JButton btImg = new JButton( );
 			btImg.setBorder( BorderFactory.createEtchedBorder() );
-			btImg.setIcon(  this._player.getImg( ConfigApp.playerPicSizeIcon.x, ConfigApp.playerPicSizeIcon.y ) );		
+			btImg.setIcon(  this._player.getImg( ConfigApp.playerPicSizeIcon.t1, ConfigApp.playerPicSizeIcon.t2 ) );		
 			btImg.setBackground( Color.WHITE );
 			
 			btImg.addMouseListener( new MouseAdapter()
@@ -411,7 +411,7 @@ public class SettingPanel extends JPanel
 	{
 		if( b != null && this._player != null )
 		{	
-			b.setIcon( this._player.getImg( ConfigApp.playerPicSizeIcon.x, ConfigApp.playerPicSizeIcon.y ) );
+			b.setIcon( this._player.getImg( ConfigApp.playerPicSizeIcon.t1, ConfigApp.playerPicSizeIcon.t2 ) );
 		}
 	}
 	

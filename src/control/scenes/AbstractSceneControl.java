@@ -17,7 +17,7 @@ import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 
 /**
- * @author manuel
+ * @author manuel merino monge
  *
  */
 public abstract class AbstractSceneControl extends AbstractStoppableThread 

@@ -437,7 +437,7 @@ public class GameManager
 											@Override
 											public int compare( Tuple< Player, Double > t0, Tuple< Player, Double > t1 ) 
 											{
-												int eq = (int)( Math.signum( t0.y - t1.y ) );
+												int eq = (int)( Math.signum( t0.t2 - t1.t2 ) );
 												return eq;
 											}
 										});

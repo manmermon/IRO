@@ -15,7 +15,7 @@ public class Player implements IOwner
 	private String name;
 	private ImageIcon img = null;
 	
-	private ImageIcon defaultImg = GeneralAppIcon.getDoll( ConfigApp.playerPicSizeIcon.x , ConfigApp.playerPicSizeIcon.y
+	private ImageIcon defaultImg = GeneralAppIcon.getDoll( ConfigApp.playerPicSizeIcon.t1 , ConfigApp.playerPicSizeIcon.t2
 															, Color.BLACK, Color.WHITE, null );
 	
 	public Player()
