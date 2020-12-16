@@ -11,7 +11,7 @@ import control.events.IInputControllerListener;
  */
 public interface IInputController
 {
-	public ControllerMetadata getMetadataController();
+	public IControllerMetadata getMetadataController();
 	
 	public void startController() throws Exception;
 	

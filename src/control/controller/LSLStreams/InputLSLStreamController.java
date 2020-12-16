@@ -37,7 +37,7 @@ import java.util.concurrent.TimeoutException;
 import javax.swing.Timer;
 import javax.swing.event.EventListenerList;
 
-import control.controller.ControllerMetadata;
+import control.controller.IControllerMetadata;
 import control.controller.IInputController;
 import control.events.IInputControllerListener;
 import control.events.InputControllerEvent;
@@ -60,7 +60,7 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 		
 	private EventListenerList listenerList;
 	
-	private ControllerMetadata metadata = null;
+	private IControllerMetadata metadata = null;
 	
 	private double dataTime;
 	
@@ -427,7 +427,7 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 	 * @see @see control.controller.IInputController#getMetadataController()
 	 */
 	@Override
-	public ControllerMetadata getMetadataController()
+	public IControllerMetadata getMetadataController()
 	{
 		return this.metadata;
 	}

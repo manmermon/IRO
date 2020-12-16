@@ -211,7 +211,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 						public void run() 
 						{
 							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage )" );
-							ScreenControl.getInstance().setUpdateLevelInputGoal( tp );
+							ScreenControl.getInstance().setUpdateLevelInputGoal( tp, owner );
 						};
 					};
 					t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal");
@@ -227,7 +227,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 						public void run() 
 						{
 							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( 0 )" );
-							ScreenControl.getInstance().setUpdateLevelInputGoal( 0 );
+							ScreenControl.getInstance().setUpdateLevelInputGoal( 0, owner );
 						};
 					};
 					t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal" );
@@ -253,7 +253,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 	 */
 	private synchronized void fireActionEvent( int typeEvent )
 	{
-		InputActionEvent event = new InputActionEvent( this, typeEvent );
+		InputActionEvent event = new InputActionEvent( this, typeEvent, this.owner );
 
 		InputActionListerner[] listeners = this.listeners.getListeners( InputActionListerner.class );
 

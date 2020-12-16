@@ -9,12 +9,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CyclicBarrier;
 
 import javax.imageio.ImageIO;
 import javax.sound.midi.InvalidMidiDataException;
@@ -230,6 +233,7 @@ public class LevelFactory
 				NumberRange r = null;
 				boolean getNext = true;
 				List< NumberRange > timeListCopy = new ArrayList<NumberRange>( times );
+				
 				boolean[] assignedNotes = new boolean[ timeListCopy.size() ];
 				
 				//
@@ -428,6 +432,7 @@ public class LevelFactory
 					
 					backgroundPattern.add( track.getPatternTrackSheet() );
 				}
+				
 				backgroundPattern = backgroundPattern.atomize();
 					
 				//
@@ -494,6 +499,7 @@ public class LevelFactory
 					
 					//InputGoal goal = new InputGoal( IScene.INPUT_TARGET_ID, pen );
 					InputGoal goal = new InputGoal( Level.INPUT_TARGET_ID, pen.getRailHeight(), pen.getBounds() );
+					goal.setOwner( playerSetting.getPlayer() );
 					goal.setZIndex( Level.PLANE_INPUT_TARGET );
 					Point2D.Double goalLoc = new Point2D.Double();
 					goalLoc.y = prevScoreLoc.y;
@@ -718,23 +724,27 @@ public class LevelFactory
 						pat.add( tr.getPatternTrackSheet() );
 					}
 					pat = pat.atomize();
+					//pat.setTempo( tempo );
 					playerPatterns[ iplayer ] = pat;
 				}				
 				
 				
 				BackgroundMusic backMusic = null;
 				
+				CyclicBarrier musicCoordinator = new CyclicBarrier( playerPatterns.length + 1 );
+				
 				try
 				{
 					backMusic = new BackgroundMusic();
 					backMusic.setPattern( backgroundPattern );
 					backMusic.setDelay( startDealy );
+					backMusic.setCoordinator( musicCoordinator );
 				}
 				catch ( Exception ex) 
 				{
 					ex.printStackTrace();
 				}
-
+				
 				lv.setBackgroundPattern( backMusic );
 				
 				Map< Integer, BackgroundMusic > playerBgMusicSheets = new HashMap< Integer, BackgroundMusic >();
@@ -748,6 +758,7 @@ public class LevelFactory
 						BackgroundMusic playerbgMusic = new BackgroundMusic();
 						playerbgMusic.setPattern( pt );
 						playerbgMusic.setDelay( startDealy );
+						playerbgMusic.setCoordinator( musicCoordinator );
 						
 						playerBgMusicSheets.put( setPl.getPlayer().getId(), playerbgMusic );
 					}					
@@ -757,7 +768,6 @@ public class LevelFactory
 					ex.printStackTrace();
 				}
 				
-
 				lv.setPlayerSheetMusic( playerBgMusicSheets );
 			}
 

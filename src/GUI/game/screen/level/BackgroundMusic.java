@@ -2,11 +2,11 @@ package GUI.game.screen.level;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.CyclicBarrier;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequence;
-import javax.swing.Timer;
 import javax.swing.event.EventListenerList;
 
 import org.jfugue.pattern.Pattern;
@@ -16,7 +16,6 @@ import GUI.game.screen.IPausable;
 import JFugueMod.org.jfugue.player.PlayerMod;
 import control.events.BackgroundMusicEvent;
 import control.events.BackgroundMusicEventListener;
-import control.events.SceneEvent;
 import general.PausableTimer;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
@@ -39,6 +38,8 @@ public class BackgroundMusic extends AbstractStoppableThread
 	
 	private PausableTimer delayTimer = null;
 	
+	private CyclicBarrier barrier = null;
+	
  	public BackgroundMusic() 
 	{
 		super.setName( this.getClass().getSimpleName() );
@@ -58,7 +59,7 @@ public class BackgroundMusic extends AbstractStoppableThread
 		this.pattern = pattern;
 		this.player.load( pattern );
 	}
-	
+		
 	public Pattern getPattern() 
 	{
 		return pattern;
@@ -74,6 +75,11 @@ public class BackgroundMusic extends AbstractStoppableThread
 		return delay;
 	}
 
+	public void setCoordinator( CyclicBarrier barrier )
+	{
+		this.barrier = barrier;
+	}
+	
 	@Override
 	protected void preStopThread(int friendliness) throws Exception 
 	{	
@@ -131,7 +137,7 @@ public class BackgroundMusic extends AbstractStoppableThread
 						{
 							@Override
 							public void actionPerformed(ActionEvent arg0) 
-							{
+							{								
 								delayTimerFinish();
 							}
 						} 
@@ -169,8 +175,14 @@ public class BackgroundMusic extends AbstractStoppableThread
 				this.delayTimer.startThread();
 				this.wait();
 			}
-									
+			
+			if( this.barrier != null )
+			{
+				this.barrier.await();
+			}
+						
 			this.player.play( );
+			
 			this.fireBackgroundMusicEvent( BackgroundMusicEvent.START );
 			
 			//this.fireSceneEvent( BackgroundMusicEvent.END );
@@ -398,6 +410,8 @@ public class BackgroundMusic extends AbstractStoppableThread
 		public MuteThread( PlayerMod player )
 		{
 			this.player = player;
+			
+			super.setName( this.getClass().getName() );
 		}
 
 		/*(non-Javadoc)

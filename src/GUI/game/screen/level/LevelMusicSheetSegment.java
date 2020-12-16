@@ -1,6 +1,7 @@
 package GUI.game.screen.level;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jfugue.theory.Note;
@@ -103,6 +104,22 @@ public class LevelMusicSheetSegment
 				if( refTrack != null && !refTrack.isEmpty() )
 				{
 					track.setTempo( refTrack.get( 0 ).getTempo() );
+				}
+				else
+				{
+					setTempoLoop:
+					for( Collection< IROTrack > trs : this.segments.values() )
+					{
+						if( trs != null && !trs.isEmpty( ) )
+						{
+							for( IROTrack t : trs )
+							{
+								track.setTempo( t.getTempo() );
+								
+								break setTempoLoop;
+							}
+						}
+					}
 				}
 			}
 			

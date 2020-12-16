@@ -49,7 +49,7 @@ import config.Settings;
 import control.ScreenControl;
 import control.controller.ControllerActionChecker;
 import control.controller.ControllerManager;
-import control.controller.ControllerMetadata;
+import control.controller.IControllerMetadata;
 import edu.ucsd.sccn.LSL;
 import exceptions.ConfigParameterException;
 import general.NumberRange;
@@ -197,7 +197,7 @@ public class GameManager
 		this.gameWindow = new GameWindow( players );
 		this.gameWindow.setIconImage( MainAppUI.getInstance().getIconImage() );
 		
-		ControllerMetadata[] controllers = new ControllerMetadata[ players.size() ];
+		IControllerMetadata[] controllers = new IControllerMetadata[ players.size() ];
 		
 		for( int i = 0; i < players.size(); i++ ) 
 		{
@@ -209,7 +209,7 @@ public class GameManager
 
 			if( ctr != null )
 			{
-				controllers[ i ] = (ControllerMetadata)ctr;				
+				controllers[ i ] = (IControllerMetadata)ctr;				
 			}
 		}
 		
@@ -226,7 +226,7 @@ public class GameManager
 		LSL.StreamInfo[] lslInfos = new LSL.StreamInfo[ controllers.length ];
 		for( int i = 0; i < controllers.length; i++ )
 		{			
-			ControllerMetadata meta = controllers[ i ];
+			IControllerMetadata meta = controllers[ i ];
 			
 			checkLSLInfo:
 			for( LSL.StreamInfo str : streams )
@@ -251,7 +251,7 @@ public class GameManager
 
 		try
 		{
-			List< ControllerMetadata > ctrs = new ArrayList<ControllerMetadata>();
+			List< IControllerMetadata > ctrs = new ArrayList<IControllerMetadata>();
 			
 			for( int i = 0; i < players.size(); i++ )
 			{
@@ -267,7 +267,7 @@ public class GameManager
 				// CONTROLLER
 				//
 				
-				ControllerMetadata cmeta = controllers[ i ];
+				IControllerMetadata cmeta = controllers[ i ];
 				
 				ConfigParameter par = setting.getParameter( ConfigApp.INPUT_MIN_VALUE );
 				double min = ((Number)par.getSelectedValue()).doubleValue();
@@ -300,7 +300,7 @@ public class GameManager
 			
 			ControllerManager.getInstance().startController( ctrs );
 			
-			for( ControllerMetadata cmeta : ctrs )
+			for( IControllerMetadata cmeta : ctrs )
 			{
 				NumberRange rng = new NumberRange( cmeta.getRecoverInputLevel(), cmeta.getActionInputLevel().getMin() );
 				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
@@ -471,7 +471,9 @@ public class GameManager
 				}
 			}		
 			
-			ConfigApp.dbSaveStatistic();
+			//
+			System.out.println("GameManager.stopLevel() - CORREGIR ERROR: java.util.ConcurrentModificationException");
+			//ConfigApp.dbSaveStatistic();
 			
 			MainAppUI.getInstance().setVisible( true );
 		}

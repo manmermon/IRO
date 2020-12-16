@@ -6,6 +6,7 @@ import GUI.MainAppUI;
 import GUI.GameManager;
 import GUI.game.screen.IScene;
 import config.ConfigApp;
+import config.IOwner;
 import config.language.Language;
 import control.events.InputActionEvent;
 import control.events.InputActionListerner;
@@ -239,13 +240,13 @@ public class ScreenControl extends AbstractStoppableThread
 		}
 	}
 
-	public void setUpdateLevelInputGoal( double percent )
+	public void setUpdateLevelInputGoal( double percent, IOwner owner )
 	{
 		synchronized ( this )
 		{
 			if( this.sceneCtrl != null && this.sceneCtrl instanceof LevelControl )
 			{
-				((LevelControl)this.sceneCtrl).updateInputGoal( percent );
+				((LevelControl)this.sceneCtrl).updateInputGoal( percent, owner );
 			}
 		}
 	}

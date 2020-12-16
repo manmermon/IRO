@@ -10,7 +10,7 @@ import general.NumberRange;
  * @author manuel
  *
  */
-public interface ControllerMetadata
+public interface IControllerMetadata
 {
 	public enum ControllerType { UNKNOWN, LSLSTREAM };
 	

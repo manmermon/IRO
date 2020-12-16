@@ -244,6 +244,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 				
 				Double muteTime = this.mutePlayerSheet.get( iPlayer );
 				
+				System.out.println("MusicPlayerControl.runInLoop() " + iPlayer);
 				BackgroundMusic playerSheet = this.playerMusicSheets.get( iPlayer );
 				
 				playerSheet.mute( muteTime );

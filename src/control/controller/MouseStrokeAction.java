@@ -4,12 +4,20 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
+import config.IOwner;
 import control.ScreenControl;
 import control.events.InputActionEvent;
 
 public class MouseStrokeAction implements MouseListener
 											, MouseMotionListener
 {	
+	private IOwner owner = null;
+	
+	public MouseStrokeAction( IOwner owner ) 
+	{
+		this.owner = owner;
+	}
+	
 	@Override
 	public void mouseClicked(java.awt.event.MouseEvent e) 
 	{	
@@ -35,7 +43,7 @@ public class MouseStrokeAction implements MouseListener
 			type = InputActionEvent.RECOVER_DONE;
 		}
 		
-		final InputActionEvent ev = new InputActionEvent( this, type );
+		final InputActionEvent ev = new InputActionEvent( this, type, this.owner );
 		
 		ScreenControl.getInstance().InputAction( ev );
 	}

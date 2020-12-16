@@ -5,6 +5,8 @@ package control.events;
 
 import java.util.EventObject;
 
+import config.IOwner;
+
 
 /**
  * @author manuel
@@ -24,21 +26,30 @@ public class InputActionEvent extends EventObject
 
 	private int typeEvent;
 	
-	public InputActionEvent( Object source ) 
+	private IOwner owner = null;
+	
+	public InputActionEvent( Object source, IOwner actionOwner ) 
 	{
-		this( source, ACTION_NONE );
+		this( source, ACTION_NONE, actionOwner );
 	}
 	
-	public InputActionEvent( Object source, int type ) 
+	public InputActionEvent( Object source, int type, IOwner actionOwner ) 
 	{
 		super( source );
 		
 		this.typeEvent = type;
+		
+		this.owner = actionOwner;
 	}
 	
 	public int getType()
 	{
 		return this.typeEvent;
+	}
+	
+	public IOwner getActionOwner()
+	{
+		return this.owner;
 	}
 	
 	/*(non-Javadoc)

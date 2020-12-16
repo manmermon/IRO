@@ -62,7 +62,7 @@ import javax.swing.ImageIcon;
 import config.ConfigParameter.ParameterType;
 import config.language.Caption;
 import config.language.Language;
-import control.controller.ControllerMetadata;
+import control.controller.IControllerMetadata;
 import exceptions.ConfigParameterException;
 import general.ConvertTo;
 import general.NumberRange;
@@ -1227,7 +1227,7 @@ public class ConfigApp
 			
 				if( playerID != Player.ANONYMOUS && !register.isEmpty() )
 				{
-					ControllerMetadata cmeta = RegistrarStatistic.getControllerSetting( playerID );
+					IControllerMetadata cmeta = RegistrarStatistic.getControllerSetting( playerID );
 					LinkedList< Double[] > cData = RegistrarStatistic.getControllerData( playerID );
 					double score = RegistrarStatistic.getPlayerScore( playerID );
 					//TODO

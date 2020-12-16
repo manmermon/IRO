@@ -22,7 +22,7 @@
 package control.scenes.level;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import GUI.game.component.event.FretEventListener;
 import GUI.game.component.sprite.Fret;
@@ -32,6 +32,7 @@ import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.component.sprite.Score;
 import GUI.game.screen.IScene;
 import GUI.game.screen.level.Level;
+import config.IOwner;
 import control.events.BackgroundMusicEventListener;
 import control.events.InputActionEvent;
 import control.events.SceneEvent;
@@ -44,7 +45,7 @@ public class LevelControl extends AbstractSceneControl
 							implements BackgroundMusicEventListener
 										, FretEventListener
 {		
-	private AtomicBoolean actionDone;
+	private ConcurrentSkipListSet< Integer > actionOwner;
 	private boolean backgroundMusicEnd = false;
 	
 	private boolean noteIntoFret = false;
@@ -57,7 +58,7 @@ public class LevelControl extends AbstractSceneControl
 	{	
 		super();
 		
-		this.actionDone = new AtomicBoolean( true );
+		this.actionOwner = new ConcurrentSkipListSet< Integer >();
 	}
 	
 	/*(non-Javadoc)
@@ -138,20 +139,37 @@ public class LevelControl extends AbstractSceneControl
 				{	
 					noteInFret = true;
 					
-					if( this.actionDone.get() 
-							|| note.isGhost() 
-							//|| true 
-							)
+					if( note.isGhost() )
 					{
 						if( !note.isSelected() )
 						{
 							note.setSelected( true );
 							note.setState( GUI.game.component.sprite.MusicNoteGroup.State.ACTION );
-							
-							for( ISprite score : this.scene.getSprites( Level.SCORE_ID, true ) )
+						}
+					}
+					else if( !this.actionOwner.isEmpty() )
+					{
+						IOwner noteOwner = note.getOwner();
+						
+						Integer act;
+						while( ( act = this.actionOwner.pollFirst() ) != null )
+						{
+							if( !note.isSelected() && noteOwner != null && noteOwner.getId() == act )
 							{
-								((Score)score).incrementScore();
-							}							
+								note.setSelected( true );
+								note.setState( GUI.game.component.sprite.MusicNoteGroup.State.ACTION );
+
+								for( ISprite score : this.scene.getSprites( Level.SCORE_ID, true ) )
+								{
+									Score sc = (Score)score;
+									IOwner owner = sc.getOwner();
+
+									if( owner != null && owner.getId() == act )
+									{
+										sc.incrementScore();
+									}
+								}							
+							}
 						}
 					}
 					else if( !note.isSelected() )
@@ -169,8 +187,6 @@ public class LevelControl extends AbstractSceneControl
 			}
 			
 			this.noteIntoFret = noteInFret;
-
-			this.actionDone.set( false );
 		}
 	}
 	
@@ -199,7 +215,12 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	public void specificUpdateScene( InputActionEvent act ) throws SceneException
 	{			
-		this.actionDone.set( act == null ? false : act.getType() == InputActionEvent.ACTION_DONE );				
+		if( act != null )
+		{
+			IOwner owner = act.getActionOwner();
+			
+			this.actionOwner.add( owner.getId() );
+		}
 	}
 
 	/*(non-Javadoc)
@@ -288,15 +309,23 @@ public class LevelControl extends AbstractSceneControl
 		}
 	}
 
-	public void updateInputGoal( double percentage )
+	public void updateInputGoal( double percentage, IOwner owner )
 	{
-		if( this.scene != null )
+		if( this.scene != null && owner != null )
 		{
 			List< ISprite > targets = this.scene.getSprites( Level.INPUT_TARGET_ID, true );
 			
 			for( ISprite tg : targets )
 			{
-				((InputGoal)tg).setPercentage( percentage );
+				InputGoal goal = (InputGoal)tg;
+				IOwner gOwner = goal.getOwner();
+				
+				if( gOwner.getId() == owner.getId() )
+				{
+					goal.setPercentage( percentage );
+					
+					break;
+				}
 			}
 		}
 	}

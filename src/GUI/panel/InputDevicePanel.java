@@ -45,7 +45,7 @@ import config.language.Caption;
 import config.language.Language;
 import config.language.TranslateComponents;
 import control.controller.ControllerManager;
-import control.controller.ControllerMetadata;
+import control.controller.IControllerMetadata;
 import control.controller.LSLStreams.LSLStreamMetadata;
 import edu.ucsd.sccn.LSL;
 import image.icon.GeneralAppIcon;
@@ -370,7 +370,7 @@ public class InputDevicePanel extends JPanel
 					Object val = par.getSelectedValue();
 					if( val != null )
 					{											
-						ControllerMetadata cmeta = (ControllerMetadata)val;
+						IControllerMetadata cmeta = (IControllerMetadata)val;
 
 						if( cmeta.getControllerID().equals( ctr.uid() ) )
 						{
@@ -380,7 +380,7 @@ public class InputDevicePanel extends JPanel
 				}
 				else
 				{
-					ControllerMetadata meta = new LSLStreamMetadata( ctr );
+					IControllerMetadata meta = new LSLStreamMetadata( ctr );
 					par.setSelectedValue( meta );
 				}
 			}
@@ -505,7 +505,7 @@ public class InputDevicePanel extends JPanel
 					
 					if( selectedController != null )
 					{
-						ControllerMetadata meta = (ControllerMetadata)selectedController;
+						IControllerMetadata meta = (IControllerMetadata)selectedController;
 						
 						if( meta.getControllerID().equals( info.uid() ) )
 						{
@@ -565,7 +565,7 @@ public class InputDevicePanel extends JPanel
 			{
 				ControllerManager.getInstance().stopController();
 				
-				List< ControllerMetadata > ctr = new ArrayList<ControllerMetadata>();
+				List< IControllerMetadata > ctr = new ArrayList<IControllerMetadata>();
 				LSLStreamMetadata meta = new LSLStreamMetadata( info );
 				Player p = new Player();
 				meta.setPlayer( p );				

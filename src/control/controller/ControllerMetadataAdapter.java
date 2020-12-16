@@ -10,7 +10,7 @@ import general.NumberRange;
  * @author manuel
  *
  */
-public class ControllerMetadataAdapter implements ControllerMetadata
+public class ControllerMetadataAdapter implements IControllerMetadata
 {	
 	protected ControllerType controllerType = ControllerType.UNKNOWN;
 	

@@ -36,11 +36,11 @@ public class ControllerManager
 		return ctr;
 	}
 	
-	public void startController( List< ControllerMetadata > controllers ) throws Exception
+	public void startController( List< IControllerMetadata > controllers ) throws Exception
 	{		
 		stopController();
 		
-		for( ControllerMetadata meta : controllers )
+		for( IControllerMetadata meta : controllers )
 		{
 			switch ( meta.getControllerType() )
 			{

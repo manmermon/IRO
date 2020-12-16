@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import config.Player;
-import control.controller.ControllerMetadata;
+import control.controller.IControllerMetadata;
 import general.ArrayTreeMap;
 import general.ConvertTo;
 import general.Tuple;
@@ -83,7 +83,7 @@ public class RegistrarStatistic
 	
 	private static ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType > > register = new ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType> >();
 	
-	private static Map< Integer, ControllerMetadata > controllerSettings = new HashMap< Integer, ControllerMetadata >();
+	private static Map< Integer, IControllerMetadata > controllerSettings = new HashMap< Integer, IControllerMetadata >();
 	
 	private static Map< Integer, LinkedList< Double[] > > controllerData = new HashMap< Integer, LinkedList< Double[] > >();
 	
@@ -114,7 +114,7 @@ public class RegistrarStatistic
 		return score;
 	}
 	
-	public static synchronized void addControllerSetting( int playerID, ControllerMetadata meta )
+	public static synchronized void addControllerSetting( int playerID, IControllerMetadata meta )
 	{
 		if( meta != null )
 		{
@@ -181,7 +181,7 @@ public class RegistrarStatistic
 		return register.get( playerID );
 	}
 	
-	public static ControllerMetadata getControllerSetting( int playerID )
+	public static IControllerMetadata getControllerSetting( int playerID )
 	{
 		return controllerSettings.get( playerID );
 	}
