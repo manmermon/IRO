@@ -9,8 +9,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -450,7 +448,7 @@ public class LevelFactory
 				}
 
 				BufferedImage noteImg = null;
-				Color bgc = new Color( 255, 255, 255, 140 );
+				//Color bgc = new Color( 255, 255, 255, 140 );
 				
 				double maxNumNotes = Integer.MIN_VALUE;
 				for( LevelMusicSheetSegment lmss : musicPlayers )
@@ -565,7 +563,7 @@ public class LevelFactory
 						noteSprite.setPreactionColor( preActColor );
 						noteSprite.setWaitingActionColor( waitActColor );
 						noteSprite.setOwner( playerSetting.getPlayer() );
-
+						
 						if( noteImg == null )
 						{
 							if( path != null )
@@ -574,19 +572,29 @@ public class LevelFactory
 								{
 									Image img = ImageIO.read( new File( path ) );
 
+									/*
 									Dimension s = noteSprite.getBounds().getSize();
+									
 									noteImg = (BufferedImage)basicPainter2D.circle( 0, 0, s.width, bgc, null );
 									noteImg = (BufferedImage)basicPainter2D.composeImage( noteImg, 0, 0
 											, basicPainter2D.copyImage( 
 													img.getScaledInstance( noteImg.getWidth() 
 															, noteImg.getHeight()
 															, Image.SCALE_SMOOTH ) ) );
+									 
+									noteImg = (BufferedImage)img.getScaledInstance( s.width 
+																					, s.width
+																					, Image.SCALE_SMOOTH );
+									 */
+									noteImg = (BufferedImage)img;
+									
 								}
 								catch (Exception ex) 
 								{
 								}
 							}
 						}
+						
 						noteSprite.setImage( noteImg );
 
 						noteSprite.setZIndex( Level.PLANE_NOTE );

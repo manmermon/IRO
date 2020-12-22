@@ -88,6 +88,8 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	//
 	//
 	
+	private boolean animationActive = false;
+	
 	private NumberRange angleRange = new NumberRange( -45, 45 );
 	private final int numAngles = 7;
 	private double stepAngle = angleRange.getRangeLength() / numAngles;
@@ -104,6 +106,13 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	private Color actionColor = Color.GREEN;
 	
 	private State state = State.PREACTION;
+	
+	private BufferedImage circPreAction = null;
+	private BufferedImage circAction = null;
+	private BufferedImage circWaitAction = null;
+	
+	private int notePasteX = 0;
+	private int notePasteY = 0;
 		
 	public MusicNoteGroup( String track
 							, double timeScreen
@@ -253,7 +262,27 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	
 	public void setImage( BufferedImage img )
 	{
-		this.noteImg = img;		
+		//this.noteImg = img;
+		
+		if( img != null )
+		{
+			Dimension size = super.getBounds().getSize();
+			
+			int l = (int)Math.max( size.getWidth(), size.getHeight() );
+			int s = (int)Math.sqrt( l * l / 2 );  
+			
+			if( s <= 0 )
+			{
+				s = 1;
+			}
+			
+			this.noteImg = (BufferedImage)basicPainter2D.copyImage( img.getScaledInstance( s 
+																	, s
+																	, BufferedImage.SCALE_SMOOTH ) );
+		}
+		
+		this.animationActive = ( this.noteImg != null );
+				
 	}
 	
 	public void setTempo( int bpm )
@@ -374,6 +403,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		{	
 			if( !this.noteTracks.isEmpty() )
 			{	
+				/*
 				Color c = preactionColor;
 				
 				switch ( this.state )
@@ -393,6 +423,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 						break;
 					}
 				}
+				*/
 				
 				pic = basicPainter2D.copyImage( this.noteImg ); 
 				if( pic == null )
@@ -412,18 +443,82 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 					List< Byte > l = new ArrayList< Byte >();
 					l.addAll( instruments );
 					
-					pic = (BufferedImage)MusicInstrumentIcons.getInstrument( l, super.getSize().width, c );
-				}
-				else
-				{	
-					if( this.currentAngle != 0 )
+					int s = (int)( Math.max(  super.getSize().width, super.getSize().height ) ) + 1;
+					s = (int)Math.abs( Math.sqrt( s * s / 2 ) );
+					if( s <= 0 )
 					{
-						pic = basicPainter2D.rotate( pic, this.currentAngle );
-					}					
+						s = 1;
+					}
 					
-					basicPainter2D.changeColorPixels( Color.BLACK, c, pic );
-					//basicPainter2D.changeColorPixels( Color.BLACK, this.color, 0.25F, pic );
+					pic = (BufferedImage)MusicInstrumentIcons.getInstrument( l, s, Color.BLACK );
 				}
+				
+				BufferedImage bg = this.circPreAction;
+				
+				if( bg == null )
+				{
+					
+					int alpha = 170;
+					Color c = new Color( this.preactionColor.getRed(), this.preactionColor.getGreen(), this.preactionColor.getBlue(), alpha );
+					
+					int r = (int)( Math.max(  super.getSize().width, super.getSize().height ) ) + 1;
+					
+					this.circPreAction = (BufferedImage)basicPainter2D.circle( 0
+																				, 0
+																				, r 
+																				, c
+																				, null );
+					
+					c = new Color( this.actionColor.getRed(), this.actionColor.getGreen(), this.actionColor.getBlue(), alpha );
+					this.circAction = (BufferedImage)basicPainter2D.circle( 0
+																			, 0
+																			, r
+																			, c
+																			, null );
+					
+					c = new Color( this.waitingActionColor.getRed(), this.waitingActionColor.getGreen(), this.waitingActionColor.getBlue(), alpha );
+					this.circWaitAction = (BufferedImage)basicPainter2D.circle( 0
+																				, 0
+																				, r
+																				, c
+																				, null );
+					
+					bg = this.circPreAction;
+					
+					this.notePasteX = Math.abs(  bg.getWidth() - pic.getWidth() ) / 2;
+					this.notePasteY = Math.abs( bg.getHeight() - pic.getHeight() ) / 2;
+				}
+				
+				switch ( this.state )
+				{
+					case WAITING_ACTION:
+					{
+						bg = this.circWaitAction;
+						break;
+					} 
+					case ACTION:
+					{
+						bg = this.circAction;
+						break;
+					}
+					default:
+					{
+						break;
+					}
+				}
+				
+				pic = (BufferedImage)basicPainter2D.composeImage( basicPainter2D.copyImage( bg ), this.notePasteX, this.notePasteY, pic );
+				//pic = bg;
+				if( this.currentAngle != 0 && this.animationActive )
+				{
+						pic = basicPainter2D.rotate( pic, this.currentAngle );
+				}					
+					
+				//basicPainter2D.changeColorPixels( Color.BLACK, c, pic );
+				//basicPainter2D.changeColorPixels( Color.BLACK, this.color, 0.25F, pic );
+				
+
+				
 			}			
 		}
 		

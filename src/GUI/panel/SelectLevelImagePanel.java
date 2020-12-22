@@ -228,6 +228,7 @@ public class SelectLevelImagePanel extends JPanel
 					{
 						Image img = ImageIO.read( new File( notPath ) );
 						
+						/*
 						Color bg = new Color( 255, 255, 255, 140 );
 						Dimension s = noteSprite1.getBounds().getSize();
 						noteImg = (BufferedImage)basicPainter2D.circle( 0, 0, s.width, bg, null );
@@ -236,6 +237,8 @@ public class SelectLevelImagePanel extends JPanel
 																					img.getScaledInstance( noteImg.getWidth() 
 																							, noteImg.getHeight()
 																							, Image.SCALE_SMOOTH ) ) );
+						 */
+						noteImg = (BufferedImage)img;
 					}
 					catch (Exception ex) 
 					{
