@@ -27,12 +27,12 @@ import GUI.game.component.sprite.Score;
 import GUI.game.screen.IScene;
 import GUI.game.screen.Scene;
 import GUI.game.screen.level.Level;
+import GUI.layout.VerticalFlowLayout;
 import config.Player;
 import config.language.Language;
 import control.controller.IInputable;
 import control.events.InputActionEvent;
 import general.Tuple;
-import general.VerticalFlowLayout;
 
 public class MenuGameResults extends Scene implements IInputable, IGameMenu 
 {

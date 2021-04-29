@@ -3,7 +3,6 @@
 	<name>IRO</name>
 	<comment></comment>
 	<projects>
-		<project>myLibraries</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
