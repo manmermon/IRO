@@ -18,6 +18,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Field;
+import java.util.Arrays;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -26,6 +28,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
+
+import com.sun.jna.Platform;
 
 import GUI.AppIcon;
 import GUI.MainAppUI;
@@ -47,6 +51,28 @@ public class MainLaunchApp
 		try 
 		{
 			String OS = System.getProperty("os.name").toLowerCase();
+						
+			String p = System.getProperty( "user.dir" ) + "/" + ConfigApp.SYSTEM_LIB_WIN_PATH;
+			
+			if( Platform.getOSType() == Platform.LINUX )
+			{
+				p = System.getProperty( "user.dir" ) + "/" + ConfigApp.SYSTEM_LIB_LINUX_PATH;
+			}
+			else if( Platform.getOSType() == Platform.MAC )
+			{
+				p = System.getProperty( "user.dir" ) + "/" + ConfigApp.SYSTEM_LIB_MACOS_PATH;
+			}
+			
+			try 
+			{
+				addLibraryPath( p );
+			} 
+			catch (Exception e) 
+			{
+				//showError( e, false );
+			}
+			
+			
 			if( (OS.contains("nix") || OS.contains("nux") || OS.contains("aix")) )
 			{
 				UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName() );
@@ -83,6 +109,23 @@ public class MainLaunchApp
 		}		
 	}
 
+	private static void addLibraryPath(String pathToAdd) throws Exception 
+	{
+		Field usrPathsField = ClassLoader.class.getDeclaredField("usr_paths");
+		usrPathsField.setAccessible(true);
+		String[] paths = (String[]) usrPathsField.get(null);
+		for (String path : paths)
+		{
+			if (path.equals(pathToAdd))
+			{
+				return;
+			}
+		}
+
+		String[] newPaths = Arrays.copyOf(paths, paths.length + 1);
+		newPaths[newPaths.length - 1] = pathToAdd;
+		usrPathsField.set(null, newPaths);
+	}
 
 	private static void createApplication() throws Throwable
 	{

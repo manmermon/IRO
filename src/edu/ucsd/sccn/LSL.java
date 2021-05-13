@@ -4,6 +4,8 @@ import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 
+import config.ConfigApp;
+
 import java.io.IOException;
 
 
@@ -1094,6 +1096,7 @@ public class LSL {
     }
 
     static dll inst;
+    /*
     static {
         System.setProperty("jna.debug_load", "true");
         System.setProperty("jna.debug_load.jna", "true");
@@ -1116,6 +1119,56 @@ public class LSL {
                 break;
         }
     }
+    //*/
+    static {
+        System.setProperty("jna.debug_load", "true");
+        System.setProperty("jna.debug_load.jna", "true");
+        
+        String libPath = ConfigApp.SYSTEM_LIB_WIN_PATH;
+        String libName = "";
+        String libNameAlt = "";
+        
+        switch ( Platform.getOSType() ) 
+        {
+            case Platform.WINDOWS:
+            {
+            	libName = ( Platform.is64Bit() ? "liblsl64.dll" : "liblsl32.dll" );
+            	libNameAlt = "liblsl.dll";
+                break;
+            }
+            case Platform.MAC:
+            {
+            	libPath = ConfigApp.SYSTEM_LIB_MACOS_PATH;
+            	
+            	libName = ( Platform.is64Bit() ? "liblsl64.dylib" : "liblsl32.dylib" );
+            	libNameAlt = "liblsl.dylib";
+                break;
+            }
+            case Platform.ANDROID:
+            {
+                // For JNA <= 5.1.0
+                System.setProperty("jna.nosys", "false");
+                libName = "lsl";         
+                libNameAlt = "lsl";
+                break;
+            }
+            default:
+            {
+            	libPath = ConfigApp.SYSTEM_LIB_LINUX_PATH;
+            	libName += ( Platform.is64Bit() ? "liblsl64.so" : "liblsl32.so" );
+            	libNameAlt = "liblsl.so";
+                break;
+            }
+        }
+        
+        inst = (dll)Native.loadLibrary( libPath + libName, dll.class);        
+        if (inst == null)
+        {
+            //inst = (LSLDll)Native.loadLibrary( ConfigApp.SYSTEM_LIB_PATH  + "liblsl.so", LSLDll.class );
+        	inst = (dll)Native.loadLibrary( libName + libNameAlt, dll.class );
+        }
+    }
+    
     /*static dll inst;
     static {
         String libname;

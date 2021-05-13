@@ -77,12 +77,16 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2020, 06 - 1, 22 );
+	public static final Calendar buildDate = new GregorianCalendar( 2021, 05 - 1, 3 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
 	public static final String appDateRange = "2019-" + buildDate.get( Calendar.YEAR );
 
+	public static final String SYSTEM_LIB_WIN_PATH = "systemLib/win/";
+	public static final String SYSTEM_LIB_LINUX_PATH = "systemLib/linux/";
+	public static final String SYSTEM_LIB_MACOS_PATH = "systemLib/macox/";
+	
 	private static final String DB_FOLDER = "./user/db/";
 	private static final String DB_FILENAME = "data.db";
 	private static final String DB_PATH = DB_FOLDER + DB_FILENAME;
