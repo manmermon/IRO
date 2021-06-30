@@ -24,7 +24,6 @@ import GUI.buttom.GeometricButtom;
 import GUI.dialog.InfoDialog;
 import GUI.game.component.Frame;
 import GUI.game.component.sprite.Score;
-import GUI.game.screen.IScene;
 import GUI.game.screen.Scene;
 import GUI.game.screen.level.Level;
 import GUI.layout.VerticalFlowLayout;

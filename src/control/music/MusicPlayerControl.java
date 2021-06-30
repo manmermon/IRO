@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import GUI.game.screen.level.BackgroundMusic;
+import GUI.game.screen.level.music.BackgroundMusic;
 import control.events.BackgroundMusicEventListener;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
@@ -29,6 +29,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	
 	private Object sync = new Object();
 	
+	private boolean isMuteSession = false;
 	
 	private MusicPlayerControl( )
 	{	
@@ -55,6 +56,14 @@ public class MusicPlayerControl extends AbstractStoppableThread
 		}
 		
 		return mpctr;
+	}
+	
+	public void setMuteSession( boolean mute )
+	{
+		synchronized ( this.sync )
+		{
+			this.isMuteSession = mute;
+		}
 	}
 	
 	public void setBackgroundMusicPatter( BackgroundMusic backgroundMusicPattern )
@@ -87,7 +96,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			this.backgroundMusic.addBackgroundMusicEventListener( listener );
 		}
 	}	
-	
+		
 	@Override
 	protected void preStopThread( int friendliness ) throws Exception 
 	{		
@@ -105,14 +114,16 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			this.mutePlayerSheet.clear();
 			
 			this.startTime = System.nanoTime();
-			
+						
 			for( BackgroundMusic playerSheet : this.playerMusicSheets.values() )
 			{
+				playerSheet.setMuteSession( this.isMuteSession );
 				playerSheet.startThread();
 			}
 			
 			if( this.backgroundMusic != null )
 			{						
+				this.backgroundMusic.setMuteSession( this.isMuteSession );
 				this.backgroundMusic.startThread();
 			}
 			
@@ -145,6 +156,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 				this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
 			}
 			
+			this.isMuteSession = false;			
 			this.isBackPlay = false;
 			this.isPlay.set( false );
 		}
@@ -244,7 +256,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 				
 				Double muteTime = this.mutePlayerSheet.get( iPlayer );
 				
-				System.out.println("MusicPlayerControl.runInLoop() " + iPlayer);
+				//System.out.println("MusicPlayerControl.runInLoop() " + iPlayer);
 				BackgroundMusic playerSheet = this.playerMusicSheets.get( iPlayer );
 				
 				playerSheet.mute( muteTime );

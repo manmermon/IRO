@@ -35,6 +35,7 @@ import GUI.game.component.sprite.MusicNoteGroup;
 import GUI.game.component.sprite.Pause;
 import GUI.game.screen.IPausable;
 import GUI.game.screen.Scene;
+import GUI.game.screen.level.music.BackgroundMusic;
 
 public class Level extends Scene implements IPausable
 {
@@ -64,6 +65,8 @@ public class Level extends Scene implements IPausable
 	
 	private Boolean pause = false;
 	
+	private Boolean isMuteSession = false;
+	
 	public Level( Dimension sceneSize) //, Rectangle frameBounds ) 
 	{
 		//super( sceneSize, frameBounds );
@@ -77,7 +80,7 @@ public class Level extends Scene implements IPausable
 	{
 		this.backgroundMusic = backgroundPattern;
 	}
-	
+		
 	public void setPlayerSheetMusic( Map< Integer, BackgroundMusic > playerSheets )
 	{
 		this.playerMusics.putAll( playerSheets );
@@ -193,6 +196,22 @@ public class Level extends Scene implements IPausable
 		synchronized ( this.pause )
 		{
 			return this.pause;
+		}
+	}
+	
+	public void setMuteSession( boolean mute )
+	{
+		synchronized( this.isMuteSession )
+		{
+			this.isMuteSession = mute;
+		}
+	}
+	
+	public boolean isMuteSession()
+	{
+		synchronized( this.isMuteSession )
+		{
+			return this.isMuteSession;
 		}
 	}
 }

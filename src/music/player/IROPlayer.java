@@ -13,8 +13,8 @@ import org.jfugue.pattern.Pattern;
 import org.jfugue.player.ManagedPlayerListener;
 import org.jfugue.theory.Note;
 
-import JFugueMod.org.jfugue.player.PlayerMod;
-import music.IROTrack;
+import music.jfugueIRO.PlayerMod;
+import music.sheet.IROTrack;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 import tools.MusicSheetTools;

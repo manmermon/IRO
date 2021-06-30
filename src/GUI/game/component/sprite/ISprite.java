@@ -22,14 +22,11 @@
 package GUI.game.component.sprite;
 
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
-import GUI.game.component.event.MouseSpriteEventListener;
 import GUI.game.component.event.SpriteEventListener;
-import control.controller.IInputAction;
 
 public interface ISprite 
 {

@@ -38,9 +38,8 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
 import GUI.game.GameWindow;
-import GUI.game.component.Frame;
 import GUI.game.screen.level.Level;
-import GUI.game.screen.level.LevelFactory;
+import GUI.game.screen.level.build.LevelMusicBuilder;
 import GUI.game.screen.menu.MenuGameResults;
 import config.ConfigApp;
 import config.ConfigParameter;
@@ -319,8 +318,17 @@ public class GameManager
 			File fileSong = new File( this.leveSongs.poll() );
 			
 			MainAppUI.getInstance().setVisible( false );
+
+			ConfigParameter muteSession = ConfigApp.getGeneralSetting( ConfigApp.MUTE_SESSION );			
+						
+			boolean mute = false;
 			
-			this.setLevel( fileSong );			
+			if( muteSession != null && muteSession.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
+			{
+				mute = (Boolean)muteSession.getSelectedValue();
+			}
+			
+			this.setLevel( fileSong, mute );			
 
 			this.gameWindow.setVisible( true );			
 		}
@@ -370,7 +378,7 @@ public class GameManager
 		}
 	}
 
-	private void setLevel( File fileSong ) throws Exception
+	private void setLevel( File fileSong, boolean isMuteSession ) throws Exception
 	{
 		Rectangle screenBounds = this.gameWindow.getSceneBounds();
 		
@@ -380,7 +388,9 @@ public class GameManager
 			settings.add( ConfigApp.getPlayerSetting( player ) );
 		}
 		
-		Level level = LevelFactory.getLevel( fileSong, screenBounds.getSize(), settings );
+		Level level = LevelMusicBuilder.getLevel( fileSong, screenBounds.getSize(), settings );
+		
+		level.setMuteSession( isMuteSession );
 	
 		this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() + ": " + fileSong.getName() );
 		
@@ -406,7 +416,16 @@ public class GameManager
 			
 			this.gameWindow.getGamePanel().removeAll();
 			
-			this.setLevel( new File( this.leveSongs.poll() ) );
+			ConfigParameter muteSession = ConfigApp.getGeneralSetting( ConfigApp.MUTE_SESSION );			
+			
+			boolean mute = false;
+			
+			if( muteSession != null && muteSession.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
+			{
+				mute = (Boolean)muteSession.getSelectedValue();
+			}
+						
+			this.setLevel( new File( this.leveSongs.poll() ), mute );
 			
 			this.gameWindow.getGamePanel().setVisible( true );
 		}
@@ -446,14 +465,30 @@ public class GameManager
 			
 			this.gameWindow.getGamePanel().removeAll();
 			
-			MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
-													//, this.gameWindow.getSceneBounds()
-													, scores, this.hasNextLevel(), true );
-			//ScreenControl.getInstance().setScene( mr );
+			ConfigParameter contSession = ConfigApp.getGeneralSetting( ConfigApp.CONTINUOUS_SESSION );			
 			
-			this.gameWindow.getGamePanel().add( mr.getMenuFrame(), BorderLayout.CENTER );
+			boolean continuous = false;
 			
-			this.gameWindow.getGamePanel().setVisible( true );
+			if( contSession != null && contSession.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
+			{
+				continuous = (Boolean)contSession.getSelectedValue();
+			}
+			
+			if( continuous && this.hasNextLevel() )
+			{
+				this.nextLevel();
+			}			
+			else
+			{
+				MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
+														//, this.gameWindow.getSceneBounds()
+														, scores, this.hasNextLevel(), true );
+				//ScreenControl.getInstance().setScene( mr );
+				
+				this.gameWindow.getGamePanel().add( mr.getMenuFrame(), BorderLayout.CENTER );
+				
+				this.gameWindow.getGamePanel().setVisible( true );
+			}
 		}
 		
 		if( !nextLevel )
@@ -473,7 +508,7 @@ public class GameManager
 			
 			//
 			System.out.println("GameManager.stopLevel() - CORREGIR ERROR: java.util.ConcurrentModificationException");
-			//ConfigApp.dbSaveStatistic();
+			ConfigApp.dbSaveStatistic();
 			
 			MainAppUI.getInstance().setVisible( true );
 		}

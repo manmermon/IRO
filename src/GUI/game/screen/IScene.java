@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import GUI.game.component.Frame;
 import GUI.game.component.sprite.ISprite;
 
 public interface IScene 

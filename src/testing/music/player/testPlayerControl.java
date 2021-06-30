@@ -7,7 +7,7 @@ import org.jfugue.player.Player;
 import org.jfugue.theory.Note;
 
 import control.music.MusicPlayerControl;
-import music.IROTrack;
+import music.sheet.IROTrack;
 
 public class testPlayerControl 
 {

@@ -42,7 +42,7 @@ import control.music.MusicPlayerControl;
 import general.NumberRange;
 import image.basicPainter2D;
 import image.icon.MusicInstrumentIcons;
-import music.IROTrack;
+import music.sheet.IROTrack;
 import statistic.RegistrarStatistic;
 import statistic.RegistrarStatistic.FieldType;
 

@@ -5,11 +5,13 @@ package statistic.chart;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import general.ArrayTreeMap;
 import general.NumberRange;
 import general.Pair;
+import general.Tuple;
 
 /**
  * @author manuel merino monge
@@ -21,6 +23,7 @@ public class GameSessionStatistic
 	private Map< Integer, Pair< ControllerMetadataExtenderAdapter, Double[][] > > sessionControllerData;
 	private ArrayTreeMap< Long, Pair< Integer, String > > gameEvent;
 	
+	private ArrayTreeMap< Integer, Tuple< Double, Integer > > scores;
 		
 	public GameSessionStatistic( long id )
 	{
@@ -28,6 +31,8 @@ public class GameSessionStatistic
 		
 		this.sessionControllerData = new HashMap<Integer, Pair<ControllerMetadataExtenderAdapter,Double[][] > >();
 		this.gameEvent = new ArrayTreeMap<Long, Pair<Integer,String>>();
+		
+		this.scores = new ArrayTreeMap< Integer, Tuple< Double, Integer > >(); 
 	}
 	
 	public long getStartSessionInMillis()
@@ -144,5 +149,15 @@ public class GameSessionStatistic
 	public ArrayTreeMap< Long, Pair< Integer, String > > getGameEvent( )
 	{
 		return this.gameEvent;
+	}
+	
+	public void addScore( int player, double date, int score )
+	{
+		this.scores.put( player, new Tuple< Double, Integer>( date, score ) );
+	}
+	
+	public List< Tuple< Double, Integer > > getScores( int player )
+	{
+		return this.scores.get( player );
 	}
 }

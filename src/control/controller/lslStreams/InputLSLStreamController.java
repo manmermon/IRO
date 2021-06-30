@@ -20,7 +20,7 @@
  *   
  */
 
-package control.controller.LSLStreams;
+package control.controller.lslStreams;
 
 import edu.ucsd.sccn.LSL;
 import edu.ucsd.sccn.LSL.StreamInlet;

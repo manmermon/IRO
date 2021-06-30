@@ -33,7 +33,7 @@ import config.language.Caption;
 import config.language.Language;
 import exceptions.ConfigParameterException;
 import image.basicPainter2D;
-import music.IROTrack;
+import music.sheet.IROTrack;
 
 import java.awt.GridLayout;
 import java.awt.Image;

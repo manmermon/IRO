@@ -93,6 +93,7 @@ public class LevelControl extends AbstractSceneControl
 			MusicPlayerControl.getInstance().setBackgroundMusicPatter( lv.getBackgroundPattern() );
 			MusicPlayerControl.getInstance().addBackgroundMusicEvent( this );
 			
+			MusicPlayerControl.getInstance().setMuteSession( lv.isMuteSession() );
 			MusicPlayerControl.getInstance().setPlayerMusicSheets( lv.getPlayerSheets() );
 		}
 		else
@@ -109,7 +110,7 @@ public class LevelControl extends AbstractSceneControl
 	protected void startUp() throws Exception 
 	{
 		super.startUp();
-
+				
 		MusicPlayerControl.getInstance().startMusic();
 	}
 

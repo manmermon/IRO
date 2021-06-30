@@ -77,12 +77,18 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2021, 05 - 1, 3 );
+	public static final Calendar buildDate = new GregorianCalendar( 2021, 06 - 1, 30 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
-	public static final String appDateRange = "2019-" + buildDate.get( Calendar.YEAR );
+	public static final String appDateRange = "2020-" + buildDate.get( Calendar.YEAR );
 
+	//***********
+	//
+	// PATHS 
+	//
+	//***********
+	
 	public static final String SYSTEM_LIB_WIN_PATH = "systemLib/win/";
 	public static final String SYSTEM_LIB_LINUX_PATH = "systemLib/linux/";
 	public static final String SYSTEM_LIB_MACOS_PATH = "systemLib/macox/";
@@ -95,19 +101,33 @@ public class ConfigApp
 	public static final String BACKGROUND_SPRITE_FILE_PATH = "./resources/background/";
 	public static final String NOTE_SPRITE_FILE_PATH = "./resources/note/";
 	
+	
+	
+	
 	public static final Tuple< Integer, Integer > playerPicSize = new Tuple<Integer, Integer>( 100, 100 );
 	
 	public static final Tuple< Integer, Integer > playerPicSizeIcon = new Tuple<Integer, Integer>( 48, 48 );
 	
 	public static final String SONG_LIST_SEPARATOR = ";";
 
+	
+	//***********
+	//
+	// PATHS 
+	//
+	//***********
+	
 	public static final String SELECTED_CONTROLLER = "SELECTED_CONTROLLER";
 	
 	public static final String LANGUAGE = "LANGUAGE";
 	
-	public static final String PLAYER = "PLAYER";
+	//public static final String PLAYER = "PLAYER";
 	
-	public static final String MULTIPLAYER = "MULTIPLAYER";
+	//public static final String MULTIPLAYER = "MULTIPLAYER";
+	
+	public static final String MUTE_SESSION = "MUTE_SESSION";
+	
+	public static final String CONTINUOUS_SESSION = "CONTINUOUS_SESSION"; 
 	
 	
 	///////////
@@ -184,7 +204,7 @@ public class ConfigApp
 		listGeneralConfig.clear();
 		listPlayerConfig.clear();
 
-		resetSettings();
+		resetPlayerSettings();
 	}
 	
 	public static Set< Player > getPlayers()
@@ -254,6 +274,19 @@ public class ConfigApp
 		return load;
 	}
 	
+	public static ConfigParameter getGeneralSetting( String idPar )
+	{
+		return listGeneralConfig.get( idPar );
+	}
+	
+	public static void setGeneralSetting( String idPar, ConfigParameter par )
+	{
+		if( par != null && idPar != null )
+		{
+			listGeneralConfig.put( idPar, par );
+		}
+	}
+	
 	public static Settings getPlayerSetting( Player player )
 	{				
 		return listPlayerConfig.get( player );
@@ -269,12 +302,12 @@ public class ConfigApp
 		return listPlayerConfig.values();
 	}
 	
-	public static void resetSettings()
+	public static void resetPlayerSettings()
 	{
 		try
 		{
 			listPlayerConfig.clear();
-			listGeneralConfig.clear();
+			//listGeneralConfig.clear();
 			
 			loadDefaultLanguage( );
 			
@@ -1373,6 +1406,7 @@ public class ConfigApp
 				gss.setActionLevel(player, new NumberRange( rs.getDouble( "controllerMaxValueTarget" ), Double.POSITIVE_INFINITY ) );
 				gss.setRecoverLevel( player,rs.getDouble("controllerMinValueTarget" ) );
 				gss.setTargetTimeInLevelAction(player, rs.getDouble( "controllerTimeTarget" ) );
+				gss.addScore( player, sessionID , rs.getInt( "score" ) );
 
 				InputStream input = rs.getBinaryStream( "controllerData" );
 				if( input != null )

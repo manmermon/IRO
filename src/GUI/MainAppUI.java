@@ -27,6 +27,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,14 +53,20 @@ import GUI.panel.InputDevicePanel;
 import GUI.panel.SelectLevelImagePanel;
 import GUI.panel.SelectSongPanel;
 import config.ConfigApp;
+import config.ConfigParameter;
+import config.ConfigParameter.ParameterType;
 import config.Player;
 import config.language.Caption;
 import config.language.Language;
 import config.language.TranslateComponents;
+import exceptions.ConfigParameterException;
 import image.icon.GeneralAppIcon;
 
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+
 import java.awt.FlowLayout;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -90,6 +99,9 @@ public class MainAppUI extends JFrame
 	// Buttom	
 	private JButton btnPlay;
 	private JButton addPlayer;
+	
+	private JCheckBox chbMuteSession;
+	private JCheckBox chbContinueSession;
 	
 	
 	// Radio Button
@@ -292,7 +304,7 @@ public class MainAppUI extends JFrame
 								&& !addingPlayers
 								&& ConfigApp.isTesting() )
 						{
-							ConfigApp.resetSettings();
+							ConfigApp.resetPlayerSettings();
 							for( Player player : ConfigApp.getPlayers() )
 							{
 								addPlayerSetting( player );
@@ -324,7 +336,7 @@ public class MainAppUI extends JFrame
 		tab.insertTab( player.getName(), settings );
 		
 		int c = tab.getTabCount();
-		if( c < 2 )
+		if( c < 2 && player.isAnonymous() )
 		{
 			tab.showTabCloseButton( false, 0 );
 		}
@@ -332,6 +344,13 @@ public class MainAppUI extends JFrame
 		{
 			tab.showTabCloseButton( true, 0 );
 		}
+		
+		/*
+		if( c == 1 )
+		{
+			SelectSongPanel.getInstance().updateSelectedSong();
+		}
+		*/
 	}
 			
 	private JPanel getPanelMenu() 
@@ -383,7 +402,7 @@ public class MainAppUI extends JFrame
 					if( players != null && !players.isEmpty() ) 
 					{
 						addingPlayers = true;
-						
+												
 						//
 						// Removing Anonymous players
 						//
@@ -754,16 +773,16 @@ public class MainAppUI extends JFrame
 	
 	private JPanel getPanelPlay() 
 	{
-		if (panelPlay == null) 
+		if ( this.panelPlay == null) 
 		{
-			panelPlay = new JPanel();
-			FlowLayout flowLayout = (FlowLayout) panelPlay.getLayout();
+			this.panelPlay = new JPanel( new FlowLayout( FlowLayout.RIGHT ) );			
 			
-			flowLayout.setAlignment( FlowLayout.RIGHT );
-			panelPlay.add(getBtnPlay());
+			this.panelPlay.add( this.getBtnPlay() );
+			this.panelPlay.add( this.getMuteSession() );
+			this.panelPlay.add( this.getContinuousSession() );
 		}
 		
-		return panelPlay;
+		return this.panelPlay;
 	}
 	
 	private JTabbedPane getSongPanel()
@@ -794,5 +813,108 @@ public class MainAppUI extends JFrame
 	{
 		SelectSongPanel.getInstance().updateSelectedSong();
 		SelectLevelImagePanel.getInstance().updatePreviewLevelImages();
+	}
+	
+	private JCheckBox getMuteSession()
+	{
+		if( this.chbMuteSession == null )
+		{
+			final String ID = ConfigApp.MUTE_SESSION;
+			
+			this.chbMuteSession = new JCheckBox( );
+			
+			String txt = Language.getLocalCaption( Language.MUTE_SESSION );
+					
+			ImageIcon ic = GeneralAppIcon.Mute( 256,256, Color.BLACK, null );
+			ic = null;
+			
+			if( ic != null )
+			{
+				BufferedImage img = (BufferedImage)ic.getImage();
+				this.chbMuteSession.setIcon( new ImageIcon( img.getScaledInstance( 16, 16, BufferedImage.SCALE_SMOOTH ) ) );
+			}
+			else
+			{
+				this.chbMuteSession.setText( txt );
+				TranslateComponents.add( this.chbMuteSession, Language.getAllCaptions().get(  Language.MUTE_SESSION ) );			
+			}
+			
+			this.chbMuteSession.addItemListener( new ItemListener() 
+			{				
+				@Override
+				public void itemStateChanged(ItemEvent arg0) 
+				{
+					ConfigParameter par  = ConfigApp.getGeneralSetting( ID );
+					
+					JCheckBox ch = (JCheckBox)arg0.getSource();
+					
+					try 
+					{
+						if( par == null )
+						{
+						
+							par = new ConfigParameter( new Caption( Language.MUTE_SESSION, Language.defaultLanguage, Language.getLocalCaption( Language.MUTE_SESSION ) )
+														, ParameterType.BOOLEAN );
+							
+							ConfigApp.setGeneralSetting( ID, par );
+						}
+					
+						par.setSelectedValue( ch.isSelected() );
+					}
+					catch (IllegalArgumentException | ConfigParameterException e) 
+					{
+						e.printStackTrace();
+					}					
+				}
+			});
+		}
+		
+		return this.chbMuteSession;
+	}
+	
+	private JCheckBox getContinuousSession()
+	{
+		if( this.chbContinueSession == null )
+		{
+			final String ID = ConfigApp.CONTINUOUS_SESSION;
+			
+			this.chbContinueSession = new JCheckBox( );
+			
+			String txt = Language.getLocalCaption( Language.CONTINUOUS_SESSION );
+			
+			this.chbContinueSession.setText( txt );
+			TranslateComponents.add( this.chbContinueSession, Language.getAllCaptions().get(  Language.CONTINUOUS_SESSION ) );
+			
+			this.chbContinueSession.addItemListener( new ItemListener() 
+			{				
+				@Override
+				public void itemStateChanged(ItemEvent arg0) 
+				{
+					ConfigParameter par  = ConfigApp.getGeneralSetting( ID );
+					
+					JCheckBox ch = (JCheckBox)arg0.getSource();
+					
+					try 
+					{
+						if( par == null )
+						{
+						
+							par = new ConfigParameter( new Caption( Language.CONTINUOUS_SESSION, Language.defaultLanguage, Language.getLocalCaption( Language.CONTINUOUS_SESSION ) )
+														, ParameterType.BOOLEAN );
+							
+							ConfigApp.setGeneralSetting( ID, par );
+						}
+					
+						par.setSelectedValue( ch.isSelected() );
+					}
+					catch (IllegalArgumentException | ConfigParameterException e) 
+					{
+						e.printStackTrace();
+					}					
+				}
+			});
+		}
+		
+		return this.chbContinueSession;
 	}
 }

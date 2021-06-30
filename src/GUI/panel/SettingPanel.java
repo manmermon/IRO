@@ -8,7 +8,6 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -308,7 +307,7 @@ public class SettingPanel extends JPanel
 					
 					try
 					{
-						List<GameSessionStatistic> sessions = ConfigApp.dbGetPlayerStatistic( _player.getId() );
+						List< GameSessionStatistic> sessions = ConfigApp.dbGetPlayerStatistic( _player.getId() );
 
 						StatisticGraphic.showSessionStatistic( owner, sessions, _player, bounds);
 					}

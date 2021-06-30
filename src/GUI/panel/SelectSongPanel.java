@@ -13,10 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
@@ -33,15 +30,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import org.jfugue.midi.MidiParser;
-import org.jfugue.midi.MidiParserListener;
 import org.jfugue.pattern.Pattern;
-import org.staccato.StaccatoParser;
-import org.staccato.StaccatoParserListener;
 
 import GUI.GameManager;
 import GUI.dialog.InfoDialog;
-import GUI.game.screen.level.BackgroundMusic;
+import GUI.game.screen.level.music.BackgroundMusic;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.Player;
@@ -53,13 +46,10 @@ import control.music.MusicPlayerControl;
 import exceptions.ConfigParameterException;
 import image.basicPainter2D;
 import image.icon.GeneralAppIcon;
-import music.MusicSheet;
 import tools.MusicSheetTools;
 
 import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequence;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -169,6 +159,7 @@ public class SelectSongPanel extends JPanel
 	public void updateSelectedSong()
 	{
 		JTable t = this.gettableSongList();
+		JTable selectedSongTable = getSelectedSongTable();
 		
 		Player player = ConfigApp.getFirstPlayer();
 		
@@ -190,21 +181,48 @@ public class SelectSongPanel extends JPanel
 				String songList = songs.toString().trim().replaceAll( "\\s+", "" );
 				
 				if( !songList.isEmpty() )
-				{
+				{					
 					String[] list = songList.split( ConfigApp.SONG_LIST_SEPARATOR );
+					
+					DefaultTableModel tm = (DefaultTableModel)selectedSongTable.getModel();
+					tm.setRowCount( 0 );
 					
 					for( String s : list )
 					{
-						for( int i = 0; i < t.getRowCount(); i++ )
+						boolean isIn = false;
+						
+						/*
+						checkValueInTable:
+						for( int r = 0; r < selectedSongTable.getRowCount(); r++ )
 						{
-							String tVal = t.getValueAt( i, 0 ).toString();
-							if( s.equals( tVal ) )
+							for( int c = 0; c < selectedSongTable.getColumnCount(); c++ )
 							{
-								t.addRowSelectionInterval( i, i );
-								//moveSong( t, getSelectedSongTable(), false );
-								copySong( t, getSelectedSongTable() );
+								isIn = selectedSongTable.getValueAt( r, c ).equals( s );
 								
-								break;
+								if( isIn )
+								{
+									break checkValueInTable;
+								}
+							}
+						}
+						*/
+							
+						if( !isIn )
+						{
+							File fs = new File( s );
+							for( int i = 0; i < t.getRowCount(); i++ )
+							{
+								String tVal = t.getValueAt( i, 0 ).toString();
+								File fv = new File( tVal );
+								if( fv.getAbsolutePath().equals( fs.getAbsolutePath() ) )
+								{
+									t.clearSelection();
+									t.addRowSelectionInterval( i, i );
+									//moveSong( t, getSelectedSongTable(), false );
+									copySong( t, selectedSongTable );
+									
+									break;
+								}
 							}
 						}
 					}
@@ -1155,4 +1173,5 @@ public class SelectSongPanel extends JPanel
 			}
 		}
 	}
+
 }

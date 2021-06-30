@@ -16,7 +16,6 @@ import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.JDialog;
@@ -37,12 +36,15 @@ import org.knowm.xchart.XYSeries;
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
+import org.knowm.xchart.style.markers.Marker;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
 import GUI.AppIcon;
 import config.Player;
 import config.language.Language;
+import general.ConvertTo;
 import general.Pair;
+import general.Tuple;
 
 /**
  * @author manuel
@@ -50,6 +52,7 @@ import general.Pair;
  */
 public class StatisticGraphic
 {
+	//*
 	public static JPanel getSessionStatistic( GameSessionStatistic session, Player player, Dimension size )
 	{   
 		JPanel statPanel = new JPanel( new BorderLayout() );
@@ -149,6 +152,103 @@ public class StatisticGraphic
 		
 		return statPanel;
 	}
+	//*/
+	
+	public static JPanel getPlot( List< Tuple< Double, Double > > data, StatisticPropieties propieties )
+	{   
+		JPanel statPanel = new JPanel( new BorderLayout() );
+		
+		Dimension size = propieties.getSize();
+		
+		// Create Chart
+		XYChart chart = new XYChartBuilder()
+						.width( size.width )
+						.height( size.height )
+						.title( propieties.getTitle() )
+						.xAxisTitle( propieties.getXlabel() )
+						.yAxisTitle( propieties.getYlabel() )
+						.build();
+
+		// Customize Chart
+		chart.getStyler().setLegendPosition( LegendPosition.OutsideE );
+		chart.getStyler().setDefaultSeriesRenderStyle( XYSeriesRenderStyle.Line );
+		chart.getStyler().setYAxisLabelAlignment( XYStyler.TextAlignment.Right );
+		chart.getStyler().setYAxisDecimalPattern( "#,###.##" );
+		chart.getStyler().setPlotMargin( 0 );
+		chart.getStyler().setPlotContentSize( .95 );
+
+		XChartPanel< XYChart > chartPanel = new XChartPanel< XYChart>( chart );
+				
+		if( data != null && !data.isEmpty() )
+		{
+			double[ ] xData = new double[ data.size() ];
+			double[ ] yData = new double[ data.size() ];
+			
+			int i = 0;
+			for( Tuple< Double, Double > d : data )
+			{	
+				xData[ i ] = d.t1;
+				yData[ i ] = d.t2;
+				
+				i++;
+			}
+		
+			Color c = Color.BLUE;
+			
+			if( !propieties.getColors().isEmpty() )
+			{
+				c = propieties.getColors().get( 0 );
+			}
+			
+			String lng = " ";
+			
+			if( !propieties.getLegend().isEmpty() )
+			{
+				lng = propieties.getLegend().get( 0 );
+			}
+			
+			XYSeries serie = chart.addSeries( lng, xData, yData );
+			serie.setShowInLegend( propieties.isLegendOn() );
+
+			Marker mk = SeriesMarkers.NONE;
+			
+			if( !propieties.getMarkes().isEmpty() )
+			{
+				mk = propieties.getMarkes().get( 0 );
+			}
+
+			serie.setMarker( mk );
+			serie.setLineColor( c );						
+	
+			statPanel.add( chartPanel, BorderLayout.CENTER );
+		}
+		
+		return statPanel;
+	}
+	
+	public static JPanel getScores( List< GameSessionStatistic > gss, Player player, Dimension panelSize )
+	{		
+		StatisticPropieties prop = new StatisticPropieties();
+		
+		prop.addColors( Color.BLUE );
+		prop.addMarkes( SeriesMarkers.TRIANGLE_UP );
+		prop.setTitle( player.getName() + ": " + Language.getLocalCaption( Language.SCORE ) );
+		prop.setSize( panelSize );
+		
+		List< Tuple< Double, Double > > score = new ArrayList<Tuple<Double,Double>>();
+		
+		for( GameSessionStatistic session : gss )
+		{
+			for( Tuple< Double, Integer > sc : session.getScores( player.getId() ) )
+			{
+				score.add( new Tuple<Double, Double>( sc.t1, sc.t2.doubleValue() ) );
+			}
+		}
+		
+		JPanel scorePlot = getPlot( score, prop );
+		
+		return scorePlot;
+	}
 	
 	public static void showSessionStatistic( Window owner, List< GameSessionStatistic > sessions, Player player, Rectangle bounds )
 	{
@@ -191,7 +291,8 @@ public class StatisticGraphic
 		SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
 		for( GameSessionStatistic session : sessions )
 		{
-			statPlotPanels.add( getSessionStatistic( session, player, panelSize ) );
+			//statPlotPanels.add( getSessionStatistic( session, player, panelSize ) );
+			statPlotPanels.add( getScores( sessions, player, panelSize ) );
 			
 			tm.addRow( new String[] {  dateFormat.format( session.getSessionDate() ) } );
 		}
@@ -303,5 +404,145 @@ public class StatisticGraphic
 							};
 		return tm;
 	}
+
+	//*************************
+	//
+	//
 	
+	private static class StatisticPropieties
+	{
+		private String title = "";
+		private String xlabel = "";
+		private String ylabel = "";
+		private Dimension size = new Dimension();
+		
+		private List< Color > colors = new ArrayList<Color>();
+		
+		private List< String > legend = new ArrayList< String >();
+		
+		private List< Marker > markes = new ArrayList< Marker >();
+		
+		private boolean legendOn = false;
+		
+		public StatisticPropieties()
+		{
+		}
+		
+		/**
+		 * @param title the title to set
+		 */
+		public void setTitle(String title) {
+			this.title = title;
+		}
+		
+		/**
+		 * @return the title
+		 */
+		public String getTitle() {
+			return title;
+		}
+		
+		/**
+		 * @param xlabel the xlabel to set
+		 */
+		public void setXlabel(String xlabel) {
+			this.xlabel = xlabel;
+		}
+		
+		/**
+		 * @return the xlabel
+		 */
+		public String getXlabel() {
+			return xlabel;
+		}
+		
+		/**
+		 * @param ylabel the ylabel to set
+		 */
+		public void setYlabel(String ylabel) {
+			this.ylabel = ylabel;
+		}
+		
+		/**
+		 * @return the ylabel
+		 */
+		public String getYlabel() {
+			return ylabel;
+		}
+		
+		public void addColors( Color c)
+		{
+			this.colors.add( c );
+		}
+		
+		/**
+		 * @return the colors
+		 */
+		public List<Color> getColors() 
+		{
+			return colors;
+		}
+		
+		/**
+		 * @param size the size to set
+		 */
+		public void setSize(Dimension size) 
+		{
+			this.size = size;
+		}
+		
+		/**
+		 * @return the size
+		 */
+		public Dimension getSize() {
+			return size;
+		}
+		
+		/**
+		 * @param legend the legend to set
+		 */
+		public void addLegend( String legend) 
+		{
+			this.legend.add( legend );
+		}
+		
+		/**
+		 * @return the legend
+		 */
+		public List<String> getLegend()
+		{
+			return legend;
+		}
+		
+		/**
+		 * @param legendOn the legendOn to set
+		 */
+		public void setLegendOn( boolean legendOn )
+		{
+			this.legendOn = legendOn;
+		}
+		
+		/**
+		 * @return the legendOn
+		 */
+		public boolean isLegendOn() 
+		{
+			return legendOn;
+		}
+		
+		/**
+		 * @param markes the markes to set
+		 */
+		public void addMarkes( Marker markes) 
+		{
+			this.markes.add( markes );
+		}
+		
+		/**
+		 * @return the markes
+		 */
+		public List< Marker > getMarkes() {
+			return markes;
+		}
+	}
 }

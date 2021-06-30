@@ -14,9 +14,9 @@ import org.jfugue.tools.ComputeDurationForEachTrackTool;
 import org.jfugue.tools.GetInstrumentsUsedTool;
 import org.jfugue.tools.GetPatternStats;
 
-import io.IROMusicParserListener;
-import music.MusicSheet;
-import music.IROTrack;
+import music.sheet.IROTrack;
+import music.sheet.MusicSheet;
+import music.sheet.io.IROMusicParserListener;
 
 public class testJFuguePlayer 
 {

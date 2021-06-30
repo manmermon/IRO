@@ -2,7 +2,6 @@ package GUI.game.screen;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import GUI.game.component.Frame;
 import GUI.game.component.event.SpriteEvent;
 import GUI.game.component.event.SpriteEventListener;
 import GUI.game.component.sprite.ISprite;

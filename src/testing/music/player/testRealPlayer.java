@@ -7,7 +7,7 @@ import org.jfugue.pattern.Pattern;
 import org.jfugue.player.Player;
 import org.jfugue.realtime.RealtimePlayer;
 
-import JFugueMod.org.jfugue.player.PlayerMod;
+import music.jfugueIRO.PlayerMod;
 
 public class testRealPlayer {
 

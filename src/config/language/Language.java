@@ -130,6 +130,11 @@ public class Language
 	
 	public static final String FILE_ERROR = "FILE_ERROR";
 	
+	public static final String MUTE_SESSION = "MUTE_SESSION";
+	public static final String CONTINUOUS_SESSION = "CONTINUOUS_SESSION";
+	
+	public static final String SCORE = "SCORE";
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
@@ -138,6 +143,18 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( SCORE, defaultLanguage, "Score" );
+		cap.setCaption( esEs, "Puntuación");
+		captions.put( SCORE, cap );
+		
+		cap = new Caption( CONTINUOUS_SESSION, defaultLanguage, "Continuous session" );
+		cap.setCaption( esEs, "Sesión continua");
+		captions.put( CONTINUOUS_SESSION, cap );
+		
+		cap = new Caption( MUTE_SESSION, defaultLanguage, "Mute session" );
+		cap.setCaption( esEs, "Sin sonido");
+		captions.put( MUTE_SESSION, cap );
 		
 		cap = new Caption( PAUSE, defaultLanguage, "Pause" );
 		cap.setCaption( esEs, "Pausa");

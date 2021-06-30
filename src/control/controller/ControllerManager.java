@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import config.Player;
-import control.controller.LSLStreams.InputLSLStreamController;
-import control.controller.LSLStreams.LSLStreamMetadata;
+import control.controller.lslStreams.InputLSLStreamController;
+import control.controller.lslStreams.LSLStreamMetadata;
 import control.events.IInputControllerListener;
 
 /**

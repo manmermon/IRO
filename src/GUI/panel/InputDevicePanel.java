@@ -46,7 +46,7 @@ import config.language.Language;
 import config.language.TranslateComponents;
 import control.controller.ControllerManager;
 import control.controller.IControllerMetadata;
-import control.controller.LSLStreams.LSLStreamMetadata;
+import control.controller.lslStreams.LSLStreamMetadata;
 import edu.ucsd.sccn.LSL;
 import image.icon.GeneralAppIcon;
 

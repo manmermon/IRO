@@ -1,7 +1,7 @@
 /**
  * 
  */
-package control.controller.LSLStreams;
+package control.controller.lslStreams;
 
 import control.controller.ControllerMetadataAdapter;
 import edu.ucsd.sccn.LSL;

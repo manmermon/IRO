@@ -15,10 +15,10 @@ import org.jfugue.midi.MidiFileManager;
 import org.jfugue.midi.MidiParser;
 import org.jfugue.pattern.Pattern;
 
-import JFugueMod.org.jfugue.player.PlayerMod;
-import io.IROMusicParserListener;
-import music.IROTrack;
-import music.MusicSheet;
+import music.jfugueIRO.PlayerMod;
+import music.sheet.IROTrack;
+import music.sheet.MusicSheet;
+import music.sheet.io.IROMusicParserListener;
 import tools.MusicSheetTools;
 
 /**
