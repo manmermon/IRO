@@ -48,7 +48,7 @@ public class RegistrarStatistic
 		// La nota entra en la zona de accion
 		
 		, NOTE_EXIT_FRET 
-		// La nota ale de la zona de accion
+		// La nota sale de la zona de accion
 		
 		, CONTROLLER_WAIT_RECORVER_LEVEL 
 		// Se espera a que el control (mando) caiga por debajo del nivel de recuperación. El funcionamiento normal está deshabilitado
@@ -66,7 +66,7 @@ public class RegistrarStatistic
 		// El control (mando) se mantiene en el nivel de acción el tiempo suficiente para generar la acción 
 		
 		, CONTROLLER_MAINTAIN_LEVEL_FINISH 
-		// El control (mando) cae por debajo del nivel por debajo del nivel objetivo que generó una acción
+		// El control (mando) cae por debajo del nivel objetivo que generó una acción
 		
 		//, CONTROLER_LEVEL_REACH_WITHOUT_RECOVER_LEVEL // El control (mando) alcanza el nivel objetivo para generar una acción sin haber caído por debajo del nivel de recuperación
 	};

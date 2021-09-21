@@ -510,6 +510,8 @@ public class LevelMusicBuilder
 					lv.add( goal, goal.getZIndex() );
 					
 					double reactionTime = ((Number)playerSettings.get( indexMusicSheetPlayers ).getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
+					//reactionTime += ((Number)playerSettings.get( indexMusicSheetPlayers ).getParameter( ConfigApp.TIME_IN_INPUT_TARGET ).getSelectedValue()).doubleValue();
+					
 					double vel = fret.getFretWidth() / reactionTime;
 					
 					for( NumberRange rng : msplayer.getSegments().keySet() )

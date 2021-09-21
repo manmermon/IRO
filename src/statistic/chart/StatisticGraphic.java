@@ -15,7 +15,12 @@ import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.text.SimpleDateFormat;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.swing.JDialog;
@@ -29,11 +34,15 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import org.knowm.xchart.BoxChart;
+import org.knowm.xchart.BoxChartBuilder;
+import org.knowm.xchart.SwingWrapper;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
 import org.knowm.xchart.XYSeries.XYSeriesRenderStyle;
+import org.knowm.xchart.style.BoxStyler.BoxplotCalCulationMethod;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.Marker;
@@ -42,9 +51,11 @@ import org.knowm.xchart.style.markers.SeriesMarkers;
 import GUI.AppIcon;
 import config.Player;
 import config.language.Language;
+import general.ArrayTreeMap;
 import general.ConvertTo;
 import general.Pair;
 import general.Tuple;
+import statistic.RegistrarStatistic;
 
 /**
  * @author manuel
@@ -176,6 +187,7 @@ public class StatisticGraphic
 		chart.getStyler().setYAxisDecimalPattern( "#,###.##" );
 		chart.getStyler().setPlotMargin( 0 );
 		chart.getStyler().setPlotContentSize( .95 );
+		chart.getStyler().setLegendVisible( propieties.isLegendOn() );
 
 		XChartPanel< XYChart > chartPanel = new XChartPanel< XYChart>( chart );
 				
@@ -208,7 +220,8 @@ public class StatisticGraphic
 			}
 			
 			XYSeries serie = chart.addSeries( lng, xData, yData );
-			serie.setShowInLegend( propieties.isLegendOn() );
+			//serie.setShowInLegend( propieties.isLegendOn() );
+			
 
 			Marker mk = SeriesMarkers.NONE;
 			
@@ -226,6 +239,50 @@ public class StatisticGraphic
 		return statPanel;
 	}
 	
+	public static JPanel getBoxplot( ArrayTreeMap< String,  List< Double > > data, StatisticPropieties propieties )
+	{   
+		JPanel statPanel = new JPanel( new BorderLayout() );
+		
+		Dimension size = propieties.getSize();
+		
+		// Create Chart
+		BoxChart chart = new BoxChartBuilder()
+							.width( size.width )
+							.height( size.height )
+							.title( propieties.getTitle() )
+							.xAxisTitle( propieties.getXlabel() )
+							.yAxisTitle( propieties.getYlabel() )
+							.build();
+
+		// Customize Chart
+		chart.getStyler().setLegendPosition( LegendPosition.OutsideE );
+		chart.getStyler().setBoxplotCalCulationMethod( BoxplotCalCulationMethod.N_LESS_1_PLUS_1 );
+		chart.getStyler().setYAxisLabelAlignment( XYStyler.TextAlignment.Right );
+		chart.getStyler().setYAxisDecimalPattern( "#,###.##" );
+		chart.getStyler().setPlotMargin( 0 );
+		chart.getStyler().setPlotContentSize( .95 );
+		chart.getStyler().setLegendVisible( propieties.isLegendOn() );
+				
+		if( data != null )
+		{
+			for( String lng : data.keySet() )
+			{
+				List< List< Double > > values = data.get( lng );
+								
+				for( List< Double > d : values )
+				{	
+					chart.addSeries( lng, d );
+				}
+			}
+		}
+		
+		XChartPanel< BoxChart > panel = new XChartPanel< BoxChart >( chart );
+		
+		statPanel.add( panel, BorderLayout.CENTER );
+		
+		return statPanel;
+	}
+	
 	public static JPanel getScores( List< GameSessionStatistic > gss, Player player, Dimension panelSize )
 	{		
 		StatisticPropieties prop = new StatisticPropieties();
@@ -234,21 +291,124 @@ public class StatisticGraphic
 		prop.addMarkes( SeriesMarkers.TRIANGLE_UP );
 		prop.setTitle( player.getName() + ": " + Language.getLocalCaption( Language.SCORE ) );
 		prop.setSize( panelSize );
+		prop.setXlabel( "days" );
+		prop.setLegendOn( false );
 		
 		List< Tuple< Double, Double > > score = new ArrayList<Tuple<Double,Double>>();
 		
+		List< Tuple< Long, Integer > > values = new ArrayList< Tuple< Long, Integer > >();
+		
 		for( GameSessionStatistic session : gss )
 		{
-			for( Tuple< Double, Integer > sc : session.getScores( player.getId() ) )
+			 values.addAll( session.getScores( player.getId() ) );			
+		}
+		
+		Collections.sort( values
+				, new Comparator< Tuple< Long, Integer > >() 
+		{				
+			@Override
+			public int compare(Tuple<Long, Integer> o1, Tuple<Long, Integer> o2) 
 			{
-				score.add( new Tuple<Double, Double>( sc.t1, sc.t2.doubleValue() ) );
+				return (int)( o1.t1 - o2.t1);
 			}
+		} );
+
+		Calendar refDate = null;
+		for( Tuple< Long, Integer > sc : values )
+		{
+			long date = sc.t1;
+			int val = sc.t2;
+
+			Calendar cal = GregorianCalendar.getInstance();
+			cal.setTimeInMillis( date );
+
+			if( refDate == null )
+			{
+				refDate = cal;
+			}
+
+			long minutes = ChronoUnit.MINUTES.between( refDate.toInstant(), cal.toInstant() );
+
+			double time = minutes / ( 24D * 60 ); // day distance
+
+			score.add( new Tuple<Double, Double>( time, (double)val ) );
 		}
 		
 		JPanel scorePlot = getPlot( score, prop );
 		
 		return scorePlot;
 	}
+
+	
+	public static JPanel getReactionTime( List< GameSessionStatistic > gss, Player player, Dimension panelSize )
+	{
+		StatisticPropieties prop = new StatisticPropieties();
+	
+		prop.addColors( Color.BLUE );
+		prop.addMarkes( SeriesMarkers.TRIANGLE_UP );
+		prop.setTitle( player.getName() + ": " + Language.getLocalCaption( Language.REACTION_TIME ) );
+		prop.setSize( panelSize );
+		prop.setXlabel( "seconds (s)" );
+		prop.setLegendOn( false );
+				
+		ArrayTreeMap< Long, String > eventTime = new ArrayTreeMap< Long, String >();
+		
+		for( GameSessionStatistic session : gss )
+		{
+			ArrayTreeMap< Long, Pair< Integer, String > > events = session.getGameEvent();
+			
+			for( Long t : events.keySet() )
+			{
+				List< Pair< Integer, String > > evs = events.get( t );
+				
+				for( Pair< Integer, String > ev : evs )
+				{
+					String noteEvent = ev.getX2();
+					int pl = ev.getX1();
+					
+					if( pl == player.getId() 
+							&& 
+							( noteEvent.equals( RegistrarStatistic.FieldType.NOTE_ENTER_FRET.name() ) 
+								|| 
+								noteEvent.equals( RegistrarStatistic.FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH.name() )
+							) 
+						)
+					{
+						
+						eventTime.put( t, noteEvent );
+					}
+				}
+			}			
+		}
+		
+		
+		
+		Calendar refDate = null;
+		for( Tuple< Long, Integer > sc : values )
+		{
+			long date = sc.t1;
+			int val = sc.t2;
+
+			Calendar cal = GregorianCalendar.getInstance();
+			cal.setTimeInMillis( date );
+
+			if( refDate == null )
+			{
+				refDate = cal;
+			}
+
+			long minutes = ChronoUnit.MINUTES.between( refDate.toInstant(), cal.toInstant() );
+
+			double time = minutes / ( 24D * 60 ); // day distance
+
+			score.add( new Tuple<Double, Double>( time, (double)val ) );
+		}
+		
+		JPanel scorePlot = getPlot( score, prop );
+		
+		return scorePlot;
+	}
+	
 	
 	public static void showSessionStatistic( Window owner, List< GameSessionStatistic > sessions, Player player, Rectangle bounds )
 	{

@@ -23,7 +23,7 @@ public class GameSessionStatistic
 	private Map< Integer, Pair< ControllerMetadataExtenderAdapter, Double[][] > > sessionControllerData;
 	private ArrayTreeMap< Long, Pair< Integer, String > > gameEvent;
 	
-	private ArrayTreeMap< Integer, Tuple< Double, Integer > > scores;
+	private ArrayTreeMap< Integer, Tuple< Long, Integer > > scores;
 		
 	public GameSessionStatistic( long id )
 	{
@@ -32,7 +32,7 @@ public class GameSessionStatistic
 		this.sessionControllerData = new HashMap<Integer, Pair<ControllerMetadataExtenderAdapter,Double[][] > >();
 		this.gameEvent = new ArrayTreeMap<Long, Pair<Integer,String>>();
 		
-		this.scores = new ArrayTreeMap< Integer, Tuple< Double, Integer > >(); 
+		this.scores = new ArrayTreeMap< Integer, Tuple< Long, Integer > >(); 
 	}
 	
 	public long getStartSessionInMillis()
@@ -151,12 +151,12 @@ public class GameSessionStatistic
 		return this.gameEvent;
 	}
 	
-	public void addScore( int player, double date, int score )
+	public void addScore( int player, long date, int score )
 	{
-		this.scores.put( player, new Tuple< Double, Integer>( date, score ) );
+		this.scores.put( player, new Tuple< Long, Integer>( date, score ) );
 	}
 	
-	public List< Tuple< Double, Integer > > getScores( int player )
+	public List< Tuple< Long, Integer > > getScores( int player )
 	{
 		return this.scores.get( player );
 	}
