@@ -56,7 +56,7 @@ public class RegistrarStatistic
 		, CONTROLLER_RESTORED_LEVEL 
 		// El control (mando) cae por debajo del nivel de recuperación habilitando el normal funcionamiento 
 		
-		, CONTROLER_LEVEL_REACH 
+		, CONTROLLER_LEVEL_REACH 
 		// El control (mando) alcanza el nivel objetivo para generar una acción
 		
 		, CONTROLER_RECOVER_LEVEL_REACH 

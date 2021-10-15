@@ -2,9 +2,9 @@ package control;
 
 import javax.swing.JOptionPane;
 
-import GUI.MainAppUI;
-import GUI.GameManager;
-import GUI.game.screen.IScene;
+import gui.MainAppUI;
+import gui.GameManager;
+import gui.game.screen.IScene;
 import config.ConfigApp;
 import config.IOwner;
 import config.language.Language;
@@ -240,13 +240,13 @@ public class ScreenControl extends AbstractStoppableThread
 		}
 	}
 
-	public void setUpdateLevelInputGoal( double percent, IOwner owner )
+	public void setUpdateLevelInputGoal( double percentTime, int rep, IOwner owner )
 	{
 		synchronized ( this )
 		{
 			if( this.sceneCtrl != null && this.sceneCtrl instanceof LevelControl )
 			{
-				((LevelControl)this.sceneCtrl).updateInputGoal( percent, owner );
+				((LevelControl)this.sceneCtrl).updateInputGoal( percentTime, rep, owner );
 			}
 		}
 	}

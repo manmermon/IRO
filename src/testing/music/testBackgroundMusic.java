@@ -8,7 +8,7 @@ import java.util.concurrent.CyclicBarrier;
 import org.jfugue.pattern.Pattern;
 import org.jfugue.player.Player;
 
-import GUI.game.screen.level.music.BackgroundMusic;
+import gui.game.screen.level.music.BackgroundMusic;
 
 /**
  * @author Manuel Merino Monge

@@ -1,4 +1,4 @@
-package GUI.game.component.event;
+package gui.game.component.event;
 
 import java.util.EventObject;
 

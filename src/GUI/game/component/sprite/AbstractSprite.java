@@ -20,7 +20,7 @@
  */
 
 
-package GUI.game.component.sprite;
+package gui.game.component.sprite;
 
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -29,8 +29,8 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.event.EventListenerList;
 
-import GUI.game.component.event.SpriteEvent;
-import GUI.game.component.event.SpriteEventListener;
+import gui.game.component.event.SpriteEvent;
+import gui.game.component.event.SpriteEventListener;
 
 public abstract class AbstractSprite implements ISprite 
 {

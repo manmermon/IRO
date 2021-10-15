@@ -19,7 +19,7 @@
  *   Project's URL: https://github.com/manmermon/IRO
  */
 
-package GUI.game.component.sprite;
+package gui.game.component.sprite;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -28,8 +28,8 @@ import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
-import GUI.game.component.event.FretEvent;
-import GUI.game.component.event.FretEventListener;
+import gui.game.component.event.FretEvent;
+import gui.game.component.event.FretEventListener;
 import config.Player;
 import image.basicPainter2D;
 import statistic.RegistrarStatistic;

@@ -18,7 +18,7 @@
  *   
  *   Project's URL: https://github.com/manmermon/IRO
  */
-package GUI.game.screen.level;
+package gui.game.screen.level;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -28,14 +28,15 @@ import java.util.Map;
 
 import org.jfugue.midi.MidiDefaults;
 
-import GUI.game.component.sprite.Fret;
-import GUI.game.component.sprite.ISprite;
-import GUI.game.component.sprite.Stave;
-import GUI.game.component.sprite.MusicNoteGroup;
-import GUI.game.component.sprite.Pause;
-import GUI.game.screen.IPausable;
-import GUI.game.screen.Scene;
-import GUI.game.screen.level.music.BackgroundMusic;
+import gui.game.component.sprite.Fret;
+import gui.game.component.sprite.ISprite;
+import gui.game.component.sprite.Stave;
+import gui.game.component.sprite.MusicNoteGroup;
+import gui.game.component.sprite.Pause;
+import gui.game.screen.IPausable;
+import gui.game.screen.Scene;
+import gui.game.screen.level.music.BackgroundMusic;
+import music.sheet.IROTrack;
 
 public class Level extends Scene implements IPausable
 {
@@ -196,6 +197,28 @@ public class Level extends Scene implements IPausable
 		synchronized ( this.pause )
 		{
 			return this.pause;
+		}
+	}
+	
+	public void changeSpeed( double percentage )
+	{
+		synchronized( this.pause )
+		{
+			if( percentage > 0  )
+			{
+				int tempo = 0;
+				for( MusicNoteGroup mng : this.getNotes() )
+				{
+					mng.setShiftSpeed( mng.getShiftSpeed() * percentage );				
+					
+					if( tempo == 0 )
+					{
+						tempo = mng.getNotesTempo();
+					}
+				}
+				
+				
+			}
 		}
 	}
 	

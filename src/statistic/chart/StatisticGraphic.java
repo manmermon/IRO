@@ -48,7 +48,7 @@ import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.Marker;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 
-import GUI.AppIcon;
+import gui.AppIcon;
 import config.Player;
 import config.language.Language;
 import general.ArrayTreeMap;

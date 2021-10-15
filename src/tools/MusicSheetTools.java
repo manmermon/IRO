@@ -2,6 +2,7 @@ package tools;
 
 import java.io.File;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Sequence;
@@ -216,5 +217,39 @@ public class MusicSheetTools
 		staccatoParser.parse( listener.getPattern() );
 		
 		return listener.getPattern();
+	}
+	
+	public static int getTempo( String pattern )
+	{
+		int t = 0;
+		
+		java.util.regex.Pattern pat = java.util.regex.Pattern.compile( "T[0-9]+" );
+		Matcher matcher = pat.matcher( pattern );
+		if (matcher.find())
+		{
+		    t = Integer.parseInt( matcher.group(0).trim().replaceAll( "T", "" ) );
+		}
+		
+		return t;
+	}
+	
+	public static double getQuarterTempo2Second( int tempo )
+	{
+		return 60D / tempo;
+	}
+	
+	public static double getWholeTempo2Second( int tempo )
+	{
+		return 4 * getQuarterTempo2Second( tempo );
+	}
+	
+	public static int getQuarterSecond2Tempo( double quarterSec )
+	{
+		return (int)( 60D / quarterSec );
+	}
+	
+	public static int getWholeSecond2Tempo( double wholeSec )
+	{
+		return (int)( 60D / wholeSec );
 	}
 }

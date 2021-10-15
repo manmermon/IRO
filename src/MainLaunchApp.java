@@ -31,8 +31,8 @@ import javax.swing.UIManager;
 
 import com.sun.jna.Platform;
 
-import GUI.AppIcon;
-import GUI.MainAppUI;
+import gui.AppIcon;
+import gui.MainAppUI;
 import GUI.dialog.OpeningDialog;
 import GUI.text.TextAreaPrintStream;
 import config.ConfigApp;

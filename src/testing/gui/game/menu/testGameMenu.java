@@ -14,11 +14,11 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import GUI.game.component.Frame;
-import GUI.game.component.sprite.Pause;
-import GUI.game.screen.IScene;
-import GUI.game.screen.level.Level;
-import GUI.game.screen.menu.MenuGameResults;
+import gui.game.component.Frame;
+import gui.game.component.sprite.Pause;
+import gui.game.screen.IScene;
+import gui.game.screen.level.Level;
+import gui.game.screen.menu.MenuGameResults;
 import config.Player;
 import general.Tuple;
 

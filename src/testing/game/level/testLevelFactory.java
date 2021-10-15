@@ -3,11 +3,22 @@
  */
 package testing.game.level;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
-import GUI.game.screen.level.build.LevelMusicBuilder;
+import gui.game.screen.level.Level;
+import gui.game.screen.level.build.LevelMusicBuilder;
 import config.ConfigApp;
+import config.ConfigParameter;
+import config.Player;
+import config.Settings;
+import control.controller.IControllerMetadata;
+import exceptions.ConfigParameterException;
+import general.NumberRange;
+import tools.MusicSheetTools;
 
 /**
  * @author manuel
@@ -19,7 +30,19 @@ public class testLevelFactory
 	{
 		try
 		{
-			LevelMusicBuilder.getLevel( new File( ConfigApp.SONG_FILE_PATH + "FF7.mid"), new Rectangle(0,0, 100, 100), 2, 2);
+			List< Settings > settings = new ArrayList<Settings>();
+			for( Player player : ConfigApp.getPlayers() )
+			{
+				settings.add( ConfigApp.getPlayerSetting( player ) );
+			}
+			
+			Level lv = LevelMusicBuilder.getLevel( new File( ConfigApp.SONG_FILE_PATH + "zelda.mid"), new Dimension(100, 100), settings );
+			LevelMusicBuilder.changeLevelSpeed( lv );
+			
+			int t = 73;
+			System.out.println( "testLevelFactory.main() " + MusicSheetTools.getQuarterTempo2Second( t ) );
+			System.out.println( "testLevelFactory.main() " + MusicSheetTools.getWholeSecond2Tempo( MusicSheetTools.getQuarterTempo2Second( t ) ) );
+				
 		}
 		catch (Exception ex) 
 		{

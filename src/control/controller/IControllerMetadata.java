@@ -42,6 +42,10 @@ public interface IControllerMetadata
 	
 	public double getTargetTimeInLevelAction( );
 	
+	public void setRepetitions( int rep );
+	
+	public int getRepetitions( );
+	
 	public void setPlayer( Player player );
 	
 	public Player getPlayer();

@@ -5,9 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.event.EventListenerList;
 
-import GUI.GameManager;
-import GUI.game.screen.IPausable;
-import GUI.game.screen.IScene;
+import gui.GameManager;
+import gui.game.screen.IPausable;
+import gui.game.screen.IScene;
 import control.controller.IInputable;
 import control.events.InputActionEvent;
 import control.events.SceneEvent;

@@ -1,4 +1,4 @@
-package GUI.game.component.sprite;
+package gui.game.component.sprite;
 
 import java.awt.Color;
 import java.awt.Dimension;

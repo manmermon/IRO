@@ -24,14 +24,14 @@ package control.scenes.level;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import GUI.game.component.event.FretEventListener;
-import GUI.game.component.sprite.Fret;
-import GUI.game.component.sprite.ISprite;
-import GUI.game.component.sprite.InputGoal;
-import GUI.game.component.sprite.MusicNoteGroup;
-import GUI.game.component.sprite.Score;
-import GUI.game.screen.IScene;
-import GUI.game.screen.level.Level;
+import gui.game.component.event.FretEventListener;
+import gui.game.component.sprite.Fret;
+import gui.game.component.sprite.ISprite;
+import gui.game.component.sprite.InputGoal;
+import gui.game.component.sprite.MusicNoteGroup;
+import gui.game.component.sprite.Score;
+import gui.game.screen.IScene;
+import gui.game.screen.level.Level;
 import config.IOwner;
 import control.events.BackgroundMusicEventListener;
 import control.events.InputActionEvent;
@@ -49,7 +49,9 @@ public class LevelControl extends AbstractSceneControl
 	private boolean backgroundMusicEnd = false;
 	
 	private boolean noteIntoFret = false;
-		
+	
+	private int consecutiveErrors = 0;
+	
 	/**
 	 * @throws SceneException 
 	 * 
@@ -145,7 +147,7 @@ public class LevelControl extends AbstractSceneControl
 						if( !note.isSelected() )
 						{
 							note.setSelected( true );
-							note.setState( GUI.game.component.sprite.MusicNoteGroup.State.ACTION );
+							note.setState(gui.game.component.sprite.MusicNoteGroup.State.ACTION );
 						}
 					}
 					else if( !this.actionOwner.isEmpty() )
@@ -158,7 +160,7 @@ public class LevelControl extends AbstractSceneControl
 							if( !note.isSelected() && noteOwner != null && noteOwner.getId() == act )
 							{
 								note.setSelected( true );
-								note.setState( GUI.game.component.sprite.MusicNoteGroup.State.ACTION );
+								note.setState(gui.game.component.sprite.MusicNoteGroup.State.ACTION );
 
 								for( ISprite score : this.scene.getSprites( Level.SCORE_ID, true ) )
 								{
@@ -175,14 +177,14 @@ public class LevelControl extends AbstractSceneControl
 					}
 					else if( !note.isSelected() )
 					{
-						note.setState( GUI.game.component.sprite.MusicNoteGroup.State.WAITING_ACTION );
+						note.setState(gui.game.component.sprite.MusicNoteGroup.State.WAITING_ACTION );
 					}
 				}
 				else
 				{						
 					if( !note.isSelected() )
 					{
-						note.setState( GUI.game.component.sprite.MusicNoteGroup.State.PREACTION );						
+						note.setState(gui.game.component.sprite.MusicNoteGroup.State.PREACTION );						
 					}
 				}					
 			}
@@ -218,9 +220,12 @@ public class LevelControl extends AbstractSceneControl
 	{			
 		if( act != null )
 		{
-			IOwner owner = act.getActionOwner();
-			
-			this.actionOwner.add( owner.getId() );
+			if( act.getType() == InputActionEvent.ACTION_DONE )
+			{
+				IOwner owner = act.getActionOwner();
+				
+				this.actionOwner.add( owner.getId() );
+			}
 		}
 	}
 
@@ -291,13 +296,13 @@ public class LevelControl extends AbstractSceneControl
 	 * @see @see GUI.game.component.event.FretEventListener#FretEvent(GUI.game.component.event.FretEvent)
 	 */
 	@Override
-	public void FretEvent(GUI.game.component.event.FretEvent ev)
+	public void FretEvent(gui.game.component.event.FretEvent ev)
 	{
 		MusicNoteGroup note = ev.getNote();
 		
 		if( note != null && !note.isGhost() )
 		{
-			if( ev.getType() == GUI.game.component.event.FretEvent.NOTE_EXITED )
+			if( ev.getType() == gui.game.component.event.FretEvent.NOTE_EXITED )
 			{
 				if( !note.isGhost() && !note.isSelected() )
 				{
@@ -305,12 +310,20 @@ public class LevelControl extends AbstractSceneControl
 					double time = note.getDuration();
 					
 					MusicPlayerControl.getInstance().mutePlayerSheet( player, time );
+					
+					this.consecutiveErrors++;
+					
+					if( this.consecutiveErrors > 0 )
+					{
+						this.consecutiveErrors = 0;
+						this.changeSceneSpeed( true );
+					}
 				}
 			}
 		}
 	}
 
-	public void updateInputGoal( double percentage, IOwner owner )
+	public void updateInputGoal( double percentageTime, int rep, IOwner owner )
 	{
 		if( this.scene != null && owner != null )
 		{
@@ -323,7 +336,7 @@ public class LevelControl extends AbstractSceneControl
 				
 				if( gOwner.getId() == owner.getId() )
 				{
-					goal.setPercentage( percentage );
+					goal.setPercentage( percentageTime, rep );
 					
 					break;
 				}
@@ -348,5 +361,20 @@ public class LevelControl extends AbstractSceneControl
 	{
 		super.setPauseScene( pause );
 		MusicPlayerControl.getInstance().setPauseMusic( pause );
+	}
+
+	@Override
+	public void changeSceneSpeed( boolean reduce ) 
+	{
+		Level lv = (Level)this.scene;
+		
+		double perc = 0.8;
+		
+		if( !reduce )
+		{
+			perc = 1 / perc;
+		}
+		
+		//lv.setNoteSpeed( perc );
 	}
 }

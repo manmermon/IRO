@@ -135,6 +135,8 @@ public class Language
 	
 	public static final String SCORE = "SCORE";
 	
+	public static final String REPETITIONS = "REPETITIONS";
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
@@ -147,6 +149,10 @@ public class Language
 		cap = new Caption( SCORE, defaultLanguage, "Score" );
 		cap.setCaption( esEs, "Puntuación");
 		captions.put( SCORE, cap );
+		
+		cap = new Caption( REPETITIONS, defaultLanguage, "Repetitions" );
+		cap.setCaption( esEs, "Repeticiones");
+		captions.put( REPETITIONS, cap );
 		
 		cap = new Caption( CONTINUOUS_SESSION, defaultLanguage, "Continuous session" );
 		cap.setCaption( esEs, "Sesión continua");

@@ -24,6 +24,7 @@ public class ControllerMetadataAdapter implements IControllerMetadata
 	protected NumberRange actionRange;
 	protected double targetTime = 0;
 	protected double samplingRate = 0;
+	protected int repetitions = 0;
 	
 	protected Object controllerSetting = null;
 	
@@ -182,5 +183,17 @@ public class ControllerMetadataAdapter implements IControllerMetadata
 	public String getInfo()
 	{
 		return this.info;
+	}
+
+	@Override
+	public void setRepetitions(int rep) 
+	{
+		this.repetitions = rep;
+	}
+
+	@Override
+	public int getRepetitions() 
+	{
+		return this.repetitions;
 	}
 }

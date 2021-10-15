@@ -1,6 +1,6 @@
 package control.scenes.level;
 
-import GUI.game.screen.level.Level;
+import gui.game.screen.level.Level;
 import control.scenes.ISceneControl;
 import exceptions.IllegalLevelStateException;
 

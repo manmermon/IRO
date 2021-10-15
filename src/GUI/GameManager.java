@@ -19,7 +19,7 @@
  *   Project's URL: https://github.com/manmermon/IRO
  */
 
-package GUI;
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Rectangle;
@@ -37,10 +37,10 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
-import GUI.game.GameWindow;
-import GUI.game.screen.level.Level;
-import GUI.game.screen.level.build.LevelMusicBuilder;
-import GUI.game.screen.menu.MenuGameResults;
+import gui.game.GameWindow;
+import gui.game.screen.level.Level;
+import gui.game.screen.level.build.LevelMusicBuilder;
+import gui.game.screen.menu.MenuGameResults;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.Player;
@@ -285,10 +285,14 @@ public class GameManager
 					throw new ConfigParameterException( "Selected channel out of controller's bounds [0, " + (cmeta.getNumberOfChannels() - 1 ) + "]."  );
 				}
 
+				par = setting.getParameter( ConfigApp.MOV_REPETITIONS );
+				int rep = ((Number)par.getSelectedValue()).intValue();
+				
 				cmeta.setPlayer( player );
 				cmeta.setRecoverInputLevel( min );
 				cmeta.setTargetTimeInLevelAction( timeTarget );
 				cmeta.setActionInputLevel( new NumberRange( max, Double.POSITIVE_INFINITY ));
+				cmeta.setRepetitions( rep );
 				
 				RegistrarStatistic.addControllerSetting( player.getId(), cmeta );
 				
@@ -303,7 +307,8 @@ public class GameManager
 			{
 				NumberRange rng = new NumberRange( cmeta.getRecoverInputLevel(), cmeta.getActionInputLevel().getMin() );
 				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
-																				, rng, cmeta.getTargetTimeInLevelAction( ) );
+																				, rng, cmeta.getTargetTimeInLevelAction( )
+																				, cmeta.getRepetitions() );
 				actCheck.setOwner( cmeta.getPlayer() );
 				ControllerManager.getInstance().addControllerListener( cmeta.getPlayer(), actCheck );
 				actCheck.addInputActionListerner( ScreenControl.getInstance() );
@@ -389,6 +394,8 @@ public class GameManager
 		}
 		
 		Level level = LevelMusicBuilder.getLevel( fileSong, screenBounds.getSize(), settings );
+	
+		//LevelMusicBuilder.changeLevelSpeed( level );
 		
 		level.setMuteSession( isMuteSession );
 	

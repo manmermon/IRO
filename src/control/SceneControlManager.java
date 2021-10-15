@@ -1,8 +1,8 @@
 package control;
 
-import GUI.game.screen.IScene;
-import GUI.game.screen.level.Level;
-import GUI.game.screen.menu.IGameMenu;
+import gui.game.screen.IScene;
+import gui.game.screen.level.Level;
+import gui.game.screen.menu.IGameMenu;
 import control.scenes.ISceneControl;
 import control.scenes.level.LevelControl;
 import control.scenes.menu.MenuScreenControl;

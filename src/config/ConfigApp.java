@@ -171,6 +171,8 @@ public class ConfigApp
 	public static final String BACKGROUND_IMAGE = "backgroundImage";
 	public static final String NOTE_IMAGE = "noteImage";
 	
+	public static final String MOV_REPETITIONS = "repetitions";
+	
 	///////////
 	
 	private static boolean test = true;
@@ -382,6 +384,9 @@ public class ConfigApp
 			cfg.setParameter( p.get_ID().getID(), p );
 		}
 		
+		par = loadDefaultRepetitions();
+		cfg.setParameter( par.get_ID().getID(), par );
+		
 		return cfg;
 	}
 	
@@ -483,7 +488,8 @@ public class ConfigApp
 	{		
 		Caption id = getCaptions( Language.RECOVER_TIME );
 		id.setID( RECOVER_TIME );
-		NumberRange rng = new NumberRange( 0.5, Double.MAX_VALUE );
+		double minVal = 0;
+		NumberRange rng = new NumberRange( minVal, Double.MAX_VALUE );
 		ConfigParameter par = new ConfigParameter( id, rng );
 		par.setSelectedValue( 2D );
 		par.setPriority( 3 );
@@ -560,7 +566,7 @@ public class ConfigApp
 
 		ConfigParameter par = new ConfigParameter( id, r );
 		par.setSelectedValue( 1D );
-		par.setPriority( 1 );
+		par.setPriority( 4 );
 
 		return par;
 	}
@@ -586,6 +592,21 @@ public class ConfigApp
 		pars.add( parMax );
 		
 		return pars;
+	}
+	
+	private static ConfigParameter loadDefaultRepetitions() throws ConfigParameterException
+	{	
+		Caption id = getCaptions( Language.REPETITIONS );
+		id.setID( MOV_REPETITIONS );
+
+		NumberRange r = new NumberRange( 1D, Double.MAX_VALUE);
+
+		ConfigParameter par = new ConfigParameter( id, r );
+		par.setSelectedValue( 1D );
+		par.setPriority( 1 );
+
+		return par;
+
 	}
 		
 	///////////////////

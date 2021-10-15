@@ -1,6 +1,6 @@
 package control;
 
-import GUI.game.screen.IScene;
+import gui.game.screen.IScene;
 
 public interface ISceneManager 
 {

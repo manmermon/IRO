@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import GUI.game.screen.level.music.BackgroundMusic;
+import gui.game.screen.level.music.BackgroundMusic;
 import control.events.BackgroundMusicEventListener;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;

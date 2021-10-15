@@ -1,6 +1,6 @@
 package control.scenes;
 
-import GUI.game.screen.IScene;
+import gui.game.screen.IScene;
 import control.events.InputActionEvent;
 import control.events.SceneEventListener;
 import exceptions.SceneException;
@@ -72,4 +72,10 @@ public interface ISceneControl
 	 * @param listener
 	 */
 	public void removeSceneEventListener( SceneEventListener listener );
+	
+	/**
+	 * 
+	 * @param reduce
+	 */
+	public void changeSceneSpeed( boolean reduce );
 }

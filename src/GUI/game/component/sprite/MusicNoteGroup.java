@@ -19,7 +19,7 @@
  *   Project's URL: https://github.com/manmermon/IRO
  */
 
-package GUI.game.component.sprite;
+package gui.game.component.sprite;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -33,9 +33,9 @@ import java.util.TreeSet;
 import org.jfugue.midi.MidiDictionary;
 import org.jfugue.theory.Note;
 
-import GUI.game.component.IPossessable;
-import GUI.game.component.event.SpriteEvent;
-import GUI.game.component.event.SpriteEventListener;
+import gui.game.component.IPossessable;
+import gui.game.component.event.SpriteEvent;
+import gui.game.component.event.SpriteEventListener;
 import config.IOwner;
 import config.Player;
 import control.music.MusicPlayerControl;
@@ -81,7 +81,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	private String trackID = "";
 	
 	private IOwner _player = new Player();
-	
+		
 	//
 	//
 	// ANIMATION SETTTINGS
@@ -588,6 +588,16 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		}
 	}
 	
+	public void setShiftSpeed( double vel )
+	{
+		this.shiftVelocity = vel;
+	}
+	
+	public double getShiftSpeed()
+	{
+		return this.shiftVelocity;
+	}
+	
 	public Point2D.Double getPreviousNoteLocation()
 	{
 		return this.previousLocation;
@@ -620,6 +630,19 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	public IOwner getOwner()
 	{
 		return this._player;
+	}
+	
+	public int getNotesTempo()
+	{
+		int tempo = 120;
+		
+		for( IROTrack t : this.noteTracks )
+		{
+			tempo = t.getTempo();
+			break;
+		}
+		
+		return tempo;
 	}
 }
 

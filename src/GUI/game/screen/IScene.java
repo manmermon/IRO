@@ -1,10 +1,10 @@
-package GUI.game.screen;
+package gui.game.screen;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import GUI.game.component.sprite.ISprite;
+import gui.game.component.sprite.ISprite;
 
 public interface IScene 
 {

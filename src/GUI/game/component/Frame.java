@@ -19,7 +19,7 @@
  *   Project's URL: https://github.com/manmermon/IRO
  */
 
-package GUI.game.component;
+package gui.game.component;
 
 import java.awt.Graphics;
 import java.awt.event.KeyAdapter;
@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
-import GUI.GameManager;
+import gui.GameManager;
 
 public class Frame extends JPanel
 {

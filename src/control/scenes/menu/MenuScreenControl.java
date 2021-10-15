@@ -1,7 +1,7 @@
 package control.scenes.menu;
 
-import GUI.game.screen.IScene;
-import GUI.game.screen.menu.IGameMenu;
+import gui.game.screen.IScene;
+import gui.game.screen.menu.IGameMenu;
 import control.events.InputActionEvent;
 import control.scenes.AbstractSceneControl;
 import exceptions.SceneException;
@@ -65,5 +65,10 @@ public class MenuScreenControl extends AbstractSceneControl
 	{
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public void changeSceneSpeed(boolean reduce) 
+	{	
 	}
 }

@@ -18,7 +18,7 @@
  *   
  *   Project's URL: https://github.com/manmermon/IRO
  */
-package GUI;
+package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,15 +43,15 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
-import GUI.panel.SettingPanel;
+import gui.panel.SettingPanel;
 import GUI.tabbedpanel.ClosableTabbedPanel;
 import GUI.tabbedpanel.CollectionEvent;
 import GUI.tabbedpanel.CollectionListener;
-import GUI.dialogs.AppSelectPlayer;
+import gui.dialogs.AppSelectPlayer;
 import GUI.menu.MenuScroller;
-import GUI.panel.InputDevicePanel;
-import GUI.panel.SelectLevelImagePanel;
-import GUI.panel.SelectSongPanel;
+import gui.panel.InputDevicePanel;
+import gui.panel.SelectLevelImagePanel;
+import gui.panel.SelectSongPanel;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.ConfigParameter.ParameterType;

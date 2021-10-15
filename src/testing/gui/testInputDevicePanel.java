@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import GUI.panel.InputDevicePanel;
+import gui.panel.InputDevicePanel;
 
 /**
  * @author manuel

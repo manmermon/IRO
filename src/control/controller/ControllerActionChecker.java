@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.event.EventListenerList;
 
-import GUI.game.component.IPossessable;
+import gui.game.component.IPossessable;
 import config.IOwner;
 import control.ScreenControl;
 import control.events.IInputControllerListener;
@@ -19,15 +19,17 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 {	
 	public int selectedChannel = 0;
 	
-	private NumberRange _rng = null;
+	private NumberRange _rng = null; // movement range
 
 	private AtomicBoolean archievedTarget = new AtomicBoolean( false );
 	
 	private EventListenerList listeners = null;
 	
-	private double targetTime;
-	
-	private Long refTime;
+	private double targetTime; // aimed time
+	private int repetitions = 1; // number of movements to do
+	 
+	private Long refTime; // chromometer
+	private int repCounter = 0; // number of movs. done
 	private Object sync = new Object();			
 	
 	private boolean enabledController = false;
@@ -42,7 +44,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 	
 	private boolean enableCheck = true;
 	
- 	public ControllerActionChecker( int selChannel, NumberRange inputThreshold, double time ) 
+ 	public ControllerActionChecker( int selChannel, NumberRange inputThreshold, double time, int rep ) 
 	{
 		//super.setName( this.getClass().getSimpleName() );
 		
@@ -58,6 +60,8 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 		this._rng = inputThreshold;
 		
 		this.targetTime = time;
+		
+		this.repetitions = rep;
 	}	
 	
  	/*
@@ -123,19 +127,24 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 				refTime = null;
 				
 				this.enabledController = true;
+				
+				this.repCounter = 0;
 			}
 			
 			synchronized ( this.sync )
 			{
-				if( data > this._rng.getMax() )
+				if( data > this._rng.getMax() ) // target zone
 				{
 					if( this.statistic == 0 )
 					{
-						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLER_LEVEL_REACH );
+						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_LEVEL_REACH );
 						
 						this.statistic++;
 					}
 	
+					//
+					// Check: time in target zone
+					//
 					timerPercentage  = 100;
 	
 					if( this.targetTime > 0 )
@@ -150,6 +159,9 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 						timerPercentage = 100 * t  / this.targetTime;						
 					}				
 	
+					//
+					// target time archieved
+					//
 					if( timerPercentage >= 100 )
 					{	
 						if( this.statistic == 1 )
@@ -164,13 +176,20 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 						{	
 							this.archievedTarget.set( true );
 							
-							this.fireActionEvent( InputActionEvent.ACTION_DONE );						
+							this.repCounter++;
+							
+							this.repCounter = ( this.repCounter >= this.repetitions ) ? 0 : this.repCounter;
+							
+							if( this.repCounter < 1 )
+							{
+								this.fireActionEvent( InputActionEvent.ACTION_DONE );
+							}
 						}
 					}
 					
 					this.recoverLevelReported = false;
 				}
-				else if ( this._rng.within( data ) )
+				else if ( this._rng.within( data ) ) // intermediate are
 				{
 					if( this.statistic > 0 )
 					{
@@ -182,7 +201,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 					
 					this.refTime = null;
 				}
-				else
+				else // recovered area
 				{	
 					this.statistic = 0;
 					
@@ -203,15 +222,16 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 					}				
 				}
 				
+				final int rep = this.repCounter;
 				if( enable )
 				{
-					final double tp = timerPercentage;
+					final double tp = timerPercentage;					
 					Thread t = new Thread() 
 					{
 						public void run() 
 						{
 							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage )" );
-							ScreenControl.getInstance().setUpdateLevelInputGoal( tp, owner );
+							ScreenControl.getInstance().setUpdateLevelInputGoal( tp, rep, owner );
 						};
 					};
 					t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal");
@@ -227,7 +247,7 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 						public void run() 
 						{
 							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( 0 )" );
-							ScreenControl.getInstance().setUpdateLevelInputGoal( 0, owner );
+							ScreenControl.getInstance().setUpdateLevelInputGoal( 0, repCounter, owner );
 						};
 					};
 					t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal" );
