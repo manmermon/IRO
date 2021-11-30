@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage;
 
 import control.controller.IInputable;
 import control.events.InputActionEvent;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 
 public class Buttom extends AbstractSprite implements IInputable
 {	
@@ -140,8 +140,8 @@ public class Buttom extends AbstractSprite implements IInputable
 		Image img = null;
 		if( super.spriteSize.width > 0 && super.spriteSize.height > 0 )
 		{
-			img = basicPainter2D.paintFigure( 0, 0, this.poly, this.currentBgColor, null );
-			basicPainter2D.paintOutlineFigure( 0, 0, this.poly, this.currentBgColor.darker(), 2, img );
+			img = BasicPainter2D.paintFigure( 0, 0, this.poly, this.currentBgColor, null );
+			BasicPainter2D.paintOutlineFigure( 0, 0, this.poly, this.currentBgColor.darker(), 2, img );
 			
 			if( this.text != null )
 			{
@@ -150,7 +150,7 @@ public class Buttom extends AbstractSprite implements IInputable
 					this.setFontMetric( (BufferedImage)img );
 				}
 				
-				basicPainter2D.text( this.text, this.fontmetric, this.currentFgColor.darker(), this.fgColor, img );
+				BasicPainter2D.text( this.text, this.fontmetric, this.currentFgColor.darker(), this.fgColor, img );
 			}			
 		}
 		
@@ -168,7 +168,7 @@ public class Buttom extends AbstractSprite implements IInputable
 			do
 			{	
 				f = new Font( f.getFontName(), f.getStyle(), f.getSize() + 5 );
-				Shape shapeText = basicPainter2D.generateShapeFromText( (int)this.poly.getX(), (int)this.poly.getY()
+				Shape shapeText = BasicPainter2D.generateShapeFromText( (int)this.poly.getX(), (int)this.poly.getY()
 																, (int)this.poly.getWidth(), (int)this.poly.getHeight()
 																, f, this.text );
 				

@@ -13,7 +13,7 @@ import java.awt.image.BufferedImage;
 
 import gui.game.component.IPossessable;
 import config.IOwner;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import image.icon.GeneralAppIcon;
 import tools.SceneTools;
 
@@ -63,11 +63,11 @@ public class InputGoal extends AbstractSprite implements IPossessable
 		// TODO Auto-generated method stub
 		super.setSize(size);
 		
-		this.reachedTarget = (BufferedImage)basicPainter2D.circle( 0, 0
+		this.reachedTarget = (BufferedImage)BasicPainter2D.circle( 0, 0
 																, super.spriteSize.width
 																, Color.WHITE, null );
 		
-		basicPainter2D.composeImage( this.reachedTarget, 0, 0 
+		BasicPainter2D.composeImage( this.reachedTarget, 0, 0 
 									, GeneralAppIcon.Correct()
 												.getImage()
 												.getScaledInstance( this.reachedTarget.getWidth()
@@ -99,7 +99,7 @@ public class InputGoal extends AbstractSprite implements IPossessable
 			{
 				if( percentageTime < 100 )
 				{
-					sprite = (BufferedImage)basicPainter2D.arc(0, 0
+					sprite = (BufferedImage)BasicPainter2D.arc(0, 0
 															, super.spriteSize.width
 															, super.spriteSize.height
 															, this.startAngle
@@ -123,7 +123,7 @@ public class InputGoal extends AbstractSprite implements IPossessable
 					}
 					
 					String tx = "" + this.repCounter;
-					sprite = (BufferedImage)basicPainter2D.text( tx, SceneTools.getFontMetricByWidth( (int)txSize, tx ), Color.BLACK, Color.GREEN, sprite );
+					sprite = (BufferedImage)BasicPainter2D.text( tx, SceneTools.getFontMetricByWidth( (int)txSize, tx ), Color.BLACK, Color.GREEN, sprite );
 				}
 			}
 			
@@ -133,7 +133,7 @@ public class InputGoal extends AbstractSprite implements IPossessable
 				{
 					if( sprite != null )
 					{
-						sprite = (BufferedImage)basicPainter2D.composeImage( basicPainter2D.copyImage( this.reachedTarget ), 0, 0, sprite );
+						sprite = (BufferedImage)BasicPainter2D.composeImage( BasicPainter2D.copyImage( this.reachedTarget ), 0, 0, sprite );
 					}
 					else
 					{

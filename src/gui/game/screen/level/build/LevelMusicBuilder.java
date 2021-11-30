@@ -38,7 +38,7 @@ import config.Settings;
 import general.ArrayTreeMap;
 import general.NumberRange;
 import general.Tuple;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import music.sheet.IROTrack;
 import music.sheet.MusicSheet;
 import music.sheet.io.IROMusicParserListener;
@@ -111,7 +111,7 @@ public class LevelMusicBuilder
 							, back.getBounds().height
 							, Image.SCALE_SMOOTH );
 
-					back.setImage( (BufferedImage)basicPainter2D.copyImage( img ) );
+					back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
 				}
 				catch (IOException ex)
 				{	

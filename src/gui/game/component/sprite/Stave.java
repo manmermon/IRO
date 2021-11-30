@@ -24,7 +24,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
-import image.basicPainter2D;
+import image.BasicPainter2D;
 
 public class Stave extends AbstractSprite
 {
@@ -69,11 +69,11 @@ public class Stave extends AbstractSprite
 			railThinck = 1;
 		}
 		
-		this.stave = (BufferedImage)basicPainter2D.createEmptyCanva( this.spriteSize.width, this.spriteSize.height, null );
+		this.stave = (BufferedImage)BasicPainter2D.createEmptyCanva( this.spriteSize.width, this.spriteSize.height, null );
 		
 		for( int i = 0; i < this.numLines; i++ )
 		{
-			basicPainter2D.line( 0, i * this.wayHeight + railLoc - railThinck / 2
+			BasicPainter2D.line( 0, i * this.wayHeight + railLoc - railThinck / 2
 												, this.spriteSize.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, Color.BLACK, this.stave );
 		}
 	}

@@ -33,7 +33,7 @@ import config.Settings;
 import config.language.Caption;
 import config.language.Language;
 import exceptions.ConfigParameterException;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import music.sheet.IROTrack;
 
 import java.awt.GridLayout;
@@ -181,7 +181,7 @@ public class SelectLevelImagePanel extends JPanel
 												, back.getBounds().height
 												, Image.SCALE_SMOOTH );
 							
-					back.setImage( (BufferedImage)basicPainter2D.copyImage( img ) );
+					back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
 				}
 				catch (IOException ex)
 				{	

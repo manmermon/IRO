@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Date;
 
-import general.PausableTimer;
+import thread.timer.PausableTimer;
 
 public class testPausableTimer 
 {

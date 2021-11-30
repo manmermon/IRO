@@ -15,10 +15,10 @@ import org.jfugue.player.ManagedPlayerListener;
 import gui.game.screen.IPausable;
 import control.events.BackgroundMusicEvent;
 import control.events.BackgroundMusicEventListener;
-import general.PausableTimer;
 import music.jfugueIRO.PlayerMod;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
+import thread.timer.PausableTimer;
 import tools.MusicSheetTools;
 
 public class BackgroundMusic extends AbstractStoppableThread 

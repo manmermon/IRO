@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
 
 import gui.game.component.IPossessable;
 import config.IOwner;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import statistic.RegistrarStatistic;
 import tools.SceneTools;
 
@@ -90,7 +90,7 @@ public class Score extends AbstractSprite implements IPossessable
 		Color fill = Color.ORANGE;
 		
 		String txt = String.format( this.scoreFormat, this.score );
-		BufferedImage sprite = (BufferedImage)basicPainter2D.text( txt, this.fontmetrics
+		BufferedImage sprite = (BufferedImage)BasicPainter2D.text( txt, this.fontmetrics
 																	, border
 																	, fill
 																	, null );
@@ -102,8 +102,8 @@ public class Score extends AbstractSprite implements IPossessable
 		}
 		
 		Color bg = new Color( 255, 255, 255, 140 );
-		BufferedImage img = ( BufferedImage )basicPainter2D.createEmptyCanva( sprite.getWidth() + this.playerPic.getWidth( null ), sprite.getHeight(), null );
-		basicPainter2D.roundRectangle( this.playerPic.getWidth( null ), 0
+		BufferedImage img = ( BufferedImage )BasicPainter2D.createEmptyCanva( sprite.getWidth() + this.playerPic.getWidth( null ), sprite.getHeight(), null );
+		BasicPainter2D.roundRectangle( this.playerPic.getWidth( null ), 0
 										, sprite.getWidth() 
 										, sprite.getHeight() 
 										, this.fontmetrics.stringWidth( "0")
@@ -111,8 +111,8 @@ public class Score extends AbstractSprite implements IPossessable
 										, 1 , bg, bg, img );
 		
 		//BufferedImage img = (BufferedImage)basicPainter2D.createEmptyCanva( sprite.getWidth(), sprite.getHeight(), bg );
-		basicPainter2D.composeImage( img, this.playerPic.getWidth( null ), 0, sprite );
-		basicPainter2D.composeImage( img, 0, 0, playerPic );
+		BasicPainter2D.composeImage( img, this.playerPic.getWidth( null ), 0, sprite );
+		BasicPainter2D.composeImage( img, 0, 0, playerPic );
 				
 		return img;
 	}

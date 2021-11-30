@@ -44,7 +44,7 @@ import config.language.Language;
 import config.language.TranslateComponents;
 import control.music.MusicPlayerControl;
 import exceptions.ConfigParameterException;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import image.icon.GeneralAppIcon;
 import tools.MusicSheetTools;
 
@@ -312,7 +312,7 @@ public class SelectSongPanel extends JPanel
 		{
 			this.btPlayStopSong = new JButton();
 			
-			this.btPlayStopSong.setIcon( new ImageIcon( basicPainter2D.triangle( 16, 1, Color.BLACK, Color.GREEN,  basicPainter2D.EAST ) ) );
+			this.btPlayStopSong.setIcon( new ImageIcon( BasicPainter2D.triangle( 16, 1, Color.BLACK, Color.GREEN,  BasicPainter2D.EAST ) ) );
 			
 			this.btPlayStopSong.setBorder( BorderFactory.createRaisedSoftBevelBorder() );
 			
@@ -345,11 +345,11 @@ public class SelectSongPanel extends JPanel
 						try
 						{							
 							MusicPlayerControl.getInstance().stopMusic();
-							b.setIcon( new ImageIcon( basicPainter2D.triangle( 16, 1, Color.BLACK, Color.GREEN, basicPainter2D.EAST ) ) );
+							b.setIcon( new ImageIcon( BasicPainter2D.triangle( 16, 1, Color.BLACK, Color.GREEN, BasicPainter2D.EAST ) ) );
 							
 							if( !played || play )
 							{	
-								b.setIcon( new ImageIcon( basicPainter2D.rectangle( 16, 16, 1, Color.BLACK, Color.ORANGE ) ) );
+								b.setIcon( new ImageIcon( BasicPainter2D.rectangle( 16, 16, 1, Color.BLACK, Color.ORANGE ) ) );
 								
 								MusicPlayerControl.getInstance().setBackgroundMusicPatter( bgm );
 								MusicPlayerControl.getInstance().startMusic();
@@ -453,8 +453,8 @@ public class SelectSongPanel extends JPanel
 			
 			try
 			{
-				ImageIcon icon = new ImageIcon( basicPainter2D.triangle( 16,  2, Color.BLACK
-														, Color.LIGHT_GRAY, basicPainter2D.NORTH ) );
+				ImageIcon icon = new ImageIcon( BasicPainter2D.triangle( 16,  2, Color.BLACK
+														, Color.LIGHT_GRAY, BasicPainter2D.NORTH ) );
 				
 				Dimension d = new Dimension( icon.getIconWidth(), icon.getIconHeight() );
 				d.width += 6;
@@ -493,8 +493,8 @@ public class SelectSongPanel extends JPanel
 			
 			try
 			{
-				ImageIcon icon = new ImageIcon( basicPainter2D.triangle( 16,  2, Color.BLACK
-														, Color.LIGHT_GRAY, basicPainter2D.SOUTH ) );
+				ImageIcon icon = new ImageIcon( BasicPainter2D.triangle( 16,  2, Color.BLACK
+														, Color.LIGHT_GRAY, BasicPainter2D.SOUTH ) );
 				
 				Dimension d = new Dimension( icon.getIconWidth(), icon.getIconHeight() );
 				d.width += 6;
@@ -800,8 +800,8 @@ public class SelectSongPanel extends JPanel
 			
 			try
 			{
-				ImageIcon icon = new ImageIcon( basicPainter2D.triangle( 16,  2, Color.BLACK
-						, Color.LIGHT_GRAY, basicPainter2D.EAST ) );
+				ImageIcon icon = new ImageIcon( BasicPainter2D.triangle( 16,  2, Color.BLACK
+						, Color.LIGHT_GRAY, BasicPainter2D.EAST ) );
 
 				Dimension d = new Dimension( icon.getIconWidth(), icon.getIconHeight() );
 				d.width += 6;
@@ -841,8 +841,8 @@ public class SelectSongPanel extends JPanel
 			
 			try
 			{
-				ImageIcon icon = new ImageIcon( basicPainter2D.triangle( 16,  2, Color.BLACK
-						, Color.LIGHT_GRAY, basicPainter2D.WEST ) );
+				ImageIcon icon = new ImageIcon( BasicPainter2D.triangle( 16,  2, Color.BLACK
+						, Color.LIGHT_GRAY, BasicPainter2D.WEST ) );
 
 				Dimension d = new Dimension( icon.getIconWidth(), icon.getIconHeight() );
 				d.width += 6;

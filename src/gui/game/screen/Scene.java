@@ -14,7 +14,7 @@ import gui.game.component.event.SpriteEvent;
 import gui.game.component.event.SpriteEventListener;
 import gui.game.component.sprite.ISprite;
 import general.ArrayTreeMap;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 
 public abstract class Scene implements IScene, SpriteEventListener
 {
@@ -237,7 +237,7 @@ public abstract class Scene implements IScene, SpriteEventListener
 	{
 		synchronized ( this.SPRITES )
 		{
-			BufferedImage scene = (BufferedImage)basicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
+			BufferedImage scene = (BufferedImage)BasicPainter2D.createEmptyCanva( this.size.width, this.size.height, Color.WHITE );
 			
 			List< Integer > drawIndexes = new ArrayList< Integer >( this.SPRITES.keySet() );
 			Collections.sort( drawIndexes );
@@ -257,7 +257,7 @@ public abstract class Scene implements IScene, SpriteEventListener
 						if( r.contains( loc ) )
 						{						
 							BufferedImage spr = pic.getSprite();
-							basicPainter2D.composeImage( scene, (int)loc.x, (int)loc.y, spr );						
+							BasicPainter2D.composeImage( scene, (int)loc.x, (int)loc.y, spr );						
 						}
 					}
 				}

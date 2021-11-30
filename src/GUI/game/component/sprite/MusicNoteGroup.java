@@ -40,7 +40,7 @@ import config.IOwner;
 import config.Player;
 import control.music.MusicPlayerControl;
 import general.NumberRange;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import image.icon.MusicInstrumentIcons;
 import music.sheet.IROTrack;
 import statistic.RegistrarStatistic;
@@ -276,7 +276,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 				s = 1;
 			}
 			
-			this.noteImg = (BufferedImage)basicPainter2D.copyImage( img.getScaledInstance( s 
+			this.noteImg = (BufferedImage)BasicPainter2D.copyImage( img.getScaledInstance( s 
 																	, s
 																	, BufferedImage.SCALE_SMOOTH ) );
 		}
@@ -425,7 +425,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 				}
 				*/
 				
-				pic = basicPainter2D.copyImage( this.noteImg ); 
+				pic = BasicPainter2D.copyImage( this.noteImg ); 
 				if( pic == null )
 				{				
 					Set< Byte > instruments = new TreeSet< Byte >();
@@ -463,21 +463,21 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 					
 					int r = (int)( Math.max(  super.getSize().width, super.getSize().height ) ) + 1;
 					
-					this.circPreAction = (BufferedImage)basicPainter2D.circle( 0
+					this.circPreAction = (BufferedImage)BasicPainter2D.circle( 0
 																				, 0
 																				, r 
 																				, c
 																				, null );
 					
 					c = new Color( this.actionColor.getRed(), this.actionColor.getGreen(), this.actionColor.getBlue(), alpha );
-					this.circAction = (BufferedImage)basicPainter2D.circle( 0
+					this.circAction = (BufferedImage)BasicPainter2D.circle( 0
 																			, 0
 																			, r
 																			, c
 																			, null );
 					
 					c = new Color( this.waitingActionColor.getRed(), this.waitingActionColor.getGreen(), this.waitingActionColor.getBlue(), alpha );
-					this.circWaitAction = (BufferedImage)basicPainter2D.circle( 0
+					this.circWaitAction = (BufferedImage)BasicPainter2D.circle( 0
 																				, 0
 																				, r
 																				, c
@@ -507,11 +507,11 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 					}
 				}
 				
-				pic = (BufferedImage)basicPainter2D.composeImage( basicPainter2D.copyImage( bg ), this.notePasteX, this.notePasteY, pic );
+				pic = (BufferedImage)BasicPainter2D.composeImage( BasicPainter2D.copyImage( bg ), this.notePasteX, this.notePasteY, pic );
 				//pic = bg;
 				if( this.currentAngle != 0 && this.animationActive )
 				{
-						pic = basicPainter2D.rotate( pic, this.currentAngle );
+						pic = BasicPainter2D.rotate( pic, this.currentAngle );
 				}					
 					
 				//basicPainter2D.changeColorPixels( Color.BLACK, c, pic );

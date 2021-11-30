@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 import gui.game.component.event.FretEvent;
 import gui.game.component.event.FretEventListener;
 import config.Player;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import statistic.RegistrarStatistic;
 import statistic.RegistrarStatistic.FieldType;
 
@@ -154,7 +154,7 @@ public class Fret extends AbstractSprite
 		{
 			Rectangle r = this.fret.getBounds();
 			
-			this.fretImg = (BufferedImage)basicPainter2D.rectangle( r.width, r.height, 3
+			this.fretImg = (BufferedImage)BasicPainter2D.rectangle( r.width, r.height, 3
 																, this.fretFillColor
 																, this.fretFillColor );
 		}

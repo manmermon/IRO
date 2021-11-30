@@ -6,7 +6,7 @@ import java.awt.FontMetrics;
 import java.awt.image.BufferedImage;
 
 import config.language.Language;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import tools.SceneTools;
 
 public class Pause extends AbstractSprite 
@@ -33,10 +33,10 @@ public class Pause extends AbstractSprite
 		
 		Color c = new Color( 0, 0, 0, 127 );
 		
-		this.img = (BufferedImage)basicPainter2D.createEmptyCanva( w, h, c);
+		this.img = (BufferedImage)BasicPainter2D.createEmptyCanva( w, h, c);
 		
 		int tw = fm.stringWidth( text );
-		basicPainter2D.text( ( w - tw ) / 2, ( h - fm.getHeight() ) / 2
+		BasicPainter2D.text( ( w - tw ) / 2, ( h - fm.getHeight() ) / 2
 							, text, fm, Color.RED
 							, Color.ORANGE, this.img );
 	}

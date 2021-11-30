@@ -25,7 +25,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
-import image.basicPainter2D;
+import image.BasicPainter2D;
 
 public class Background extends AbstractSprite 
 {
@@ -49,7 +49,7 @@ public class Background extends AbstractSprite
 		if( this.pic == null )
 		{
 			Dimension size = super.getSize();
-			this.pic = (BufferedImage)basicPainter2D.createEmptyCanva( size.width, size.height, Color.WHITE );			
+			this.pic = (BufferedImage)BasicPainter2D.createEmptyCanva( size.width, size.height, Color.WHITE );			
 		}
 		
 		return this.pic;

@@ -14,7 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import image.icon.MusicInstrumentIcons;
 
 public class testAppIcons extends JFrame {
@@ -92,13 +92,13 @@ public class testAppIcons extends JFrame {
 					float arc = 359 * p / 100;
 					//b.setVisible( false );
 					
-					BufferedImage img = (BufferedImage)basicPainter2D.arc( 0, 0
+					BufferedImage img = (BufferedImage)BasicPainter2D.arc( 0, 0
 															, size, size 
 															, 90, -(int)arc
 															, size / 8, Color.BLACK
 															, null, null ); 
 							
-					basicPainter2D.arc( 0, 0
+					BasicPainter2D.arc( 0, 0
 										, size, size 
 										, 90, -(int)arc
 										, size / 10, Color.GREEN

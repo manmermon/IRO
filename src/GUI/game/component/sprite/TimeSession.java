@@ -11,7 +11,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import control.music.MusicPlayerControl;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 
 /**
  * @author manuel
@@ -88,20 +88,20 @@ public class TimeSession extends AbstractSprite
 		
 		text += String.format( "%02d", (int)( mm - hh * 60 ) ) + ":" + String.format( "%02d", ss );
 		
-		BufferedImage img = (BufferedImage)basicPainter2D.text( text 
+		BufferedImage img = (BufferedImage)BasicPainter2D.text( text 
 														, this.fontmetrics, Color.BLACK
 														, Color.GREEN, null );
 
 		
 		Color bg = new Color( 255, 255, 255, 140 );
-		BufferedImage bgpic = ( BufferedImage )basicPainter2D.roundRectangle( 0, 0
+		BufferedImage bgpic = ( BufferedImage )BasicPainter2D.roundRectangle( 0, 0
 																			, img.getWidth()
 																			, img.getHeight()
 																			, img.getWidth() / 4
 																			, img.getHeight()
 																			, 1 , bg, bg, null );
 		
-		basicPainter2D.composeImage( bgpic, 0, 0, img );
+		BasicPainter2D.composeImage( bgpic, 0, 0, img );
 		
 		
 		return bgpic;

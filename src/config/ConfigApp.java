@@ -67,7 +67,7 @@ import exceptions.ConfigParameterException;
 import general.ConvertTo;
 import general.NumberRange;
 import general.Tuple;
-import image.basicPainter2D;
+import image.BasicPainter2D;
 import image.icon.GeneralAppIcon;
 import statistic.chart.GameSessionStatistic;
 import statistic.RegistrarStatistic;
@@ -790,7 +790,7 @@ public class ConfigApp
 					ByteArrayOutputStream bos = new ByteArrayOutputStream();
 					try
 					{
-						BufferedImage scaleImg = basicPainter2D.copyImage( img.getScaledInstance( ConfigApp.playerPicSize.t1, ConfigApp.playerPicSize.t2, BufferedImage.SCALE_SMOOTH ) );
+						BufferedImage scaleImg = BasicPainter2D.copyImage( img.getScaledInstance( ConfigApp.playerPicSize.t1, ConfigApp.playerPicSize.t2, BufferedImage.SCALE_SMOOTH ) );
 						ImageIO.write( scaleImg, "png", bos );
 						imageBytes = bos.toByteArray();
 					}
