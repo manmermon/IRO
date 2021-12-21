@@ -28,6 +28,8 @@ import java.util.Map;
 
 import org.jfugue.midi.MidiDefaults;
 
+import config.IOwner;
+import config.Settings;
 import gui.game.component.sprite.Fret;
 import gui.game.component.sprite.ISprite;
 import gui.game.component.sprite.Stave;
@@ -36,7 +38,6 @@ import gui.game.component.sprite.Pause;
 import gui.game.screen.IPausable;
 import gui.game.screen.Scene;
 import gui.game.screen.level.music.BackgroundMusic;
-import music.sheet.IROTrack;
 
 public class Level extends Scene implements IPausable
 {
@@ -64,6 +65,8 @@ public class Level extends Scene implements IPausable
 	private BackgroundMusic backgroundMusic;
 	private Map< Integer, BackgroundMusic > playerMusics;
 	
+	private List< Settings > playerSettings = null;
+	
 	private Boolean pause = false;
 	
 	private Boolean isMuteSession = false;
@@ -85,6 +88,16 @@ public class Level extends Scene implements IPausable
 	public void setPlayerSheetMusic( Map< Integer, BackgroundMusic > playerSheets )
 	{
 		this.playerMusics.putAll( playerSheets );
+	}
+	
+	public void setPlayers( List< Settings > players )
+	{
+		this.playerSettings = players;
+	}
+	
+	public List<Settings> getPlayers() 
+	{
+		return this.playerSettings;
 	}
 	
 	public Map< Integer, BackgroundMusic > getPlayerSheets()
@@ -199,29 +212,7 @@ public class Level extends Scene implements IPausable
 			return this.pause;
 		}
 	}
-	
-	public void changeSpeed( double percentage )
-	{
-		synchronized( this.pause )
-		{
-			if( percentage > 0  )
-			{
-				int tempo = 0;
-				for( MusicNoteGroup mng : this.getNotes() )
-				{
-					mng.setShiftSpeed( mng.getShiftSpeed() * percentage );				
-					
-					if( tempo == 0 )
-					{
-						tempo = mng.getNotesTempo();
-					}
-				}
-				
-				
-			}
-		}
-	}
-	
+		
 	public void setMuteSession( boolean mute )
 	{
 		synchronized( this.isMuteSession )
@@ -236,5 +227,46 @@ public class Level extends Scene implements IPausable
 		{
 			return this.isMuteSession;
 		}
+	}
+	
+	public void changeSpeed( double newVel, IOwner player )
+	{
+		synchronized( this.pause )
+		{
+			if( newVel > 0  && player != null )
+			{
+				for( MusicNoteGroup mng : this.getNotes() )
+				{
+					IOwner iow = mng.getOwner();
+					if( iow != null && iow.getId() == player.getId() )
+					{
+						mng.setShiftSpeed( newVel );
+					}
+				}
+			}
+		}
+	}
+	
+	public Map< Integer, Double >getSpeedForPlayers( )
+	{
+		Map< Integer, Double > vels = new HashMap< Integer, Double >();
+		
+		for( Settings set : this.playerSettings )
+		{
+			int idPlayer = set.getPlayer().getId();
+			searching:
+			for( MusicNoteGroup mng : this.getNotes() )
+			{
+				IOwner iow = mng.getOwner();
+				if( iow != null && iow.getId() == idPlayer )
+				{
+					vels.put( idPlayer, mng.getShiftSpeed() );
+					
+					break searching;
+				}
+			}
+		}
+		
+		return vels;
 	}
 }

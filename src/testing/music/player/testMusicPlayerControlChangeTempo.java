@@ -1,25 +1,25 @@
 /**
  * 
  */
-package testing.music;
+package testing.music.player;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CyclicBarrier;
-
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiUnavailableException;
 
 import org.jfugue.pattern.Pattern;
 import org.jfugue.player.Player;
 
+import control.events.BackgroundMusicEvent;
+import control.events.BackgroundMusicEventListener;
+import control.music.MusicPlayerControl;
 import gui.game.screen.level.music.BackgroundMusic;
-import stoppableThread.IStoppableThread;
-import tools.MusicSheetTools;
 
 /**
  * @author Manuel Merino Monge
  *
  */
-public class testBackgroundMusic {
+public class testMusicPlayerControlChangeTempo {
 
 	/**
 	 * @param args
@@ -36,7 +36,7 @@ public class testBackgroundMusic {
 							, "T100 @0.0 &V0,L0,I0,Rq. @0.375 &V0,L0,I0,Ri @0.5 &V0,L0,I0,A5qa81d0 @0.75 &V0,L0,I0,Rq @1.0 &V0,L0,I0,R/0.12708333333333321 @1.125 &V0,L0,I0,R/0.11822916666666661 @1.2432291666666666 &V0,L0,I0,R/0.0067708333333333925 @1.25 &V0,L0,I0,R/0.12708333333333321 @1.375 &V0,L0,I0,R/0.11822916666666661 @1.4932291666666666 &V0,L0,I0,R/0.0067708333333333925 @1.5 &V0,L0,I0,Rq @1.75 &V0,L0,I0,Rq @2.0 &V0,L0,I0,Rq. @2.375 &V0,L0,I0,Ri @2.5 &V0,L0,I0,Rq @2.75 &V0,L0,I0,A5qa79d0 @3.0 &V0,L0,I0,R/0.12708333333333321 @3.125 &V0,L0,I0,R/0.11822916666666661 @3.2432291666666666 &V0,L0,I0,R/0.0067708333333333925 @3.25 &V0,L0,I0,R/0.12708333333333321 @3.375 &V0,L0,I0,R/0.11822916666666661 @3.4932291666666666 &V0,L0,I0,R/0.0067708333333333925 @3.5 &V0,L0,I0,Rh @4.0 &V0,L0,I0,Rq. @4.375 &V0,L0,I0,Ri @4.5 &V0,L0,I0,Rq @4.75 &V0,L0,I0,Rq @5.0 &V0,L0,I0,G5/0.12708333333333333a73d0 @5.125 &V0,L0,I0,F5/0.11822916666666666a68d0 @5.243229166666667 &V0,L0,I0,R/0.0067708333333333925 @5.25 &V0,L0,I0,R/0.12708333333333321 @5.375 &V0,L0,I0,R/0.11822916666666661 @5.493229166666667 &V0,L0,I0,R/0.0067708333333333925 @5.5 &V0,L0,I0,Rq @5.75 &V0,L0,I0,Rq @6.0 &V0,L0,I0,Rq. @6.375 &V0,L0,I0,Ri @6.5 &V0,L0,I0,Rq @6.75 &V0,L0,I0,Rq @7.0 &V0,L0,I0,R/0.12708333333333321 @7.125 &V0,L0,I0,F5/0.11822916666666666a58d0 @7.243229166666667 &V0,L0,I0,R/0.0067708333333333925 @7.25 &V0,L0,I0,G5/0.12708333333333333a79d0 @7.375 &V0,L0,I0,R/0.11822916666666661 @7.493229166666667 &V0,L0,I0,R/0.0067708333333333925 @7.5 &V0,L0,I0,Rh @8.0 &V0,L0,I0,Rw @9.0 &V0,L0,I0,Ri @9.125 &V0,L0,I0,Ri @9.25 &V0,L0,I0,A5ia73d0 @9.375 &V0,L0,I0,G5ia73d0 @9.5 &V0,L0,I0,Ri @9.625 &V0,L0,I0,Ri @9.75 &V0,L0,I0,Rq @10.0 &V0,L0,I0,Ri @10.125 &V0,L0,I0,Ri @10.25 &V0,L0,I0,Rq @10.5 &V0,L0,I0,Rh @11.0 &V0,L0,I0,Ri @11.125 &V0,L0,I0,Ri @11.25 &V0,L0,I0,Rq @11.5 &V0,L0,I0,C5ia51d0 @11.625 &V0,L0,I0,C5ia84d0 @11.75 &V0,L0,I0,Rq @12.0 &V0,L0,I0,Rq. @12.375 &V0,L0,I0,Ri @12.5 &V0,L0,I0,Rq @12.75 &V0,L0,I0,Rq @13.0 &V0,L0,I0,R/0.12708333333333321 @13.125 &V0,L0,I0,R/0.1182291666666675 @13.243229166666667 &V0,L0,I0,R/0.006770833333332504 @13.25 &V0,L0,I0,R/0.12708333333333321 @13.375 &V0,L0,I0,R/0.1182291666666675 @13.493229166666667 &V0,L0,I0,R/0.006770833333332504 @13.5 &V0,L0,I0,Rq @13.75 &V0,L0,I0,C5qa88d0 @14.0 &V0,L0,I0,Rq. @14.375 &V0,L0,I0,Ri @14.5 &V0,L0,I0,Rq @14.75 &V0,L0,I0,Rq @15.0 &V0,L0,I0,R/0.12708333333333321 @15.125 &V0,L0,I0,R/0.1182291666666675 @15.243229166666667 &V0,L0,I0,R/0.006770833333332504 @15.25 &V0,L0,I0,Ri @15.375 &V0,L0,I0,Ri @15.5 &V0,L0,I0,Rh T120 @0.0 &V1,L0,I0,Rq @0.25 &V1,L0,I0,Rq @0.5 &V1,L0,I0,F4qa90d0 @0.75 &V1,L0,I0,Rq @1.0 &V1,L0,I0,Rq @1.25 &V1,L0,I0,Rq @1.5 &V1,L0,I0,Rq @1.75 &V1,L0,I0,Rq @2.0 &V1,L0,I0,Rq @2.25 &V1,L0,I0,Rq @2.5 &V1,L0,I0,Rq @2.75 &V1,L0,I0,C5qa114d0 @3.0 &V1,L0,I0,Rq @3.25 &V1,L0,I0,Rq @3.5 &V1,L0,I0,Rq @3.75 &V1,L0,I0,Rq @4.0 &V1,L0,I0,Rq @4.25 &V1,L0,I0,Rq @4.5 &V1,L0,I0,Rq @4.75 &V1,L0,I0,Rq @5.0 &V1,L0,I0,BB4qa84d0 @5.25 &V1,L0,I0,Rq @5.5 &V1,L0,I0,Rq @5.75 &V1,L0,I0,Rq @6.0 &V1,L0,I0,Rq @6.25 &V1,L0,I0,Rq @6.5 &V1,L0,I0,Rq @6.75 &V1,L0,I0,Rq @7.0 &V1,L0,I0,Rq @7.25 &V1,L0,I0,C5qa92d0 @7.5 &V1,L0,I0,Rq @7.75 &V1,L0,I0,Rq @8.0 &V1,L0,I0,Ri @8.125 &V1,L0,I0,Ri @8.25 &V1,L0,I0,Ri @8.375 &V1,L0,I0,Ri @8.5 &V1,L0,I0,Ri @8.625 &V1,L0,I0,Ri @8.75 &V1,L0,I0,Rq @9.0 &V1,L0,I0,Rwh @10.5 &V1,L0,I0,Ri @10.625 &V1,L0,I0,Ri @10.75 &V1,L0,I0,Rq @11.0 &V1,L0,I0,Rw @12.0 &V1,L0,I0,Rq @12.25 &V1,L0,I0,Rq @12.5 &V1,L0,I0,Rq @12.75 &V1,L0,I0,Rq @13.0 &V1,L0,I0,Rq @13.25 &V1,L0,I0,Rq @13.5 &V1,L0,I0,Rq @13.75 &V1,L0,I0,Rq @14.0 &V1,L0,I0,Rq @14.25 &V1,L0,I0,Rq @14.5 &V1,L0,I0,Rq @14.75 &V1,L0,I0,Rq @15.0 &V1,L0,I0,Rq @15.25 &V1,L0,I0,Rq @15.5 &V1,L0,I0,Rq"
 							, "T100 @0.0 &V0,L0,I0,Rq. @0.375 &V0,L0,I0,Ri @0.5 &V0,L0,I0,Rq @0.75 &V0,L0,I0,A5qa78d0 @1.0 &V0,L0,I0,R/0.12708333333333321 @1.125 &V0,L0,I0,R/0.11822916666666661 @1.2432291666666666 &V0,L0,I0,R/0.0067708333333333925 @1.25 &V0,L0,I0,R/0.12708333333333321 @1.375 &V0,L0,I0,R/0.11822916666666661 @1.4932291666666666 &V0,L0,I0,R/0.0067708333333333925 @1.5 &V0,L0,I0,Rq @1.75 &V0,L0,I0,Rq @2.0 &V0,L0,I0,Rq. @2.375 &V0,L0,I0,Ri @2.5 &V0,L0,I0,Rq @2.75 &V0,L0,I0,Rq @3.0 &V0,L0,I0,G5/0.12708333333333333a68d0 @3.125 &V0,L0,I0,F5/0.11822916666666666a61d0 @3.2432291666666666 &V0,L0,I0,R/0.0067708333333333925 @3.25 &V0,L0,I0,R/0.12708333333333321 @3.375 &V0,L0,I0,R/0.11822916666666661 @3.4932291666666666 &V0,L0,I0,R/0.0067708333333333925 @3.5 &V0,L0,I0,Rh @4.0 &V0,L0,I0,Rq. @4.375 &V0,L0,I0,Ri @4.5 &V0,L0,I0,Rq @4.75 &V0,L0,I0,Rq @5.0 &V0,L0,I0,R/0.12708333333333321 @5.125 &V0,L0,I0,R/0.11822916666666661 @5.243229166666667 &V0,L0,I0,R/0.0067708333333333925 @5.25 &V0,L0,I0,G5/0.12708333333333333a83d0 @5.375 &V0,L0,I0,A5/0.11822916666666666a90d0 @5.493229166666667 &V0,L0,I0,R/0.0067708333333333925 @5.5 &V0,L0,I0,Rq @5.75 &V0,L0,I0,Rq @6.0 &V0,L0,I0,Rq. @6.375 &V0,L0,I0,Ri @6.5 &V0,L0,I0,Rq @6.75 &V0,L0,I0,Rq @7.0 &V0,L0,I0,R/0.12708333333333321 @7.125 &V0,L0,I0,R/0.11822916666666661 @7.243229166666667 &V0,L0,I0,R/0.0067708333333333925 @7.25 &V0,L0,I0,R/0.12708333333333321 @7.375 &V0,L0,I0,A5/0.11822916666666666a87d0 @7.493229166666667 &V0,L0,I0,R/0.0067708333333333925 @7.5 &V0,L0,I0,F5ha66d0 @8.0 &V0,L0,I0,Rw @9.0 &V0,L0,I0,Ri @9.125 &V0,L0,I0,Ri @9.25 &V0,L0,I0,Ri @9.375 &V0,L0,I0,Ri @9.5 &V0,L0,I0,F5ia73d0 @9.625 &V0,L0,I0,F5ia80d0 @9.75 &V0,L0,I0,Rq @10.0 &V0,L0,I0,Ri @10.125 &V0,L0,I0,Ri @10.25 &V0,L0,I0,Rq @10.5 &V0,L0,I0,Rh @11.0 &V0,L0,I0,Ri @11.125 &V0,L0,I0,Ri @11.25 &V0,L0,I0,Rq @11.5 &V0,L0,I0,Ri @11.625 &V0,L0,I0,Ri @11.75 &V0,L0,I0,C5qa91d0 @12.0 &V0,L0,I0,Rq. @12.375 &V0,L0,I0,Ri @12.5 &V0,L0,I0,Rq @12.75 &V0,L0,I0,Rq @13.0 &V0,L0,I0,R/0.12708333333333321 @13.125 &V0,L0,I0,R/0.1182291666666675 @13.243229166666667 &V0,L0,I0,R/0.006770833333332504 @13.25 &V0,L0,I0,R/0.12708333333333321 @13.375 &V0,L0,I0,R/0.1182291666666675 @13.493229166666667 &V0,L0,I0,R/0.006770833333332504 @13.5 &V0,L0,I0,Rq @13.75 &V0,L0,I0,Rq @14.0 &V0,L0,I0,F5q.a114d0 @14.375 &V0,L0,I0,Ri @14.5 &V0,L0,I0,Rq @14.75 &V0,L0,I0,Rq @15.0 &V0,L0,I0,R/0.12708333333333321 @15.125 &V0,L0,I0,R/0.1182291666666675 @15.243229166666667 &V0,L0,I0,R/0.006770833333332504 @15.25 &V0,L0,I0,Ri @15.375 &V0,L0,I0,Ri @15.5 &V0,L0,I0,Rh T120 @0.0 &V1,L0,I0,Rq @0.25 &V1,L0,I0,Rq @0.5 &V1,L0,I0,Rq @0.75 &V1,L0,I0,C5qa112d0 @1.0 &V1,L0,I0,Rq @1.25 &V1,L0,I0,Rq @1.5 &V1,L0,I0,Rq @1.75 &V1,L0,I0,Rq @2.0 &V1,L0,I0,Rq @2.25 &V1,L0,I0,Rq @2.5 &V1,L0,I0,Rq @2.75 &V1,L0,I0,Rq @3.0 &V1,L0,I0,BB4qa98d0 @3.25 &V1,L0,I0,Rq @3.5 &V1,L0,I0,Rq @3.75 &V1,L0,I0,Rq @4.0 &V1,L0,I0,Rq @4.25 &V1,L0,I0,Rq @4.5 &V1,L0,I0,Rq @4.75 &V1,L0,I0,Rq @5.0 &V1,L0,I0,Rq @5.25 &V1,L0,I0,C5qa89d0 @5.5 &V1,L0,I0,Rq @5.75 &V1,L0,I0,Rq @6.0 &V1,L0,I0,Rq @6.25 &V1,L0,I0,Rq @6.5 &V1,L0,I0,Rq @6.75 &V1,L0,I0,Rq @7.0 &V1,L0,I0,Rq @7.25 &V1,L0,I0,Rq @7.5 &V1,L0,I0,F4qa84d0 @7.75 &V1,L0,I0,Rq @8.0 &V1,L0,I0,Ri @8.125 &V1,L0,I0,Ri @8.25 &V1,L0,I0,Ri @8.375 &V1,L0,I0,Ri @8.5 &V1,L0,I0,Ri @8.625 &V1,L0,I0,Ri @8.75 &V1,L0,I0,Rq @9.0 &V1,L0,I0,Rwh @10.5 &V1,L0,I0,Ri @10.625 &V1,L0,I0,Ri @10.75 &V1,L0,I0,Rq @11.0 &V1,L0,I0,Rw @12.0 &V1,L0,I0,Rq @12.25 &V1,L0,I0,Rq @12.5 &V1,L0,I0,Rq @12.75 &V1,L0,I0,Rq @13.0 &V1,L0,I0,Rq @13.25 &V1,L0,I0,Rq @13.5 &V1,L0,I0,Rq @13.75 &V1,L0,I0,Rq @14.0 &V1,L0,I0,F4qa87d0 @14.25 &V1,L0,I0,Rq @14.5 &V1,L0,I0,Rq @14.75 &V1,L0,I0,Rq @15.0 &V1,L0,I0,Rq @15.25 &V1,L0,I0,Rq @15.5 &V1,L0,I0,Rq"
 			};
-						
+			
 			CyclicBarrier b = new CyclicBarrier( pats.length );
 					
 			BackgroundMusic musics[] = new BackgroundMusic[ pats.length ];
@@ -52,51 +52,44 @@ public class testBackgroundMusic {
 				i++;
 			}
 			
-			System.out.println("testBackgroundMusic.main() INIT ");
-			for( BackgroundMusic m : musics )
+			MusicPlayerControl mpc = MusicPlayerControl.getInstance();
+			mpc.setBackgroundMusicPatter( musics[ 0 ] );
+			Map< Integer, BackgroundMusic > pms = new HashMap<Integer, BackgroundMusic>();			
+			for( int j = 1; j < musics.length; j++ )
 			{
-				m.startThread();
+				pms.put( j, musics[ j ] );
 			}
+			mpc.setPlayerMusicSheets( pms );
 			
-			Thread.sleep( 4000L );
+			System.out.println("testMusicPlayerControlChangeTempo.main() INIT ");
+			mpc.startMusic();
 			
-			for( int tempo : new int[] { 300, 100, 300, 100 } )
-			{			
-				System.out.println("testBackgroundMusic.main() CHANGE  " + tempo);
+			Thread.sleep( 4000 );
 			
-				b = new CyclicBarrier( pats.length );
-				i  = 0;
-				for( BackgroundMusic m : musics )
-				{
-					m.setPause( true );				
-				}
-				
-				for( BackgroundMusic m : musics )
-				{
-					long tick = m.getCurrentMusicTickPosition();
-					
-					BackgroundMusic playerbgMusic = new BackgroundMusic();
-					String pat = MusicSheetTools.changeMusicTempo( m.getPattern().toString(), tempo );
-					playerbgMusic.setPattern( new Pattern( pat ) );
-					playerbgMusic.setDelay( 0 );
-					playerbgMusic.setCoordinator( b );
-					playerbgMusic.setMusicTickPosition( tick );
-					musics[ i ] = playerbgMusic;
-					i++;
-					
-					m.stopThread( IStoppableThread.FORCE_STOP );
-				} 
-				
-				for( BackgroundMusic m : musics )
-				{
-					m.startThread();
-				}
-				
-				Thread.sleep( 6000L );
-			}
+			int tempo = 180;
+			System.out.println("testMusicPlayerControlChangeTempo.main() CHANGE  " );			
+			mpc.changeTempo( tempo );
+			mpc.startMusic();
+			//mpc.startMusic();
 			
-			System.out.println("testBackgroundMusic.main() END ");
+			Thread.sleep( 6000 );
 			
+			tempo  = 100;
+			System.out.println("testMusicPlayerControlChangeTempo.main() CHANGE ");			
+			mpc.changeTempo( tempo );
+			mpc.startMusic();
+			
+			Thread.sleep( 6000 );
+			
+			System.out.println("testMusicPlayerControlChangeTempo.main() RESTORE " );
+			mpc.restoreTempo();
+			mpc.startMusic();
+			
+			Thread.sleep( 6000 );
+			
+			System.out.println("testMusicPlayerControlChangeTempo.main() RESTORE "  );
+			mpc.restoreTempo();
+			mpc.startMusic();
 		}
 		catch (Exception e) 
 		{

@@ -86,6 +86,20 @@ public class SceneTools
 		return vel;
 	}
 
+	public static double getAvatarVel( int fretWidth, double reactionTime )
+	{
+		double vel = fretWidth / reactionTime;
+		
+		return vel;
+	}
+	
+	public static double getAvatarReactionTime( int fretWidth, double vel )
+	{
+		double reactionTime = fretWidth / vel;
+		
+		return reactionTime;
+	}
+	
 	public static Set< NumberRange > getMusicSegmentation( MusicSheet music, double timeWhole )
 	{
 		Set< NumberRange > times = new TreeSet< NumberRange >();
@@ -342,14 +356,6 @@ public class SceneTools
 
 			NOTES.clear();
 			NOTES.putAll( copyNotes );
-		}
-	}
-
-	public static void changeLevelSpeed( Level lv, double perc )
-	{
-		if( perc > 0  && lv != null )
-		{
-			
 		}
 	}
 }

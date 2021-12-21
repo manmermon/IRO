@@ -44,6 +44,8 @@ public class BackgroundMusic extends AbstractStoppableThread
 	private boolean mute = false;
 	
 	private int tempo = 120;
+
+	//private ManagedPlayerMod managedPlayerMod;
 	
  	public BackgroundMusic() 
 	{
@@ -56,14 +58,14 @@ public class BackgroundMusic extends AbstractStoppableThread
 		pattern = new Pattern();
 		delay = NON_DELAY;
 		
-		this.listenerList = new EventListenerList();
+		this.listenerList = new EventListenerList();		
 	}
-		
-	public void setPattern(Pattern pattern) throws MidiUnavailableException, InvalidMidiDataException 
+ 	
+	public void setPattern( Pattern pattern ) throws MidiUnavailableException, InvalidMidiDataException 
 	{
 		this.pattern = pattern;
 		this.player.load( pattern );
-		this.tempo = MusicSheetTools.getTempo( pattern.toString() );
+		this.tempo =  MusicSheetTools.getTempo( pattern.toString() ) ;
 	}
 		
 	public Pattern getPattern() 
@@ -98,13 +100,10 @@ public class BackgroundMusic extends AbstractStoppableThread
 	{
 		this.barrier = barrier;
 	}
-	
-	public void setTempo()
+		
+	public int getTempo()
 	{
-		synchronized( this.lock )
-		{
-		//	this.player.te
-		}
+		return this.tempo;
 	}
 	
 	@Override
@@ -146,7 +145,7 @@ public class BackgroundMusic extends AbstractStoppableThread
 			}
 		}
 	}
-
+	
 	/*(non-Javadoc)
 	 * @see @see stoppableThread.AbstractStoppableThread#startUp()
 	 */
@@ -264,7 +263,15 @@ public class BackgroundMusic extends AbstractStoppableThread
 		}
 	}
 	
-	public double getCurrentMusicPosition()
+	public void setMusicTickPosition( long tick )
+	{
+		synchronized ( this.lock )
+		{
+			this.player.getManagedPlayer().seek( tick );
+		}
+	}
+	
+	public double getCurrentMusicSecondPosition()
 	{
 		long microsec  = 0;
 		synchronized ( this.lock )
@@ -278,6 +285,22 @@ public class BackgroundMusic extends AbstractStoppableThread
 		}		
 		
 		return microsec / 1e6D;
+	}
+	
+	public long getCurrentMusicTickPosition()
+	{
+		long tickPos  = 0;
+		synchronized ( this.lock )
+		{
+			try
+			{
+				tickPos = this.player.getManagedPlayer().getTickPosition();
+			}
+			catch (NullPointerException ex)
+			{}
+		}		
+		
+		return tickPos;
 	}
 		
 	@Override
@@ -338,6 +361,11 @@ public class BackgroundMusic extends AbstractStoppableThread
 	public void removeBackgroundMusicEventListener( BackgroundMusicEventListener listener) 
 	{
 		this.listenerList.remove( BackgroundMusicEventListener.class, listener );
+	}
+	
+	public BackgroundMusicEventListener[] getBackgroundMusicEventListeners()
+	{
+		return this.listenerList.getListeners( BackgroundMusicEventListener.class );
 	}
 	
 	private synchronized void fireBackgroundMusicEvent( int typeEvent )

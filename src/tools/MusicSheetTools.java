@@ -252,4 +252,16 @@ public class MusicSheetTools
 	{
 		return (int)( 60D / wholeSec );
 	}
+	
+	public static String changeMusicTempo( String musicPattern, int newTempo )
+	{
+		String pat = "";
+		
+		if( musicPattern != null )
+		{
+			pat = musicPattern.replaceAll( "T[0-9]+", "T" + newTempo );
+		}
+		
+		return pat;
+	}
 }

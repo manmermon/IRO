@@ -22,8 +22,10 @@
 package control.scenes.level;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
 
+import gui.game.component.event.FretEvent;
 import gui.game.component.event.FretEventListener;
 import gui.game.component.sprite.Fret;
 import gui.game.component.sprite.ISprite;
@@ -32,7 +34,11 @@ import gui.game.component.sprite.MusicNoteGroup;
 import gui.game.component.sprite.Score;
 import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
+import tools.MusicSheetTools;
+import tools.SceneTools;
+import config.ConfigApp;
 import config.IOwner;
+import config.Settings;
 import control.events.BackgroundMusicEventListener;
 import control.events.InputActionEvent;
 import control.events.SceneEvent;
@@ -295,6 +301,7 @@ public class LevelControl extends AbstractSceneControl
 	/*(non-Javadoc)
 	 * @see @see GUI.game.component.event.FretEventListener#FretEvent(GUI.game.component.event.FretEvent)
 	 */
+	long t = 0;
 	@Override
 	public void FretEvent(gui.game.component.event.FretEvent ev)
 	{
@@ -302,22 +309,48 @@ public class LevelControl extends AbstractSceneControl
 		
 		if( note != null && !note.isGhost() )
 		{
-			if( ev.getType() == gui.game.component.event.FretEvent.NOTE_EXITED )
+			switch( ev.getType() )
 			{
-				if( !note.isGhost() && !note.isSelected() )
+				case FretEvent.NOTE_EXITED:
 				{
-					int player = note.getOwner().getId();
-					double time = note.getDuration();
+					System.out.println("LevelControl.FretEvent() " + ( System.currentTimeMillis() - t ) / 1e3D );
 					
-					MusicPlayerControl.getInstance().mutePlayerSheet( player, time );
-					
-					this.consecutiveErrors++;
-					
-					if( this.consecutiveErrors > 0 )
+					if( !note.isGhost() )
 					{
-						this.consecutiveErrors = 0;
-						this.changeSceneSpeed( true );
+						if( !note.isSelected() )
+						{
+							int player = note.getOwner().getId();
+							double time = note.getDuration();
+							
+							MusicPlayerControl.getInstance().mutePlayerSheet( player, time );
+							
+							this.consecutiveErrors++;
+							
+							if( this.consecutiveErrors > 2 )
+							{
+								this.consecutiveErrors = 0;
+								this.changeSceneSpeed( false );
+							}
+						}
+						else
+						{
+							consecutiveErrors--;
+							
+							if( this.consecutiveErrors < -2 )
+							{
+								this.consecutiveErrors = 0;
+								this.changeSceneSpeed( true );
+							}
+						}
 					}
+					
+					break;
+				}
+				case FretEvent.NOTE_ENTERED:
+				{
+					t = System.currentTimeMillis();
+					
+					break;
 				}
 			}
 		}
@@ -366,15 +399,52 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	public void changeSceneSpeed( boolean reduce ) 
 	{
+		this.setPauseScene( true );
+		
 		Level lv = (Level)this.scene;
 		
 		double perc = 0.8;
 		
 		if( !reduce )
 		{
-			perc = 1 / perc;
+			perc = 1.2;
 		}
 		
-		//lv.setNoteSpeed( perc );
+		int tempo = MusicPlayerControl.getInstance().getMusicTempo();
+		
+		double tempoTime = MusicSheetTools.getQuarterTempo2Second( tempo );
+		tempoTime *= perc;
+		int newTempo = MusicSheetTools.getQuarterSecond2Tempo( tempoTime );
+		
+		//double newTempoTime = MusicSheetTools.getQuarterTempo2Second( newTempo );
+		
+		List< Settings > players = lv.getPlayers();		
+		if( players != null )
+		{
+			Map< Integer, Double > velsByPlayer = lv.getSpeedForPlayers();
+			for( Settings pl : players )
+			{	
+				Double vel = velsByPlayer.get( pl.getPlayer().getId() );
+				if( vel != null )
+				{
+					double reactionTime = SceneTools.getAvatarReactionTime(  lv.getFret().getFretWidth(), vel );
+					double prop = (double)tempo / newTempo ;
+					reactionTime *= prop;
+					double newVel = SceneTools.getAvatarVel( lv.getFret().getFretWidth(), reactionTime );
+					lv.changeSpeed( newVel, pl.getPlayer()  );
+				}
+			}
+		}
+		
+		MusicPlayerControl.getInstance().changeTempo( newTempo );
+		super.setPauseScene( false );
+		try 
+		{
+			MusicPlayerControl.getInstance().startMusic();
+		}
+		catch (Exception e) 
+		{
+			e.printStackTrace();
+		}		
 	}
 }

@@ -3,13 +3,18 @@ package control.music;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.jfugue.pattern.Pattern;
 
 import gui.game.screen.level.music.BackgroundMusic;
 import control.events.BackgroundMusicEventListener;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
+import tools.MusicSheetTools;
 
 public class MusicPlayerControl extends AbstractStoppableThread 
 {	
@@ -30,6 +35,8 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	private Object sync = new Object();
 	
 	private boolean isMuteSession = false;
+	
+	private Stack< Integer > tempoStack = new Stack<Integer>();
 	
 	private MusicPlayerControl( )
 	{	
@@ -176,7 +183,6 @@ public class MusicPlayerControl extends AbstractStoppableThread
 				
 				this.pauseTime = null;
 			}
-				
 			
 			if( this.backgroundMusic != null )
 			{
@@ -213,7 +219,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 		
 		if( this.backgroundMusic != null )
 		{
-			t = this.backgroundMusic.getCurrentMusicPosition();
+			t = this.backgroundMusic.getCurrentMusicSecondPosition();
 		}
 		
 		return t;
@@ -309,5 +315,122 @@ public class MusicPlayerControl extends AbstractStoppableThread
 				super.notify();
 			}
 		}
+	}
+	
+	public void changeTempo( int newTempo )
+	{
+		synchronized( this.sync )
+		{
+			if( this.isPlay() ) 
+			{
+				this.setPauseMusic( true );
+				
+				int tempo = this.backgroundMusic.getTempo();
+				
+				this.tempoStack.add( tempo );
+				System.out.println("MusicPlayerControl.changeTempo() new tempo = " + newTempo );
+			
+				try
+				{
+					long tickPos = this.backgroundMusic.getCurrentMusicTickPosition();
+					String pat = this.backgroundMusic.getPattern().toString();
+					
+								
+					BackgroundMusicEventListener[] listerns = this.backgroundMusic.getBackgroundMusicEventListeners();				
+					for( BackgroundMusicEventListener bml : listerns )
+					{
+						this.backgroundMusic.removeBackgroundMusicEventListener( bml );
+					}				
+					this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
+					
+					BackgroundMusic bgMusic = new BackgroundMusic();
+					this.backgroundMusic = bgMusic;
+					
+					for( BackgroundMusicEventListener bml : listerns )
+					{
+						bgMusic.addBackgroundMusicEventListener( bml );
+					}	
+										
+					pat = MusicSheetTools.changeMusicTempo( pat, newTempo );					
+					bgMusic.setPattern( new Pattern( pat ) );
+					bgMusic.setMusicTickPosition( tickPos );
+					
+					CyclicBarrier b = new CyclicBarrier( 1 + this.playerMusicSheets.size() );
+					
+					bgMusic.setCoordinator( b );
+					
+					for( Integer id : this.playerMusicSheets.keySet() )
+					{
+						BackgroundMusic pms = this.playerMusicSheets.get( id );
+						pat = pms.getPattern().toString();
+						tickPos = pms.getCurrentMusicTickPosition();
+						
+						BackgroundMusic bgm = new BackgroundMusic();
+						listerns = pms.getBackgroundMusicEventListeners();				
+						for( BackgroundMusicEventListener bml : listerns )
+						{
+							pms.removeBackgroundMusicEventListener( bml );
+						}				
+						pms.stopThread( IStoppableThread.FORCE_STOP );
+						
+						for( BackgroundMusicEventListener bml : listerns )
+						{
+							bgm.addBackgroundMusicEventListener( bml );
+						}											
+						pat = MusicSheetTools.changeMusicTempo( pat, newTempo );				
+						bgm.setPattern( new Pattern( pat ) );
+						bgm.setMusicTickPosition( tickPos );						
+						bgm.setCoordinator( b );
+						
+						this.playerMusicSheets.put( id, bgm );
+					}
+					
+				}
+				catch( Exception e )
+				{
+					e.printStackTrace();
+				}
+				
+				//this.setPauseMusic( false );
+			}
+		}
+		
+		/*
+		if( this.isPlay() )
+		{
+			try 
+			{
+				this.startMusic();
+			}
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}
+		}
+		*/
+	}
+	
+	public void restoreTempo()
+	{
+		if( !this.tempoStack.isEmpty() )
+		{
+			this.changeTempo( this.tempoStack.pop() );
+			//this.tempoStack.pop();
+		}
+	}
+	
+	public int getMusicTempo()
+	{
+		int tempo = 120;
+		
+		synchronized ( this.sync )
+		{
+			if( this.backgroundMusic != null )
+			{
+				tempo = this.backgroundMusic.getTempo();
+			}
+		}
+		
+		return tempo;
 	}
 }

@@ -53,7 +53,7 @@ public class LevelMusicBuilder
 	public static Level getLevel( File midiMusicSheelFile
 									//, Rectangle screenBounds
 									, Dimension screenSize
-									, List< Settings > playerTimes ) throws InvalidMidiDataException, IOException
+									, List< Settings > playerSettings ) throws InvalidMidiDataException, IOException
 	{			
 		IROMusicParserListener tool = new IROMusicParserListener();
 		MidiParser parser = new MidiParser();
@@ -63,7 +63,7 @@ public class LevelMusicBuilder
 		MusicSheet music = tool.getSheet();
 
 		//return makeLevel( music, screenBounds, playerTimes );
-		return makeLevel( music, screenSize, playerTimes );
+		return makeLevel( music, screenSize, playerSettings );
 	}
 
 
@@ -540,6 +540,7 @@ public class LevelMusicBuilder
 				}
 				
 				lv.setPlayerSheetMusic( playerBgMusicSheets );
+				lv.setPlayers( playerSettings );
 			}
 
 			/*
