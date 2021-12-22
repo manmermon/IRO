@@ -344,7 +344,8 @@ public class MusicPlayerControl extends AbstractStoppableThread
 					
 					BackgroundMusic bgMusic = new BackgroundMusic();
 					int delay = this.backgroundMusic.getRemainingDelay();
-					bgMusic.setDelay( delay / 1000D );
+					double prop = (double)tempo / newTempo;
+					bgMusic.setDelay( prop*delay / 1000D );
 										
 					this.backgroundMusic = bgMusic;
 					

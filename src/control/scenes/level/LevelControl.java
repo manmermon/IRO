@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import gui.game.component.event.FretEvent;
 import gui.game.component.event.FretEventListener;
@@ -441,7 +440,7 @@ public class LevelControl extends AbstractSceneControl
 				if( vel != null )
 				{
 					double reactionTime = SceneTools.getAvatarReactionTime(  lv.getFret().getFretWidth(), vel );
-					double prop = (double)tempo / newTempo ;
+					double prop = (double)tempo / newTempo;
 					reactionTime *= prop;
 					double newVel = SceneTools.getAvatarSpeed( lv.getFret().getFretWidth(), reactionTime );
 					
