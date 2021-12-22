@@ -86,7 +86,7 @@ public class SceneTools
 		return vel;
 	}
 
-	public static double getAvatarVel( int fretWidth, double reactionTime )
+	public static double getAvatarSpeed( int fretWidth, double reactionTime )
 	{
 		double vel = fretWidth / reactionTime;
 		

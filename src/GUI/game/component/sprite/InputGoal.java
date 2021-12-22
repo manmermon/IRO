@@ -151,6 +151,11 @@ public class InputGoal extends AbstractSprite implements IPossessable
 		return sprite;
 	}
 	
+	public boolean wasTheGoalAchieved()
+	{
+		return this.isSetStartTime;
+	}
+	
 	public void setPercentage( double percentageTime, int rep )
 	{
 		synchronized ( this.percentageTime )

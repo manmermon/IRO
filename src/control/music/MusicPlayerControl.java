@@ -334,7 +334,6 @@ public class MusicPlayerControl extends AbstractStoppableThread
 				{
 					long tickPos = this.backgroundMusic.getCurrentMusicTickPosition();
 					String pat = this.backgroundMusic.getPattern().toString();
-					
 								
 					BackgroundMusicEventListener[] listerns = this.backgroundMusic.getBackgroundMusicEventListeners();				
 					for( BackgroundMusicEventListener bml : listerns )
@@ -344,6 +343,9 @@ public class MusicPlayerControl extends AbstractStoppableThread
 					this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
 					
 					BackgroundMusic bgMusic = new BackgroundMusic();
+					int delay = this.backgroundMusic.getRemainingDelay();
+					bgMusic.setDelay( delay / 1000D );
+										
 					this.backgroundMusic = bgMusic;
 					
 					for( BackgroundMusicEventListener bml : listerns )

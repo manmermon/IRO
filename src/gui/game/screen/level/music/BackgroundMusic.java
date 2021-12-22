@@ -86,7 +86,7 @@ public class BackgroundMusic extends AbstractStoppableThread
 		return this.mute;
 	}
 	
-	public void setDelay(double delay) 
+	public void setDelay( double delay ) 
 	{
 		this.delay = delay;
 	}
@@ -95,7 +95,19 @@ public class BackgroundMusic extends AbstractStoppableThread
 	{
 		return delay;
 	}
-
+	
+	public int getRemainingDelay()
+	{
+		int t = 0;
+		
+		if( this.delayTimer != null )
+		{
+			t = this.delayTimer.getRemainingTime();
+		}
+		
+		return t;
+	}
+	
 	public void setCoordinator( CyclicBarrier barrier )
 	{
 		this.barrier = barrier;
@@ -482,8 +494,6 @@ public class BackgroundMusic extends AbstractStoppableThread
 			return  pause;
 		}		
 	}
-	
-	
 	
 	//////////////////////////
 	//

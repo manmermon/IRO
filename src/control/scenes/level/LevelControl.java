@@ -21,9 +21,11 @@
 
 package control.scenes.level;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import gui.game.component.event.FretEvent;
 import gui.game.component.event.FretEventListener;
@@ -36,7 +38,6 @@ import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import tools.MusicSheetTools;
 import tools.SceneTools;
-import config.ConfigApp;
 import config.IOwner;
 import config.Settings;
 import control.events.BackgroundMusicEventListener;
@@ -57,6 +58,8 @@ public class LevelControl extends AbstractSceneControl
 	private boolean noteIntoFret = false;
 	
 	private int consecutiveErrors = 0;
+	
+	private Map< Integer, Boolean > playerAchievedTarget = new HashMap<Integer, Boolean>();
 	
 	/**
 	 * @throws SceneException 
@@ -317,16 +320,21 @@ public class LevelControl extends AbstractSceneControl
 					
 					if( !note.isGhost() )
 					{
-						if( !note.isSelected() )
-						{
-							int player = note.getOwner().getId();
+						int playerID = note.getOwner().getId();
+						Boolean target = this.playerAchievedTarget.get( playerID );
+						this.playerAchievedTarget.put( playerID, false );
+												
+						target = ( target == null ) ? false : target;
+						
+						if( !target )
+						{					
 							double time = note.getDuration();
 							
-							MusicPlayerControl.getInstance().mutePlayerSheet( player, time );
+							MusicPlayerControl.getInstance().mutePlayerSheet( playerID, time );
 							
 							this.consecutiveErrors++;
 							
-							if( this.consecutiveErrors > 2 )
+							if( this.consecutiveErrors > 2  )
 							{
 								this.consecutiveErrors = 0;
 								this.changeSceneSpeed( false );
@@ -355,7 +363,7 @@ public class LevelControl extends AbstractSceneControl
 			}
 		}
 	}
-
+	
 	public void updateInputGoal( double percentageTime, int rep, IOwner owner )
 	{
 		if( this.scene != null && owner != null )
@@ -370,6 +378,11 @@ public class LevelControl extends AbstractSceneControl
 				if( gOwner.getId() == owner.getId() )
 				{
 					goal.setPercentage( percentageTime, rep );
+					
+					if( goal.wasTheGoalAchieved() )
+					{
+						this.playerAchievedTarget.put( owner.getId(), true );
+					}
 					
 					break;
 				}
@@ -430,7 +443,8 @@ public class LevelControl extends AbstractSceneControl
 					double reactionTime = SceneTools.getAvatarReactionTime(  lv.getFret().getFretWidth(), vel );
 					double prop = (double)tempo / newTempo ;
 					reactionTime *= prop;
-					double newVel = SceneTools.getAvatarVel( lv.getFret().getFretWidth(), reactionTime );
+					double newVel = SceneTools.getAvatarSpeed( lv.getFret().getFretWidth(), reactionTime );
+					
 					lv.changeSpeed( newVel, pl.getPlayer()  );
 				}
 			}
