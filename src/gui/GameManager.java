@@ -41,6 +41,8 @@ import gui.game.GameWindow;
 import gui.game.screen.level.Level;
 import gui.game.screen.level.build.LevelMusicBuilder;
 import gui.game.screen.menu.MenuGameResults;
+import lslStream.LSL;
+import lslStream.LSLStreamInfo;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.Player;
@@ -49,7 +51,6 @@ import control.ScreenControl;
 import control.controller.ControllerActionChecker;
 import control.controller.ControllerManager;
 import control.controller.IControllerMetadata;
-import edu.ucsd.sccn.LSL;
 import exceptions.ConfigParameterException;
 import general.NumberRange;
 import general.Tuple;
@@ -204,6 +205,7 @@ public class GameManager
 			
 			Settings setting = ConfigApp.getPlayerSetting( player );
 			ConfigParameter par = setting.getParameter( ConfigApp.SELECTED_CONTROLLER );
+			
 			Object ctr = par.getSelectedValue();
 
 			if( ctr != null )
@@ -221,14 +223,14 @@ public class GameManager
 			}
 		}
 
-		LSL.StreamInfo[] streams = LSL.resolve_streams();
-		LSL.StreamInfo[] lslInfos = new LSL.StreamInfo[ controllers.length ];
+		LSLStreamInfo[] streams = LSL.resolve_streams();
+		LSLStreamInfo[] lslInfos = new LSLStreamInfo[ controllers.length ];
 		for( int i = 0; i < controllers.length; i++ )
 		{			
 			IControllerMetadata meta = controllers[ i ];
 			
 			checkLSLInfo:
-			for( LSL.StreamInfo str : streams )
+			for( LSLStreamInfo str : streams )
 			{
 				if( str.uid().equals( meta.getControllerID() ) )
 				{
@@ -240,7 +242,7 @@ public class GameManager
 
 		for( int i = 0; i < lslInfos.length; i++ )
 		{
-			LSL.StreamInfo info = lslInfos[ i ];
+			LSLStreamInfo info = lslInfos[ i ];
 			
 			if( info == null )
 			{
@@ -309,9 +311,10 @@ public class GameManager
 				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
 																				, rng, cmeta.getTargetTimeInLevelAction( )
 																				, cmeta.getRepetitions() );
-				actCheck.setOwner( cmeta.getPlayer() );
+				actCheck.setOwner( cmeta.getPlayer() );				
 				ControllerManager.getInstance().addControllerListener( cmeta.getPlayer(), actCheck );
 				actCheck.addInputActionListerner( ScreenControl.getInstance() );
+				actCheck.startThread();
 			}
 						
 			this.gameWindow.putControllerListener();

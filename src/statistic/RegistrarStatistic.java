@@ -15,6 +15,7 @@ import control.controller.IControllerMetadata;
 import general.ArrayTreeMap;
 import general.ConvertTo;
 import general.Tuple;
+import lslStream.LSLStreamInfo;
 
 /**
  * @author manuel
@@ -87,6 +88,10 @@ public class RegistrarStatistic
 	
 	private static Map< Integer, LinkedList< Double[] > > controllerData = new HashMap< Integer, LinkedList< Double[] > >();
 	
+	private static Map< Integer, LSLStreamInfo > bioLSLSettings = new HashMap< Integer, LSLStreamInfo >();
+	
+	private static Map< String, LinkedList< Double[] > > biosignalData = new HashMap< String, LinkedList< Double[] > >( );
+	
 	/**
 	 * 
 	 */
@@ -127,6 +132,27 @@ public class RegistrarStatistic
 		}
 	}
 	
+	public static synchronized void addBiosignalStreamSetting( int playerID, LSLStreamInfo info)
+	{
+		if( info != null )
+		{
+			bioLSLSettings.put(  playerID, info );
+			String id = getBioLSLDataID( playerID, info.content_type() );
+			if( biosignalData.get( id ) == null )
+			{
+				LinkedList< Double[] > cd = new LinkedList<Double[]>();
+				biosignalData.put( id, cd );
+			}
+		}
+	}
+	
+	private static String getBioLSLDataID( int playerID, String type )
+	{
+		String id = playerID + type;
+		
+		return id;
+	}
+	
 	public static synchronized void addControllerData( int playerID, double[] ctrData )
 	{
 		if( ctrData != null && ctrData.length > 0 )
@@ -139,6 +165,23 @@ public class RegistrarStatistic
 			
 			cd.add( ConvertTo.doubleArray2DoubleArray( ctrData ) );
 			controllerData.put( playerID, cd );				
+		}
+	}
+	
+	public static synchronized void addBiosignalData( int playerID, String bioType, double[] ctrData )
+	{
+		if( ctrData != null && ctrData.length > 0 )
+		{
+			String id = getBioLSLDataID( playerID, bioType );
+			
+			LinkedList< Double[] > cd = biosignalData.get( id );
+			if( cd == null )
+			{
+				cd = new LinkedList<Double[]>();				
+			}
+			
+			cd.add( ConvertTo.doubleArray2DoubleArray( ctrData ) );
+			biosignalData.put( id, cd );				
 		}
 	}
 	

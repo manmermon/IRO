@@ -103,7 +103,7 @@ public class ControllerInputValuePanel extends JPanel implements IInputControlle
 	 * @see @see control.events.IInputControllerListener#InputControllerEvent(control.events.InputControllerEvent)
 	 */
 	@Override
-	public void InputControllerEvent(control.events.InputControllerEvent ev)
+	public void InputLSLDataEvent(lslStream.event.InputLSLDataEvent ev) 
 	{
 		double[] data = ev.getInputValues();
 		

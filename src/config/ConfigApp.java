@@ -113,11 +113,12 @@ public class ConfigApp
 	
 	//***********
 	//
-	// PATHS 
+	//  
 	//
 	//***********
 	
 	public static final String SELECTED_CONTROLLER = "SELECTED_CONTROLLER";
+	public static final String SELECTED_BIOSIGNAL = "SELECTED_BIOSIGNAL";
 	
 	public static final String LANGUAGE = "LANGUAGE";
 	
@@ -373,6 +374,9 @@ public class ConfigApp
 		par = loadDefaultSelectedController();
 		cfg.setParameter( par.get_ID().getID(), par );
 		
+		par = loadDefaultSelectedBiosignal();
+		cfg.setParameter( par.get_ID().getID(), par );
+		
 		par = loadDefaultBackgroundImage();
 		cfg.setParameter( par.get_ID().getID(), par );
 		
@@ -455,6 +459,16 @@ public class ConfigApp
 		Caption id = getCaptions( Language.CONTROLLER );
 		id.setID( SELECTED_CONTROLLER );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
+		par.setPriority(  Integer.MAX_VALUE );
+
+		return par; 
+	}
+	
+	private static ConfigParameter loadDefaultSelectedBiosignal() throws ConfigParameterException
+	{
+		Caption id = getCaptions( Language.BIOSIGNAL );
+		id.setID( SELECTED_BIOSIGNAL );
+		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.STRING );
 		par.setPriority(  Integer.MAX_VALUE );
 
 		return par; 
@@ -1064,7 +1078,7 @@ public class ConfigApp
 				Object val = par.getSelectedValue();
 				if( val != null )
 				{
-					value = val.toString();
+					value = val.toString();					
 				}
 		
 				if( par.get_type() == ConfigParameter.ParameterType.COLOR )

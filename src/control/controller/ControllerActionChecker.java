@@ -5,17 +5,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.event.EventListenerList;
 
 import gui.game.component.IPossessable;
+import lslStream.event.InputLSLDataReader;
 import config.IOwner;
 import control.ScreenControl;
 import control.events.IInputControllerListener;
 import control.events.InputActionEvent;
 import control.events.InputActionListerner;
-import control.events.InputControllerEvent;
 import general.NumberRange;
 import statistic.RegistrarStatistic;
 import statistic.RegistrarStatistic.FieldType;
 
-public class ControllerActionChecker implements IInputControllerListener, IPossessable 
+public class ControllerActionChecker extends InputLSLDataReader implements IInputControllerListener, IPossessable 
 {	
 	public int selectedChannel = 0;
 	
@@ -46,8 +46,6 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 	
  	public ControllerActionChecker( int selChannel, NumberRange inputThreshold, double time, int rep ) 
 	{
-		//super.setName( this.getClass().getSimpleName() );
-		
 		if( inputThreshold == null )
 		{
 			throw new IllegalArgumentException( "Input range null." );
@@ -62,46 +60,73 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 		this.targetTime = time;
 		
 		this.repetitions = rep;
+		
+		this.setThreadName();
 	}	
 	
- 	/*
-	public void enableProcessInputControllerEvent( boolean ena )
+ 	private void setThreadName()
+ 	{
+ 		super.setName( this.getClass().getSimpleName() + "-" + this.ownerID );
+ 	}
+ 	
+	public synchronized void addInputActionListerner( InputActionListerner listener ) 
 	{
-		if( this.enable != ena )
-		{	
-			synchronized ( this.sync )
-			{
-				this.refTime = null;
-				
-				this.archievedTarget.set( false );
-				
-				this.recoverLevelReach.set( false );
-				
-				GameStatistic.add( FieldType.CONTROLLER_WAIT_RECORVER_LEVEL );
-				
-				if( !ena )
-				{
-					Thread t = new Thread()
-					{
-						public void run() 
-						{
-							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( 0 )");
-							ScreenControl.getInstance().setUpdateLevelInputGoal( 0 );
-						};
-					};
-					
-					t.start();
-						
-				}
-							
-				this.enable = ena;
-			}
+		this.listeners.add( InputActionListerner.class, listener );
+	}
+
+	public synchronized void removeInputActionListerner( InputActionListerner listener ) 
+	{
+		this.listeners.remove( InputActionListerner.class, listener );		
+	}
+	
+	/**
+	 * 
+	 * @param typeEvent
+	 */
+	private synchronized void fireActionEvent( int typeEvent )
+	{
+		InputActionEvent event = new InputActionEvent( this, typeEvent, this.owner );
+
+		InputActionListerner[] listeners = this.listeners.getListeners( InputActionListerner.class );
+
+		for (int i = 0; i < listeners.length; i++ ) 
+		{
+			listeners[ i ].InputAction( event );
 		}
 	}
-	*/
-	
+
+	/*(non-Javadoc)
+	 * @see @see GUI.game.component.IPossessable#setOwner(config.IOwner)
+	 */
 	@Override
-	public void InputControllerEvent( InputControllerEvent ev )
+	public void setOwner(IOwner owner)
+	{
+		this.owner = owner;
+		if( owner != null )
+		{
+			this.ownerID = this.owner.getId();
+		}
+		
+		this.setThreadName();
+	}
+
+	/*(non-Javadoc)
+	 * @see @see GUI.game.component.IPossessable#getOwner()
+	 */
+	@Override
+	public IOwner getOwner()
+	{
+		return this.owner;
+	}
+
+	@Override
+	public void setEnableInputController(boolean enable)
+	{
+		this.enableCheck = enable;
+	}
+
+	@Override
+	protected void readInputData( lslStream.event.InputLSLDataEvent ev ) 
 	{
 		double[] values = ev.getInputValues();
 		double time = ev.getTime();
@@ -256,58 +281,14 @@ public class ControllerActionChecker implements IInputControllerListener, IPosse
 			}
 		}
 	}
-	
-	public synchronized void addInputActionListerner( InputActionListerner listener ) 
-	{
-		this.listeners.add( InputActionListerner.class, listener );
-	}
 
-	public synchronized void removeInputActionListerner( InputActionListerner listener ) 
-	{
-		this.listeners.remove( InputActionListerner.class, listener );		
-	}
-	
-	/**
-	 * 
-	 * @param typeEvent
-	 */
-	private synchronized void fireActionEvent( int typeEvent )
-	{
-		InputActionEvent event = new InputActionEvent( this, typeEvent, this.owner );
-
-		InputActionListerner[] listeners = this.listeners.getListeners( InputActionListerner.class );
-
-		for (int i = 0; i < listeners.length; i++ ) 
-		{
-			listeners[ i ].InputAction( event );
-		}
-	}
-
-	/*(non-Javadoc)
-	 * @see @see GUI.game.component.IPossessable#setOwner(config.IOwner)
-	 */
 	@Override
-	public void setOwner(IOwner owner)
-	{
-		this.owner = owner;
-		if( owner != null )
-		{
-			this.ownerID = this.owner.getId();
-		}
-	}
-
-	/*(non-Javadoc)
-	 * @see @see GUI.game.component.IPossessable#getOwner()
-	 */
-	@Override
-	public IOwner getOwner()
-	{
-		return this.owner;
+	protected void preStopThread(int friendliness) throws Exception 
+	{	
 	}
 
 	@Override
-	public void setEnableInputController(boolean enable)
-	{
-		this.enableCheck = enable;
+	protected void postStopThread(int friendliness) throws Exception 
+	{	
 	}
 }

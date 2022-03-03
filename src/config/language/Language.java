@@ -106,6 +106,7 @@ public class Language
 	public static final String UPDATE = "UPDATE";
 	
 	public static final String CONTROLLER = "CONTROLLER";
+	public static final String BIOSIGNAL = "BIOSIGNAL";
 	
 	public static final String CHANNEL = "CHANNEL";
 	public static final String CHANNELS = "CHANNELS";
@@ -381,6 +382,10 @@ public class Language
 		cap = new Caption( CONTROLLER, defaultLanguage, "Controller" );
 		cap.setCaption( esEs, "Control" );
 		captions.put( CONTROLLER, cap );
+		
+		cap = new Caption( BIOSIGNAL, defaultLanguage, "Biosignal" );
+		cap.setCaption( esEs, "biose\u00f1al" );
+		captions.put( BIOSIGNAL, cap );
 		
 		cap = new Caption( CHANNEL, defaultLanguage, "Channel" );
 		cap.setCaption( esEs, "Canal" );

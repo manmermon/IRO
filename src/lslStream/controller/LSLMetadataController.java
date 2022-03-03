@@ -1,22 +1,22 @@
 /**
  * 
  */
-package control.controller.lslStreams;
+package lslStream.controller;
 
 import control.controller.ControllerMetadataAdapter;
-import edu.ucsd.sccn.LSL;
+import lslStream.LSLStreamInfo;
 
 /**
  * @author manuel
  *
  */
-public class LSLStreamMetadata extends ControllerMetadataAdapter
+public class LSLMetadataController extends ControllerMetadataAdapter
 {	
-	private LSL.StreamInfo info = null; 
+	private LSLStreamInfo info = null; 
 	/**
 	 * 
 	 */
-	public LSLStreamMetadata( LSL.StreamInfo strInfo ) throws IllegalArgumentException
+	public LSLMetadataController( LSLStreamInfo strInfo ) throws IllegalArgumentException
 	{
 		if( strInfo == null )
 		{
@@ -29,9 +29,9 @@ public class LSLStreamMetadata extends ControllerMetadataAdapter
 		
 		super.id = strInfo.uid();
 		super.numberOfChannels = strInfo.channel_count();
-		super.info = strInfo.as_xml();
+		super.info = strInfo.description();
 		super.name = strInfo.name();
-		super.samplingRate = strInfo.nominal_srate();
+		super.samplingRate = strInfo.sampling_rate();
 	}
 
 	

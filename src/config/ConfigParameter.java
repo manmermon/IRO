@@ -175,7 +175,8 @@ public class ConfigParameter
 	
 	public void removeAllOptions()
 	{
-		this._selectedValue = null;
+		this.removeSelectedValue();
+		
 		this._options.clear();
 	}
 	
@@ -188,13 +189,7 @@ public class ConfigParameter
 	{
 		return this._player;
 	}
-	
-	public void clearOptions()
-	{
-		this._selectedValue = null;
-		this._options.clear();		 
-	}
-	
+		
 	public void setSelectedValue( Object val ) throws ConfigParameterException
 	{
 		String errMsg = this.checkValue( val );

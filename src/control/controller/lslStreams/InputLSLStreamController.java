@@ -22,11 +22,13 @@
 
 package control.controller.lslStreams;
 
-import edu.ucsd.sccn.LSL;
-import edu.ucsd.sccn.LSL.StreamInlet;
 import exceptions.UnsupportedDataTypeException;
 import general.ConvertTo;
-import general.Pair;
+import lslStream.LSL;
+import lslStream.LSL.StreamInlet;
+import lslStream.LSLStreamInfo.StreamDataType;
+import lslStream.LSLStreamInfo;
+import lslStream.controller.LSLMetadataController;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 
@@ -54,7 +56,7 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 	private float[] floatData;
 	private double[] doubleData;
 	
-	private int LSLFormatData = LSL.ChannelFormat.float32;
+	private StreamDataType LSLFormatData = StreamDataType.float32;
 		
 	private double blockTimer = 0;
 		
@@ -64,7 +66,7 @@ public class InputLSLStreamController extends AbstractStoppableThread implements
 	
 	private double dataTime;
 	
-	public InputLSLStreamController( LSLStreamMetadata meta ) throws Exception
+	public InputLSLStreamController( LSLMetadataController meta ) throws Exception
 	{
 		if ( meta == null || meta.getControllerSetting() == null )
 		{

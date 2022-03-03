@@ -332,6 +332,8 @@ public class LevelControl extends AbstractSceneControl
 							MusicPlayerControl.getInstance().mutePlayerSheet( playerID, time );
 							
 							this.consecutiveErrors++;
+														
+							System.out.println("LevelControl.FretEvent() A " + consecutiveErrors );
 							
 							if( this.consecutiveErrors > 2  )
 							{

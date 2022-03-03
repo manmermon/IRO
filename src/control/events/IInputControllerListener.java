@@ -3,17 +3,13 @@
  */
 package control.events;
 
-import java.util.EventListener;
+import lslStream.event.IInputLSLDataListener;
 
 /**
  * @author manuel
  *
  */
-public interface IInputControllerListener extends EventListener 
+public interface IInputControllerListener extends IInputLSLDataListener
 {
-	public void InputControllerEvent( InputControllerEvent  ev );
-	
 	public void setEnableInputController( boolean enable );
-	
-	//public void enableProcessInputControllerEvent( boolean enable );
 }

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -46,9 +47,12 @@ import config.language.Language;
 import config.language.TranslateComponents;
 import control.controller.ControllerManager;
 import control.controller.IControllerMetadata;
-import control.controller.lslStreams.LSLStreamMetadata;
-import edu.ucsd.sccn.LSL;
 import image.icon.GeneralAppIcon;
+import lslStream.LSL;
+import lslStream.LSLStreamInfo;
+import lslStream.LSLStreamInfo.StreamType;
+import lslStream.LSLUtils;
+import lslStream.controller.LSLMetadataController;
 
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -72,12 +76,16 @@ public class InputDevicePanel extends JPanel
 	private JSplitPane splitInputPane;
 	private JPanel panelInputDeviceList;
 	private JPanel panelInputValues;
+	private JPanel panelControllerBiosignal;
+	private JPanel panelInputBiosignalList;
 
-	private JTable inputDeviceTable;
+	private JTable inputControllerTable;
+	private JTable inputBiosignalTable;
 	
 	private ControllerInputValuePanel inputValues = null;
 	
-	private LSL.StreamInfo[] lslStreamInfo = null;
+	private LSLStreamInfo[] lslControlStreamInfo = null;
+	private LSLStreamInfo[] lslBioStreamInfo = null;
 		
 	private static InputDevicePanel setInDevPanel = null;
 	
@@ -100,7 +108,7 @@ public class InputDevicePanel extends JPanel
 	private InputDevicePanel( )
 	{			
 		this.setLayout(new BorderLayout());		
-		this.add(this.getInputControlPanel(), BorderLayout.NORTH);
+		this.add( this.getInputControlPanel(), BorderLayout.NORTH );
 		this.add( this.getInputDevicePanel(), BorderLayout.CENTER );
 		
 		this.updateInputs();
@@ -164,7 +172,7 @@ public class InputDevicePanel extends JPanel
 	{
 		if( this.inputDevicePanel == null )
 		{
-			this.inputDevicePanel = new JPanel( new BorderLayout());
+			this.inputDevicePanel = new JPanel( new BorderLayout());			
 			this.inputDevicePanel.add( this.getSplitInputPane(), BorderLayout.CENTER );	
 		}
 		
@@ -179,14 +187,48 @@ public class InputDevicePanel extends JPanel
 			splitInputPane.setOrientation(JSplitPane.VERTICAL_SPLIT);
 			
 			splitInputPane.setResizeWeight( 0.25 );
-			
-			splitInputPane.setLeftComponent( new JScrollPane( this.getPanelInputDeviceList() ) );
+						
+			splitInputPane.setLeftComponent( this.getControllerBiosignalPanel() );
 			splitInputPane.setRightComponent( new JScrollPane( this.getPanelInputValues() ) );
 		}
 		return splitInputPane;
 	}
 	
-	private JPanel getPanelInputDeviceList() 
+	private JPanel getControllerBiosignalPanel()
+	{
+		if( this.panelControllerBiosignal == null )
+		{
+			this.panelControllerBiosignal = new JPanel();
+			BoxLayout ly = new BoxLayout( this.panelControllerBiosignal, BoxLayout.X_AXIS );
+			this.panelControllerBiosignal.setLayout( ly );
+			
+			this.panelControllerBiosignal.add( new JScrollPane( this.getPanelInputControllerDeviceList() ) );
+			this.panelControllerBiosignal.add( new JScrollPane( this.getPanelInputBiosignalDeviceList() ) );
+		}
+		
+		return this.panelControllerBiosignal;
+	}
+	
+	private JPanel getPanelInputBiosignalDeviceList() 
+	{
+		if ( panelInputBiosignalList == null) 
+		{
+			panelInputBiosignalList = new JPanel();
+			
+			Caption caption = Language.getAllCaptions().get( Language.BIOSIGNAL );
+			panelInputBiosignalList.setBorder( BorderFactory.createTitledBorder( caption.getCaption( Language.getCurrentLanguage() ) ) );
+			
+			TranslateComponents.add( panelInputBiosignalList, caption );
+			
+			panelInputBiosignalList.setLayout( new BorderLayout() );
+			panelInputBiosignalList.add( this.getInputBiosignalTable().getTableHeader(), BorderLayout.NORTH );
+			panelInputBiosignalList.add( this.getInputBiosignalTable(), BorderLayout.CENTER );
+		}
+		
+		return panelInputBiosignalList;
+	}
+	
+	private JPanel getPanelInputControllerDeviceList() 
 	{
 		if (panelInputDeviceList == null) 
 		{
@@ -198,8 +240,8 @@ public class InputDevicePanel extends JPanel
 			TranslateComponents.add( panelInputDeviceList, caption );
 			
 			panelInputDeviceList.setLayout( new BorderLayout() );
-			panelInputDeviceList.add( this.getInputDeviceTable().getTableHeader(), BorderLayout.NORTH );
-			panelInputDeviceList.add( this.getInputDeviceTable(), BorderLayout.CENTER );
+			panelInputDeviceList.add( this.getInputControllerTable().getTableHeader(), BorderLayout.NORTH );
+			panelInputDeviceList.add( this.getInputControllerTable(), BorderLayout.CENTER );
 		}
 		return panelInputDeviceList;
 	}
@@ -227,51 +269,64 @@ public class InputDevicePanel extends JPanel
 	}
 	
 	public void updatePlayers()
+	{	
+		this.updatePlayerAux( this.getInputControllerTable() );
+		this.updatePlayerAux( this.getInputBiosignalTable() );
+	}
+	
+	private void updatePlayerAux( JTable t )
 	{
-		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
-		
-		JTable t = this.getInputDeviceTable();
-		JTableHeader th = t.getTableHeader();
-		TableColumnModel tcm = th.getColumnModel();				
-		TableColumn tc = tcm.getColumn( 0 );
-		DefaultCellEditor ed = (DefaultCellEditor)tc.getCellEditor();
-		JComboBox< Player > cbb = (JComboBox< Player >)ed.getComponent();
-		
-		for( int i = cbb.getItemCount() - 1; i >= 0; i-- )
+		if( t != null )
 		{
-			Player p = cbb.getItemAt( i );
+			List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
 			
-			if( !p.equals( NON_SELECTED_PLAYER ) )
+			JTableHeader th = t.getTableHeader();
+			TableColumnModel tcm = th.getColumnModel();				
+			TableColumn tc = tcm.getColumn( 0 );
+			DefaultCellEditor ed = (DefaultCellEditor)tc.getCellEditor();
+			JComboBox< Player > cbb = (JComboBox< Player >)ed.getComponent();
+			
+			for( int i = cbb.getItemCount() - 1; i >= 0; i-- )
 			{
-				if( !players.contains( p ) )
+				Player p = cbb.getItemAt( i );
+				
+				if( !p.equals( NON_SELECTED_PLAYER ) )
 				{
-					cbb.removeItemAt( i );
-					checkPlayerController( p, -1 );
-				}
-				else				
-				{
-					players.remove( p );
+					if( !players.contains( p ) )
+					{
+						cbb.removeItemAt( i );
+						checkPlayerController( p, -1 );
+					}
+					else				
+					{
+						players.remove( p );
+					}
 				}
 			}
-		}
-		
-		for( Player p : players )
-		{
-			cbb.addItem( p );
+			
+			for( Player p : players )
+			{
+				cbb.addItem( p );
+			}
 		}
 	}
 	
-	private JTable getInputDeviceTable()
+	private JTable getInputControllerTable()
 	{
-		if( this.inputDeviceTable == null )
+		if( this.inputControllerTable == null )
 		{	
-			this.inputDeviceTable = this.getCreateJTable();
-			TableModel tm = this.createTablemodel();
-			this.inputDeviceTable.setModel( tm );
+			this.inputControllerTable = this.getCreateJTable();
+			TableModel tm = this.createControllerTablemodel();
+			this.inputControllerTable.setModel( tm );		
+			/*
+			this.inputControllerTable.getColumnModel().getColumn( this.inputControllerTable.getColumnCount() - 1 ).setMinWidth( 0 );
+			this.inputControllerTable.getColumnModel().getColumn( this.inputControllerTable.getColumnCount() - 1 ).setMaxWidth( 0 );
+			this.inputControllerTable.getColumnModel().getColumn( this.inputControllerTable.getColumnCount() - 1 ).setWidth( 0 );
+			*/
 			
-			FontMetrics fm = this.inputDeviceTable.getFontMetrics( this.inputDeviceTable.getFont() );
+			FontMetrics fm = this.inputControllerTable.getFontMetrics( this.inputControllerTable.getFont() );
 			
-			JTableHeader th = this.inputDeviceTable.getTableHeader();			
+			JTableHeader th = this.inputControllerTable.getTableHeader();			
 			th.setReorderingAllowed( false );
 
 			TableColumnModel tcm = th.getColumnModel();
@@ -294,49 +349,49 @@ public class InputDevicePanel extends JPanel
 				tc.setPreferredWidth( s );
 			}
 			
-			this.inputDeviceTable.getModel().addTableModelListener( new TableModelListener()
+			this.inputControllerTable.getModel().addTableModelListener( new TableModelListener()
 			{				
 				@Override
 				public void tableChanged(TableModelEvent ev )
 				{
 					if( ev.getType() == TableModelEvent.UPDATE )
 					{
-						JTable t = inputDeviceTable;
+						JTable t = inputControllerTable;
 					
-						int row = ev.getFirstRow();
+						int row = ev.getFirstRow();		
 						int col = ev.getColumn();
 						
-						if( row >= 0 && col >= 0 )
+						if( row >= 0 && col == 0 )
 						{
-							if( col == 0 )
-							{
-								LSL.StreamInfo info = lslStreamInfo[ row ];
-								
-								Player player = (Player)t.getValueAt( row, col );
+							Player player = (Player)t.getValueAt( row, 0 );
+																					
+							LSLStreamInfo info = null;
+							info = lslControlStreamInfo[ row ];
 							
-								if( player.getId() != NON_SELECTED_PLAYER.getId() )
-								{
-									checkPlayerController( player, row );
-								}
-								
-								updatePlayerControllerSetting( player, info );
+							if( player.getId() != NON_SELECTED_PLAYER.getId() )
+							{
+								checkPlayerController( player, row );
 							}
+
+							updatePlayerControllerSetting( player, info );
 						}
 					}
 				}
 			});
 			
-			this.inputDeviceTable.getSelectionModel().addListSelectionListener( new ListSelectionListener()
+			this.inputControllerTable.getSelectionModel().addListSelectionListener( new ListSelectionListener()
 			{				
 				@Override
 				public void valueChanged(ListSelectionEvent e)
 				{
-					JTable t = getInputDeviceTable();
+					JTable t = getInputControllerTable();
 					int sel = t.getSelectedRow();
-					LSL.StreamInfo info = null;
-					if( sel >= 0 && sel < lslStreamInfo.length )
+					
+					LSLStreamInfo info = null;					
+					
+					if( sel >= 0 )
 					{
-						info = lslStreamInfo[ sel ];
+						info = lslControlStreamInfo[ sel ];
 					}
 					
 					showInputControllerInfo( info );
@@ -344,10 +399,95 @@ public class InputDevicePanel extends JPanel
 			});			
 		}
 		
-		return this.inputDeviceTable;
+		return this.inputControllerTable;
+	}
+		
+	private JTable getInputBiosignalTable()
+	{
+		if( this.inputBiosignalTable == null )
+		{	
+			this.inputBiosignalTable = this.getCreateJTable();
+			TableModel tm = this.createBiosignalTablemodel();
+			this.inputBiosignalTable.setModel( tm );
+			
+			FontMetrics fm = this.inputBiosignalTable.getFontMetrics( this.inputBiosignalTable.getFont() );
+			
+			JTableHeader th = this.inputBiosignalTable.getTableHeader();			
+			th.setReorderingAllowed( false );
+
+			TableColumnModel tcm = th.getColumnModel();
+			
+			for( int i = 0; i < tcm.getColumnCount() - 1; i++ )
+			{
+				TableColumn tc = tcm.getColumn( i );
+				tc.setResizable( false );
+				
+				String h = tc.getHeaderValue().toString();
+				int s = fm.stringWidth( h ) + 10;
+				
+				if( i == 0 )
+				{
+					tc.setCellEditor( new DefaultCellEditor( getPlayerCombobox() ) );
+					s *= 2;
+				}
+				
+				tc.setMaxWidth( s );
+				tc.setPreferredWidth( s );
+			}
+			
+			this.inputBiosignalTable.getModel().addTableModelListener( new TableModelListener()
+			{				
+				@Override
+				public void tableChanged(TableModelEvent ev )
+				{
+					if( ev.getType() == TableModelEvent.UPDATE )
+					{
+						JTable t = inputBiosignalTable;
+					
+						int row = ev.getFirstRow();
+						int col = ev.getColumn();
+						
+						if( row >= 0 && col == 0 )
+						{
+							Player player = (Player)t.getValueAt( row, 0 );
+							
+							LSLStreamInfo info = null;													
+							info = lslBioStreamInfo[ row ];
+								
+							updatePlayerBiosignalSetting( player, info );
+						}
+					}
+				}
+			});
+			
+			/*
+			this.inputBiosignalTable.getSelectionModel().addListSelectionListener( new ListSelectionListener()
+			{				
+				@Override
+				public void valueChanged(ListSelectionEvent e)
+				{
+					JTable t = getInputBiosignalTable();
+					int sel = t.getSelectedRow();
+					LSLStreamInfo info = null;
+										
+					//if( sel >= 0 && sel < lslStreamInfo.length )
+					//{
+					//	info = lslStreamInfo[ sel ];
+					//}
+					
+					
+					info = lslBioStreamInfo[ sel ];
+					
+					//showInputControllerInfo( info );
+				}
+			});	
+			//*/
+		}
+		
+		return this.inputBiosignalTable;
 	}
 	
-	private void updatePlayerControllerSetting( Player player, LSL.StreamInfo ctr )
+	private void updatePlayerControllerSetting( Player player, LSLStreamInfo info )
 	{
 		try
 		{
@@ -372,7 +512,8 @@ public class InputDevicePanel extends JPanel
 					{											
 						IControllerMetadata cmeta = (IControllerMetadata)val;
 
-						if( cmeta.getControllerID().equals( ctr.uid() ) )
+						String uid = info.uid();
+						if( cmeta.getControllerID().equals( uid ) )
 						{
 							par.removeSelectedValue();
 						}
@@ -380,8 +521,57 @@ public class InputDevicePanel extends JPanel
 				}
 				else
 				{
-					IControllerMetadata meta = new LSLStreamMetadata( ctr );
+					IControllerMetadata meta = new LSLMetadataController( info );
 					par.setSelectedValue( meta );
+				}
+			}
+		}
+		catch (Exception ex) 
+		{
+			ex.printStackTrace();
+		}
+	}
+	
+	private void updatePlayerBiosignalSetting( Player player, LSLStreamInfo strInfo )
+	{
+		try
+		{
+			for( Player pl : ConfigApp.getPlayers() )
+			{
+				Settings setplayer = ConfigApp.getPlayerSetting( pl );			
+				ConfigParameter par = setplayer.getParameter( ConfigApp.SELECTED_BIOSIGNAL );
+
+				if( par == null )
+				{
+					Caption cap = Language.getAllCaptions().get( Language.BIOSIGNAL );
+					cap.setID( ConfigApp.SELECTED_BIOSIGNAL );
+
+					par = new ConfigParameter( cap, ParameterType.OTHER );											
+				}
+
+				if( !pl.equals( player ) )
+				{
+					Object val = par.getSelectedValue();
+					
+					if( val != null )
+					{		
+						String[] strUIDS = val.toString().split( ";" );
+						
+						val = "";
+						for( String uid : strUIDS )
+						{
+							if( !strInfo.uid().equals( uid ) )
+							{
+								val += uid + ";";
+							}						
+						}
+						
+						par.setSelectedValue( val );
+					}
+				}
+				else
+				{
+					par.setSelectedValue( strInfo.uid() );
 				}
 			}
 		}
@@ -445,21 +635,69 @@ public class InputDevicePanel extends JPanel
 		return table;
 	}
 	
-	private Class[] getTableColumnTypes()
+	private Class[] getControllerTableColumnTypes()
 	{
-		return new Class[]{ Player.class, Integer.class, String.class };
+		return new Class[]{ Player.class
+							, Integer.class
+							, String.class
+							//, String.class 
+							};
 	}
 	
-	private TableModel createTablemodel( )
+	private TableModel createControllerTablemodel( )
 	{					
 		TableModel tm =  new DefaultTableModel( null, new String[] { Language.getLocalCaption( Language.PLAYER )
 																	, Language.getLocalCaption( Language.CHANNELS )
-																	, Language.getLocalCaption( Language.INPUT ) } )
+																	, Language.getLocalCaption( Language.INPUT )
+																	//,  "" 
+																	} )
 							{
 								private static final long serialVersionUID = 1L;
 								
-								Class[] columnTypes = getTableColumnTypes();
-								boolean[] columnEditables = new boolean[] { true, false, false };
+								Class[] columnTypes = getControllerTableColumnTypes();
+								boolean[] columnEditables = new boolean[] { true
+																			, false
+																			, false
+																			//, false 
+																			};
+								
+								public Class getColumnClass(int columnIndex) 
+								{
+									return columnTypes[columnIndex];
+								}
+																								
+								public boolean isCellEditable(int row, int column) 
+								{
+									boolean editable = columnEditables[ column ];
+									
+									return editable;
+								}
+							};
+		return tm;
+	}
+	
+	private Class[] getBiosignalTableColumnTypes()
+	{
+		return new Class[]{ Player.class
+							, String.class
+							//, String.class 
+							};
+	}
+	
+	private TableModel createBiosignalTablemodel( )
+	{					
+		TableModel tm =  new DefaultTableModel( null, new String[] { Language.getLocalCaption( Language.PLAYER )
+																	, Language.getLocalCaption( Language.INPUT )
+																	//, "" 
+																	} )
+							{
+								private static final long serialVersionUID = 1L;
+								
+								Class[] columnTypes = getBiosignalTableColumnTypes();
+								boolean[] columnEditables = new boolean[] { true
+																			, false
+																			//, false 
+																			};
 								
 								public Class getColumnClass(int columnIndex) 
 								{
@@ -477,10 +715,11 @@ public class InputDevicePanel extends JPanel
 	}
 	
 	public void updateInputs( )
-	{
-		this.lslStreamInfo = LSL.resolve_streams();
+	{		
+		//this.lslStreamInfo = LSL.resolve_streams();
+		LSLStreamInfo[] streams = LSL.resolve_streams();
 		
-		JTable t = this.getInputDeviceTable();
+		JTable t = this.getInputControllerTable();
 		DefaultTableModel tm = (DefaultTableModel)t.getModel();
 		t.clearSelection();
 		
@@ -489,40 +728,201 @@ public class InputDevicePanel extends JPanel
 			tm.removeRow( i );
 		}
 		
-		for( LSL.StreamInfo info : this.lslStreamInfo )
+		JTable bioT = this.getInputBiosignalTable();
+		DefaultTableModel bioTm = (DefaultTableModel)bioT.getModel();
+		bioT.clearSelection();
+		
+		for( int i = bioTm.getRowCount() -1; i >= 0; i-- )
 		{
-			Object selectedController = null;
-			Set< Player > players = ConfigApp.getPlayers();
-			
-			Player selPlayer = NON_SELECTED_PLAYER;
-			for( Player p : players )
-			{
-				Settings cfg = ConfigApp.getPlayerSetting( p );
-				if( cfg != null )
-				{
-					ConfigParameter par = cfg.getParameter( ConfigApp.SELECTED_CONTROLLER );
-					selectedController = par.getSelectedValue();
-					
-					if( selectedController != null )
-					{
-						IControllerMetadata meta = (IControllerMetadata)selectedController;
-						
-						if( meta.getControllerID().equals( info.uid() ) )
-						{
-							selPlayer = p;
-							break;
-						}
-					}
-				}
-			}
-						
-			
-			Object[] row = new Object[] { selPlayer, info.channel_count(), "  " + info.name() };
-			
-			tm.addRow( row );
+			bioTm.removeRow( i );
 		}
 		
-		if( this.lslStreamInfo.length == 1 )
+		List< LSLStreamInfo > ctrStreams = new ArrayList< LSLStreamInfo >();
+		List< LSLStreamInfo > bioStreams = new ArrayList< LSLStreamInfo >();			
+		
+		for( LSLStreamInfo info : streams )
+		{
+			StreamType strType = LSLUtils.getStreamType( info.content_type() );
+			
+			if( strType == StreamType.CONTROLLER || strType == StreamType.CONTROLLER_BIOSIGNAL )
+			{				
+				ctrStreams.add( info );
+				
+				Object selectedController = null;
+				Set< Player > players = ConfigApp.getPlayers();
+				
+				Player selPlayer = NON_SELECTED_PLAYER;
+				for( Player p : players )
+				{
+					Settings cfg = ConfigApp.getPlayerSetting( p );
+					if( cfg != null )
+					{
+						ConfigParameter par = cfg.getParameter( ConfigApp.SELECTED_CONTROLLER );						
+						
+						if( par != null )
+						{
+							selectedController = par.getSelectedValue();
+							
+							if( selectedController != null )
+							{
+								IControllerMetadata meta = (IControllerMetadata)selectedController;
+								
+								String uid = info.uid();
+								if( meta.getControllerID().equals( uid ) )
+								{
+									selPlayer = p;
+									break;
+								}
+							}
+						}						
+						
+					}
+				}
+				
+				Object[] row = new Object[] { selPlayer, info.channel_count(), info.name(), info.uid() };
+				
+				tm.addRow( row );
+				
+				if( strType == StreamType.CONTROLLER_BIOSIGNAL )
+				{
+					bioStreams.add( info );
+					
+					Settings cfg = ConfigApp.getPlayerSetting( selPlayer );
+					
+					if( cfg != null )
+					{
+						ConfigParameter par = cfg.getParameter( ConfigApp.SELECTED_BIOSIGNAL );						
+						
+						if( par != null )
+						{
+							/*
+							  selectedController = par.getSelectedValue();
+							  if( selectedController != null )
+							{
+								LSLStreamInfo meta = (LSLStreamInfo)selectedController;
+								
+								String uid = info.uid();
+								if( !meta.uid().equals( uid ) )
+								{
+									selPlayer = NON_SELECTED_PLAYER;
+									break;
+								}
+							}
+							else
+							{
+								selPlayer = NON_SELECTED_PLAYER;
+							}
+							//*/
+							
+							List< Object > vals = par.getAllOptions();
+							
+							if( vals != null && !vals.isEmpty() )
+							{
+								boolean find = false;
+								
+								for( Object val : vals )
+								{
+									LSLStreamInfo meta = (LSLStreamInfo)val;
+									
+									String uid = info.uid();
+									find = !meta.uid().equals( uid );
+									
+									if( find )
+									{
+										break;
+									}
+								}
+								
+								if( !find )
+								{
+									selPlayer = NON_SELECTED_PLAYER;
+								}
+							}
+							else
+							{
+								selPlayer = NON_SELECTED_PLAYER;
+							}
+							
+							
+						}
+						else
+						{
+							selPlayer = NON_SELECTED_PLAYER;
+						}
+						
+					}
+					else
+					{
+						selPlayer = NON_SELECTED_PLAYER;
+					}
+					
+					row = new Object[] { selPlayer, info.name(), info.uid() };
+					bioTm.addRow( row );
+				}
+			}
+			else if( strType == StreamType.BIOSIGNAL )
+			{
+				
+				bioStreams.add( info );
+				
+				Set< Player > players = ConfigApp.getPlayers();
+				
+				Player selPlayer = NON_SELECTED_PLAYER;
+				
+				bioPlayer:
+				for( Player p : players )
+				{
+					Settings cfg = ConfigApp.getPlayerSetting( p );
+					if( cfg != null )
+					{
+						ConfigParameter par = cfg.getParameter( ConfigApp.SELECTED_BIOSIGNAL );
+						
+						if( par != null )
+						{
+							/*
+							selectedBiosignal = par.getSelectedValue();
+							
+							if( selectedBiosignal != null )
+							{
+								LSLStreamInfo meta = (LSLStreamInfo)selectedBiosignal;
+								
+								if( meta.uid().equalsIgnoreCase( info.uid() ) )
+								{
+									selPlayer = p;
+									break;
+								}
+							}
+							//*/
+							
+							Object val = par.getSelectedValue();
+							
+							if( val != null )
+							{
+								String[] uids = val.toString().split( ";" );
+								
+								for( String uid : uids )
+								{
+									if( info.uid().equals( uid ) )
+									{
+										selPlayer = p;										
+										break bioPlayer;
+									}
+								}
+							}
+						}
+					}
+				}				
+				
+				Object[] row = new Object[] { selPlayer, info.name(), info.uid() };
+				
+				bioTm.addRow( row );
+			}
+		}
+		
+		this.lslControlStreamInfo = ctrStreams.toArray( new LSLStreamInfo[0] );
+		this.lslBioStreamInfo = bioStreams.toArray( new LSLStreamInfo[0] );
+		
+		if( streams.length == 1 )
 		{
 			t.addRowSelectionInterval( 0, 0 );
 			Set< Player > players = ConfigApp.getPlayers();
@@ -541,7 +941,7 @@ public class InputDevicePanel extends JPanel
 		}
 	}
 
-	private void showInputControllerInfo( LSL.StreamInfo info )
+	private void showInputControllerInfo( LSLStreamInfo info )
 	{	
 		JPanel panel = this.getPanelInputValues();
 		panel.setVisible( false );
@@ -566,7 +966,7 @@ public class InputDevicePanel extends JPanel
 				ControllerManager.getInstance().stopController();
 				
 				List< IControllerMetadata > ctr = new ArrayList<IControllerMetadata>();
-				LSLStreamMetadata meta = new LSLStreamMetadata( info );
+				LSLMetadataController meta = new LSLMetadataController( info );
 				Player p = new Player();
 				meta.setPlayer( p );				
 				ctr.add( meta );
@@ -593,7 +993,7 @@ public class InputDevicePanel extends JPanel
 
 	private void checkPlayerController( Player player, int ignoreRow )
 	{
-		JTable t = this.getInputDeviceTable();
+		JTable t = this.getInputControllerTable();
 		
 		JTableHeader th = t.getTableHeader();
 		TableColumnModel tcm = th.getColumnModel();				
@@ -621,7 +1021,7 @@ public class InputDevicePanel extends JPanel
 		{
 			checkPlayerController( player, -1 );
 			
-			JTable t = this.getInputDeviceTable();
+			JTable t = this.getInputControllerTable();
 			JTableHeader th = t.getTableHeader();
 			TableColumnModel tcm = th.getColumnModel();				
 			TableColumn tc = tcm.getColumn( 0 );

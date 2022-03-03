@@ -8,8 +8,9 @@ import java.util.List;
 
 import config.Player;
 import control.controller.lslStreams.InputLSLStreamController;
-import control.controller.lslStreams.LSLStreamMetadata;
 import control.events.IInputControllerListener;
+import lslStream.controller.LSLInputControllerStream;
+import lslStream.controller.LSLMetadataController;
 
 /**
  * @author manuel
@@ -46,7 +47,7 @@ public class ControllerManager
 			{
 				case LSLSTREAM:
 				{
-					IInputController controller = new InputLSLStreamController( (LSLStreamMetadata)meta );
+					IInputController controller = new LSLInputControllerStream( (LSLMetadataController)meta );
 					this.controllers.add( controller );
 					break;
 				}
