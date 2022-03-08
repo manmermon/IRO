@@ -21,7 +21,6 @@
 
 package control.scenes.level;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -56,9 +55,9 @@ public class LevelControl extends AbstractSceneControl
 	
 	private boolean noteIntoFret = false;
 	
-	private int consecutiveErrors = 0;
+	//private int consecutiveErrors = 0;
 	
-	private Map< Integer, Boolean > playerAchievedTarget = new HashMap<Integer, Boolean>();
+	//private Map< Integer, Boolean > playerAchievedTarget = new HashMap<Integer, Boolean>();
 	
 	/**
 	 * @throws SceneException 
@@ -104,7 +103,7 @@ public class LevelControl extends AbstractSceneControl
 			MusicPlayerControl.getInstance().addBackgroundMusicEvent( this );
 			
 			MusicPlayerControl.getInstance().setMuteSession( lv.isMuteSession() );
-			MusicPlayerControl.getInstance().setPlayerMusicSheets( lv.getPlayerSheets() );
+			//MusicPlayerControl.getInstance().setPlayerMusicSheets( lv.getPlayerSheets() );
 		}
 		else
 		{
@@ -315,41 +314,32 @@ public class LevelControl extends AbstractSceneControl
 			{
 				case FretEvent.NOTE_EXITED:
 				{
-					System.out.println("LevelControl.FretEvent() " + ( System.currentTimeMillis() - t ) / 1e3D );
-					
 					if( !note.isGhost() )
 					{
 						int playerID = note.getOwner().getId();
+						/*
 						Boolean target = this.playerAchievedTarget.get( playerID );
 						this.playerAchievedTarget.put( playerID, false );
-												
 						target = ( target == null ) ? false : target;
-						
-						if( !target )
+						//*/
+										
+						if( !note.isSelected() )
 						{					
-							double time = note.getDuration();
+							//double time = note.getDuration();
+							//MusicPlayerControl.getInstance().mutePlayerSheet( Player.ANONYMOUS - 1, time );
+							//MusicPlayerControl.getInstance().mutePlayerSheet( playerID, time );
 							
-							MusicPlayerControl.getInstance().mutePlayerSheet( playerID, time );
+							MusicPlayerControl.getInstance().playDissonantTrack( playerID, note.getDissonantNotes() );
 							
+							/*
 							this.consecutiveErrors++;
-														
-							System.out.println("LevelControl.FretEvent() A " + consecutiveErrors );
-							
+																					
 							if( this.consecutiveErrors > 2  )
 							{
 								this.consecutiveErrors = 0;
 								this.changeSceneSpeed( false );
 							}
-						}
-						else
-						{
-							consecutiveErrors--;
-							
-							if( this.consecutiveErrors < -2 )
-							{
-								this.consecutiveErrors = 0;
-								this.changeSceneSpeed( true );
-							}
+							*/
 						}
 					}
 					
@@ -379,11 +369,6 @@ public class LevelControl extends AbstractSceneControl
 				if( gOwner.getId() == owner.getId() )
 				{
 					goal.setPercentage( percentageTime, rep );
-					
-					if( goal.wasTheGoalAchieved() )
-					{
-						this.playerAchievedTarget.put( owner.getId(), true );
-					}
 					
 					break;
 				}

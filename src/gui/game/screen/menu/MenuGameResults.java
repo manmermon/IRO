@@ -23,6 +23,7 @@ import gui.GameManager;
 import GUI.buttom.GeometricButtom;
 import GUI.dialog.InfoDialog;
 import gui.game.component.Frame;
+import gui.game.component.sprite.ISprite;
 import gui.game.component.sprite.Score;
 import gui.game.screen.Scene;
 import gui.game.screen.level.Level;
@@ -53,9 +54,19 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 	 */
 	public MenuGameResults( Dimension sceneSize//, Rectangle frameBounds
 							, List< Tuple< Player, Double > > results
-							, boolean showNextBt, boolean showStopBt ) 
+							, List< ISprite > bgs
+							, boolean showNextBt
+							, boolean showStopBt ) 
 	{
 		super( sceneSize );
+		
+		if( bgs != null )
+		{
+			for( ISprite sp : bgs )
+			{
+				super.add( sp, PLANE_BRACKGROUND );
+			}
+		}
 		
 		this.scores = new ArrayList<Tuple<Player,Double>>( results );
 		
@@ -176,9 +187,11 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 		fr.setLayout( new BorderLayout() );
 		fr.setIgnoreRepaint( true );
 		fr.setDoubleBuffered( true );
+		fr.setBackground( Color.WHITE );
 		
 		JPanel btPanel = new JPanel( new VerticalFlowLayout( VerticalFlowLayout.CENTER ) );
-		btPanel.setBackground( Color.WHITE );
+		btPanel.setBackground( new Color( 255, 255, 255, 255 ) );
+		btPanel.setOpaque( false );
 		
 		Component top = Box.createRigidArea( this.btSize );
 		Component mid = Box.createRigidArea( this.btSize );
@@ -197,14 +210,18 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 		}
 		
 		JPanel padPanel = new JPanel( new BorderLayout() );
+		padPanel.setOpaque( false );
+		
 		Dimension padSize = new Dimension( (int)( this.btSize.width * this.padding )
 											, (int)( this.btSize.height * this.padding ) ) ;
+		
 		Component pad = Box.createRigidArea( padSize );
 		padPanel.add( pad, BorderLayout.EAST );
-		padPanel.setBackground( Color.WHITE );
+		padPanel.setBackground( new Color( 255, 255, 255, 255 ) );
 		
 		JPanel eastPanel = new JPanel( new FlowLayout() );
-		eastPanel.setBackground( Color.WHITE );
+		eastPanel.setOpaque( false );
+		eastPanel.setBackground( new Color( 255, 255, 255, 255 ) );
 		eastPanel.add( btPanel );
 		eastPanel.add( padPanel );
 		
@@ -220,28 +237,33 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 				- padPanel.getInsets().left
 				- padPanel.getInsets().right;
 		Dimension scoreSiz = new Dimension( w, h );		
-		super.size = scoreSiz;
+		//super.size = scoreSiz;
 		
-		BufferedImage scImg = this.getScore( scoreSiz );	
+		this.setScore( scoreSiz );
 		
-		JLabel score = new JLabel( new ImageIcon( scImg ) );
-		score.setBackground( Color.WHITE );
+		//BufferedImage scImg = this.getScore( scoreSiz );	
 		
-		fr.setBackground( Color.WHITE );
+		//JLabel score = new JLabel( new ImageIcon( scImg ) );
+		//score.setBackground( Color.WHITE );
+		//score.setOpaque( false );
+		
+		//fr.setBackground( Color.WHITE );
+		fr.setScene( super.getScene() );
+		
 		fr.add( eastPanel, BorderLayout.EAST );
-		fr.add( score, BorderLayout.CENTER );
+		//fr.add( score, BorderLayout.CENTER );
 				
 		return fr;
 	}
 	
-	private BufferedImage getScore( Dimension sceneSize )
+	private void setScore( Dimension sceneSize )
 	{
-		super.removeAllSprites();
+		//super.removeAllSprites();
 		
 		int w = sceneSize.width;		
 		int h =  sceneSize.height / ( this.scores.size() + 1 );
 		
-		BufferedImage s = null;
+		//BufferedImage s = null;
 		
 		int i = 0;
 		for( Tuple< Player, Double > score : this.scores )
@@ -278,9 +300,9 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 			super.add( sc, Level.PLANE_SCORE);
 		}
 		
-		s = super.getScene();
+		//s = super.getScene();
 	
-		return s;
+		//return s;
 	}
 	
 	@Override

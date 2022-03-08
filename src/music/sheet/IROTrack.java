@@ -32,7 +32,7 @@ public class IROTrack
 	private int tempo = MidiDefaults.DEFAULT_TEMPO_BEATS_PER_MINUTE;
 	private int voiceID = 0;
 	
-	private double trackDuration = 0.0D;
+	//private double trackDuration = 0.0D;
 	
 	private byte maxVolumeNote = 0;
 	
@@ -138,7 +138,7 @@ public class IROTrack
 	{		
 		this.tempo = t;
 		
-		this.adjustTrackDuration();
+		//this.adjustTrackDuration();
 	}
 	
 	public int getTempo( )
@@ -182,7 +182,7 @@ public class IROTrack
 	{
 		return this.instrument;
 	}
-	
+		
 	public void addNotes( Note NOTE )
 	{
 		Double time = this.getMaxNoteStartTime();
@@ -206,7 +206,7 @@ public class IROTrack
 			this.maxVolumeNote = NOTE.getOnVelocity();
 		}
 		
-		this.adjustTrackDuration();
+		//this.adjustTrackDuration();
 	}
 	
 	public void addNotes( double time, List< Note > NOTES )
@@ -221,7 +221,7 @@ public class IROTrack
 			}
 		}
 		
-		this.adjustTrackDuration();
+		//this.adjustTrackDuration();
 	}
 	
 	public byte getMaxVolumeNote() 
@@ -229,6 +229,7 @@ public class IROTrack
 		return this.maxVolumeNote;
 	}
 	
+	/*
 	private void adjustTrackDuration()
 	{
 		double startTime = Double.MAX_VALUE;
@@ -257,12 +258,45 @@ public class IROTrack
 			}
 		}
 		
-		this.trackDuration = endTime - startTime;
+		double d = endTime - startTime;
+		
+		if( d > 0 )
+		{
+			this.trackDuration = d;
+		}
 	}
+	//*/
 	
 	public double getTrackDuration()
 	{
-		return this.trackDuration;
+		//return this.trackDuration;
+		
+		double d = 0;
+		
+		if( !this.notes.isEmpty() )
+		{
+			double tq = MusicSheetTools.getQuarterTempo2Second( this.tempo );
+			
+			List< Double > ts = new ArrayList< Double >( this.notes.keySet() );
+			Collections.sort( ts );
+			Double startTime = ts.get( 0 ) * 4 * tq;
+			Double endTime = ts.get( ts.size() - 1 );
+			
+			List< Note > Notes = this.notes.get( endTime );
+			
+			double finTime = endTime * tq * 4;
+			endTime = finTime;
+			for( Note note : Notes )
+			{
+				double noteDuration = note.getDuration() * 4; // To do quarter duration equal to 1
+				noteDuration *= ( 60.0D / this.tempo ); 
+				finTime = ( finTime >= endTime + noteDuration ) ? ( finTime ) : ( endTime + noteDuration );
+			}
+			
+			d = finTime - startTime;
+		}
+		
+		return d;
 	}
 	
 	private double getMaxNoteStartTime()

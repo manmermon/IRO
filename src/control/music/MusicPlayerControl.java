@@ -2,15 +2,20 @@ package control.music;
 
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiUnavailableException;
+
 import org.jfugue.pattern.Pattern;
 
 import gui.game.screen.level.music.BackgroundMusic;
+import music.sheet.IROTrack;
 import control.events.BackgroundMusicEventListener;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
@@ -19,7 +24,7 @@ import tools.MusicSheetTools;
 public class MusicPlayerControl extends AbstractStoppableThread 
 {	
 	private BackgroundMusic backgroundMusic = null;
-	private Map< Integer, BackgroundMusic > playerMusicSheets = null;
+	private Map< Integer, BackgroundMusic > playerDissonantMusicSheets = null;
 	
 	private ConcurrentHashMap< Integer, Double > mutePlayerSheet = null;
 	
@@ -42,7 +47,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	{	
 		super.setName( this.getClass().getSimpleName() );	
 		
-		this.playerMusicSheets = new HashMap<Integer, BackgroundMusic>();
+		this.playerDissonantMusicSheets = new HashMap<Integer, BackgroundMusic>();
 		this.mutePlayerSheet = new ConcurrentHashMap< Integer, Double>();
 		
 		try
@@ -83,18 +88,20 @@ public class MusicPlayerControl extends AbstractStoppableThread
 		this.backgroundMusic = backgroundMusicPattern;				
 	}
 	
+	/*
 	public void setPlayerMusicSheets( Map< Integer, BackgroundMusic > playerSheets )
 	{
-		if( !this.playerMusicSheets.isEmpty() )
+		if( !this.playerDissonantMusicSheets.isEmpty() )
 		{
-			for( BackgroundMusic pbgm : this.playerMusicSheets.values() )
+			for( BackgroundMusic pbgm : this.playerDissonantMusicSheets.values() )
 			{
 				pbgm.stopThread( IStoppableThread.FORCE_STOP );
 			}
 		}
 		
-		this.playerMusicSheets.putAll( playerSheets );
+		this.playerDissonantMusicSheets.putAll( playerSheets );
 	}
+	//*/
 	
 	public void addBackgroundMusicEvent( BackgroundMusicEventListener listener ) 
 	{	
@@ -122,7 +129,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 			
 			this.startTime = System.nanoTime();
 						
-			for( BackgroundMusic playerSheet : this.playerMusicSheets.values() )
+			for( BackgroundMusic playerSheet : this.playerDissonantMusicSheets.values() )
 			{
 				playerSheet.setMuteSession( this.isMuteSession );
 				playerSheet.startThread();
@@ -152,11 +159,11 @@ public class MusicPlayerControl extends AbstractStoppableThread
 	{
 		synchronized( this.sync )
 		{
-			for( BackgroundMusic playerSheet : this.playerMusicSheets.values() )
+			for( BackgroundMusic playerSheet : this.playerDissonantMusicSheets.values() )
 			{
 				playerSheet.stopThread( IStoppableThread.FORCE_STOP );
 			}
-			this.playerMusicSheets.clear();
+			this.playerDissonantMusicSheets.clear();
 			
 			if( this.backgroundMusic != null )
 			{	
@@ -189,7 +196,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 				this.backgroundMusic.setPause( pause );
 			}
 				
-			for( BackgroundMusic playerSheet : this.playerMusicSheets.values() )
+			for( BackgroundMusic playerSheet : this.playerDissonantMusicSheets.values() )
 			{
 				playerSheet.setPause( pause );
 			}
@@ -256,16 +263,30 @@ public class MusicPlayerControl extends AbstractStoppableThread
 		synchronized( this.sync )
 		{
 			Enumeration< Integer > players = this.mutePlayerSheet.keys();
+			Double muteTime = -1D;
+			
 			while( players.hasMoreElements() )
 			{
 				int iPlayer = players.nextElement();
 				
-				Double muteTime = this.mutePlayerSheet.get( iPlayer );
+				double mt = this.mutePlayerSheet.get( iPlayer );
+				if( mt > muteTime )
+				{
+					mt = muteTime;
+				}
 				
 				//System.out.println("MusicPlayerControl.runInLoop() " + iPlayer);
-				BackgroundMusic playerSheet = this.playerMusicSheets.get( iPlayer );
-				
-				playerSheet.mute( muteTime );
+				BackgroundMusic playerSheet = this.playerDissonantMusicSheets.get( iPlayer );
+			
+				if( playerSheet != null )
+				{
+					playerSheet.startThread();
+				}
+			}
+			
+			if( muteTime > 0 && this.backgroundMusic != null )
+			{
+				this.backgroundMusic.mute( muteTime );
 			}
 			
 			this.mutePlayerSheet.clear();
@@ -288,7 +309,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 				
 		synchronized( this )
 		{
-			for( BackgroundMusic bg : this.playerMusicSheets.values() )
+			for( BackgroundMusic bg : this.playerDissonantMusicSheets.values() )
 			{
 				bg.stopThread( IStoppableThread.FORCE_STOP );
 			}
@@ -317,6 +338,38 @@ public class MusicPlayerControl extends AbstractStoppableThread
 		}
 	}
 	
+	public void playDissonantTrack( int player, List< IROTrack > tracks )
+	{
+		if( !this.isMuteSession && tracks != null && !tracks.isEmpty() )
+		{
+			double muteTime = Double.MIN_VALUE;
+			Pattern pat = new Pattern();
+			
+			for( IROTrack t : tracks )
+			{
+				pat.add( t.getPatternTrackSheet() );
+				double ti = t.getTrackDuration();
+				if( ti > muteTime )
+				{
+					muteTime = ti;
+				}
+			}			
+			
+			try 
+			{
+				BackgroundMusic pm = new BackgroundMusic();
+				pm.setPattern( pat );
+
+				this.playerDissonantMusicSheets.put( player, pm );
+			}
+			catch (MidiUnavailableException | InvalidMidiDataException e) 
+			{
+			}
+			
+			this.mutePlayerSheet( player, muteTime );
+		}
+	}
+		
 	public void changeTempo( int newTempo )
 	{
 		synchronized( this.sync )
@@ -358,13 +411,13 @@ public class MusicPlayerControl extends AbstractStoppableThread
 					bgMusic.setPattern( new Pattern( pat ) );
 					bgMusic.setMusicTickPosition( tickPos );
 					
-					CyclicBarrier b = new CyclicBarrier( 1 + this.playerMusicSheets.size() );
+					CyclicBarrier b = new CyclicBarrier( 1 + this.playerDissonantMusicSheets.size() );
 					
 					bgMusic.setCoordinator( b );
 					
-					for( Integer id : this.playerMusicSheets.keySet() )
+					for( Integer id : this.playerDissonantMusicSheets.keySet() )
 					{
-						BackgroundMusic pms = this.playerMusicSheets.get( id );
+						BackgroundMusic pms = this.playerDissonantMusicSheets.get( id );
 						pat = pms.getPattern().toString();
 						tickPos = pms.getCurrentMusicTickPosition();
 						
@@ -385,7 +438,7 @@ public class MusicPlayerControl extends AbstractStoppableThread
 						bgm.setMusicTickPosition( tickPos );						
 						bgm.setCoordinator( b );
 						
-						this.playerMusicSheets.put( id, bgm );
+						this.playerDissonantMusicSheets.put( id, bgm );
 					}
 					
 				}

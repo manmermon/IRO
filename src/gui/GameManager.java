@@ -38,6 +38,8 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
 import gui.game.GameWindow;
+import gui.game.component.sprite.ISprite;
+import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import gui.game.screen.level.build.LevelMusicBuilder;
 import gui.game.screen.menu.MenuGameResults;
@@ -396,7 +398,8 @@ public class GameManager
 			settings.add( ConfigApp.getPlayerSetting( player ) );
 		}
 		
-		Level level = LevelMusicBuilder.getLevel( fileSong, screenBounds.getSize(), settings );
+		//Level level = LevelMusicBuilder.getLevel( fileSong, screenBounds.getSize(), settings );
+		Level level = new Level( screenBounds.getSize(), settings, fileSong );
 	
 		//LevelMusicBuilder.changeLevelSpeed( level );
 		
@@ -448,9 +451,17 @@ public class GameManager
 	
 	public synchronized void stopLevel( boolean nextLevel ) throws Exception
 	{
-		ScreenControl.getInstance().stopScene();
-		//ControllerManager.getInstance().stopController();
 		ControllerManager.getInstance().setEnableControllerListener( false );
+		
+		IScene sc = ScreenControl.getInstance().getScene();
+		ScreenControl.getInstance().stopScene();
+		
+		List< ISprite > spr = null;
+		
+		if( sc != null )					
+		{
+			spr = sc.getSprites( IScene.BACKGROUND_ID, true );
+		}
 		
 		if( nextLevel )
 		{
@@ -492,7 +503,9 @@ public class GameManager
 			{
 				MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
 														//, this.gameWindow.getSceneBounds()
-														, scores, this.hasNextLevel(), true );
+														, scores
+														, spr
+														, this.hasNextLevel(), true );
 				//ScreenControl.getInstance().setScene( mr );
 				
 				this.gameWindow.getGamePanel().add( mr.getMenuFrame(), BorderLayout.CENTER );
@@ -517,8 +530,17 @@ public class GameManager
 			}		
 			
 			//
-			System.out.println("GameManager.stopLevel() - CORREGIR ERROR: java.util.ConcurrentModificationException");
-			ConfigApp.dbSaveStatistic();
+			try
+			{			
+				ConfigApp.dbSaveStatistic();
+			}
+			catch (Exception e) {
+				// TODO: handle exception
+			}
+			finally
+			{
+				System.out.println("GameManager.stopLevel() - CORREGIR ERROR: java.util.ConcurrentModificationException");
+			}
 			
 			MainAppUI.getInstance().setVisible( true );
 		}

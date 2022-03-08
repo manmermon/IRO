@@ -118,6 +118,20 @@ public class ScreenControl extends AbstractStoppableThread
 		}
 	}
 	
+
+	@Override
+	public IScene getScene() 
+	{
+		IScene scene = null;
+		
+		if( this.sceneCtrl != null )
+		{
+			scene = this.sceneCtrl.getScene();
+		}
+		
+		return scene;
+	}
+	
 	/*(non-Javadoc)
 	 * @see @see control.ISceneManager#startScene()
 	 */

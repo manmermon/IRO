@@ -2,6 +2,7 @@ package gui.game.screen.level.music;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 
 import javax.sound.midi.InvalidMidiDataException;
@@ -16,6 +17,7 @@ import gui.game.screen.IPausable;
 import control.events.BackgroundMusicEvent;
 import control.events.BackgroundMusicEventListener;
 import music.jfugueIRO.PlayerMod;
+import music.sheet.IROTrack;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppableThread;
 import thread.timer.PausableTimer;
@@ -263,7 +265,7 @@ public class BackgroundMusic extends AbstractStoppableThread
 			this.wait();
 		}
 	}
-	
+		
 	public void mute( double time )
 	{
 		synchronized ( this.lock )

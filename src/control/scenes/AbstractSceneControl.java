@@ -144,6 +144,12 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 		this.setInputables( this.scene );		
 	}
 	
+	@Override
+	public IScene getScene() 
+	{
+		return this.scene;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see @see control.scenes.ISceneControl#updateScene(control.inputs.IInputAction)

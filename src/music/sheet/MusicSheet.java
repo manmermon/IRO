@@ -1,10 +1,21 @@
 package music.sheet;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import org.jfugue.theory.Note;
+
+import general.ArrayTreeMap;
+import general.NumberRange;
+import general.Tuple;
+import tools.MusicSheetTools;
 
 public class MusicSheet 
 {
@@ -54,6 +65,42 @@ public class MusicSheet
 		}
 				
 		return track;
+	}
+	
+	public List< IROTrack > getNotesAtIntervalTime( NumberRange times )
+	{
+		List< IROTrack > notes = new ArrayList< IROTrack >();
+		
+		if( this.tracks != null  && times != null )
+		{
+			for( IROTrack track : this.tracks.values() )
+			{
+				double wholeDuration = MusicSheetTools.getWholeTempo2Second( track.getTempo() );
+				
+				ArrayTreeMap< Double, Note > trackNotes = track.getTrackNotes();
+				
+				IROTrack ctrack = new IROTrack( track.getID() );
+				ctrack.setInstrument( track.getInstrument() );
+				ctrack.setTempo( track.getTempo() );
+				ctrack.setVoice( track.getVoice() );
+				
+				for( Double t : trackNotes.keySet() )
+				{
+					double tt = t * wholeDuration;
+					if( times.within( tt ) )
+					{
+						ctrack.addNotes( t, trackNotes.get( t ) );
+					}
+				}
+				
+				if( !ctrack.isEmpty() )
+				{
+					notes.add( ctrack );
+				}
+			}
+		}
+		
+		return notes;
 	}
 	
 	public void setTempo( int tempo )

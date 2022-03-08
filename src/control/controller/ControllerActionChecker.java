@@ -39,6 +39,8 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 	private int statistic = 0;
 	private boolean recoverLevelReported = false;
 	
+	private boolean updateLevelGoal = false;
+	
 	private IOwner owner = null;
 	private int ownerID = IOwner.ANONYMOUS;
 	
@@ -208,7 +210,9 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 							if( this.repCounter < 1 )
 							{
 								this.fireActionEvent( InputActionEvent.ACTION_DONE );
-							}
+							}							
+							
+							this.recoverLevelReach.set( false );
 						}
 					}
 					
@@ -237,6 +241,8 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 					
 					if( !this.recoverLevelReach.getAndSet( true ) )
 					{
+						this.updateLevelGoal = true;
+						
 						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RESTORED_LEVEL );
 						
 						this.recoverLevelReported = true;
@@ -250,17 +256,25 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 				final int rep = this.repCounter;
 				if( enable )
 				{
-					final double tp = timerPercentage;					
-					Thread t = new Thread() 
+					if( this.updateLevelGoal )
 					{
-						public void run() 
+						final double tp = timerPercentage;
+						Thread t = new Thread() 
 						{
-							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage )" );
-							ScreenControl.getInstance().setUpdateLevelInputGoal( tp, rep, owner );
+							public void run() 
+							{
+								super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage )" );
+								ScreenControl.getInstance().setUpdateLevelInputGoal( tp, rep, owner );
+							};
 						};
-					};
-					t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal");
-					t.start();
+						t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal");
+						t.start();
+						
+						if( this.archievedTarget.get() )
+						{
+							this.updateLevelGoal = false;
+						}
+					}						
 				}
 				else if( this.enabledController )
 				{

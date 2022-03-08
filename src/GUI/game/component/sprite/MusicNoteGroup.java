@@ -39,6 +39,7 @@ import gui.game.component.event.SpriteEventListener;
 import config.IOwner;
 import config.Player;
 import control.music.MusicPlayerControl;
+import general.ArrayTreeMap;
 import general.NumberRange;
 import image.BasicPainter2D;
 import image.icon.MusicInstrumentIcons;
@@ -70,6 +71,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	private Point2D.Double previousLocation = null;
 	
 	private List< IROTrack > noteTracks;
+	private List< IROTrack > dissonantNoteTracks;
 	
 	private BufferedImage noteImg = null;
 	
@@ -129,7 +131,42 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		this.trackID = "track-" + System.nanoTime();
 		
 		this.noteTracks = new ArrayList< IROTrack >();
-		this.noteTracks.addAll( Notes );	
+		this.dissonantNoteTracks = new ArrayList< IROTrack >();
+		
+		if( Notes != null )
+		{
+			this.noteTracks.addAll( Notes );	
+			
+			for( IROTrack t : Notes )
+			{
+				IROTrack disT = new IROTrack( t.getID() );
+				disT.setInstrument( t.getInstrument() );
+				disT.setTempo( t.getTempo() );
+				disT.setVoice( t.getVoice() );
+				
+				ArrayTreeMap< Double,  Note > tN = t.getTrackNotes(); 
+				
+				for( Double time : tN.keySet() )
+				{
+					List< Note > nots = new ArrayList<Note>();
+					List< Note > nL = tN.get( time );
+					for( Note nt : nL )
+					{					
+						Note n = new Note( nt );
+						byte v = n.getValue();						
+						n.changeValue( ( v == 127) ? -1 : 1 );
+						nots.add( n );
+					}
+					
+					disT.addNotes( nots );
+				}
+				
+				if( !disT.isEmpty() )
+				{
+					this.dissonantNoteTracks.add( disT );
+				}
+			}
+		}
 						
 		//this.pentagram = pen;		
 		this.shiftVelocity = shiftVel;
@@ -234,6 +271,11 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		}
 	}
 	
+	public Color getPreactionColor()
+	{
+		return preactionColor;
+	}
+	
 	public void setWaitingActionColor( Color c )
 	{
 		if( c != null )
@@ -242,12 +284,22 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		}
 	}
 	
+	public Color getWaitingActionColor() 
+	{
+		return waitingActionColor;
+	}
+	
 	public void setActionColor( Color c )
 	{
 		if( c != null )
 		{
 			this.actionColor = c;
 		}
+	}
+	
+	public Color getActionColor() 
+	{
+		return actionColor;
 	}
 	
 	public void setState( State state )
@@ -283,6 +335,11 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		
 		this.animationActive = ( this.noteImg != null );
 				
+	}
+	
+	public BufferedImage getNoteImg() 
+	{
+		return noteImg;
 	}
 	
 	public void setTempo( int bpm )
@@ -351,6 +408,11 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		return this.noteTracks;
 	}
 	
+	public List< IROTrack > getDissonantNotes()
+	{
+		return this.dissonantNoteTracks;
+	}
+		
 	public double getDuration()
 	{
 		double dur = 0;

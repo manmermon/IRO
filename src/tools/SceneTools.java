@@ -12,7 +12,6 @@ import java.util.TreeSet;
 
 import org.jfugue.theory.Note;
 
-import gui.game.screen.level.Level;
 import gui.game.screen.level.build.LevelMusicSheetSegment;
 import config.ConfigApp;
 import config.Settings;

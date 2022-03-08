@@ -27,7 +27,7 @@ public class InputGoal extends AbstractSprite implements IPossessable
 	
 	private final int startAngle = 90;
 	
-	private final double reachedTargetShowingTime = 1.5D;
+	private final double reachedTargetShowingTime = .75D;
 	
 	private long startTime = Long.MIN_VALUE;
 	private int repCounter = 0;
@@ -128,8 +128,9 @@ public class InputGoal extends AbstractSprite implements IPossessable
 			}
 			
 			if( this.isSetStartTime )
-			{
-				if( ( ( System.nanoTime() - this.startTime ) / 1e9D ) < this.reachedTargetShowingTime )
+			{		
+				double vt = ( System.nanoTime() - this.startTime ) / 1e9D;
+				if( vt < this.reachedTargetShowingTime )
 				{
 					if( sprite != null )
 					{
@@ -141,7 +142,7 @@ public class InputGoal extends AbstractSprite implements IPossessable
 					}
 				}
 				else
-				{
+				{					
 					this.percentageTime = 0D;
 					this.isSetStartTime = false;
 				}
@@ -153,7 +154,23 @@ public class InputGoal extends AbstractSprite implements IPossessable
 	
 	public boolean wasTheGoalAchieved()
 	{
-		return this.isSetStartTime;
+		boolean goal = false;
+		
+		synchronized ( this.percentageTime)
+		{
+			goal = this.percentageTime >= 100 && this.repCounter < 1;
+		}
+		
+		return goal;
+	}
+	
+	public void reset()
+	{
+		synchronized( this.percentageTime )
+		{
+			this.percentageTime = 0D;
+			this.repCounter = 0;
+		}
 	}
 	
 	public void setPercentage( double percentageTime, int rep )

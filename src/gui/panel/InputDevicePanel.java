@@ -924,19 +924,22 @@ public class InputDevicePanel extends JPanel
 		
 		if( streams.length == 1 )
 		{
-			t.addRowSelectionInterval( 0, 0 );
-			Set< Player > players = ConfigApp.getPlayers();
-			if( players.size() == 1 )
+			if( t.getRowCount() > 0 )
 			{
-				JTableHeader th = t.getTableHeader();
-				TableColumnModel tcm = th.getColumnModel();				
-				TableColumn tc = tcm.getColumn( 0 );
-				DefaultCellEditor ed = (DefaultCellEditor)tc.getCellEditor();
-				JComboBox cbb = (JComboBox)ed.getComponent();
-				
-				Player player = players.iterator().next();
-				cbb.setSelectedItem( player );
-				t.setValueAt( player,  0, 0 );
+				t.addRowSelectionInterval( 0, 0 );
+				Set< Player > players = ConfigApp.getPlayers();
+				if( players.size() == 1 )
+				{
+					JTableHeader th = t.getTableHeader();
+					TableColumnModel tcm = th.getColumnModel();				
+					TableColumn tc = tcm.getColumn( 0 );
+					DefaultCellEditor ed = (DefaultCellEditor)tc.getCellEditor();
+					JComboBox cbb = (JComboBox)ed.getComponent();
+					
+					Player player = players.iterator().next();
+					cbb.setSelectedItem( player );
+					t.setValueAt( player,  0, 0 );
+				}
 			}
 		}
 	}

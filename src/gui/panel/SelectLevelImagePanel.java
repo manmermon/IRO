@@ -166,157 +166,168 @@ public class SelectLevelImagePanel extends JPanel
 			}
 				
 			//Level lv = new Level( size, preview.getBounds() );
-			Level lv = new Level( size );
-			
-			Background back = new Background( size, Level.BACKGROUND_ID );
-			back.setZIndex( Level.PLANE_BRACKGROUND );
-			lv.addBackgroud( back );
-			if( bgPath != null )
+			Level lv = null;
+			try 
 			{
-				try
-				{
-					Image img = ImageIO.read( new File( bgPath ) );
-						
-					img = img.getScaledInstance( back.getBounds().width
-												, back.getBounds().height
-												, Image.SCALE_SMOOTH );
-							
-					back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
-				}
-				catch (IOException ex)
-				{	
-				}
+				lv = new Level( size, null, null );
 			}
-			
-	
-			Stave pen = new Stave( size, Level.STAVE_ID );
-			pen.setZIndex( 0 );
-			lv.addPentagram( pen );
-			
-			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() );
-			//Fret fret = new Fret( pen, IScene.FRET_ID );
-			Fret fret = new Fret( Level.FRET_ID, sizeFret );
-			fret.setZIndex( 2 );
-			Point2D.Double loc = new Point2D.Double();
-			loc.x = lv.getSize().width / 2;
-			loc.y = 0;
-			fret.setScreenLocation( loc );
-			lv.addFret( fret );
-			
-			char n = 'A';
-			int padding = 0;
-			for( Settings setting : ConfigApp.getSettings() )
-			{			
-				List< IROTrack > notes = new ArrayList< IROTrack >( );
-				IROTrack tr = new IROTrack();
-				tr.addNote( 0, new Note( n + "" ) );
-				notes.add( tr );
-				MusicNoteGroup noteSprite1 = new MusicNoteGroup( "Test1"
-																, 0
-																, notes
-																, Level.NOTE_ID
-																//, pen
-																, pen.getRailHeight()
-																, (int)fret.getScreenLocation().x + padding
-																, 0D
-																, false );
-				noteSprite1.setState( State.ACTION );
-				
-				BufferedImage noteImg = null;
-				if( notPath != null )
-				{
-					try
-					{
-						Image img = ImageIO.read( new File( notPath ) );
-						
-						/*
-						Color bg = new Color( 255, 255, 255, 140 );
-						Dimension s = noteSprite1.getBounds().getSize();
-						noteImg = (BufferedImage)basicPainter2D.circle( 0, 0, s.width, bg, null );
-						noteImg = (BufferedImage)basicPainter2D.composeImage( noteImg, 0, 0
-																			, basicPainter2D.copyImage( 
-																					img.getScaledInstance( noteImg.getWidth() 
-																							, noteImg.getHeight()
-																							, Image.SCALE_SMOOTH ) ) );
-						 */
-						noteImg = (BufferedImage)img;
-					}
-					catch (Exception ex) 
-					{
-					}
-				}
-				noteSprite1.setImage( noteImg );
-				
-				ConfigParameter par = setting.getParameter( ConfigApp.ACTION_COLOR );
-				Object c = par.getSelectedValue();
-				if( c != null )
-				{
-					noteSprite1.setActionColor( (Color)c );
-				}
-				
-				notes = new ArrayList< IROTrack >( );
-				tr = new IROTrack();
-				tr.addNote( 0, new Note( n + "" ) );
-				notes.add( tr );
-				MusicNoteGroup noteSprite2 = new MusicNoteGroup( "Test2"
-																, 0
-																, notes
-																, Level.NOTE_ID
-																//, pen
-																, pen.getRailHeight()
-																, (int)fret.getScreenLocation().x 
-																	+ padding 
-																	+ noteSprite1.getBounds().width
-																, 0D
-																, false );
-				noteSprite2.setState( State.WAITING_ACTION );
-				noteSprite2.setImage( noteImg );
-				
-				par = setting.getParameter( ConfigApp.WAITING_ACTION_COLOR );
-				c = par.getSelectedValue();
-				if( c != null )
-				{
-					noteSprite2.setWaitingActionColor( (Color)c );
-				}
-				
-				notes = new ArrayList< IROTrack >( );
-				tr = new IROTrack();
-				tr.addNote( 0, new Note( n + "" ) );
-				notes.add( tr );
-				MusicNoteGroup noteSprite3 = new MusicNoteGroup( "Test3"
-																, 0
-																, notes
-																, Level.NOTE_ID
-																//, pen
-																, pen.getRailHeight()
-																, ( size.width + (int)fret.getBounds().getMaxX() ) / 2   
-																	+ padding
-																, 0D
-																, false );
-				noteSprite3.setState( State.PREACTION );
-				noteSprite3.setImage( noteImg );
-																
-				par = setting.getParameter( ConfigApp.PREACTION_COLOR );
-				c = par.getSelectedValue();
-				if( c != null )
-				{
-					noteSprite3.setPreactionColor( (Color)c);
-				}
-					
-				lv.addNote( noteSprite1 );
-				lv.addNote( noteSprite2 );
-				lv.addNote( noteSprite3 );
-				
-				n++;
+			catch (Exception e) 
+			{
 			}
 			
 			preview.setVisible( false );
 			preview.removeAll();
 			
-			Frame fr = new Frame();
-			fr.setScene(  lv.getScene() );
+			if( lv != null )
+			{
+				Background back = new Background( size, Level.BACKGROUND_ID );
+				back.setZIndex( Level.PLANE_BRACKGROUND );
+				lv.addBackgroud( back );
+				if( bgPath != null )
+				{
+					try
+					{
+						Image img = ImageIO.read( new File( bgPath ) );
+							
+						img = img.getScaledInstance( back.getBounds().width
+													, back.getBounds().height
+													, Image.SCALE_SMOOTH );
+								
+						back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
+					}
+					catch (IOException ex)
+					{	
+					}
+				}
+				
+		
+				Stave pen = new Stave( size, Level.STAVE_ID );
+				pen.setZIndex( 0 );
+				lv.addPentagram( pen );
+				
+				Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() );
+				//Fret fret = new Fret( pen, IScene.FRET_ID );
+				Fret fret = new Fret( Level.FRET_ID, sizeFret );
+				fret.setZIndex( 2 );
+				Point2D.Double loc = new Point2D.Double();
+				loc.x = lv.getSize().width / 2;
+				loc.y = 0;
+				fret.setScreenLocation( loc );
+				lv.addFret( fret );
+				
+				char n = 'A';
+				int padding = 0;
+				for( Settings setting : ConfigApp.getSettings() )
+				{			
+					List< IROTrack > notes = new ArrayList< IROTrack >( );
+					IROTrack tr = new IROTrack();
+					tr.addNote( 0, new Note( n + "" ) );
+					notes.add( tr );
+					MusicNoteGroup noteSprite1 = new MusicNoteGroup( "Test1"
+																	, 0
+																	, notes
+																	, Level.NOTE_ID
+																	//, pen
+																	, pen.getRailHeight()
+																	, (int)fret.getScreenLocation().x + padding
+																	, 0D
+																	, false );
+					noteSprite1.setState( State.ACTION );
+					
+					BufferedImage noteImg = null;
+					if( notPath != null )
+					{
+						try
+						{
+							Image img = ImageIO.read( new File( notPath ) );
+							
+							/*
+							Color bg = new Color( 255, 255, 255, 140 );
+							Dimension s = noteSprite1.getBounds().getSize();
+							noteImg = (BufferedImage)basicPainter2D.circle( 0, 0, s.width, bg, null );
+							noteImg = (BufferedImage)basicPainter2D.composeImage( noteImg, 0, 0
+																				, basicPainter2D.copyImage( 
+																						img.getScaledInstance( noteImg.getWidth() 
+																								, noteImg.getHeight()
+																								, Image.SCALE_SMOOTH ) ) );
+							 */
+							noteImg = (BufferedImage)img;
+						}
+						catch (Exception ex) 
+						{
+						}
+					}
+					noteSprite1.setImage( noteImg );
+					
+					ConfigParameter par = setting.getParameter( ConfigApp.ACTION_COLOR );
+					Object c = par.getSelectedValue();
+					if( c != null )
+					{
+						noteSprite1.setActionColor( (Color)c );
+					}
+					
+					notes = new ArrayList< IROTrack >( );
+					tr = new IROTrack();
+					tr.addNote( 0, new Note( n + "" ) );
+					notes.add( tr );
+					MusicNoteGroup noteSprite2 = new MusicNoteGroup( "Test2"
+																	, 0
+																	, notes
+																	, Level.NOTE_ID
+																	//, pen
+																	, pen.getRailHeight()
+																	, (int)fret.getScreenLocation().x 
+																		+ padding 
+																		+ noteSprite1.getBounds().width
+																	, 0D
+																	, false );
+					noteSprite2.setState( State.WAITING_ACTION );
+					noteSprite2.setImage( noteImg );
+					
+					par = setting.getParameter( ConfigApp.WAITING_ACTION_COLOR );
+					c = par.getSelectedValue();
+					if( c != null )
+					{
+						noteSprite2.setWaitingActionColor( (Color)c );
+					}
+					
+					notes = new ArrayList< IROTrack >( );
+					tr = new IROTrack();
+					tr.addNote( 0, new Note( n + "" ) );
+					notes.add( tr );
+					MusicNoteGroup noteSprite3 = new MusicNoteGroup( "Test3"
+																	, 0
+																	, notes
+																	, Level.NOTE_ID
+																	//, pen
+																	, pen.getRailHeight()
+																	, ( size.width + (int)fret.getBounds().getMaxX() ) / 2   
+																		+ padding
+																	, 0D
+																	, false );
+					noteSprite3.setState( State.PREACTION );
+					noteSprite3.setImage( noteImg );
+																	
+					par = setting.getParameter( ConfigApp.PREACTION_COLOR );
+					c = par.getSelectedValue();
+					if( c != null )
+					{
+						noteSprite3.setPreactionColor( (Color)c);
+					}
+						
+					lv.addNote( noteSprite1 );
+					lv.addNote( noteSprite2 );
+					lv.addNote( noteSprite3 );
+					
+					n++;
+				}
+				
+				Frame fr = new Frame();
+				fr.setScene(  lv.getScene() );
+				
+				preview.add( fr, BorderLayout.CENTER );
+			}
 			
-			preview.add( fr, BorderLayout.CENTER );
 			preview.setVisible( true );			
 		}
 	}
