@@ -38,6 +38,8 @@ import music.sheet.IROTrack;
 
 import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -169,10 +171,15 @@ public class SelectLevelImagePanel extends JPanel
 			Level lv = null;
 			try 
 			{
-				lv = new Level( size, null, null );
+				Settings set = ConfigApp.getDefaultSettings();
+				set.setPlayer( new Player() );
+				List< Settings > ls = new ArrayList< Settings >();
+				ls.add( set );				
+				lv = new Level( new Rectangle( new Point(), size), ls, null );
 			}
 			catch (Exception e) 
 			{
+				e.printStackTrace();
 			}
 			
 			preview.setVisible( false );

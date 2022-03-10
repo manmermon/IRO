@@ -48,6 +48,8 @@ import GUI.tabbedpanel.ClosableTabbedPanel;
 import GUI.tabbedpanel.CollectionEvent;
 import GUI.tabbedpanel.CollectionListener;
 import gui.dialogs.AppSelectPlayer;
+import GUI.dialog.InfoDialog;
+import GUI.dialog.OpeningDialog;
 import GUI.menu.MenuScroller;
 import gui.panel.InputDevicePanel;
 import gui.panel.SelectLevelImagePanel;
@@ -66,8 +68,10 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 
 import java.awt.FlowLayout;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 
@@ -740,31 +744,57 @@ public class MainAppUI extends JFrame
 			{				
 				@Override
 				public void actionPerformed(ActionEvent e) 
-				{
-					try
+				{	
+					JButton b = (JButton)e.getSource();
+					b.requestFocus();
+										
+					Thread t = new Thread()
 					{
-						JButton b = (JButton)e.getSource();
-						b.requestFocus();
-												
-						GameManager.getInstance().startGame();
-					} 
-					catch (Exception ex)
-					{
-						ex.printStackTrace();
-						
-						String msg = "";
-						
-						if( ex.getCause() != null )
+						public void run() 
 						{
-							msg = ex.getCause().toString();
-						}
+							Dimension d = new Dimension( 300, 200 );
+							
+							OpeningDialog dialog = new OpeningDialog( d
+									, MainAppUI.getInstance().getIconImage()
+									, MainAppUI.getInstance().getTitle()
+									, Language.getLocalCaption( Language.LOADING )
+									, Color.WHITE );
+							
+							//dialog.setAlwaysOnTop( true );
+							dialog.setLocationRelativeTo( MainAppUI.getInstance() );
+							dialog.setUndecorated( false );
+							//dialog.setDefaultCloseOperation( OpeningDialog.DISPOSE_ON_CLOSE );
+							dialog.setVisible( true );		
+							
+							try
+							{												
+								GameManager.getInstance().startGame();
+							} 
+							catch (Exception ex)
+							{
+								//ex.printStackTrace();
+								
+								String msg = "";
+								
+								if( ex.getCause() != null )
+								{
+									msg = ex.getCause().toString();
+								}
 
-						msg += "\n" +ex.getMessage();
+								msg += "\n" +ex.getMessage();
+								
+								JOptionPane.showMessageDialog( ui, msg 
+																, Language.getLocalCaption( Language.ERROR )
+																, JOptionPane.ERROR_MESSAGE );
+							}
+							finally 
+							{
+								dialog.dispose();
+							}
+						};
+					};
 						
-						JOptionPane.showMessageDialog( ui, msg 
-														, Language.getLocalCaption( Language.ERROR )
-														, JOptionPane.ERROR_MESSAGE );
-					}
+					t.start();
 				}
 			});
 		}

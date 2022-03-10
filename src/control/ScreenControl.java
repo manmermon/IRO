@@ -1,5 +1,9 @@
 package control;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import javax.swing.JOptionPane;
 
 import gui.MainAppUI;
@@ -29,11 +33,13 @@ public class ScreenControl extends AbstractStoppableThread
 	
 	private ISceneControl sceneCtrl;
 	
-	private InputActionEvent inAction = null;
+	private List< InputActionEvent > inActions = null;
 	
 	private ScreenControl( ) 
 	{
 		super.setName( this.getClass().getSimpleName() );
+		
+		this.inActions = new ArrayList<InputActionEvent>();
 	}
 	
 	public static ScreenControl getInstance()
@@ -63,10 +69,10 @@ public class ScreenControl extends AbstractStoppableThread
 						
 			if( this.sceneCtrl != null )
 			{
-				this.sceneCtrl.updateScene( this.inAction );
+				this.sceneCtrl.updateScene( this.inActions );
 			}
 			
-			this.inAction = null;
+			this.inActions.clear();
 		}
 	}
 
@@ -246,11 +252,11 @@ public class ScreenControl extends AbstractStoppableThread
 	 * @see @see control.events.InputActionListerner#InputAction(control.events.InputActionEvent)
 	 */
 	@Override
-	public void InputAction(InputActionEvent ev)
+	public synchronized void InputAction(InputActionEvent ev)
 	{
 		if( ev != null )
 		{
-			this.inAction = ev;
+			this.inActions.add( ev );
 		}
 	}
 

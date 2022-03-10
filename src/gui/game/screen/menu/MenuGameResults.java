@@ -10,13 +10,10 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Box;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import gui.GameManager;
@@ -275,7 +272,7 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 			{	
 				h -= 1;
 				sc = new Score( Level.SCORE_ID
-								, score.t2.intValue()
+								, score.t2
 								, 0
 								, h
 								, new Point( 0 , (int)( ( i + 0.5 ) * h ) ) );
@@ -306,7 +303,7 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 	}
 	
 	@Override
-	public void action(InputActionEvent act) 
+	public void action( List< InputActionEvent > act) 
 	{
 		
 	}

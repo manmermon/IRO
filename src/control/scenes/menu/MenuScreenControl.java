@@ -2,6 +2,10 @@ package control.scenes.menu;
 
 import gui.game.screen.IScene;
 import gui.game.screen.menu.IGameMenu;
+
+import java.util.List;
+
+import config.IOwner;
 import control.events.InputActionEvent;
 import control.scenes.AbstractSceneControl;
 import exceptions.SceneException;
@@ -36,7 +40,7 @@ public class MenuScreenControl extends AbstractSceneControl
 	 * @see @see control.scenes.AbstractSceneControl#specificUpdateScene(control.inputs.IInputAction)
 	 */
 	@Override
-	protected void specificUpdateScene( InputActionEvent act ) throws SceneException
+	protected void specificUpdateScene( List< InputActionEvent > act ) throws SceneException
 	{	
 	}
 
@@ -68,7 +72,7 @@ public class MenuScreenControl extends AbstractSceneControl
 	}
 
 	@Override
-	public void changeSceneSpeed(boolean reduce) 
+	public void changeSceneSpeed(IOwner player, boolean reduceVel, boolean changeTempo ) 
 	{	
 	}
 }

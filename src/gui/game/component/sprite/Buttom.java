@@ -10,6 +10,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 import control.controller.IInputable;
 import control.events.InputActionEvent;
@@ -203,7 +204,7 @@ public class Buttom extends AbstractSprite implements IInputable
 	 * @see @see control.controller.IInputable#action(control.controller.IInputAction)
 	 */
 	@Override
-	public void action( InputActionEvent act)
+	public void action( List< InputActionEvent > act)
 	{
 		// TODO Auto-generated method stub
 		

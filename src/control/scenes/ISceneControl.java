@@ -1,6 +1,10 @@
 package control.scenes;
 
 import gui.game.screen.IScene;
+
+import java.util.List;
+
+import config.IOwner;
 import control.events.InputActionEvent;
 import control.events.SceneEventListener;
 import exceptions.SceneException;
@@ -23,7 +27,7 @@ public interface ISceneControl
 	 * @param act
 	 * @throws SceneException
 	 */
-	public void updateScene( InputActionEvent act ) throws SceneException;
+	public void updateScene( List< InputActionEvent > act ) throws SceneException;
 	
 	/**
 	 * 
@@ -80,8 +84,9 @@ public interface ISceneControl
 	public void removeSceneEventListener( SceneEventListener listener );
 	
 	/**
-	 * 
-	 * @param reduce
+	 * @param owner
+	 * @param reduceVel
+	 * @param changeTempo
 	 */
-	public void changeSceneSpeed( boolean reduce );
+	public void changeSceneSpeed( IOwner owner, boolean reduceVel, boolean changeTempo );
 }

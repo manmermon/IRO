@@ -32,7 +32,7 @@ import javax.swing.event.EventListenerList;
 import gui.game.component.event.SpriteEvent;
 import gui.game.component.event.SpriteEventListener;
 
-public abstract class AbstractSprite implements ISprite 
+public abstract class AbstractSprite implements ISprite
 {
 	protected Point2D.Double screenLoc;
 	protected int zIndex;
@@ -158,13 +158,13 @@ public abstract class AbstractSprite implements ISprite
 		}
 	}
 	
-	/*
+	//*
 	@Override
 	public void setFrameBounds(Rectangle bounds) 
 	{
 		this.frameBounds = bounds;
 	}
-	*/
+	//*/
 	
 	/*
 	 * (non-Javadoc)
@@ -194,8 +194,7 @@ public abstract class AbstractSprite implements ISprite
 		
 	@Override
 	public Rectangle getBounds()
-	{
-		
+	{		
 		Rectangle r = new Rectangle( (int)this.screenLoc.x
 									, (int)this.screenLoc.y
 									, (int)this.spriteSize.width
@@ -236,6 +235,5 @@ public abstract class AbstractSprite implements ISprite
 		return sprite;
 	}
 	
-	protected abstract BufferedImage createSprite();
-	
+	protected abstract BufferedImage createSprite();		
 }

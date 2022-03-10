@@ -50,6 +50,7 @@ public class Fret extends AbstractSprite
 	{
 		super( id );
 		
+		super.setSize( size );
 		
 		//this.fretWidth = pentagram.getPentragramWidth() / 3;
 		this.fretWidth = size.width;
@@ -65,7 +66,7 @@ public class Fret extends AbstractSprite
 		this.fret.addPoint( this.fretWidth, size.height );
 		this.fret.addPoint( 0, size.height );
 		
-		this.fretFillColor = new Color( 255, 255, 255, 160 );		
+		this.fretFillColor = new Color( 255, 255, 255, 160 );
 	}
 	
 	public int getFretWidth()
@@ -91,7 +92,7 @@ public class Fret extends AbstractSprite
 		else
 		{
 			if( this.fret.contains( prevLoc ) )
-			{ 
+			{
 				this.fireFretEvent( FretEvent.NOTE_EXITED, note );
 			}
 		}
@@ -189,11 +190,11 @@ public class Fret extends AbstractSprite
 		{
 			playerID = note.getOwner().getId();
 		}
-		
+				
 		switch ( typeEvent )
 		{
 			case FretEvent.NOTE_ENTERED:
-			{
+			{	
 				RegistrarStatistic.add( playerID, FieldType.NOTE_ENTER_FRET );
 				break;
 			}

@@ -77,7 +77,7 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2022, 3 - 1, 8 );
+	public static final Calendar buildDate = new GregorianCalendar( 2022, 3 - 1, 10 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
@@ -342,7 +342,7 @@ public class ConfigApp
 		listPlayerConfig.put( player, cfg );		
 	}
 	
-	private static Settings getDefaultSettings( ) throws ConfigParameterException
+	public static Settings getDefaultSettings( ) throws ConfigParameterException
 	{
 		Settings cfg = new Settings();
 		
@@ -1569,7 +1569,7 @@ public class ConfigApp
 				//+ " id integer PRIMARY KEY AUTOINCREMENT"
 				+ " userID integer PRIMARY KEY "
 				+ ", reactionTime real CHECK (reactionTime > 0)"
-				+ ", recoverTime real CHECK (recoverTime > 0)"
+				+ ", recoverTime real CHECK (recoverTime >= 0)"
 				+ ", colorPreaction integer"
 				+ ", colorWaitingAction integer"
 				+ ", colorAction integer"

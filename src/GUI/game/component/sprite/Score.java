@@ -25,20 +25,20 @@ public class Score extends AbstractSprite implements IPossessable
 
 	private FontMetrics fontmetrics;
 	
-	private int score = 0;
+	private double score = 0;
 	
-	private int scoreUnit = 100;
+	private double scoreUnit = 100D;
 	
 	private IOwner _player;
 	
 	private Image playerPic = null;
 	
-	private final String scoreFormat = "%06d";
+	private final String scoreFormat = "%06.0f";
 
 	/**
 	 * 
 	 */
-	public Score( String id, int value, int scoreUnitValue, int h, Point loc )
+	public Score( String id, double value, double scoreUnitValue, int h, Point loc )
 	{
 		super( id );
 		
@@ -70,6 +70,16 @@ public class Score extends AbstractSprite implements IPossessable
 		}
 		
 		return d;
+	}
+	
+	public void setScore(double score) 
+	{
+		this.score = score;
+	}
+	
+	public double getScore() 
+	{
+		return score;
 	}
 		
 	/*(non-Javadoc)
@@ -127,7 +137,7 @@ public class Score extends AbstractSprite implements IPossessable
 		}
 	}
 	
-	public void setScoreUnit( int unit )
+	public void setScoreUnit( double unit )
 	{
 		this.scoreUnit = unit;
 	}

@@ -138,6 +138,8 @@ public class Language
 	
 	public static final String REPETITIONS = "REPETITIONS";
 	
+	public static final String LOADING = "LOADING";
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
@@ -146,6 +148,10 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( LOADING, defaultLanguage, "Loading..." );
+		cap.setCaption( esEs, "Cargando...");
+		captions.put( LOADING, cap );
 		
 		cap = new Caption( SCORE, defaultLanguage, "Score" );
 		cap.setCaption( esEs, "Puntuación");

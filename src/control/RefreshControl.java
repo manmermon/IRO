@@ -78,89 +78,6 @@ public class RefreshControl extends AbstractStoppableThread
 		}
 		
 		this.delay = System.nanoTime();
-		
-		/*
-		this.scene = new Level( this.canvas.getSize() );
-		Background back = new Background( this.scene.getSize() );
-		back.setZIndex( -1 );
-		this.scene.addBackgroud( back );
-		
-		Pentragram pen = new Pentragram( this.scene.getSize() );
-		pen.setZIndex( 0 );
-		this.scene.addPentagram( pen );
-		
-		double vel = 200;
-		
-		*/
-		
-		/*
-		for( int i = 0; i < 16; i++ )
-		{
-			int pos = (int)( pen.getPentragramWidth() - ( (i % 5 )  * 80 ));
-			Note note = new Note( ( i % 7 )
-								, pen
-								,  pos
-								, vel );
-			note.setZIndex( 1 );
-			this.scene.addNote( note );
-		}
-		*/
-		/*
-		String[] nots = new String[] { "C", "R", "R", "D", "R","R",  "E","R", "R", "R", "C", "R", "R", "R"
-				, "C", "R", "R", "D", "R","R",  "E","R", "R", "R", "C", "R", "R", "R"
-				, "E", "R", "R", "F", "R","R",  "G","R", "R", "R", "R"
-				, "E", "R", "R", "F", "R","R",  "G","R", "R"
-				, "G", "R", "R", "A", "R","R",  "G","R", "R", "R", "F", "R", "R", "E", "R", "R", "C","R", "R", "R"
-				, "G", "R", "R", "A", "R","R",  "G","R", "R", "R", "F", "R", "R", "E", "R", "R", "C","R", "R", "R"
-				, "D", "R", "R", "G", "R","R",  "C","R", "R"
-				, "D", "R", "R", "G", "R","R",  "C","R", "R" 
-		};
-		*/
-		
-		/*
-		String[] nots = new String[] { "C4", "R", "C#4", "R","C#4", "R","C#4", "R","D4", "D4","D4", "D#4","D#4","D#4","D#4","D#4","D#4","E","D",  "C","G", "F", "E", "D", "C", "G", "R"
-				 , "C", "R", "R", "D", "R","R",  "E","R", "R", "R", "C", "R", "R", "R"
-				 , "R", "R", "R", "R", "R","R",  "R","R", "R", "R", "R"
-				 , "E", "R", "R", "F", "R","R",  "G","R", "R"
-				 , "E", "F", "G", "G", "F","E",  "D","C", "C", "D", "E", "E", "D", "D", "R", "R", "C","R", "R", "R"
-				 , "G", "R", "R", "A", "R","R",  "G","R", "R", "R", "F", "R", "R", "E", "R", "R", "C","R", "R", "R"
-				 , "D", "R", "R", "G", "R","R",  "C","R", "R"
-				 , "D", "R", "R", "G", "R","R",  "C","R", "R" };
-		*/
-		
-		/*
-		int initPos = pen.getPentragramWidth();
-		for( String c : nots )
-		{
-			boolean ghost = c.charAt( 0 ) == 'E';
-			
-			if( !c.equals( "R" ) )
-			{
-				Note note = new Note( c
-									, pen
-									,  initPos
-									, vel
-									, ghost );
-				note.setZIndex( 1 );
-				this.scene.addNote( note );
-			}
-			
-			initPos += 45;
-		}
-		
-		Fret fret = new Fret( pen );
-		fret.setZIndex( 2 );
-		Point loc = new Point();
-		loc.x = this.scene.getSize().width / 2;
-		loc.y = 0;
-		fret.setScreenLocation( loc );
-		this.scene.addFret( fret );
-		
-		this.sceneCtr = new LevelControl( this.scene, this.canvas );
-		this.sceneCtr.startThread();
-		
-		this.canvas.setSceneControl( this.sceneCtr );
-		*/
 	}
 	
 	@Override
@@ -197,25 +114,5 @@ public class RefreshControl extends AbstractStoppableThread
 			
 			this.delay = System.nanoTime();
 		}
-	}
-	
-	/*
-	public void action( InputAction act )
-	{
-		synchronized( this.screenCtrl )
-		{
-			this.inAction = act;
-		}
-	}
-	*/
-	
-	/*
-	public void putSceneControl( LevelControl sceneCtrl ) throws IllegalLevelStateException
-	{
-		synchronized( this.screenCtrl )
-		{
-			this.screenCtrl.setSceneControl( sceneCtrl );
-		}
-	}
-	*/
+	}	
 }

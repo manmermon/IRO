@@ -21,8 +21,8 @@
 
 package control.scenes.level;
 
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import gui.game.component.event.FretEvent;
@@ -35,9 +35,7 @@ import gui.game.component.sprite.Score;
 import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import tools.MusicSheetTools;
-import tools.SceneTools;
 import config.IOwner;
-import config.Settings;
 import control.events.BackgroundMusicEventListener;
 import control.events.InputActionEvent;
 import control.events.SceneEvent;
@@ -55,7 +53,7 @@ public class LevelControl extends AbstractSceneControl
 	
 	private boolean noteIntoFret = false;
 	
-	//private int consecutiveErrors = 0;
+	private int consecutiveErrors = 0;
 	
 	//private Map< Integer, Boolean > playerAchievedTarget = new HashMap<Integer, Boolean>();
 	
@@ -130,73 +128,98 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	protected void updatedLoopAfterUpdateScene() 
 	{		
-		Level lv = (Level)this.scene;
-		Fret fret = lv.getFret();
-		
-		List< ISprite > Notes = this.scene.getSprites( Level.NOTE_ID, true );
-
-		if( fret != null 
-				&& Notes != null 
-				&& !Notes.isEmpty() )
+		synchronized( this.scene )
 		{
-			boolean noteInFret = false;
+			Level lv = (Level)this.scene;
+			Fret fret = lv.getFret();
 			
-			for( ISprite __Note : Notes )
+			List< ISprite > Notes = this.scene.getSprites( Level.NOTE_ID, true );
+	
+			if( fret != null 
+					&& Notes != null 
+					&& !Notes.isEmpty() )
 			{
-				MusicNoteGroup note = (MusicNoteGroup) __Note;
-
-				if( fret.isNoteIntoFret( note ) )
-				{	
-					noteInFret = true;
-					
-					if( note.isGhost() )
+				boolean noteInFret = false;
+				
+				if( !this.actionOwner.isEmpty() )
+				{
+					String n = "<";
+					for( ISprite __Note : Notes )
 					{
-						if( !note.isSelected() )
-						{
-							note.setSelected( true );
-							note.setState(gui.game.component.sprite.MusicNoteGroup.State.ACTION );
-						}
+						MusicNoteGroup note = (MusicNoteGroup) __Note;
+						n += note.getOwner().getId() + ", ";
 					}
-					else if( !this.actionOwner.isEmpty() )
-					{
-						IOwner noteOwner = note.getOwner();
+					System.out.println("LevelControl.updatedLoopAfterUpdateScene() " + this.actionOwner + " " + n);
+				}
+				
+				for( ISprite __Note : Notes )
+				{
+					MusicNoteGroup note = (MusicNoteGroup) __Note;
+	
+					if( fret.isNoteIntoFret( note ) )
+					{	
+						noteInFret = true;
 						
-						Integer act;
-						while( ( act = this.actionOwner.pollFirst() ) != null )
+						if( note.isGhost() )
 						{
-							if( !note.isSelected() && noteOwner != null && noteOwner.getId() == act )
+							if( !note.isSelected() )
 							{
 								note.setSelected( true );
 								note.setState(gui.game.component.sprite.MusicNoteGroup.State.ACTION );
-
-								for( ISprite score : this.scene.getSprites( Level.SCORE_ID, true ) )
-								{
-									Score sc = (Score)score;
-									IOwner owner = sc.getOwner();
-
-									if( owner != null && owner.getId() == act )
-									{
-										sc.incrementScore();
-									}
-								}							
 							}
 						}
+						else if( !this.actionOwner.isEmpty() )
+						{
+							IOwner noteOwner = note.getOwner();
+							
+							System.out.println("LevelControl.updatedLoopAfterUpdateScene() " + this.actionOwner );
+							
+							Integer act;
+							Iterator< Integer > itActOwner = this.actionOwner.iterator();
+							while( itActOwner.hasNext() )
+							{
+								act = itActOwner.next();
+								
+								if( !note.isSelected() && noteOwner != null && noteOwner.getId() == act )
+								{
+									itActOwner.remove();
+									
+									note.setSelected( true );
+									note.setState(gui.game.component.sprite.MusicNoteGroup.State.ACTION );
+	
+									for( ISprite score : this.scene.getSprites( Level.SCORE_ID, true ) )
+									{
+										Score sc = (Score)score;
+										IOwner owner = sc.getOwner();
+	
+										if( owner != null && owner.getId() == act )
+										{
+											sc.incrementScore();
+										}
+									}	
+									
+									break;
+								}
+							}
+						}
+						else if( !note.isSelected() )
+						{
+							note.setState(gui.game.component.sprite.MusicNoteGroup.State.WAITING_ACTION );
+						}
 					}
-					else if( !note.isSelected() )
-					{
-						note.setState(gui.game.component.sprite.MusicNoteGroup.State.WAITING_ACTION );
-					}
-				}
-				else
-				{						
-					if( !note.isSelected() )
-					{
-						note.setState(gui.game.component.sprite.MusicNoteGroup.State.PREACTION );						
-					}
-				}					
+					else
+					{						
+						if( !note.isSelected() )
+						{
+							note.setState(gui.game.component.sprite.MusicNoteGroup.State.PREACTION );						
+						}
+					}					
+				}				
+				
+				this.actionOwner.clear();
+				
+				this.noteIntoFret = noteInFret;
 			}
-			
-			this.noteIntoFret = noteInFret;
 		}
 	}
 	
@@ -223,15 +246,26 @@ public class LevelControl extends AbstractSceneControl
 	 * @see @see control.scenes.AbstractSceneControl#specificUpdateScene(control.inputs.IInputAction)
 	 */
 	@Override
-	public void specificUpdateScene( InputActionEvent act ) throws SceneException
+	public synchronized void specificUpdateScene( List< InputActionEvent > acts ) throws SceneException
 	{			
-		if( act != null )
+		if( acts != null )
 		{
-			if( act.getType() == InputActionEvent.ACTION_DONE )
+			synchronized( this.scene )
 			{
-				IOwner owner = act.getActionOwner();
+				for( InputActionEvent act : acts )
+				{
+					if( act.getType() == InputActionEvent.ACTION_DONE )
+					{
+						IOwner owner = act.getActionOwner();
+						
+						this.actionOwner.add( owner.getId() );
+					}
+				}
 				
-				this.actionOwner.add( owner.getId() );
+				if( !this.actionOwner.isEmpty() )
+				{
+					System.out.println("LevelControl.specificUpdateScene() " + this.actionOwner );
+				}
 			}
 		}
 	}
@@ -302,7 +336,7 @@ public class LevelControl extends AbstractSceneControl
 	/*(non-Javadoc)
 	 * @see @see GUI.game.component.event.FretEventListener#FretEvent(GUI.game.component.event.FretEvent)
 	 */
-	long t = 0;
+	//long t = 0;
 	@Override
 	public void FretEvent(gui.game.component.event.FretEvent ev)
 	{
@@ -322,6 +356,8 @@ public class LevelControl extends AbstractSceneControl
 						this.playerAchievedTarget.put( playerID, false );
 						target = ( target == null ) ? false : target;
 						//*/
+					
+						int thr = 100;			
 										
 						if( !note.isSelected() )
 						{					
@@ -331,15 +367,25 @@ public class LevelControl extends AbstractSceneControl
 							
 							MusicPlayerControl.getInstance().playDissonantTrack( playerID, note.getDissonantNotes() );
 							
-							/*
-							this.consecutiveErrors++;
-																					
-							if( this.consecutiveErrors > 2  )
+							//*
+							this.consecutiveErrors++;				
+							
+							if( this.consecutiveErrors > thr  )
 							{
 								this.consecutiveErrors = 0;
-								this.changeSceneSpeed( false );
+								this.changeSceneSpeed( note.getOwner(), false, false );
 							}
-							*/
+							//*/
+						}
+						else
+						{
+							this.consecutiveErrors--;
+							
+							if( this.consecutiveErrors < -thr  )
+							{
+								this.consecutiveErrors = 0;
+								this.changeSceneSpeed( note.getOwner(), true, false );
+							}
 						}
 					}
 					
@@ -347,7 +393,7 @@ public class LevelControl extends AbstractSceneControl
 				}
 				case FretEvent.NOTE_ENTERED:
 				{
-					t = System.currentTimeMillis();
+					//t = System.currentTimeMillis();
 					
 					break;
 				}
@@ -355,7 +401,7 @@ public class LevelControl extends AbstractSceneControl
 		}
 	}
 	
-	public void updateInputGoal( double percentageTime, int rep, IOwner owner )
+	public synchronized void updateInputGoal( double percentageTime, int rep, IOwner owner )
 	{
 		if( this.scene != null && owner != null )
 		{
@@ -389,34 +435,31 @@ public class LevelControl extends AbstractSceneControl
 	}
 	
 	@Override
-	public void setPauseScene(boolean pause) 
+	public void setPauseScene(boolean pause ) 
 	{
 		super.setPauseScene( pause );
 		MusicPlayerControl.getInstance().setPauseMusic( pause );
 	}
 
 	@Override
-	public void changeSceneSpeed( boolean reduce ) 
+	public void changeSceneSpeed( IOwner player, boolean reduceVel, boolean changeTempo  ) 
 	{
-		this.setPauseScene( true );
+		MusicPlayerControl.getInstance().setPauseMusic( true );
 		
 		Level lv = (Level)this.scene;
 		
-		double perc = 0.8;
+		double percReaction = 0.8;
+		double percRecover = 0.8;
 		
-		if( !reduce )
+		if( !reduceVel )
 		{
-			perc = 1.2;
+			percReaction = 1.2;
+			percRecover = 1.2;
 		}
 		
-		int tempo = MusicPlayerControl.getInstance().getMusicTempo();
+		lv.changeSpeed( player, percReaction, percRecover / percRecover );
 		
-		double tempoTime = MusicSheetTools.getQuarterTempo2Second( tempo );
-		tempoTime *= perc;
-		int newTempo = MusicSheetTools.getQuarterSecond2Tempo( tempoTime );
-		
-		//double newTempoTime = MusicSheetTools.getQuarterTempo2Second( newTempo );
-		
+		/*
 		List< Settings > players = lv.getPlayers();		
 		if( players != null )
 		{
@@ -426,25 +469,39 @@ public class LevelControl extends AbstractSceneControl
 				Double vel = velsByPlayer.get( pl.getPlayer().getId() );
 				if( vel != null )
 				{
-					double reactionTime = SceneTools.getAvatarReactionTime(  lv.getFret().getFretWidth(), vel );
-					double prop = (double)tempo / newTempo;
-					reactionTime *= prop;
-					double newVel = SceneTools.getAvatarSpeed( lv.getFret().getFretWidth(), reactionTime );
+					//double reactionTime = SceneTools.getAvatarReactionTime(  lv.getFret().getFretWidth(), vel );
+					//double prop = (double)tempo / newTempo;
+					//reactionTime *= prop;
+					//double newVel = SceneTools.getAvatarSpeed( lv.getFret().getFretWidth(), reactionTime );
 					
-					lv.changeSpeed( newVel, pl.getPlayer()  );
+					lv.changeSpeed( pl.getPlayer(), percReaction, percRecover );
 				}
 			}
 		}
+		//*/
 		
-		MusicPlayerControl.getInstance().changeTempo( newTempo );
-		super.setPauseScene( false );
-		try 
+		if( changeTempo )
 		{
-			MusicPlayerControl.getInstance().startMusic();
+			int tempo = MusicPlayerControl.getInstance().getMusicTempo();
+			
+			double tempoTime = MusicSheetTools.getQuarterTempo2Second( tempo );
+			tempoTime *= percReaction;
+			int newTempo = MusicSheetTools.getQuarterSecond2Tempo( tempoTime );
+			
+			//double newTempoTime = MusicSheetTools.getQuarterTempo2Second( newTempo );
+			
+			MusicPlayerControl.getInstance().changeTempo( newTempo );
+			
+			try 
+			{
+				MusicPlayerControl.getInstance().startMusic();
+			}
+			catch (Exception e) 
+			{
+				e.printStackTrace();
+			}		
 		}
-		catch (Exception e) 
-		{
-			e.printStackTrace();
-		}		
+		
+		MusicPlayerControl.getInstance().setPauseMusic( false );
 	}
 }

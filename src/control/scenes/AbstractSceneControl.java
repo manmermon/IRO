@@ -1,6 +1,7 @@
 package control.scenes;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.event.EventListenerList;
@@ -155,7 +156,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 	 * @see @see control.scenes.ISceneControl#updateScene(control.inputs.IInputAction)
 	 */
 	@Override
-	public void updateScene( InputActionEvent act ) throws SceneException
+	public synchronized void updateScene( List< InputActionEvent > act ) throws SceneException
 	{	
 		this.specificUpdateScene( act );
 		
@@ -363,7 +364,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 	 * @param act
 	 * @throws SceneException
 	 */
-	protected abstract  void specificUpdateScene( InputActionEvent act ) throws SceneException;
+	protected abstract  void specificUpdateScene( List< InputActionEvent > act ) throws SceneException;
 	
 	/**
 	 * 
@@ -371,7 +372,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 	protected abstract void setInputables( IScene scene );
 
 	@Override
-	public void setPauseScene(boolean pause) 
+	public void setPauseScene( boolean pause ) 
 	{
 		if( this.scene != null )
 		{
