@@ -752,6 +752,7 @@ public class MainAppUI extends JFrame
 					{
 						public void run() 
 						{
+							/*
 							Dimension d = new Dimension( 300, 200 );
 							
 							OpeningDialog dialog = new OpeningDialog( d
@@ -765,6 +766,7 @@ public class MainAppUI extends JFrame
 							dialog.setUndecorated( false );
 							//dialog.setDefaultCloseOperation( OpeningDialog.DISPOSE_ON_CLOSE );
 							dialog.setVisible( true );		
+							*/
 							
 							try
 							{												
@@ -773,6 +775,8 @@ public class MainAppUI extends JFrame
 							catch (Exception ex)
 							{
 								//ex.printStackTrace();
+								
+								MainAppUI.getInstance().setVisible( true );
 								
 								String msg = "";
 								
@@ -789,7 +793,7 @@ public class MainAppUI extends JFrame
 							}
 							finally 
 							{
-								dialog.dispose();
+								//dialog.dispose();
 							}
 						};
 					};

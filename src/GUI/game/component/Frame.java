@@ -21,6 +21,7 @@
 
 package gui.game.component;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -43,6 +44,8 @@ public class Frame extends JPanel
 		super.setDoubleBuffered( true );
 		
 		super.setFocusable( true );
+		
+		super.setBackground( Color.WHITE );
 		
 		super.addKeyListener( new KeyAdapter()
 		{	

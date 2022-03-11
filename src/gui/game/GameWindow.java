@@ -97,12 +97,15 @@ public class GameWindow extends JFrame
 				}
 			}
 		});
-		
+	}
+
+	public void setWindowsKeyStrokeAction()
+	{
 		super.getRootPane().registerKeyboardAction( keyActions.getEscapeCloseWindows( "EscapeCloseWindow"), 
 													KeyStroke.getKeyStroke( KeyEvent.VK_ESCAPE, 0), 
 													JComponent.WHEN_IN_FOCUSED_WINDOW );
 	}
-
+	
 	public Dimension getSceneSize()
 	{
 		super.pack();

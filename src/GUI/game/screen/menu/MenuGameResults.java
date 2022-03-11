@@ -51,15 +51,15 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 	 */
 	public MenuGameResults( Dimension sceneSize//, Rectangle frameBounds
 							, List< Tuple< Player, Double > > results
-							, List< ISprite > bgs
+							, List< ISprite > backgroundImages
 							, boolean showNextBt
 							, boolean showStopBt ) 
 	{
 		super( sceneSize );
 		
-		if( bgs != null )
+		if( backgroundImages != null )
 		{
-			for( ISprite sp : bgs )
+			for( ISprite sp : backgroundImages )
 			{
 				super.add( sp, PLANE_BRACKGROUND );
 			}

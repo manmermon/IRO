@@ -149,8 +149,8 @@ public class Language
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
 		
-		cap = new Caption( LOADING, defaultLanguage, "Loading..." );
-		cap.setCaption( esEs, "Cargando...");
+		cap = new Caption( LOADING, defaultLanguage, "Loading" );
+		cap.setCaption( esEs, "Cargando");
 		captions.put( LOADING, cap );
 		
 		cap = new Caption( SCORE, defaultLanguage, "Score" );

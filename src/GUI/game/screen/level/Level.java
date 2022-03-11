@@ -88,7 +88,9 @@ public class Level extends Scene implements IPausable
 	public static final int PLANE_INPUT_TARGET = 4;
 	public static final int PLANE_TIME = 5;
 	public static final int PLANE_PAUSE = 6;
-
+	
+	public static final int PLANE_ALWAYS_IN_FRONT = Integer.MAX_VALUE;
+	public static final int PLANE_ALWAYS_AT_THE_END = Integer.MIN_VALUE;
 
 	public static final String BACKGROUND_ID = "background";
 	public static final String STAVE_ID = "stave";
@@ -98,6 +100,7 @@ public class Level extends Scene implements IPausable
 	public static final String INPUT_TARGET_ID = "input";
 	public static final String TIME_ID = "time";
 	public static final String PAUSE_ID = "pause";
+	public static final String LOADING_ID = "loading";
 
 	private int BPM;
 
@@ -350,8 +353,17 @@ public class Level extends Scene implements IPausable
 	}
 	*/
 	
-	public void changeSpeed( IOwner player, double percentcReactionTimeVariation, double percentRecoverTimeVariation )
+	public void checkLevelSpeed( )
 	{	
+		for( Settings set : this.playerSettings )
+		{
+			Player player = set.getPlayer();
+			this.changeSpeed( player, 1, 1 );
+		}
+	}
+	
+	public void changeSpeed( IOwner player, double percentcReactionTimeVariation, double percentRecoverTimeVariation )
+	{
 		if( player != null )
 		{
 			int idPlayer = player.getId();

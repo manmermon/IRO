@@ -22,9 +22,12 @@
 package gui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -36,10 +39,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFrame;
-import javax.swing.JMenuBar;
+import javax.swing.KeyStroke;
 
 import gui.game.GameWindow;
 import gui.game.component.sprite.ISprite;
+import gui.game.component.sprite.Loading;
 import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import gui.game.screen.menu.MenuGameResults;
@@ -59,13 +63,14 @@ import general.NumberRange;
 import general.Tuple;
 import statistic.RegistrarStatistic;
 import stoppableThread.IStoppableThread;
+import thread.stoppableThread.AbstractStoppableThread;
 
 public class GameManager 
 {
 	private static GameManager manager;
 	
 	private GameWindow gameWindow = null;
-	private mouseTracking autoHideMenu = null;
+	//private mouseTracking autoHideMenu = null;
 	
 	private Object sync = new Object();
 	
@@ -121,50 +126,68 @@ public class GameManager
 		{
 			if( full  )
 			{
-				if (this.autoHideMenu != null)
+				GraphicsDevice device = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+				if( device.isFullScreenSupported() && false )
 				{
-					this.autoHideMenu.stopThread( IStoppableThread.FORCE_STOP );
-					this.autoHideMenu = null;
+					device.setFullScreenWindow( this.gameWindow );					
 				}
-				
-				this.gameWindow.setVisible(false);
-				this.gameWindow.setUndecorated( true );
-				
-				this.gameWindow.toFront();
-				this.gameWindow.setExtendedState( JFrame.MAXIMIZED_BOTH );				
-				
-				this.gameWindow.addMouseMotionListener(new MouseAdapter()
+				else
 				{
-					public void mouseMoved(MouseEvent e)
+					/*
+					if (this.autoHideMenu != null)
 					{
-						JFrame jf = (JFrame)e.getSource();
-						JMenuBar menuBar = jf.getJMenuBar();
-						
+						this.autoHideMenu.stopThread( IStoppableThread.FORCE_STOP );
+						this.autoHideMenu = null;
+					}
+					//*/
+					
+					this.gameWindow.setVisible(false);
+					this.gameWindow.setUndecorated( true );
+					
+					this.gameWindow.toFront();
+					//this.gameWindow.setExtendedState( JFrame.MAXIMIZED_BOTH );
+					//this.gameWindow.setLocation( 0, 0);
+					Dimension size = Toolkit.getDefaultToolkit().getScreenSize();
+					this.gameWindow.setBounds( new Rectangle( new Point(), size ) );
+					this.gameWindow.setPreferredSize( size );
+					
+					/*
+					this.gameWindow.addMouseMotionListener(new MouseAdapter()
+					{
+						public void mouseMoved(MouseEvent e)
+						{
+							JFrame jf = (JFrame)e.getSource();
+							JMenuBar menuBar = jf.getJMenuBar();
+							
+							if (menuBar != null)
+							{
+								System.out.println("GameManager.fullScreen(...).new MouseAdapter() {...}.mouseMoved() " + e.getY());
+								menuBar.setVisible(e.getY() < 15);
+							}
+	
+						}
+					});
+					*/
+					
+					/*
+					this.autoHideMenu = new mouseTracking( this.gameWindow );
+		
+					try
+					{
+						this.autoHideMenu.startThread();
+					}
+					catch (Exception e1)
+					{
+						JMenuBar menuBar = this.gameWindow.getJMenuBar();
 						if (menuBar != null)
 						{
-							System.out.println("GameManager.fullScreen(...).new MouseAdapter() {...}.mouseMoved() " + e.getY());
-							menuBar.setVisible(e.getY() < 15);
+							menuBar.setVisible(true);
 						}
-
-					}
-				});
-
-				this.autoHideMenu = new mouseTracking( this.gameWindow );
 	
-				try
-				{
-					this.autoHideMenu.startThread();
-				}
-				catch (Exception e1)
-				{
-					JMenuBar menuBar = this.gameWindow.getJMenuBar();
-					if (menuBar != null)
-					{
-						menuBar.setVisible(true);
+						this.autoHideMenu.stopThread( IStoppableThread.FORCE_STOP );
+						this.autoHideMenu = null;
 					}
-
-					this.autoHideMenu.stopThread( IStoppableThread.FORCE_STOP );
-					this.autoHideMenu = null;
+					*/
 				}
 			}
 		}
@@ -190,26 +213,23 @@ public class GameManager
 				this.gameWindow.dispose();
 				this.gameWindow = null;
 			}
-		}		
+		}
 		
 		RegistrarStatistic.startRegister();
-		
+
 		this.leves.clear();
-				
+
 		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
-		
-		this.gameWindow = new GameWindow( players );
-		this.gameWindow.setIconImage( MainAppUI.getInstance().getIconImage() );
-		
+
 		IControllerMetadata[] controllers = new IControllerMetadata[ players.size() ];
-		
+
 		for( int i = 0; i < players.size(); i++ ) 
 		{
 			Player player = players.get( i );
-			
+
 			Settings setting = ConfigApp.getPlayerSetting( player );
 			ConfigParameter par = setting.getParameter( ConfigApp.SELECTED_CONTROLLER );
-			
+
 			Object ctr = par.getSelectedValue();
 
 			if( ctr != null )
@@ -217,13 +237,13 @@ public class GameManager
 				controllers[ i ] = (IControllerMetadata)ctr;				
 			}
 		}
-		
+
 		for( int i = 0; i < players.size(); i++ ) 
 		{
 			if( controllers[ i ] == null )
-			{
+			{				
 				throw new ConfigParameterException( "Player " + players.get( i ).getName() 
-													+ ": controller non found." );
+						+ ": controller non found." );
 			}
 		}
 
@@ -232,60 +252,113 @@ public class GameManager
 		for( int i = 0; i < controllers.length; i++ )
 		{			
 			IControllerMetadata meta = controllers[ i ];
-			
+
 			checkLSLInfo:
-			for( LSLStreamInfo str : streams )
-			{
-				if( str.uid().equals( meta.getControllerID() ) )
+				for( LSLStreamInfo str : streams )
 				{
-					lslInfos[ i ] = str;
-					break checkLSLInfo;
+					if( str.uid().equals( meta.getControllerID() ) )
+					{
+						lslInfos[ i ] = str;
+						break checkLSLInfo;
+					}
 				}
-			}
 		}
 
 		for( int i = 0; i < lslInfos.length; i++ )
 		{
 			LSLStreamInfo info = lslInfos[ i ];
-			
+
 			if( info == null )
-			{
+			{				
 				throw new IOException( "Player " + players.get( i ).getName() + ": controller not found." );
 			}
 		}
-		
+
+		AbstractStoppableThread loadAnimationThread = null;
 		try
 		{
+			this.gameWindow = new GameWindow( players );
+			this.gameWindow.setIconImage( MainAppUI.getInstance().getIconImage() );
+			this.gameWindow.setAlwaysOnTop( true );
+			this.gameWindow.setDefaultCloseOperation( JFrame.DO_NOTHING_ON_CLOSE );
+
+			this.fullScreen( true );		
+
+			final Loading loading = new Loading( this.gameWindow.getSceneBounds().getSize(), Level.LOADING_ID );
+
+			loadAnimationThread = new AbstractStoppableThread() 
+			{			
+				@Override
+				protected void runInLoop() throws Exception 
+				{
+					synchronized ( this )
+					{
+						super.wait( 500L );
+					}
+
+					loading.updateSprite();
+					
+					setGameFrame( loading.getSprite() );
+				}
+
+				@Override
+				protected void preStopThread(int friendliness) throws Exception {}
+
+				@Override
+				protected void postStopThread(int friendliness) throws Exception {}
+
+				@Override
+				protected void cleanUp() throws Exception 
+				{
+					setGameFrame( null );
+				}
+
+				@Override
+				protected void runExceptionManager(Throwable e) 
+				{
+					if( !( e instanceof InterruptedException ) )
+					{
+						e.printStackTrace();
+					}
+				}
+			};		
+
+			loadAnimationThread.startThread();
+
+			MainAppUI.getInstance().setVisible( false );
+
+			this.gameWindow.setVisible( true );
+
 			List< IControllerMetadata > ctrs = new ArrayList<IControllerMetadata>();
-			
+
 			for( int i = 0; i < players.size(); i++ )
 			{
 				//
 				// REACTION TIMES
 				//
-				
+
 				Player player = players.get( i );
-				
+
 				Settings setting = ConfigApp.getPlayerSetting( player);
-				
+
 				//
 				// CONTROLLER
 				//
-				
+
 				IControllerMetadata cmeta = controllers[ i ];
-				
+
 				ConfigParameter par = setting.getParameter( ConfigApp.INPUT_MIN_VALUE );
 				double min = ((Number)par.getSelectedValue()).doubleValue();
-		
+
 				par = setting.getParameter( ConfigApp.INPUT_MAX_VALUE);
 				double max = ((Number)par.getSelectedValue()).doubleValue();
-				
+
 				par = setting.getParameter( ConfigApp.TIME_IN_INPUT_TARGET);
 				double timeTarget = ((Number)par.getSelectedValue()).doubleValue();
-				
+
 				par = setting.getParameter( ConfigApp.INPUT_SELECTED_CHANNEL );
 				int ch = ((Number)par.getSelectedValue()).intValue() - 1;
-				
+
 				if( ch < 0 || ch >= cmeta.getNumberOfChannels() )
 				{
 					throw new ConfigParameterException( "Selected channel out of controller's bounds [0, " + (cmeta.getNumberOfChannels() - 1 ) + "]."  );
@@ -293,44 +366,42 @@ public class GameManager
 
 				par = setting.getParameter( ConfigApp.MOV_REPETITIONS );
 				int rep = ((Number)par.getSelectedValue()).intValue();
-				
+
 				cmeta.setPlayer( player );
 				cmeta.setRecoverInputLevel( min );
 				cmeta.setTargetTimeInLevelAction( timeTarget );
 				cmeta.setActionInputLevel( new NumberRange( max, Double.POSITIVE_INFINITY ));
 				cmeta.setRepetitions( rep );
-				
+
 				RegistrarStatistic.addControllerSetting( player.getId(), cmeta );
-				
+
 				this.gameWindow.setTargetInputValues( player, min, max);
-				
+
 				ctrs.add( cmeta );
 			}
-			
+
 			ControllerManager.getInstance().startController( ctrs );
-			
+
 			for( IControllerMetadata cmeta : ctrs )
 			{
 				NumberRange rng = new NumberRange( cmeta.getRecoverInputLevel(), cmeta.getActionInputLevel().getMin() );
 				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
-																				, rng, cmeta.getTargetTimeInLevelAction( )
-																				, cmeta.getRepetitions() );
+						, rng, cmeta.getTargetTimeInLevelAction( )
+						, cmeta.getRepetitions() );
 				actCheck.setOwner( cmeta.getPlayer() );				
 				ControllerManager.getInstance().addControllerListener( cmeta.getPlayer(), actCheck );
 				actCheck.addInputActionListerner( ScreenControl.getInstance() );
 				actCheck.startThread();
 			}
-						
+
 			this.gameWindow.putControllerListener();
-			
+
 			ControllerManager.getInstance().setEnableControllerListener( false );
-			
-			this.fullScreen( true );		
-			
+
 			ConfigParameter muteSession = ConfigApp.getGeneralSetting( ConfigApp.MUTE_SESSION );			
-			
+
 			boolean mute = false;
-			
+
 			if( muteSession != null && muteSession.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
 			{
 				mute = (Boolean)muteSession.getSelectedValue();
@@ -341,50 +412,54 @@ public class GameManager
 			{
 				settings.add( ConfigApp.getPlayerSetting( player ) );
 			}
-			
+
 			for( String song : this.getLevelSongs() )
 			{			
 				File fileSong = new File( song );
-								
+
 				Level level = this.getLevel( fileSong, mute, settings ); 
 				level.setMuteSession( mute );
-				
+
 				this.leves.add( level );
 			}
-			
+
 			if( this.leves.isEmpty() )
 			{
 				throw new SceneException( "Levels empty" );
 			}
 			else
-			{
+			{	
 				this.currentLevel = this.leves.poll();
 				this.setLevel( this.currentLevel );
-			}
-			
-			MainAppUI.getInstance().setVisible( false );
-
-			this.gameWindow.setVisible( true );			
+			}			
 		}
 		catch( Exception ex )
 		{
 			ex.printStackTrace();
-			
+
 			if( this.gameWindow != null )
 			{
 				this.gameWindow.dispose();
 				this.gameWindow = null;
 			}
-			
+
 			MainAppUI.getInstance().setVisible( true );
 
 			throw ex;
 		}
 		finally 
 		{
-			
-		}
-		
+			if( loadAnimationThread != null )
+			{
+				loadAnimationThread.stopThread( IStoppableThread.FORCE_STOP );
+			}
+
+			if( this.gameWindow != null )
+			{	
+				this.gameWindow.setWindowsKeyStrokeAction();
+				this.gameWindow.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+			}
+		}		
 	}
 
 	private synchronized List< String > getLevelSongs() throws ConfigParameterException
@@ -420,13 +495,15 @@ public class GameManager
 
 	private Level getLevel( File fileSong, boolean isMuteSession, List< Settings > settings  ) throws Exception
 	{
-		Rectangle screenBounds = this.gameWindow.getSceneBounds();
-				
-		//Level level = LevelMusicBuilder.getLevel( fileSong, screenBounds.getSize(), settings );		
-	
-		//LevelMusicBuilder.changeLevelSpeed( level );
+		Level level = null;
 		
-		Level level = new Level( screenBounds, settings, fileSong );
+		Rectangle screenBounds = this.gameWindow.getSceneBounds();
+
+		//Level level = LevelMusicBuilder.getLevel( fileSong, screenBounds.getSize(), settings );		
+
+		//LevelMusicBuilder.changeLevelSpeed( level );
+
+		level = new Level( screenBounds, settings, fileSong );
 		level.setMuteSession( isMuteSession );
 		
 		return level;
@@ -439,13 +516,16 @@ public class GameManager
 			throw new SceneException( "Level null" );
 		}
 		
-		this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() + ": " + level.getMidiFile().getName() );
+		if( this.gameWindow != null )
+		{
+			this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() + ": " + level.getMidiFile().getName() );
+			
+			ControllerManager.getInstance().setEnableControllerListener( true );
+			
+			ScreenControl.getInstance().setScene( level );
 		
-		ControllerManager.getInstance().setEnableControllerListener( true );
-		
-		ScreenControl.getInstance().setScene( level );
-	
-		ScreenControl.getInstance().startScene();
+			ScreenControl.getInstance().startScene();
+		}
 	}
 	
 	public synchronized boolean hasNextLevel()
@@ -470,6 +550,8 @@ public class GameManager
 			{
 				this.currentLevel.setScore( idPlayer, scores.get( idPlayer ) );
 			}
+			
+			//this.currentLevel.checkLevelSpeed();
 			
 			this.setLevel( this.currentLevel );
 						
@@ -558,7 +640,8 @@ public class GameManager
 			{
 				if( this.gameWindow != null )
 				{
-					this.gameWindow.setVisible( false );
+					//this.gameWindow.setVisible( false );
+					this.gameWindow.dispose();
 					this.gameWindow = null;
 					
 					System.gc();

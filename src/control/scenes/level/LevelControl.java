@@ -149,7 +149,6 @@ public class LevelControl extends AbstractSceneControl
 						MusicNoteGroup note = (MusicNoteGroup) __Note;
 						n += note.getOwner().getId() + ", ";
 					}
-					System.out.println("LevelControl.updatedLoopAfterUpdateScene() " + this.actionOwner + " " + n);
 				}
 				
 				for( ISprite __Note : Notes )
@@ -171,9 +170,7 @@ public class LevelControl extends AbstractSceneControl
 						else if( !this.actionOwner.isEmpty() )
 						{
 							IOwner noteOwner = note.getOwner();
-							
-							System.out.println("LevelControl.updatedLoopAfterUpdateScene() " + this.actionOwner );
-							
+														
 							Integer act;
 							Iterator< Integer > itActOwner = this.actionOwner.iterator();
 							while( itActOwner.hasNext() )
@@ -260,12 +257,7 @@ public class LevelControl extends AbstractSceneControl
 						
 						this.actionOwner.add( owner.getId() );
 					}
-				}
-				
-				if( !this.actionOwner.isEmpty() )
-				{
-					System.out.println("LevelControl.specificUpdateScene() " + this.actionOwner );
-				}
+				}				
 			}
 		}
 	}
@@ -357,7 +349,7 @@ public class LevelControl extends AbstractSceneControl
 						target = ( target == null ) ? false : target;
 						//*/
 					
-						int thr = 100;			
+						int thr = 100 * 0;			
 										
 						if( !note.isSelected() )
 						{					
