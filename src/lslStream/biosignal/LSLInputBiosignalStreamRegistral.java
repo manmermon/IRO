@@ -2,12 +2,12 @@ package lslStream.biosignal;
 
 import lslStream.LSLStreamInfo.StreamType;
 import lslStream.event.InputLSLDataReader;
+import stoppableThread.IStoppableThread;
 
 public class LSLInputBiosignalStreamRegistral extends InputLSLDataReader
 {
 	public LSLInputBiosignalStreamRegistral( StreamType strType ) 
-	{
-		
+	{		
 	}
 	
 	@Override
@@ -23,6 +23,12 @@ public class LSLInputBiosignalStreamRegistral extends InputLSLDataReader
 	@Override
 	protected void postStopThread(int friendliness) throws Exception 
 	{	
+	}
+
+	@Override
+	public void close() 
+	{
+		super.stopThread( IStoppableThread.FORCE_STOP );
 	}
 	
 }

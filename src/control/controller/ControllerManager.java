@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import config.Player;
-import control.controller.lslStreams.InputLSLStreamController;
 import control.events.IInputControllerListener;
 import lslStream.controller.LSLInputControllerStream;
 import lslStream.controller.LSLMetadataController;
@@ -95,7 +94,7 @@ public class ControllerManager
 			}
 		}
 	}
-	
+		
 	public void setEnableControllerListener( boolean ena )
 	{
 		for( IInputController controller : this.controllers )
@@ -106,7 +105,7 @@ public class ControllerManager
 			}
 		}
 	}
-		
+	
 	public List< IInputController > getControllers()
 	{
 		return this.controllers;

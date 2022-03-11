@@ -318,7 +318,11 @@ public class LSLInputStream extends AbstractStoppableThread
 			this.timer.stop();
 		}		
 		this.timer = null;
-				
+		
+		for( IInputLSLDataListener list : this.getListener() )
+		{
+			list.close();
+		}		
 	}
 		
 	protected void notifyProblem(Exception e)

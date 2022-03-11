@@ -77,9 +77,8 @@ public class SceneTools
 		return fm;
 	}
 
-	public static double getAvatarVel( int fretWidth, Settings playerSetting )
+	public static double getAvatarVel( int fretWidth, double reactionTime )
 	{
-		double reactionTime = ((Number)playerSetting.getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
 		double vel = fretWidth / reactionTime;
 		
 		return vel;

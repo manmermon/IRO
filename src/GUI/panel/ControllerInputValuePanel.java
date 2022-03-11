@@ -168,6 +168,12 @@ public class ControllerInputValuePanel extends JPanel implements IInputControlle
 		this.enaCtr = enable;
 	}
 
+	@Override
+	public void close() 
+	{
+		this.setEnableInputController( false );
+	}
+
 	/*(non-Javadoc)
 	 * @see @see control.events.IInputControllerListener#enableProcessInputControllerEvent(boolean)
 	 */

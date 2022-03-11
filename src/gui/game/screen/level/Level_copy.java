@@ -28,7 +28,6 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,11 +73,10 @@ import music.sheet.IROTrack;
 import music.sheet.MusicSheet;
 import music.sheet.io.IROMusicParserListener;
 import statistic.RegistrarStatistic;
-import stoppableThread.IStoppableThread;
 import tools.MusicSheetTools;
 import tools.SceneTools;
 
-public class Level extends Scene implements IPausable
+public class Level_copy extends Scene implements IPausable
 {
 	private static final double MIN_PLAYER_NOTE_TRACK = 0.5D;
 	
@@ -107,6 +105,7 @@ public class Level extends Scene implements IPausable
 	private int BPM;
 
 	private BackgroundMusic backgroundMusic;
+	private Map< Integer, BackgroundMusic > playerMusics;
 
 	private List< Settings > playerSettings = null;
 
@@ -114,49 +113,41 @@ public class Level extends Scene implements IPausable
 
 	private Boolean isMuteSession = false;
 
-	private ArrayDeque< MusicSheet > musics = null;
-	private MusicSheet currentMusic = null;
+	private MusicSheet music = null;
 	
 	private Rectangle sceneBounds;
 	
 	private Map< Integer, NumberTuple > playerTimes;
 	
-	private List< File > midiFiles = null;
+	private File midiFile = null;
 	
-	private boolean playGame = false;
-	
-	public Level( Rectangle sceneSize, List< Settings > playerSettings, List< File > midiMusicSheelFiles ) 
+	public Level_copy( Rectangle sceneSize, List< Settings > playerSettings, File midiMusicSheelFile ) 
 	{
 		super( sceneSize.getSize() );
 
 		this.sceneBounds = sceneSize;
 		
+		this.playerMusics = new HashMap< Integer, BackgroundMusic>();
 		this.BPM = MidiDefaults.DEFAULT_TEMPO_BEATS_PER_MINUTE;
 		
-		this.musics = new ArrayDeque< MusicSheet >();
+		this.midiFile = midiMusicSheelFile;
 		
-		if( midiMusicSheelFiles != null )
+		if( midiMusicSheelFile != null )
 		{
-			this.midiFiles = new ArrayList< File >( midiMusicSheelFiles );			
-			
-			for( File midiFile : midiMusicSheelFiles )
+			IROMusicParserListener tool = new IROMusicParserListener();
+			MidiParser parser = new MidiParser();
+			parser.addParserListener( tool );
+			try 
 			{
-				IROMusicParserListener tool = new IROMusicParserListener();
-				MidiParser parser = new MidiParser();
-				parser.addParserListener( tool );
-				try 
-				{
-					parser.parse( MidiSystem.getSequence( midiFile ) );
-					this.musics.add( tool.getSheet() );
-				}
-				catch (InvalidMidiDataException | IOException e) 
-				{
-				}
+				parser.parse( MidiSystem.getSequence( midiFile ) );
+				music = tool.getSheet() ;
+			}
+			catch (InvalidMidiDataException | IOException e) 
+			{
 			}
 		}
 		
-		this.playerSettings = new ArrayList< Settings>( playerSettings );
-		this.playerTimes = new HashMap< Integer, NumberTuple >();	
+		this.playerTimes = new HashMap<Integer, NumberTuple>();	
 		
 		for( Settings set : playerSettings )
 		{
@@ -166,53 +157,45 @@ public class Level extends Scene implements IPausable
 			
 			this.playerTimes.put( id, new NumberTuple( reactionTime, recoverTime ) );
 		}
-			}
+		
+		this.setLevel( sceneSize, playerSettings);
+	}
 	
-	public List< File > getMidiFiles() 
+	public File getMidiFiles() 
 	{
-		return this.midiFiles;
+		return this.midiFile;
 	}
 		
-	public List< Settings > getPlayers() 
+	public void setBackgroundPattern( BackgroundMusic backgroundPattern ) 
+	{
+		this.backgroundMusic = backgroundPattern;
+	}
+
+	public void setPlayerSheetMusic( Map< Integer, BackgroundMusic > playerSheets )
+	{
+		this.playerMusics.putAll( playerSheets );
+	}
+
+	public void setPlayers( List< Settings > players )
+	{
+		this.playerSettings = players;
+	}
+
+	public List<Settings> getPlayers() 
 	{
 		return this.playerSettings;
 	}
 
-	public void playLevel()
+	public Map< Integer, BackgroundMusic > getPlayerSheets()
 	{
-		if( !this.playGame )
-		{
-			this.playGame = true;
-			this.currentMusic = this.musics.poll(); 
-			this.makeLevel2( this.sceneBounds, this.playerSettings );
-		}
+		return this.playerMusics;
 	}
-		
-	public void enableLevel()
-	{		
-		this.playGame = false;
-	}
-	
-	public boolean isFinished()
-	{
-		return this.musics.isEmpty();
-	}
-	
+
 	public BackgroundMusic getBackgroundPattern() 
 	{
 		return this.backgroundMusic;
 	}
 
-	private void setBackgroundPattern( BackgroundMusic bgm) 
-	{
-		if( this.backgroundMusic != null )
-		{
-			this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
-		}
-		
-		this.backgroundMusic = bgm;
-	}
-	
 	public void addBackgroud( ISprite sprite )
 	{
 		sprite.setZIndex( PLANE_BRACKGROUND );
@@ -249,40 +232,23 @@ public class Level extends Scene implements IPausable
 	{
 		List< ISprite > fret = this.SPRITES.get( PLANE_FRET );
 
-		Fret f = null;
-		
-		if( fret != null && !fret.isEmpty() )
-		{
-			f = (Fret)fret.get( 0 );
-		}
-		
-		return f;
+		return (Fret)fret.get( 0 );
 	}
 
 	public Stave getPentagram()
 	{
 		List< ISprite > pen = this.SPRITES.get( PLANE_STAVE );
-		
-		Stave stave = null;
-		
-		if( pen != null && !pen.isEmpty() )
-		{
-			stave = (Stave)pen.get( 0 );
-		}
-		
-		return stave; 
+
+		return (Stave)pen.get( 0 ); 
 	}
 
 	public List< MusicNoteGroup > getAllNotes()
 	{
 		List< ISprite > sprites = this.SPRITES.get( PLANE_NOTE );
 		List< MusicNoteGroup > notes = new ArrayList< MusicNoteGroup >( );
-		if( sprites != null )
+		for( ISprite sprite : sprites )
 		{
-			for( ISprite sprite : sprites )
-			{
-				notes.add( (MusicNoteGroup)sprite );
-			}
+			notes.add( (MusicNoteGroup)sprite );
 		}
 
 		return notes;
@@ -335,7 +301,7 @@ public class Level extends Scene implements IPausable
 		{
 			this.pause = pause;
 
-			for( ISprite sp : super.getSprites( Level.PAUSE_ID, false ) )
+			for( ISprite sp : super.getSprites( Level_copy.PAUSE_ID, false ) )
 			{
 				sp.setVisible( this.pause );
 			}
@@ -366,6 +332,26 @@ public class Level extends Scene implements IPausable
 			return this.isMuteSession;
 		}
 	}
+
+	/*
+	public void changeSpeed( double newVel, IOwner player )
+	{
+		synchronized( this.pause )
+		{
+			if( newVel > 0  && player != null )
+			{
+				for( MusicNoteGroup mng : this.getNotes() )
+				{
+					IOwner iow = mng.getOwner();
+					if( iow != null && iow.getId() == player.getId() )
+					{
+						mng.setShiftSpeed( newVel );
+					}
+				}
+			}
+		}
+	}
+	*/
 	
 	public void changeSpeed( IOwner player, double percentcReactionTimeVariation, double percentRecoverTimeVariation )
 	{
@@ -385,19 +371,12 @@ public class Level extends Scene implements IPausable
 								
 				double reactionTime = percentcReactionTimeVariation * prevReactRecover.t1.doubleValue();
 				double recoverTime = percentRecoverTimeVariation * prevReactRecover.t2.doubleValue();
-				double thr = 1D;
-				reactionTime = ( reactionTime < thr ) ? thr : reactionTime;
-				
-				if( prevReactRecover.t1.doubleValue() == reactionTime 
-						&& prevReactRecover.t2.doubleValue() == recoverTime )
-				{
-					return;
-				}
+				reactionTime = ( reactionTime < 0.5 ) ? 0.5 : reactionTime;
 				
 				double stepTime = reactionTime + recoverTime;
 				
 				this.playerTimes.put( idPlayer, new NumberTuple( reactionTime, recoverTime ) );
-				System.out.println("Level.changeSpeed() " + this.playerTimes );
+				
 				
 				/*
 				 *  Get notes on screen
@@ -552,8 +531,9 @@ public class Level extends Scene implements IPausable
 				}
 				
 				// New notes
-					
-				List< MusicNoteGroup > nextNotes = this.setNotes( nextMusicTime, this.currentMusic.getDuration(), stepTime, 0, newVel );
+	
+				
+				List< MusicNoteGroup > nextNotes = this.setNotes( nextMusicTime, this.music.getDuration(), stepTime, 0, newVel );
 				double spaceBetweenNotes = stepTime * newVel;	
 				
 				
@@ -620,6 +600,13 @@ public class Level extends Scene implements IPausable
 	}
 	//*/
 
+	private void setLevel( Rectangle sceneSize, List< Settings > playerSettings ) 
+	{			
+			
+		//this.makeLevel( music, super.getSize(), playerSettings );
+		this.makeLevel2( sceneSize, playerSettings );
+	}
+
 
 	private void makeLevel( MusicSheet music, List< Settings > playerSettings )
 	{
@@ -646,8 +633,8 @@ public class Level extends Scene implements IPausable
 				path = bg.toString();
 			}
 
-			Background back = new Background( super.getSize(), Level.BACKGROUND_ID );
-			back.setZIndex( Level.PLANE_BRACKGROUND );
+			Background back = new Background( super.getSize(), Level_copy.BACKGROUND_ID );
+			back.setZIndex( Level_copy.PLANE_BRACKGROUND );
 			this.addBackgroud( back );
 			if( path != null )
 			{
@@ -666,19 +653,19 @@ public class Level extends Scene implements IPausable
 				}
 			}		
 
-			Pause pause = new Pause( super.getSize(), Level.PAUSE_ID );
-			pause.setZIndex( Level.PLANE_PAUSE );
+			Pause pause = new Pause( super.getSize(), Level_copy.PAUSE_ID );
+			pause.setZIndex( Level_copy.PLANE_PAUSE );
 			pause.setVisible( false );
 			this.addPause( pause );
 
-			Stave pen = new Stave( super.getSize(), Level.STAVE_ID );
-			pen.setZIndex( Level.PLANE_STAVE );
+			Stave pen = new Stave( super.getSize(), Level_copy.STAVE_ID );
+			pen.setZIndex( Level_copy.PLANE_STAVE );
 			this.addPentagram( pen );
 
 			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() ); 
 			//Fret fret = new Fret( pen, IScene.FRET_ID );
-			Fret fret = new Fret( Level.FRET_ID, sizeFret );
-			fret.setZIndex( Level.PLANE_FRET );
+			Fret fret = new Fret( Level_copy.FRET_ID, sizeFret );
+			fret.setZIndex( Level_copy.PLANE_FRET );
 			Point2D.Double loc = new Point2D.Double();
 			loc.x = this.getSize().width / 2;
 			loc.y = 0;
@@ -689,9 +676,9 @@ public class Level extends Scene implements IPausable
 			int hTS = pen.getRailHeight() / 2;
 			Rectangle bounds = pen.getBounds();			
 			//TimeSession time = new TimeSession( IScene.TIME_ID, pen );
-			TimeSession time = new TimeSession( Level.TIME_ID, hTS, bounds );
-			time.setZIndex( Level.PLANE_TIME );
-			this.add( time, Level.PLANE_TIME );
+			TimeSession time = new TimeSession( Level_copy.TIME_ID, hTS, bounds );
+			time.setZIndex( Level_copy.PLANE_TIME );
+			this.add( time, Level_copy.PLANE_TIME );
 
 			int wayWidth = ( super.getSize().width - (int)fret.getScreenLocation().x );
 
@@ -784,8 +771,8 @@ public class Level extends Scene implements IPausable
 						sc = 0D;
 					}
 
-					Score score = new Score( Level.SCORE_ID, sc.intValue(), (int)( 100 * maxNumNotes / nNotes ), pen.getRailHeight() / 2, pen.getBounds().getLocation() );
-					score.setZIndex( Level.PLANE_SCORE );
+					Score score = new Score( Level_copy.SCORE_ID, sc.intValue(), (int)( 100 * maxNumNotes / nNotes ), pen.getRailHeight() / 2, pen.getBounds().getLocation() );
+					score.setZIndex( Level_copy.PLANE_SCORE );
 					score.setOwner( playerSetting.getPlayer() );
 
 					if( prevScoreLoc != null )
@@ -802,9 +789,9 @@ public class Level extends Scene implements IPausable
 					this.add( score, score.getZIndex() );
 
 					//InputGoal goal = new InputGoal( IScene.INPUT_TARGET_ID, pen );
-					InputGoal goal = new InputGoal( Level.INPUT_TARGET_ID, pen.getRailHeight(), pen.getBounds() );
+					InputGoal goal = new InputGoal( Level_copy.INPUT_TARGET_ID, pen.getRailHeight(), pen.getBounds() );
 					goal.setOwner( playerSetting.getPlayer() );
-					goal.setZIndex( Level.PLANE_INPUT_TARGET );
+					goal.setZIndex( Level_copy.PLANE_INPUT_TARGET );
 					Point2D.Double goalLoc = new Point2D.Double();
 					goalLoc.y = prevScoreLoc.y;
 					goalLoc.x = prevScoreLoc.x + score.getSize().width + 5;
@@ -859,7 +846,7 @@ public class Level extends Scene implements IPausable
 						MusicNoteGroup noteSprite = new MusicNoteGroup( trackID
 								, timeTrackOnScreen //+ startDelay
 								, Tracks
-								, Level.NOTE_ID
+								, Level_copy.NOTE_ID
 								//, pen
 								, pen.getRailHeight()
 								, screenPos
@@ -905,7 +892,7 @@ public class Level extends Scene implements IPausable
 
 						noteSprite.setImage( noteImg );
 
-						noteSprite.setZIndex( Level.PLANE_NOTE );
+						noteSprite.setZIndex( Level_copy.PLANE_NOTE );
 						this.addNote( noteSprite );
 					}
 				}
@@ -951,7 +938,7 @@ public class Level extends Scene implements IPausable
 				for( Settings playerSetting : playerSettings )
 				{
 					double reactionTime = ((Number)playerSetting.getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
-					double vel = SceneTools.getAvatarVel( fret.getFretWidth(), reactionTime );
+					double vel = SceneTools.getAvatarVel( fret.getFretWidth(), playerSetting);
 
 					double delay = wayWidth / vel;
 					if( delay < startDealy )
@@ -1084,6 +1071,9 @@ public class Level extends Scene implements IPausable
 				{
 					ex.printStackTrace();
 				}
+
+				this.setPlayerSheetMusic( playerBgMusicSheets );
+				this.setPlayers( playerSettings );
 			}
 
 			/*
@@ -1098,9 +1088,9 @@ public class Level extends Scene implements IPausable
 
 	private void makeLevel2( Rectangle sceneBounds, List< Settings > playerSettings )
 	{
-		if( this.currentMusic != null && this.currentMusic.getNumberOfTracks() > 0 )
+		if( this.music != null && this.music.getNumberOfTracks() > 0 )
 		{
-			int tempo = this.currentMusic.getTempo();
+			int tempo = this.music.getTempo();
 
 			this.setBPM( tempo );
 
@@ -1120,75 +1110,56 @@ public class Level extends Scene implements IPausable
 				path = bg.toString();
 			}
 
-			if(  super.getSprites( Level.BACKGROUND_ID, false ).isEmpty() )
+			Background back = new Background( super.getSize(), Level_copy.BACKGROUND_ID );
+			back.setFrameBounds( sceneBounds );
+			back.setZIndex( Level_copy.PLANE_BRACKGROUND );
+			this.addBackgroud( back );
+			if( path != null )
 			{
-				Background back = new Background( super.getSize(), Level.BACKGROUND_ID );
-				back.setFrameBounds( sceneBounds );
-				back.setZIndex( Level.PLANE_BRACKGROUND );
-				this.addBackgroud( back );
-				if( path != null )
+				try
 				{
-					try
-					{
-						Image img = ImageIO.read( new File( path ) );
-	
-						img = img.getScaledInstance( back.getBounds().width
-								, back.getBounds().height
-								, Image.SCALE_SMOOTH );
-	
-						back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
-					}
-					catch (IOException ex)
-					{	
-					}
-				}		
-			}
+					Image img = ImageIO.read( new File( path ) );
 
-			if( super.getSprites( Level.PAUSE_ID, false ).isEmpty() )
-			{
-				Pause pause = new Pause( super.getSize(), Level.PAUSE_ID );
-				pause.setFrameBounds( sceneBounds );
-				pause.setZIndex( Level.PLANE_PAUSE );
-				pause.setVisible( false );
-				this.addPause( pause );
-			}
+					img = img.getScaledInstance( back.getBounds().width
+							, back.getBounds().height
+							, Image.SCALE_SMOOTH );
 
-			Stave pen = this.getPentagram();			
-			if( pen == null )
-			{
-				pen = new Stave( super.getSize(), Level.STAVE_ID );
-				pen.setFrameBounds( sceneBounds );
-				pen.setZIndex( Level.PLANE_STAVE );
-				this.addPentagram( pen );
-			}
+					back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
+				}
+				catch (IOException ex)
+				{	
+				}
+			}		
+
+			Pause pause = new Pause( super.getSize(), Level_copy.PAUSE_ID );
+			pause.setFrameBounds( sceneBounds );
+			pause.setZIndex( Level_copy.PLANE_PAUSE );
+			pause.setVisible( false );
+			this.addPause( pause );
+
+			Stave pen = new Stave( super.getSize(), Level_copy.STAVE_ID );
+			pen.setFrameBounds( sceneBounds );
+			pen.setZIndex( Level_copy.PLANE_STAVE );
+			this.addPentagram( pen );
 
 			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() ); 
 			//Fret fret = new Fret( pen, IScene.FRET_ID );
-			
-			Fret fret = this.getFret();
-			
-			if( fret == null )
-			{			
-				fret = new Fret( Level.FRET_ID, sizeFret );
-				fret.setFrameBounds( sceneBounds );
-				fret.setZIndex( Level.PLANE_FRET );
-				Point2D.Double loc = new Point2D.Double();
-				loc.x = this.getSize().width / 2;
-				loc.y = 0;
-				fret.setScreenLocation( loc );
-				this.addFret( fret );
-			}
+			Fret fret = new Fret( Level_copy.FRET_ID, sizeFret );
+			fret.setFrameBounds( sceneBounds );
+			fret.setZIndex( Level_copy.PLANE_FRET );
+			Point2D.Double loc = new Point2D.Double();
+			loc.x = this.getSize().width / 2;
+			loc.y = 0;
+			fret.setScreenLocation( loc );
+			this.addFret( fret );
 
 
 			int hTS = pen.getRailHeight() / 2;
 			Rectangle bounds = pen.getBounds();			
 			//TimeSession time = new TimeSession( IScene.TIME_ID, pen );
-			if( this.getSprites( Level.TIME_ID, false ) != null )
-			{
-				TimeSession time = new TimeSession( Level.TIME_ID, hTS, bounds );
-				time.setZIndex( Level.PLANE_TIME );
-				this.add( time, Level.PLANE_TIME );
-			}
+			TimeSession time = new TimeSession( Level_copy.TIME_ID, hTS, bounds );
+			time.setZIndex( Level_copy.PLANE_TIME );
+			this.add( time, Level_copy.PLANE_TIME );
 
 			int wayWidth = ( super.getSize().width - (int)fret.getScreenLocation().x );
 
@@ -1240,17 +1211,10 @@ public class Level extends Scene implements IPausable
 					}
 				}
 				
-				double musicDuration = this.currentMusic.getDuration();
+				double musicDuration = this.music.getDuration();
 
 				Point2D.Double prevScoreLoc = null; 
 				double startDelay = 0.5;
-				
-				if( this.getAllNotes() != null )
-				{
-					List< ISprite > noteSprites = new ArrayList< ISprite >( this.getAllNotes() );
-					super.remove( noteSprites );
-				}
-				boolean addScoreAndInputGoal = super.getSprites( Level.SCORE_ID, false ).isEmpty();
 				for( int indexMusicSheetPlayers = 0; indexMusicSheetPlayers < numberOfPlayers; indexMusicSheetPlayers++ )
 				{	
 					Settings playerSetting = playerSettings.get( indexMusicSheetPlayers );
@@ -1258,12 +1222,8 @@ public class Level extends Scene implements IPausable
 					Color preActColor = (Color)playerSetting.getParameter( ConfigApp.PREACTION_COLOR ).getSelectedValue();
 					Color waitActColor = (Color)playerSetting.getParameter( ConfigApp.WAITING_ACTION_COLOR ).getSelectedValue();
 
-					NumberTuple plTimes = this.playerTimes.get( playerSetting.getPlayer().getId() );
-					
-					System.out.println("Level.makeLevel2() "  + this.playerTimes );
-					
-					double reactionTime = plTimes.t1.doubleValue();
-					double recoverTime = plTimes.t2.doubleValue();
+					double reactionTime = ((Number)playerSettings.get( indexMusicSheetPlayers ).getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
+					double recoverTime = ((Number)playerSettings.get( indexMusicSheetPlayers ).getParameter( ConfigApp.RECOVER_TIME ).getSelectedValue()).doubleValue();
 					
 					double vel = fret.getFretWidth() / reactionTime;
 					
@@ -1282,47 +1242,44 @@ public class Level extends Scene implements IPausable
 						this.addNote( note );
 					}
 					
-					if( addScoreAndInputGoal )
-					{					
-						double scoreUnit = 1000D;
-						
-						if( !playerNotes.isEmpty() )
-						{
-							scoreUnit /= playerNotes.size();
-						}
-						scoreUnit = ( scoreUnit < 1 ) ? 1 : scoreUnit;
-	
-						double sc = 0;
-						Score score = new Score( Level.SCORE_ID, sc,  scoreUnit, pen.getRailHeight() / 2, pen.getBounds().getLocation() );
-						score.setFrameBounds( sceneBounds );
-						score.setZIndex( Level.PLANE_SCORE );
-						score.setOwner( playerSetting.getPlayer() );
-	
-						if( prevScoreLoc != null )
-						{
-							Point2D.Double scloc = score.getScreenLocation();
-							scloc.y = prevScoreLoc.y;
-							Dimension scDim = score.getSize();
-							scloc.y += scDim.getHeight();
-							score.setScreenLocation( scloc );
-						}
-	
-						prevScoreLoc = score.getScreenLocation();
-	
-						this.add( score, score.getZIndex() );
-	
-						InputGoal goal = new InputGoal( Level.INPUT_TARGET_ID, pen.getRailHeight(), pen.getBounds() );
-						goal.setFrameBounds( sceneBounds );
-						goal.setOwner( playerSetting.getPlayer() );
-						goal.setZIndex( Level.PLANE_INPUT_TARGET );
-						Point2D.Double goalLoc = new Point2D.Double();
-						goalLoc.y = prevScoreLoc.y;
-						goalLoc.x = prevScoreLoc.x + score.getSize().width + 5;
-						goal.setScreenLocation( goalLoc );
-						int goalSize = score.getSize().height;
-						goal.setSize( new Dimension( goalSize, goalSize ) );
-						this.add( goal, goal.getZIndex() );
+					double scoreUnit = 1000D;
+					
+					if( !playerNotes.isEmpty() )
+					{
+						scoreUnit /= playerNotes.size();
 					}
+					scoreUnit = ( scoreUnit < 1 ) ? 1 : scoreUnit;
+
+					double sc = 0;
+					Score score = new Score( Level_copy.SCORE_ID, sc,  scoreUnit, pen.getRailHeight() / 2, pen.getBounds().getLocation() );
+					score.setFrameBounds( sceneBounds );
+					score.setZIndex( Level_copy.PLANE_SCORE );
+					score.setOwner( playerSetting.getPlayer() );
+
+					if( prevScoreLoc != null )
+					{
+						Point2D.Double scloc = score.getScreenLocation();
+						scloc.y = prevScoreLoc.y;
+						Dimension scDim = score.getSize();
+						scloc.y += scDim.getHeight();
+						score.setScreenLocation( scloc );
+					}
+
+					prevScoreLoc = score.getScreenLocation();
+
+					this.add( score, score.getZIndex() );
+
+					InputGoal goal = new InputGoal( Level_copy.INPUT_TARGET_ID, pen.getRailHeight(), pen.getBounds() );
+					goal.setFrameBounds( sceneBounds );
+					goal.setOwner( playerSetting.getPlayer() );
+					goal.setZIndex( Level_copy.PLANE_INPUT_TARGET );
+					Point2D.Double goalLoc = new Point2D.Double();
+					goalLoc.y = prevScoreLoc.y;
+					goalLoc.x = prevScoreLoc.x + score.getSize().width + 5;
+					goal.setScreenLocation( goalLoc );
+					int goalSize = score.getSize().height;
+					goal.setSize( new Dimension( goalSize, goalSize ) );
+					this.add( goal, goal.getZIndex() );
 				}
 
 				//
@@ -1336,10 +1293,8 @@ public class Level extends Scene implements IPausable
 				double adjustment = 0.079687D;
 				for( Settings playerSetting : playerSettings )
 				{
-					NumberTuple times = this.playerTimes.get( playerSetting.getPlayer().getId() );
-					
-					double reactionTime = times.t1.doubleValue();
-					double vel = SceneTools.getAvatarVel( fret.getFretWidth(), reactionTime );
+					double reactionTime = ((Number)playerSetting.getParameter( ConfigApp.REACTION_TIME ).getSelectedValue()).doubleValue();
+					double vel = SceneTools.getAvatarVel( fret.getFretWidth(), playerSetting);
 
 					double delay = wayWidth / vel;
 					if( delay < startDealy )
@@ -1350,7 +1305,7 @@ public class Level extends Scene implements IPausable
 				}
 
 				startDealy +=  ( adjustment * refReactTime ); 
-				System.out.println("Level.makeLevel2() startDelay " + startDealy);
+
 
 				//
 				//
@@ -1358,7 +1313,7 @@ public class Level extends Scene implements IPausable
 				//
 				//				
 
-				Collection< IROTrack > tracks = this.currentMusic.getTracks();
+				Collection< IROTrack > tracks = this.music.getTracks();
 				List< Pattern > playerTracks = new ArrayList< Pattern >();				
 				for( IROTrack tr : tracks )
 				{					
@@ -1408,6 +1363,9 @@ public class Level extends Scene implements IPausable
 				{
 					ex.printStackTrace();
 				}
+
+				this.setPlayerSheetMusic( playerBgMusicSheets );
+				this.setPlayers( playerSettings );
 			}
 
 		}
@@ -1418,8 +1376,8 @@ public class Level extends Scene implements IPausable
 											)
 	{
 		List< MusicNoteGroup > notes = new ArrayList< MusicNoteGroup >();
-		
-		if( this.currentMusic != null )
+				
+		if( this.music != null )
 		{	
 			for( double timeTrackOnScreen = initMusicTime
 					; timeTrackOnScreen < endMusicTime
@@ -1427,7 +1385,7 @@ public class Level extends Scene implements IPausable
 			{						
 				String trackID = "";
 	
-				List< IROTrack > Tracks = this.currentMusic.getNotesAtIntervalTime( new NumberRange( timeTrackOnScreen , timeTrackOnScreen + stepMusicTime ) );
+				List< IROTrack > Tracks = music.getNotesAtIntervalTime( new NumberRange( timeTrackOnScreen , timeTrackOnScreen + stepMusicTime ) );
 	
 				if( Tracks != null && !Tracks.isEmpty() )
 				{	
@@ -1445,14 +1403,14 @@ public class Level extends Scene implements IPausable
 					MusicNoteGroup noteSprite = new MusicNoteGroup( trackID
 																	, timeTrackOnScreen //+ startDelay
 																	, Tracks
-																	, Level.NOTE_ID
+																	, Level_copy.NOTE_ID
 																	, rH
 																	, screenPos
 																	, vel
 																	, false
 																	);
 		
-					noteSprite.setZIndex( Level.PLANE_NOTE );
+					noteSprite.setZIndex( Level_copy.PLANE_NOTE );
 					
 					notes.add( noteSprite );
 				}
@@ -1460,6 +1418,42 @@ public class Level extends Scene implements IPausable
 		}
 		
 		return notes;
+	}
+	
+	public void setScore( int idPlayer, double score )
+	{
+		for( ISprite spr : super.getSprites( Level_copy.SCORE_ID, false ) )
+		{
+			Score sc = (Score)spr;
+			
+			if( sc.getOwner().getId() == idPlayer )
+			{
+				sc.setScore( score );
+			}
+		}
+	}
+	
+	public Map< Integer, Double > getScores( )
+	{
+		Map< Integer, Double > scores = new HashMap<Integer, Double>();
+		
+		for( ISprite spr : super.getSprites( Level_copy.SCORE_ID, false ) )
+		{
+			Score sc = (Score)spr;
+			
+			int id = Player.ANONYMOUS;
+			double score = 0D;		
+			
+			if( sc.getOwner() != null)
+			{
+				id = sc.getOwner().getId();
+				score = sc.getScore();
+			}
+			
+			scores.put( id,  score );
+		}
+		
+		return scores;
 	}
 }
 

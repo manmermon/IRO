@@ -98,6 +98,12 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 		this.enableCtr = enable;
 	}
 
+	@Override
+	public void close() 
+	{
+		this.setEnableInputController( false );
+	}
+
 	/*(non-Javadoc)
 	 * @see @see control.events.IInputControllerListener#enableProcessInputControllerEvent(boolean)
 	 */

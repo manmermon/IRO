@@ -57,6 +57,8 @@ import control.ScreenControl;
 import control.controller.ControllerActionChecker;
 import control.controller.ControllerManager;
 import control.controller.IControllerMetadata;
+import control.controller.IInputController;
+import control.events.IInputControllerListener;
 import exceptions.ConfigParameterException;
 import exceptions.SceneException;
 import general.NumberRange;
@@ -73,8 +75,6 @@ public class GameManager
 	//private mouseTracking autoHideMenu = null;
 	
 	private Object sync = new Object();
-	
-	private LinkedList< Level > leves = new LinkedList< Level >();
 	
 	private Level currentLevel = null;
 	
@@ -217,7 +217,15 @@ public class GameManager
 		
 		RegistrarStatistic.startRegister();
 
-		this.leves.clear();
+		if( this.currentLevel != null )
+		{
+			if( this.currentLevel.getBackgroundPattern() != null )
+			{
+				this.currentLevel.getBackgroundPattern().stopThread( IStoppableThread.FORCE_STOP );
+			}
+		}
+		
+		this.currentLevel = null;
 
 		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
 
@@ -386,8 +394,8 @@ public class GameManager
 			{
 				NumberRange rng = new NumberRange( cmeta.getRecoverInputLevel(), cmeta.getActionInputLevel().getMin() );
 				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
-						, rng, cmeta.getTargetTimeInLevelAction( )
-						, cmeta.getRepetitions() );
+																				, rng, cmeta.getTargetTimeInLevelAction( )
+																				, cmeta.getRepetitions() );
 				actCheck.setOwner( cmeta.getPlayer() );				
 				ControllerManager.getInstance().addControllerListener( cmeta.getPlayer(), actCheck );
 				actCheck.addInputActionListerner( ScreenControl.getInstance() );
@@ -413,25 +421,14 @@ public class GameManager
 				settings.add( ConfigApp.getPlayerSetting( player ) );
 			}
 
+			List< File > fileSongs = new ArrayList< File >();
 			for( String song : this.getLevelSongs() )
 			{			
-				File fileSong = new File( song );
-
-				Level level = this.getLevel( fileSong, mute, settings ); 
-				level.setMuteSession( mute );
-
-				this.leves.add( level );
+				fileSongs.add( new File( song ) );				
 			}
-
-			if( this.leves.isEmpty() )
-			{
-				throw new SceneException( "Levels empty" );
-			}
-			else
-			{	
-				this.currentLevel = this.leves.poll();
-				this.setLevel( this.currentLevel );
-			}			
+			
+			this.currentLevel = this.getLevel( fileSongs, mute, settings );			
+			this.setLevel( this.currentLevel );			
 		}
 		catch( Exception ex )
 		{
@@ -493,7 +490,7 @@ public class GameManager
 		return levelSongs;
 	}
 
-	private Level getLevel( File fileSong, boolean isMuteSession, List< Settings > settings  ) throws Exception
+	private Level getLevel( List< File > fileSongs, boolean isMuteSession, List< Settings > settings  ) throws Exception
 	{
 		Level level = null;
 		
@@ -503,7 +500,7 @@ public class GameManager
 
 		//LevelMusicBuilder.changeLevelSpeed( level );
 
-		level = new Level( screenBounds, settings, fileSong );
+		level = new Level( screenBounds, settings, fileSongs );
 		level.setMuteSession( isMuteSession );
 		
 		return level;
@@ -518,7 +515,10 @@ public class GameManager
 		
 		if( this.gameWindow != null )
 		{
-			this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() + ": " + level.getMidiFile().getName() );
+			level.enableLevel();
+			level.playLevel();
+			
+			this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() );
 			
 			ControllerManager.getInstance().setEnableControllerListener( true );
 			
@@ -530,29 +530,20 @@ public class GameManager
 	
 	public synchronized boolean hasNextLevel()
 	{
-		return !this.leves.isEmpty();
+		return !this.currentLevel.isFinished();
 	}
 	
 	public void nextLevel() throws Exception
 	{
-		if( !this.leves.isEmpty() && this.gameWindow != null )
+		if( !this.currentLevel.isFinished() && this.gameWindow != null )
 		{
 			ScreenControl.getInstance().stopScene();
 			
 			this.gameWindow.getGamePanel().setVisible( false );
 			
 			this.gameWindow.getGamePanel().removeAll();
-						
-			Map< Integer, Double > scores = this.currentLevel.getScores();			
-			this.currentLevel = this.leves.poll();
-			
-			for( Integer idPlayer : scores.keySet() )
-			{
-				this.currentLevel.setScore( idPlayer, scores.get( idPlayer ) );
-			}
-			
+									
 			//this.currentLevel.checkLevelSpeed();
-			
 			this.setLevel( this.currentLevel );
 						
 			this.gameWindow.getGamePanel().setVisible( true );
@@ -563,8 +554,7 @@ public class GameManager
 			this.stopLevel( false );
 		}
 	}
-	
-	
+
 	public synchronized void stopLevel( boolean nextLevel ) throws Exception
 	{
 		ControllerManager.getInstance().setEnableControllerListener( false );
@@ -618,7 +608,6 @@ public class GameManager
 			else
 			{
 				MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
-														//, this.gameWindow.getSceneBounds()
 														, scores
 														, spr
 														, this.hasNextLevel(), true );

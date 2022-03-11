@@ -14,6 +14,7 @@ import control.events.InputActionListerner;
 import general.NumberRange;
 import statistic.RegistrarStatistic;
 import statistic.RegistrarStatistic.FieldType;
+import stoppableThread.IStoppableThread;
 
 public class ControllerActionChecker extends InputLSLDataReader implements IInputControllerListener, IPossessable 
 {	
@@ -304,5 +305,11 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 	@Override
 	protected void postStopThread(int friendliness) throws Exception 
 	{	
+	}
+
+	@Override
+	public void close() 
+	{
+		super.stopThread( IStoppableThread.FORCE_STOP );
 	}
 }

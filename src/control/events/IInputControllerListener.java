@@ -11,5 +11,5 @@ import lslStream.event.IInputLSLDataListener;
  */
 public interface IInputControllerListener extends IInputLSLDataListener
 {
-	public void setEnableInputController( boolean enable );
+	public void setEnableInputController( boolean enable );	
 }

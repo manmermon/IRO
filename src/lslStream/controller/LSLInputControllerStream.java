@@ -45,7 +45,7 @@ public class LSLInputControllerStream extends LSLInputStream implements IInputCo
 	 */
 	@Override
 	public void stopController() throws Exception
-	{
+	{	
 		super.stopThread( IStoppableThread.FORCE_STOP );
 	} 
 	

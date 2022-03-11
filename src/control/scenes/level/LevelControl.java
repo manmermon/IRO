@@ -349,7 +349,7 @@ public class LevelControl extends AbstractSceneControl
 						target = ( target == null ) ? false : target;
 						//*/
 					
-						int thr = 100 * 0;			
+						int thr = 02;			
 										
 						if( !note.isSelected() )
 						{					
