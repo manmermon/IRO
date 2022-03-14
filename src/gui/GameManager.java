@@ -621,6 +621,7 @@ public class GameManager
 		
 		if( !nextLevel )
 		{
+			this.currentLevel.stopThread( IStoppableThread.FORCE_STOP );
 			this.currentLevel = null;
 			
 			ControllerManager.getInstance().stopController();

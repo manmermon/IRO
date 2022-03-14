@@ -140,17 +140,7 @@ public class LevelControl extends AbstractSceneControl
 					&& !Notes.isEmpty() )
 			{
 				boolean noteInFret = false;
-				
-				if( !this.actionOwner.isEmpty() )
-				{
-					String n = "<";
-					for( ISprite __Note : Notes )
-					{
-						MusicNoteGroup note = (MusicNoteGroup) __Note;
-						n += note.getOwner().getId() + ", ";
-					}
-				}
-				
+								
 				for( ISprite __Note : Notes )
 				{
 					MusicNoteGroup note = (MusicNoteGroup) __Note;
@@ -349,7 +339,7 @@ public class LevelControl extends AbstractSceneControl
 						target = ( target == null ) ? false : target;
 						//*/
 					
-						int thr = 02;			
+						int thr = 02000;			
 										
 						if( !note.isSelected() )
 						{					

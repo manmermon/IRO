@@ -187,7 +187,7 @@ public class testGameSprite extends JFrame {
 						getSprite( (OPTS)ev.getItem() );
 					}
 				}
-				catch (ConfigParameterException e) 
+				catch ( Exception e) 
 				{
 				}
 				finally 
@@ -198,14 +198,14 @@ public class testGameSprite extends JFrame {
 		});
 	}	
 	
-	private void getSprite( OPTS idSprite ) throws ConfigParameterException
+	private void getSprite( OPTS idSprite ) throws Exception
 	{				
 		Settings defPlayer = ConfigApp.getDefaultSettings();
 		defPlayer.setPlayer( new Player());
 		
 		List< Settings > players = new ArrayList< Settings >();
 		players.add( defPlayer );
-			
+				
 		this.lv = new Level( this.frame.getBounds(), players, null );
 		
 		ISprite sprite = null;
@@ -260,7 +260,7 @@ public class testGameSprite extends JFrame {
 			Frame f = new Frame();
 			BufferedImage s = lv.getScene();
 			f.setScene( s );
-			
+					
 			this.frame.add( f, BorderLayout.CENTER );
 		}
 	}

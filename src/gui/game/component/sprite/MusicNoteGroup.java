@@ -310,6 +310,11 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		});
 	}
 	
+	public Double getMusicTime() 
+	{
+		return this.timeOnScreen;
+	}
+	
 	public void setPreactionColor( Color c )
 	{
 		if( c != null )
@@ -365,6 +370,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		
 		if( img != null )
 		{
+			/*
 			Dimension size = super.getBounds().getSize();
 			
 			int l = (int)Math.max( size.getWidth(), size.getHeight() );
@@ -373,11 +379,14 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 			if( s <= 0 )
 			{
 				s = 1;
-			}
+			}			
 			
 			this.noteImg = (BufferedImage)BasicPainter2D.copyImage( img.getScaledInstance( s 
 																	, s
 																	, BufferedImage.SCALE_SMOOTH ) );
+			//*/
+			
+			this.noteImg = img;
 		}
 		
 		this.animationActive = ( this.noteImg != null );
