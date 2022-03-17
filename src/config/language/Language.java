@@ -100,8 +100,8 @@ public class Language
 	public static final String MINIMUM = "MIN";
 	public static final String MAXIMUM = "MAX";
 	
-	public static final String MIN_INPUT_VALUE = "MIN_INPUT_VALUE";
-	public static final String MAX_INPUT_VALUE = "MAX_INPUT_VALUE";
+	public static final String RECOVERY_LEVEL = "RECOVERY_LEVEL";
+	public static final String ACTION_LEVEL = "ACTION_LEVEL";
 	
 	public static final String UPDATE = "UPDATE";
 	
@@ -139,6 +139,7 @@ public class Language
 	public static final String REPETITIONS = "REPETITIONS";
 	
 	public static final String LOADING = "LOADING";
+	public static final String SAVING = "SAVING";
 	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
@@ -148,6 +149,10 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( SAVING, defaultLanguage, "Saving" );
+		cap.setCaption( esEs, "Guardando");
+		captions.put( SAVING, cap );
 		
 		cap = new Caption( LOADING, defaultLanguage, "Loading" );
 		cap.setCaption( esEs, "Cargando");
@@ -373,13 +378,15 @@ public class Language
 		cap.setCaption( esEs, "M\u00E1ximo" );
 		captions.put( MAXIMUM, cap );
 		
-		cap = new Caption( MIN_INPUT_VALUE, defaultLanguage, "Min. input value" );
-		cap.setCaption( esEs, "M\u00EDn. valor de entrada" );
-		captions.put( MIN_INPUT_VALUE, cap );
+		cap = new Caption( RECOVERY_LEVEL, defaultLanguage, "Recovery level" );
+		//cap.setCaption( esEs, "M\u00EDn. valor de entrada" );
+		cap.setCaption( esEs, "Nivel recuperaci\u00F3n" );
+		captions.put( RECOVERY_LEVEL, cap );
 		
-		cap = new Caption( MAX_INPUT_VALUE, defaultLanguage, "Max. input value" );
-		cap.setCaption( esEs, "M\u00E1x. valor de entrada" );
-		captions.put( MAX_INPUT_VALUE, cap );
+		cap = new Caption( ACTION_LEVEL, defaultLanguage, "Action level" );
+		//cap.setCaption( esEs, "M\u00E1x. valor de entrada" );
+		cap.setCaption( esEs, "Nivel de acci\u00F3n" );
+		captions.put( ACTION_LEVEL, cap );
 		
 		cap = new Caption( UPDATE, defaultLanguage, "Update" );
 		cap.setCaption( esEs, "Actualizar" );

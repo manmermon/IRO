@@ -35,6 +35,7 @@ import config.language.Language;
 import exceptions.ConfigParameterException;
 import image.BasicPainter2D;
 import music.sheet.IROTrack;
+import stoppableThread.IStoppable;
 
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -176,6 +177,7 @@ public class SelectLevelImagePanel extends JPanel
 				List< Settings > ls = new ArrayList< Settings >();
 				ls.add( set );				
 				lv = new Level( new Rectangle( new Point(), size), ls, null );
+				lv.stopActing( IStoppable.FORCE_STOP );
 			}
 			catch (Exception e) 
 			{
@@ -210,9 +212,9 @@ public class SelectLevelImagePanel extends JPanel
 		
 				Stave pen = new Stave( size, Level.STAVE_ID );
 				pen.setZIndex( 0 );
-				lv.addPentagram( pen );
+				lv.addStave( pen );
 				
-				Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() );
+				Dimension sizeFret = new Dimension( pen.getStaveWidth() / 3, pen.getStaveHeigh() );
 				//Fret fret = new Fret( pen, IScene.FRET_ID );
 				Fret fret = new Fret( Level.FRET_ID, sizeFret );
 				fret.setZIndex( 2 );
@@ -248,6 +250,19 @@ public class SelectLevelImagePanel extends JPanel
 						{
 							Image img = ImageIO.read( new File( notPath ) );
 							
+							Dimension noteSize = noteSprite1.getSize();
+							
+							int l = (int)Math.max( noteSize.getWidth(), noteSize.getHeight() );
+							int s = (int)Math.sqrt( l * l / 2 );  
+							
+							if( s <= 0 )
+							{
+								s = 1;
+							}			
+							
+							noteImg = (BufferedImage)BasicPainter2D.copyImage( img.getScaledInstance( s , s
+																					, BufferedImage.SCALE_SMOOTH ) );
+							
 							/*
 							Color bg = new Color( 255, 255, 255, 140 );
 							Dimension s = noteSprite1.getBounds().getSize();
@@ -257,8 +272,9 @@ public class SelectLevelImagePanel extends JPanel
 																						img.getScaledInstance( noteImg.getWidth() 
 																								, noteImg.getHeight()
 																								, Image.SCALE_SMOOTH ) ) );
-							 */
+							
 							noteImg = (BufferedImage)img;
+							//*/
 						}
 						catch (Exception ex) 
 						{

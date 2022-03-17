@@ -662,7 +662,7 @@ public class Level_copy extends Scene implements IPausable
 			pen.setZIndex( Level_copy.PLANE_STAVE );
 			this.addPentagram( pen );
 
-			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() ); 
+			Dimension sizeFret = new Dimension( pen.getStaveWidth() / 3, pen.getStaveHeigh() ); 
 			//Fret fret = new Fret( pen, IScene.FRET_ID );
 			Fret fret = new Fret( Level_copy.FRET_ID, sizeFret );
 			fret.setZIndex( Level_copy.PLANE_FRET );
@@ -1142,7 +1142,7 @@ public class Level_copy extends Scene implements IPausable
 			pen.setZIndex( Level_copy.PLANE_STAVE );
 			this.addPentagram( pen );
 
-			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() ); 
+			Dimension sizeFret = new Dimension( pen.getStaveWidth() / 3, pen.getStaveHeigh() ); 
 			//Fret fret = new Fret( pen, IScene.FRET_ID );
 			Fret fret = new Fret( Level_copy.FRET_ID, sizeFret );
 			fret.setFrameBounds( sceneBounds );

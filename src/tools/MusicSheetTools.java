@@ -18,6 +18,8 @@ import org.staccato.StaccatoParserListener;
 
 import general.ArrayTreeMap;
 import music.sheet.IROTrack;
+import music.sheet.MusicSheet;
+import music.sheet.io.IROMusicParserListener;
 
 public class MusicSheetTools 
 {
@@ -200,9 +202,11 @@ public class MusicSheetTools
 	{	
 		Player p = new Player();
 		Sequence sequence = p.getSequence( musicPattern );
-			
-		return sequence.getMicrosecondLength(); //micros
-	}
+				
+		long t = sequence.getMicrosecondLength();
+				
+		return t; //micros
+	}	
 	
 	public static Pattern getPatternFromMidi( File midi ) throws Exception
 	{
@@ -217,7 +221,9 @@ public class MusicSheetTools
 		staccatoParser.addParserListener( midiParserListener );
 		staccatoParser.parse( listener.getPattern() );
 		
-		return listener.getPattern();
+		Pattern pat = listener.getPattern();
+				
+		return pat;
 	}
 	
 	public static int getTempo( String pattern )

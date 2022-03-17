@@ -32,6 +32,8 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 	
 	private boolean enableCtr = true;
 	
+	private int inverted = 1;
+	
 	/**
 	 * 
 	 */
@@ -61,6 +63,16 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 		pgbar.setMaximum( max );
 	}
 	
+	public void setInvetedValues( boolean inverted )
+	{
+		this.inverted = 1;
+		
+		if( inverted )
+		{
+			this.inverted = -1;
+		}
+	}
+	
 	public void setLevels( double[] levels )
 	{
 		pgbar.setLevels( levels );
@@ -85,9 +97,10 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 				&& this.selectedChannel >= 0 
 				&& this.selectedChannel < data.length )
 		{
-			double value = data[ this.selectedChannel ];
+			double value = data[ this.selectedChannel ];			
+			value *= this.inverted;
 			
-			this.pgbar.setValue( value );
+			this.pgbar.setValue( value  );
 		}
 	}
 

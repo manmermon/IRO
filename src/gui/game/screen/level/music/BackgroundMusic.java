@@ -19,7 +19,7 @@ import control.events.BackgroundMusicEventListener;
 import music.jfugueIRO.PlayerMod;
 import music.sheet.IROTrack;
 import stoppableThread.AbstractStoppableThread;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 import thread.timer.PausableTimer;
 import tools.MusicSheetTools;
 
@@ -128,7 +128,7 @@ public class BackgroundMusic extends AbstractStoppableThread
 	@Override
 	protected void postStopThread(int friendliness) throws Exception 
 	{	
-		if( friendliness == IStoppableThread.FORCE_STOP )
+		if( friendliness == IStoppable.FORCE_STOP )
 		{
 			if( this.player != null )
 			{
@@ -168,7 +168,7 @@ public class BackgroundMusic extends AbstractStoppableThread
 	{
 		super.startUp();
 		
-		this.muteThread.startThread();
+		this.muteThread.startActing();
 		
 		if( this.delay > 0 )
 		{
@@ -343,7 +343,7 @@ public class BackgroundMusic extends AbstractStoppableThread
 		
 		synchronized ( this.lock )
 		{
-			this.muteThread.stopThread( IStoppableThread.FORCE_STOP );
+			this.muteThread.stopActing( IStoppable.FORCE_STOP );
 			this.muteThread = null;
 			
 			final PlayerMod playercopy = this.player;
@@ -459,11 +459,24 @@ public class BackgroundMusic extends AbstractStoppableThread
 				{
 					if( pause )
 					{
-						this.player.getManagedPlayer().pause();					
+						try
+						{
+							this.player.getManagedPlayer().pause();					
+						}
+						catch (Exception e)
+						{
+							//e.printStackTrace();
+						}
 					}
 					else if( this.player.getManagedPlayer().isPaused() )
 					{
-						this.player.getManagedPlayer().resume();
+						try
+						{
+							this.player.getManagedPlayer().resume();
+						}
+						catch (Exception e) 
+						{
+						}
 					}
 				}
 				else

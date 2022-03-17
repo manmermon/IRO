@@ -24,6 +24,7 @@ package control.scenes.level;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.Semaphore;
 
 import gui.game.component.event.FretEvent;
 import gui.game.component.event.FretEventListener;
@@ -57,6 +58,8 @@ public class LevelControl extends AbstractSceneControl
 	
 	//private Map< Integer, Boolean > playerAchievedTarget = new HashMap<Integer, Boolean>();
 	
+	private Semaphore changeSpeedSemaphore = new Semaphore( 1, true );
+	
 	/**
 	 * @throws SceneException 
 	 * 
@@ -82,43 +85,36 @@ public class LevelControl extends AbstractSceneControl
 		lv.getFret().addFretEventListener( this );
 	}
 	//*/
-	
-	/*
-	 * (non-Javadoc)
-	 * @see @see stoppableThread.AbstractStoppableThread#preStart()
-	 */
-	@Override
-	protected void preStart() throws Exception 
-	{
-		super.preStart();
 				
+	@Override
+	public void startScene() throws Exception 
+	{
+		// TODO Auto-generated method stub
+		super.startScene();
+		
 		if( super.scene != null )
 		{	
 			Level lv = (Level)this.scene;
+			lv.enableLevel();
+			lv.initiateLevel();
+			
 			lv.getFret().addFretEventListener( this );
 			
 			MusicPlayerControl.getInstance().setBackgroundMusicPatter( lv.getBackgroundPattern() );
 			MusicPlayerControl.getInstance().addBackgroundMusicEvent( this );
 			
 			MusicPlayerControl.getInstance().setMuteSession( lv.isMuteSession() );
+			
+			MusicPlayerControl.getInstance().startMusic();
+		
+			
+			
 			//MusicPlayerControl.getInstance().setPlayerMusicSheets( lv.getPlayerSheets() );
 		}
 		else
 		{
 			throw new SceneException( "Level null" );
 		}
-	} 
-	
-	/*
-	 * (non-Javadoc)
-	 * @see @see control.scenes.AbstractSceneControl#startUp()
-	 */
-	@Override
-	protected void startUp() throws Exception 
-	{
-		super.startUp();
-				
-		MusicPlayerControl.getInstance().startMusic();
 	}
 
 	/*
@@ -144,7 +140,7 @@ public class LevelControl extends AbstractSceneControl
 				for( ISprite __Note : Notes )
 				{
 					MusicNoteGroup note = (MusicNoteGroup) __Note;
-	
+					
 					if( fret.isNoteIntoFret( note ) )
 					{	
 						noteInFret = true;
@@ -191,7 +187,7 @@ public class LevelControl extends AbstractSceneControl
 						}
 						else if( !note.isSelected() )
 						{
-							note.setState(gui.game.component.sprite.MusicNoteGroup.State.WAITING_ACTION );
+							note.setState( gui.game.component.sprite.MusicNoteGroup.State.WAITING_ACTION );
 						}
 					}
 					else
@@ -294,6 +290,14 @@ public class LevelControl extends AbstractSceneControl
 	protected void specificCleanUp()
 	{
 		//this.actionDone = null;
+		try
+		{
+			MusicPlayerControl.getInstance().stopMusic();
+		} 
+		catch (Exception ex)
+		{
+			ex.printStackTrace();
+		}
 	}
 
 	/*
@@ -320,7 +324,7 @@ public class LevelControl extends AbstractSceneControl
 	 */
 	//long t = 0;
 	@Override
-	public void FretEvent(gui.game.component.event.FretEvent ev)
+	public synchronized void FretEvent( FretEvent ev )
 	{
 		MusicNoteGroup note = ev.getNote();
 		
@@ -330,27 +334,20 @@ public class LevelControl extends AbstractSceneControl
 			{
 				case FretEvent.NOTE_EXITED:
 				{
-					if( !note.isGhost() )
+					if( !note.isGhost() && !note.isNoteExitFret() )
 					{
+						note.setNoteExitFret( true );
+						
 						int playerID = note.getOwner().getId();
-						/*
-						Boolean target = this.playerAchievedTarget.get( playerID );
-						this.playerAchievedTarget.put( playerID, false );
-						target = ( target == null ) ? false : target;
-						//*/
 					
-						int thr = 02000;			
+						int thr = 0000;			
 										
 						if( !note.isSelected() )
-						{					
-							//double time = note.getDuration();
-							//MusicPlayerControl.getInstance().mutePlayerSheet( Player.ANONYMOUS - 1, time );
-							//MusicPlayerControl.getInstance().mutePlayerSheet( playerID, time );
-							
+						{							
 							MusicPlayerControl.getInstance().playDissonantTrack( playerID, note.getDissonantNotes() );
 							
 							//*
-							this.consecutiveErrors++;				
+							this.consecutiveErrors++;		
 							
 							if( this.consecutiveErrors > thr  )
 							{
@@ -361,6 +358,7 @@ public class LevelControl extends AbstractSceneControl
 						}
 						else
 						{
+							//*							
 							this.consecutiveErrors--;
 							
 							if( this.consecutiveErrors < -thr  )
@@ -368,6 +366,7 @@ public class LevelControl extends AbstractSceneControl
 								this.consecutiveErrors = 0;
 								this.changeSceneSpeed( note.getOwner(), true, false );
 							}
+							//*/
 						}
 					}
 					
@@ -424,66 +423,92 @@ public class LevelControl extends AbstractSceneControl
 	}
 
 	@Override
-	public void changeSceneSpeed( IOwner player, boolean reduceVel, boolean changeTempo  ) 
+	public void changeSceneSpeed( final IOwner player, final boolean reduceVel, final boolean changeTempo  ) 
 	{
-		MusicPlayerControl.getInstance().setPauseMusic( true );
-		
-		Level lv = (Level)this.scene;
-		
-		double percReaction = 0.8;
-		double percRecover = 0.8;
-		
-		if( !reduceVel )
+		if( this.changeSpeedSemaphore.tryAcquire() )
 		{
-			percReaction = 1.2;
-			percRecover = 1.2;
-		}
-		
-		lv.changeSpeed( player, percReaction, percRecover / percRecover );
-		
-		/*
-		List< Settings > players = lv.getPlayers();		
-		if( players != null )
-		{
-			Map< Integer, Double > velsByPlayer = lv.getSpeedForPlayers();
-			for( Settings pl : players )
-			{	
-				Double vel = velsByPlayer.get( pl.getPlayer().getId() );
-				if( vel != null )
+			Thread t = new Thread()
+			{
+				@Override
+				public synchronized void run() 
 				{
-					//double reactionTime = SceneTools.getAvatarReactionTime(  lv.getFret().getFretWidth(), vel );
-					//double prop = (double)tempo / newTempo;
-					//reactionTime *= prop;
-					//double newVel = SceneTools.getAvatarSpeed( lv.getFret().getFretWidth(), reactionTime );
-					
-					lv.changeSpeed( pl.getPlayer(), percReaction, percRecover );
+					try
+					{
+						MusicPlayerControl.getInstance().setPauseMusic( true );
+						
+						Level lv = (Level)scene;
+						
+						double percReaction = 0.8;
+						double percRecover = 0.8;
+						
+						if( !reduceVel )
+						{
+							percReaction = 1.2;
+							percRecover = 1.2;
+						}
+						
+						lv.changeSpeed( player, percReaction, percRecover / percRecover );
+						
+						/*
+						List< Settings > players = lv.getPlayers();		
+						if( players != null )
+						{
+							Map< Integer, Double > velsByPlayer = lv.getSpeedForPlayers();
+							for( Settings pl : players )
+							{	
+								Double vel = velsByPlayer.get( pl.getPlayer().getId() );
+								if( vel != null )
+								{
+									//double reactionTime = SceneTools.getAvatarReactionTime(  lv.getFret().getFretWidth(), vel );
+									//double prop = (double)tempo / newTempo;
+									//reactionTime *= prop;
+									//double newVel = SceneTools.getAvatarSpeed( lv.getFret().getFretWidth(), reactionTime );
+									
+									lv.changeSpeed( pl.getPlayer(), percReaction, percRecover );
+								}
+							}
+						}
+						//*/
+						
+						if( changeTempo )
+						{
+							int tempo = MusicPlayerControl.getInstance().getMusicTempo();
+							
+							double tempoTime = MusicSheetTools.getQuarterTempo2Second( tempo );
+							tempoTime *= percReaction;
+							int newTempo = MusicSheetTools.getQuarterSecond2Tempo( tempoTime );
+							
+							//double newTempoTime = MusicSheetTools.getQuarterTempo2Second( newTempo );
+							
+							MusicPlayerControl.getInstance().changeTempo( newTempo );
+							
+							try 
+							{
+								MusicPlayerControl.getInstance().startMusic();
+							}
+							catch (Exception e) 
+							{
+								e.printStackTrace();
+							}		
+						}
+					}
+					catch (Exception e) 
+					{
+					}
+					finally 
+					{
+						if( changeSpeedSemaphore.availablePermits() < 1 ) 
+						{
+							changeSpeedSemaphore.release();
+						}
+						
+						MusicPlayerControl.getInstance().setPauseMusic( false );
+					}	
 				}
-			}
+			};
+			
+			t.setName( "LevelControl-ChangeSpeed" );
+			t.start();
 		}
-		//*/
-		
-		if( changeTempo )
-		{
-			int tempo = MusicPlayerControl.getInstance().getMusicTempo();
-			
-			double tempoTime = MusicSheetTools.getQuarterTempo2Second( tempo );
-			tempoTime *= percReaction;
-			int newTempo = MusicSheetTools.getQuarterSecond2Tempo( tempoTime );
-			
-			//double newTempoTime = MusicSheetTools.getQuarterTempo2Second( newTempo );
-			
-			MusicPlayerControl.getInstance().changeTempo( newTempo );
-			
-			try 
-			{
-				MusicPlayerControl.getInstance().startMusic();
-			}
-			catch (Exception e) 
-			{
-				e.printStackTrace();
-			}		
-		}
-		
-		MusicPlayerControl.getInstance().setPauseMusic( false );
 	}
 }

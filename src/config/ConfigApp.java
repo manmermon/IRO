@@ -77,7 +77,7 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2022, 3 - 1, 14 );
+	public static final Calendar buildDate = new GregorianCalendar( 2022, 3 - 1, 17 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
@@ -97,7 +97,7 @@ public class ConfigApp
 	private static final String DB_FILENAME = "data.db";
 	private static final String DB_PATH = DB_FOLDER + DB_FILENAME;
 	
-	public static final String SONG_FILE_PATH = "./sheets/";
+	public static final String SONG_FILE_PATH = "./resources/sheets/";
 	public static final String BACKGROUND_SPRITE_FILE_PATH = "./resources/background/";
 	public static final String NOTE_SPRITE_FILE_PATH = "./resources/note/";
 	
@@ -589,9 +589,9 @@ public class ConfigApp
 	{	
 		List< ConfigParameter > pars = new ArrayList<ConfigParameter>();
 		
-		Caption idMin = getCaptions( Language.MIN_INPUT_VALUE );
+		Caption idMin = getCaptions( Language.RECOVERY_LEVEL );
 		idMin.setID( INPUT_MIN_VALUE );
-		Caption idMax = getCaptions( Language.MAX_INPUT_VALUE );
+		Caption idMax = getCaptions( Language.ACTION_LEVEL );
 		idMax.setID( INPUT_MAX_VALUE );
 
 		ConfigParameter parMin = new ConfigParameter( idMin, ParameterType.NUMBER );

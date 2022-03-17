@@ -5,7 +5,7 @@ import org.jfugue.player.Player;
 import org.jfugue.theory.Note;
 
 import gui.game.screen.level.music.BackgroundMusic;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 
 public class testSemitone {
 
@@ -32,23 +32,23 @@ public class testSemitone {
 	    	BackgroundMusic bgm = new BackgroundMusic();
 	    	bgm.setPattern( new Pattern( pat ) );
 			
-	    	bgm.startThread();
+	    	bgm.startActing();
 	    	
 	    	Thread.sleep( 5000L );
-	    	bgm.stopThread( IStoppableThread.FORCE_STOP );
+	    	bgm.stopActing( IStoppable.FORCE_STOP );
 	    	
 	    	System.out.print( "TEST\n" );
 	    	bgm = new BackgroundMusic();
 	    	bgm.setPattern( new Pattern( ":PW(72,20) " + pat + " :PW(0,64)") );
-	    	bgm.startThread();
+	    	bgm.startActing();
 	    	Thread.sleep( 5000L );
-	    	bgm.stopThread( IStoppableThread.FORCE_STOP );
+	    	bgm.stopActing( IStoppable.FORCE_STOP );
 	    	
 	    	bgm = new BackgroundMusic();
 	    	bgm.setPattern( new Pattern( pat2 ) );
-	    	bgm.startThread();
+	    	bgm.startActing();
 	    	Thread.sleep( 5000L );
-	    	bgm.stopThread( IStoppableThread.FORCE_STOP );
+	    	bgm.stopActing( IStoppable.FORCE_STOP );
 			
 		} catch ( Exception e) 
 	    {

@@ -45,12 +45,12 @@ public class Stave extends AbstractSprite
 		this.createStaveImg();
 	}
 	
-	public int getPentagramHeigh()
+	public int getStaveHeigh()
 	{
 		return this.spriteSize.height;
 	}
 	
-	public int getPentragramWidth()
+	public int getStaveWidth()
 	{
 		return this.spriteSize.width;
 	}

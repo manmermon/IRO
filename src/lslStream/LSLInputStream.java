@@ -15,7 +15,7 @@ import lslStream.LSLStreamInfo.StreamDataType;
 import lslStream.event.IInputLSLDataListener;
 import lslStream.event.InputLSLDataEvent;
 import stoppableThread.AbstractStoppableThread;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 
 public class LSLInputStream extends AbstractStoppableThread 
 {
@@ -332,7 +332,7 @@ public class LSLInputStream extends AbstractStoppableThread
 
 	private void timeOver( )
 	{	
-		this.stopThread( IStoppableThread.FORCE_STOP );
+		this.stopActing( IStoppable.FORCE_STOP );
 		this.notifyProblem( new TimeoutException( "Waiting time for input data from device was exceeded." ) );		
 	}
 

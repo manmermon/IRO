@@ -39,7 +39,7 @@ public class RefreshControl extends AbstractStoppableThread
 	{
 		super.setName( this.getClass().getSimpleName() );
 		
-		this.FPS = 30;
+		this.FPS = 24;//30;
 		this.waitTime = (long)( 1000 / this.FPS );		
 	}
 	

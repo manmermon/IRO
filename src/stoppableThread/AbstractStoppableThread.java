@@ -23,7 +23,7 @@
 
 package stoppableThread;
 
-public abstract class AbstractStoppableThread extends Thread implements IStoppableThread
+public abstract class AbstractStoppableThread extends Thread implements IStoppable
 {
     protected volatile boolean stopThread = false;
     protected volatile boolean stopWhenTaskDone = false;
@@ -33,7 +33,7 @@ public abstract class AbstractStoppableThread extends Thread implements IStoppab
      * (non-Javadoc)
      * @see StoppableThread.IStoppableThread#startThread()
      */
-    public synchronized void startThread() throws Exception
+    public synchronized void startActing() throws Exception
     {
     	this.preStart();
     	
@@ -49,7 +49,7 @@ public abstract class AbstractStoppableThread extends Thread implements IStoppab
     {
     	try 
     	{
-			this.startThread();
+			this.startActing();
 		}
     	catch (Exception e) 
     	{
@@ -78,7 +78,7 @@ public abstract class AbstractStoppableThread extends Thread implements IStoppab
 		}
         catch (Exception e1) 
         {
-			e1.printStackTrace();
+        	this.runExceptionManager( e1 );
 		}
              	        
         while ( !this.stopThread ) 
@@ -104,7 +104,7 @@ public abstract class AbstractStoppableThread extends Thread implements IStoppab
 		}
     	catch (Exception e) 
     	{
-			e.printStackTrace();
+    		this.runExceptionManager( e );
 		}
     }
     
@@ -129,7 +129,7 @@ public abstract class AbstractStoppableThread extends Thread implements IStoppab
      * (non-Javadoc)
      * @see StoppableThread.IStoppableThread#stopThread(int)
      */
-    public void stopThread( int friendliness ) 
+    public void stopActing( int friendliness ) 
     {
     	try 
     	{

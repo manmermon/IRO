@@ -138,10 +138,10 @@ public class IROLaunchApp
 		try
 		{
 			ScreenControl screenCtr = ScreenControl.getInstance();
-			screenCtr.startThread();
+			screenCtr.startActing();
 			
 			RefreshControl drawCtrl = RefreshControl.getInstance();
-			drawCtrl.startThread();
+			drawCtrl.startActing();
 			
 			/*
 			InputControl inCtrl = InputControl.getInstance();
@@ -185,7 +185,7 @@ public class IROLaunchApp
 		
 		ui.setBackground( SystemColor.info );
 
-		dm.width = ( ( 2 * dm.width ) / 3 - (pad.left + pad.right));
+		dm.width = ( ( 3 * dm.width ) / 5 - (pad.left + pad.right));
 		dm.height = (( 2 * dm.height ) / 3 - (pad.top + pad.bottom));
 
 		if( dm.width < 650 )

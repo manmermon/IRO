@@ -18,12 +18,12 @@ import javax.swing.border.EmptyBorder;
 
 import gui.game.component.Frame;
 import gui.game.component.sprite.ISprite;
-import gui.game.component.sprite.Loading;
+import gui.game.component.sprite.Transition;
 import gui.game.component.sprite.Pause;
 import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import gui.game.screen.menu.MenuGameResults;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 import thread.stoppableThread.AbstractStoppableThread;
 import config.ConfigApp;
 import config.Player;
@@ -88,7 +88,7 @@ public class testGameSprite extends JFrame {
 		
 		if( animationThread != null )
 		{
-			animationThread.stopThread( IStoppableThread.FORCE_STOP );
+			animationThread.stopThread( IStoppable.FORCE_STOP );
 		}
 		
 		animationThread = new AbstractStoppableThread() {
@@ -138,7 +138,7 @@ public class testGameSprite extends JFrame {
 				
 				if( animationThread != null )
 				{
-					animationThread.stopThread( IStoppableThread.FORCE_STOP );
+					animationThread.stopThread( IStoppable.FORCE_STOP );
 				}
 			}
 		});
@@ -205,7 +205,12 @@ public class testGameSprite extends JFrame {
 		
 		List< Settings > players = new ArrayList< Settings >();
 		players.add( defPlayer );
-				
+		
+		if( this.lv != null )
+		{
+			this.lv.stopActing( IStoppable.FORCE_STOP );
+		}
+		
 		this.lv = new Level( this.frame.getBounds(), players, null );
 		
 		ISprite sprite = null;
@@ -242,7 +247,8 @@ public class testGameSprite extends JFrame {
 			}
 			case LoadingScreen:
 			{
-				sprite = new Loading(  this.frame.getSize(), "Load" );
+				sprite = new Transition(  this.frame.getSize(), "Load", null );
+				((Transition)sprite).setMessage( "Cargando" );
 				zIndex = Level.PLANE_ALWAYS_IN_FRONT;
 				
 				break;

@@ -144,7 +144,7 @@ public class testTwoWayBar extends JFrame
 		mouseTracking mt = new mouseTracking( pb );
 		try
 		{
-			mt.startThread();
+			mt.startActing();
 		}
 		catch (Exception ex)
 		{

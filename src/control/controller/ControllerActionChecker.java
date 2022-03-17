@@ -1,5 +1,6 @@
 package control.controller;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.event.EventListenerList;
@@ -14,7 +15,7 @@ import control.events.InputActionListerner;
 import general.NumberRange;
 import statistic.RegistrarStatistic;
 import statistic.RegistrarStatistic.FieldType;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 
 public class ControllerActionChecker extends InputLSLDataReader implements IInputControllerListener, IPossessable 
 {	
@@ -47,18 +48,24 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 	
 	private boolean enableCheck = true;
 	
- 	public ControllerActionChecker( int selChannel, NumberRange inputThreshold, double time, int rep ) 
-	{
-		if( inputThreshold == null )
-		{
-			throw new IllegalArgumentException( "Input range null." );
-		}
-		
+	private boolean inverted = false;
+	
+ 	public ControllerActionChecker( int selChannel, double recovery, double action, double time, int rep ) 
+	{		
 		this.listeners = new EventListenerList();
 		
 		this.selectedChannel = selChannel;
 		
-		this._rng = inputThreshold;
+		if( recovery > action )
+		{
+			this._rng = new NumberRange( action, recovery );
+			
+			this.inverted = true;
+		}
+		else
+		{
+			this._rng = new NumberRange( recovery, action );
+		}
 		
 		this.targetTime = time;
 		
@@ -132,6 +139,7 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 	protected void readInputData( lslStream.event.InputLSLDataEvent ev ) 
 	{
 		double[] values = ev.getInputValues();
+		
 		double time = ev.getTime();
 		
 		if( this.enableCheck 
@@ -161,7 +169,17 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 			
 			synchronized ( this.sync )
 			{
-				if( data > this._rng.getMax() ) // target zone
+				boolean actionDone = false;
+				if( this.inverted )
+				{
+					actionDone = ( data < this._rng.getMin() );
+				}
+				else
+				{
+					actionDone = ( data > this._rng.getMax() );
+				}
+				
+				if( actionDone ) // target zone
 				{
 					if( this.statistic == 0 )
 					{
@@ -297,6 +315,8 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 		}
 	}
 
+	
+	
 	@Override
 	protected void preStopThread(int friendliness) throws Exception 
 	{	
@@ -310,6 +330,6 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 	@Override
 	public void close() 
 	{
-		super.stopThread( IStoppableThread.FORCE_STOP );
+		super.stopActing( IStoppable.FORCE_STOP );
 	}
 }

@@ -21,6 +21,12 @@ public class TimeSession extends AbstractSprite
 {
 	private FontMetrics fontmetrics;
 	
+	private double offsetTime;
+	
+	private double totalSessionTime = 0D;
+	private double prevTime = 0D;
+	private double time = 0D;
+	
 	/**
 	 * @param idSprite
 	 */
@@ -68,17 +74,29 @@ public class TimeSession extends AbstractSprite
 	{
 	}
 
+	public void setOffsetTime( double offset )
+	{
+		this.offsetTime = offset;
+	}
+	
 	/*(non-Javadoc)
 	 * @see @see GUI.game.component.sprite.AbstractSprite#getSprite()
 	 */
 	@Override
 	protected BufferedImage createSprite()
-	{
-		double t = MusicPlayerControl.getInstance().getPlayTime();
+	{			
+		this.time = MusicPlayerControl.getInstance().getPlayTime() + this.offsetTime;
 		
-		int hh = (int)( t / 3600 );
-		double mm = t / 60;
-		int ss = ((int) t ) % 60;
+		if( this.time > this.prevTime )
+		{		
+			this.totalSessionTime += ( this.time - this.prevTime );
+
+			this.prevTime = this.time;
+		}
+			
+		int hh = (int)( this.totalSessionTime / 3600 );
+		double mm = this.totalSessionTime / 60;
+		int ss = ((int) this.totalSessionTime ) % 60;
 		
 		String text = "";
 		if( hh > 0 )
@@ -105,6 +123,11 @@ public class TimeSession extends AbstractSprite
 		
 		
 		return bgpic;
+	}
+	
+	public double getTotalTimeSession()
+	{
+		return this.totalSessionTime;
 	}
 	
 }

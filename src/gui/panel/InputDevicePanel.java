@@ -341,12 +341,14 @@ public class InputDevicePanel extends JPanel
 				
 				if( i == 0 )
 				{
-					tc.setCellEditor( new DefaultCellEditor( getPlayerCombobox() ) );
+					DefaultCellEditor editor = new DefaultCellEditor( getPlayerCombobox() );	
+							
+					tc.setCellEditor( editor );
 					s *= 2;
 				}
 				
 				tc.setMaxWidth( s );
-				tc.setPreferredWidth( s );
+				tc.setPreferredWidth( s );				
 			}
 			
 			this.inputControllerTable.getModel().addTableModelListener( new TableModelListener()
@@ -601,26 +603,26 @@ public class InputDevicePanel extends JPanel
 				                }
 				                catch ( RuntimeException e1 )
 				                {
-				                    //catch null pointer exception if mouse is over an empty line
 				                }
 				
 				                return tip;
 				            }				            
 				        };
-				        
+				      
+				        /*
 		table.setDefaultRenderer( Object.class, new DefaultTableCellRenderer()
 											{	
 												public Component getTableCellRendererComponent( JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 											    {
 											        Component cellComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 											        	
+											        cellComponent.setBackground( new Color( 255, 255, 200 ) );
+											        
 											        if( !table.isCellEditable( row, column ) )
 											        {	
-											        	cellComponent.setBackground( new Color( 255, 255, 224 ) );
-											        	
-											        	if( isSelected )
+											        	if( hasFocus )
 											        	{
-											        		cellComponent.setBackground( new Color( 0, 120, 215 ) );
+											        		cellComponent.setBackground( new Color( 200, 200, 100 ) );
 											        	}
 											        }
 											        
@@ -628,9 +630,10 @@ public class InputDevicePanel extends JPanel
 											        
 											        return cellComponent;
 											    }
+												
+											
 											});
-		
-		table.getTableHeader().setReorderingAllowed( false );
+											*/
 		
 		return table;
 	}

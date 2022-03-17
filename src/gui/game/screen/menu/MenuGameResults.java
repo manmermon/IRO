@@ -91,36 +91,44 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 				@Override
 				public void actionPerformed(ActionEvent arg0) 
 				{
-					try
+					Thread t = new  Thread()
 					{
-						GameManager.getInstance().nextLevel();
-					}
-					catch (Exception e) 
-					{
-						e.printStackTrace();
-						String msg = "";
-						if( e != null )
+						public void run() 
 						{
-							msg += e.getCause();
-							if( !msg.isEmpty() )
+							try
 							{
-								msg += "\n";
+								GameManager.getInstance().nextLevel();
 							}
-							
-							msg += e.getMessage();
+							catch (Exception e) 
+							{
+								e.printStackTrace();
+								String msg = "";
+								if( e != null )
+								{
+									msg += e.getCause();
+									if( !msg.isEmpty() )
+									{
+										msg += "\n";
+									}
+									
+									msg += e.getMessage();
+								}
+								
+								if( msg.isEmpty() )
+								{
+									msg += e.getClass().getCanonicalName();
+								}
+								
+								InfoDialog dialog = new InfoDialog( msg );
+								Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+								dialog.setSize( d );						
+								dialog.setVisible( true );
+								dialog.toFront();
+							}
 						}
-						
-						if( msg.isEmpty() )
-						{
-							msg += e.getClass().getCanonicalName();
-						}
-						
-						InfoDialog dialog = new InfoDialog( msg );
-						Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-						dialog.setSize( d );						
-						dialog.setVisible( true );
-						dialog.toFront();
-					}
+					};
+					
+					t.start();
 				}
 			});
 		}
@@ -141,36 +149,45 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 				@Override
 				public void actionPerformed(ActionEvent arg0) 
 				{
-					try 
+					Thread t = new Thread()
 					{
-						GameManager.getInstance().stopLevel( false );
-					}
-					catch (Exception e) 
-					{
-						e.printStackTrace();
-						String msg = "";
-						if( e != null )
+						@Override
+						public void run() 
 						{
-							msg += e.getCause();
-							if( !msg.isEmpty() )
+							try 
 							{
-								msg += "\n";
+								GameManager.getInstance().stopLevel( false );
 							}
-							
-							msg += e.getMessage();
+							catch (Exception e) 
+							{
+								e.printStackTrace();
+								String msg = "";
+								if( e != null )
+								{
+									msg += e.getCause();
+									if( !msg.isEmpty() )
+									{
+										msg += "\n";
+									}
+									
+									msg += e.getMessage();
+								}
+								
+								if( msg.isEmpty() )
+								{
+									msg += e.getClass().getCanonicalName();
+								}
+								
+								InfoDialog dialog = new InfoDialog( msg );
+								Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+								dialog.setSize( d );						
+								dialog.setVisible( true );
+								dialog.toFront();
+							}
 						}
-						
-						if( msg.isEmpty() )
-						{
-							msg += e.getClass().getCanonicalName();
-						}
-						
-						InfoDialog dialog = new InfoDialog( msg );
-						Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-						dialog.setSize( d );						
-						dialog.setVisible( true );
-						dialog.toFront();
-					}
+					};
+					
+					t.start();
 				}
 			});
 		}

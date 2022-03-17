@@ -93,7 +93,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	
 	private boolean animationActive = false;
 	
-	private NumberRange angleRange = new NumberRange( -45, 45 );
+	private final NumberRange angleRange = new NumberRange( -45, 45 );
 	private final int numAngles = 7;
 	private double stepAngle = angleRange.getRangeLength() / numAngles;
 	private int directionAngle = 1;	
@@ -116,7 +116,10 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	
 	private int notePasteX = 0;
 	private int notePasteY = 0;
-		
+	
+	private boolean noteExitFret = false;
+	private boolean noteEnterFret = false;
+	
 	public MusicNoteGroup( String track
 							, double timeScreen
 							, List< IROTrack > Notes
@@ -308,6 +311,36 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 				}
 			}
 		});
+		
+		this.previousLocation = this.getNoteLocation();
+	}
+	
+	public void copyScreenProperties( MusicNoteGroup note )
+	{
+		if( note != null )
+		{
+			this.setScreenLocation( note.getScreenLocation() );
+			
+			this.setSelected( note.isSelected() );
+			this.setGhost( note.isGhost() );
+			this.setVisible( note.isVisible() );
+			
+			super.setFrameBounds( note.frameBounds );
+			
+			this.setPreactionColor( note.getPreactionColor() );
+			this.setWaitingActionColor( note.getWaitingActionColor() );
+			this.setActionColor( note.getActionColor() );
+			
+			this.setOwner( note.getOwner() );
+			
+			this.setImage( note.getNoteImg() );
+			
+			this.currentAngle = note.currentAngle;
+			
+			this.state = note.state;
+			
+			this.directionAngle = note.directionAngle;
+		}
 	}
 	
 	public Double getMusicTime() 
@@ -765,6 +798,26 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		}
 		
 		return tempo;
+	}
+	
+	public void setNoteExitFret( boolean exit )
+	{
+		this.noteExitFret = exit;
+	}
+	
+	public boolean isNoteExitFret() 
+	{
+		return this.noteExitFret;
+	}
+	
+	public void setNoteEnterFret(boolean noteEnterFret) 
+	{
+		this.noteEnterFret = noteEnterFret;
+	}
+	
+	public boolean isNoteEnterFret() 
+	{
+		return this.noteEnterFret;
 	}
 }
 

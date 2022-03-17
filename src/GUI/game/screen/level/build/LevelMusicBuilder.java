@@ -129,9 +129,9 @@ public class LevelMusicBuilder
 
 			Stave pen = new Stave( screenSize, Level.STAVE_ID );
 			pen.setZIndex( Level.PLANE_STAVE );
-			lv.addPentagram( pen );
+			lv.addStave( pen );
 
-			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() ); 
+			Dimension sizeFret = new Dimension( pen.getStaveWidth() / 3, pen.getStaveHeigh() ); 
 			//Fret fret = new Fret( pen, IScene.FRET_ID );
 			Fret fret = new Fret( Level.FRET_ID, sizeFret );
 			fret.setZIndex( Level.PLANE_FRET );
@@ -616,9 +616,9 @@ public class LevelMusicBuilder
 
 			Stave pen = new Stave( screenSize, Level.STAVE_ID );
 			pen.setZIndex( Level.PLANE_STAVE );
-			lv.addPentagram( pen );
+			lv.addStave( pen );
 
-			Dimension sizeFret = new Dimension( pen.getPentragramWidth() / 3, pen.getPentagramHeigh() ); 
+			Dimension sizeFret = new Dimension( pen.getStaveWidth() / 3, pen.getStaveHeigh() ); 
 			//Fret fret = new Fret( pen, IScene.FRET_ID );
 			Fret fret = new Fret( Level.FRET_ID, sizeFret );
 			fret.setZIndex( Level.PLANE_FRET );

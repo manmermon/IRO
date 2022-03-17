@@ -15,7 +15,7 @@ import control.events.SceneEvent;
 import control.events.SceneEventListener;
 import exceptions.SceneException;
 import stoppableThread.AbstractStoppableThread;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 
 /**
  * @author manuel merino monge
@@ -95,9 +95,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 	@Override
 	protected void startUp() throws Exception 
 	{
-		super.startUp();
-		
-		this.fireSceneEvent( SceneEvent.START );				
+		super.startUp();				
 	}
 	
 	/*
@@ -110,13 +108,14 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 		synchronized ( this ) 
 		{
 			super.wait();
-												
-			//*
+			
 			this.scene.updateLevel();
-			this.setFrame( this.scene.getScene() );
+			
+			BufferedImage scene = this.scene.getScene();
+			
+			this.setFrame( scene );
 			
 			this.updatedLoopAfterUpdateScene();
-			//*/
 		}		
 	}
 	
@@ -169,7 +168,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 		{
 			try
 			{
-				this.startThread();
+				this.startActing();
 			} 
 			catch (Exception e) 
 			{
@@ -260,7 +259,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 	@Override
 	public void startScene() throws Exception
 	{
-		super.startThread();
+		super.startActing();
 	}
 	
 	/*
@@ -273,7 +272,7 @@ public abstract class AbstractSceneControl extends AbstractStoppableThread
 		synchronized( this )
 		{
 			this.specificDestroyScene();
-			super.stopThread( IStoppableThread.FORCE_STOP );			
+			super.stopActing( IStoppable.FORCE_STOP );			
 		}
 	}
 	

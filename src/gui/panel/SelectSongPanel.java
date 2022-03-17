@@ -363,7 +363,6 @@ public class SelectSongPanel extends JPanel
 						}
 						catch (Exception ex)
 						{
-							// TODO Auto-generated catch block
 							ex.printStackTrace();
 						}
 						 
@@ -706,9 +705,13 @@ public class SelectSongPanel extends JPanel
 	
 	private long getSongTime( File midiMusicSheelFile ) throws Exception
 	{	
+		/*
 		this.pattern = MusicSheetTools.getPatternFromMidi( midiMusicSheelFile );
 			
 		return MusicSheetTools.getSongTime( this.pattern ); //micros
+		//*/
+		
+		return MusicSheetTools.getSongTime( midiMusicSheelFile );
 	}
 	
 	private void addSelectionListenerTable( final JTable table)
@@ -747,7 +750,8 @@ public class SelectSongPanel extends JPanel
 							
 						}
 						catch( Exception ex )
-						{							
+						{	
+							ex.printStackTrace();
 						}
 						finally
 						{
@@ -761,7 +765,6 @@ public class SelectSongPanel extends JPanel
 	
 	private String time2Text( long millis )
 	{	
-		
 		String time = String.format("%02d:%02d:%02d", 
 								TimeUnit.MICROSECONDS.toHours(millis),
 								TimeUnit.MICROSECONDS.toMinutes(millis) -  

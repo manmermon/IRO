@@ -42,6 +42,15 @@ public abstract class InputLSLDataReader extends AbstractStoppableThread impleme
 	}
 	
 	@Override
+	protected void runExceptionManager(Exception e) 
+	{
+		if( !( e instanceof InterruptedException ) )
+		{
+			super.runExceptionManager(e);
+		}
+	}
+	
+	@Override
 	protected void cleanUp() throws Exception 
 	{
 		super.cleanUp();

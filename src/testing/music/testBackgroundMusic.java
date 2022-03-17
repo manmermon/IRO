@@ -12,7 +12,7 @@ import org.jfugue.pattern.Pattern;
 import org.jfugue.player.Player;
 
 import gui.game.screen.level.music.BackgroundMusic;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 import tools.MusicSheetTools;
 
 /**
@@ -55,7 +55,7 @@ public class testBackgroundMusic {
 			System.out.println("testBackgroundMusic.main() INIT ");
 			for( BackgroundMusic m : musics )
 			{
-				m.startThread();
+				m.startActing();
 			}
 			
 			Thread.sleep( 4000L );
@@ -84,12 +84,12 @@ public class testBackgroundMusic {
 					musics[ i ] = playerbgMusic;
 					i++;
 					
-					m.stopThread( IStoppableThread.FORCE_STOP );
+					m.stopActing( IStoppable.FORCE_STOP );
 				} 
 				
 				for( BackgroundMusic m : musics )
 				{
-					m.startThread();
+					m.startActing();
 				}
 				
 				Thread.sleep( 6000L );

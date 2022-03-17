@@ -25,9 +25,11 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -38,21 +40,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
 import gui.game.GameWindow;
 import gui.game.component.sprite.ISprite;
-import gui.game.component.sprite.Loading;
+import gui.game.component.sprite.Transition;
 import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import gui.game.screen.menu.MenuGameResults;
+import image.BasicPainter2D;
 import lslStream.LSL;
 import lslStream.LSLStreamInfo;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.Player;
 import config.Settings;
+import config.language.Language;
 import control.ScreenControl;
 import control.controller.ControllerActionChecker;
 import control.controller.ControllerManager;
@@ -64,7 +69,7 @@ import exceptions.SceneException;
 import general.NumberRange;
 import general.Tuple;
 import statistic.RegistrarStatistic;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 import thread.stoppableThread.AbstractStoppableThread;
 
 public class GameManager 
@@ -221,7 +226,7 @@ public class GameManager
 		{
 			if( this.currentLevel.getBackgroundPattern() != null )
 			{
-				this.currentLevel.getBackgroundPattern().stopThread( IStoppableThread.FORCE_STOP );
+				this.currentLevel.getBackgroundPattern().stopActing( IStoppable.FORCE_STOP );
 			}
 		}
 		
@@ -231,12 +236,30 @@ public class GameManager
 
 		IControllerMetadata[] controllers = new IControllerMetadata[ players.size() ];
 
+		
+		Image backImg = null;
+		
 		for( int i = 0; i < players.size(); i++ ) 
 		{
 			Player player = players.get( i );
 
 			Settings setting = ConfigApp.getPlayerSetting( player );
 			ConfigParameter par = setting.getParameter( ConfigApp.SELECTED_CONTROLLER );
+			
+			Object path = setting.getParameter( ConfigApp.BACKGROUND_IMAGE ).getSelectedValue();
+			if( backImg == null )
+			{
+				if( path != null )
+				{
+					try
+					{
+						backImg = ImageIO.read( new File( path.toString() ) );
+					}
+					catch (IOException ex)
+					{	
+					}
+				}		
+			}
 
 			Object ctr = par.getSelectedValue();
 
@@ -292,47 +315,12 @@ public class GameManager
 
 			this.fullScreen( true );		
 
-			final Loading loading = new Loading( this.gameWindow.getSceneBounds().getSize(), Level.LOADING_ID );
-
-			loadAnimationThread = new AbstractStoppableThread() 
-			{			
-				@Override
-				protected void runInLoop() throws Exception 
-				{
-					synchronized ( this )
-					{
-						super.wait( 500L );
-					}
-
-					loading.updateSprite();
-					
-					setGameFrame( loading.getSprite() );
-				}
-
-				@Override
-				protected void preStopThread(int friendliness) throws Exception {}
-
-				@Override
-				protected void postStopThread(int friendliness) throws Exception {}
-
-				@Override
-				protected void cleanUp() throws Exception 
-				{
-					setGameFrame( null );
-				}
-
-				@Override
-				protected void runExceptionManager(Throwable e) 
-				{
-					if( !( e instanceof InterruptedException ) )
-					{
-						e.printStackTrace();
-					}
-				}
-			};		
-
-			loadAnimationThread.startThread();
-
+			loadAnimationThread = this.showTransitionScreen( Language.getLocalCaption( Language.LOADING ), backImg );
+			if( loadAnimationThread != null )
+			{
+				loadAnimationThread.startThread();
+			}
+			
 			MainAppUI.getInstance().setVisible( false );
 
 			this.gameWindow.setVisible( true );
@@ -377,13 +365,14 @@ public class GameManager
 
 				cmeta.setPlayer( player );
 				cmeta.setRecoverInputLevel( min );
-				cmeta.setTargetTimeInLevelAction( timeTarget );
 				cmeta.setActionInputLevel( new NumberRange( max, Double.POSITIVE_INFINITY ));
+				cmeta.setTargetTimeInLevelAction( timeTarget );
 				cmeta.setRepetitions( rep );
+				cmeta.setSelectedChannel( ch );
 
 				RegistrarStatistic.addControllerSetting( player.getId(), cmeta );
 
-				this.gameWindow.setTargetInputValues( player, min, max);
+				//this.gameWindow.setTargetInputValues( player, min, max);
 
 				ctrs.add( cmeta );
 			}
@@ -392,17 +381,24 @@ public class GameManager
 
 			for( IControllerMetadata cmeta : ctrs )
 			{
+				/*
 				NumberRange rng = new NumberRange( cmeta.getRecoverInputLevel(), cmeta.getActionInputLevel().getMin() );
 				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
 																				, rng, cmeta.getTargetTimeInLevelAction( )
 																				, cmeta.getRepetitions() );
+				//*/
+				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
+																				, cmeta.getRecoverInputLevel()
+																				, cmeta.getActionInputLevel().getMin()
+																				, cmeta.getTargetTimeInLevelAction( )
+																				, cmeta.getRepetitions() );
 				actCheck.setOwner( cmeta.getPlayer() );				
 				ControllerManager.getInstance().addControllerListener( cmeta.getPlayer(), actCheck );
 				actCheck.addInputActionListerner( ScreenControl.getInstance() );
-				actCheck.startThread();
+				actCheck.startActing();
 			}
 
-			this.gameWindow.putControllerListener();
+			//this.gameWindow.putControllerListener();
 
 			ControllerManager.getInstance().setEnableControllerListener( false );
 
@@ -427,7 +423,13 @@ public class GameManager
 				fileSongs.add( new File( song ) );				
 			}
 			
-			this.currentLevel = this.getLevel( fileSongs, mute, settings );			
+			this.currentLevel = this.getLevel( fileSongs, mute, settings );	
+			
+			if( loadAnimationThread != null )
+			{
+				loadAnimationThread.stopThread( IStoppable.FORCE_STOP );
+			}
+			
 			this.setLevel( this.currentLevel );			
 		}
 		catch( Exception ex )
@@ -448,7 +450,7 @@ public class GameManager
 		{
 			if( loadAnimationThread != null )
 			{
-				loadAnimationThread.stopThread( IStoppableThread.FORCE_STOP );
+				loadAnimationThread.stopThread( IStoppable.FORCE_STOP );
 			}
 
 			if( this.gameWindow != null )
@@ -459,6 +461,56 @@ public class GameManager
 		}		
 	}
 
+	private AbstractStoppableThread showTransitionScreen( String msg, Image backImg  )
+	{
+		AbstractStoppableThread loadAnimationThread = null;
+		
+		if( this.gameWindow != null )
+		{
+			final Transition loading = new Transition( this.gameWindow.getSceneBounds().getSize(), Level.LOADING_ID, backImg );
+			loading.setMessage( msg );
+	
+			loadAnimationThread = new AbstractStoppableThread() 
+			{			
+				@Override
+				protected void runInLoop() throws Exception 
+				{
+					synchronized ( this )
+					{
+						super.wait( 500L );
+					}
+	
+					loading.updateSprite();
+					
+					setGameFrame( loading.getSprite() );
+				}
+	
+				@Override
+				protected void preStopThread(int friendliness) throws Exception {}
+	
+				@Override
+				protected void postStopThread(int friendliness) throws Exception {}
+	
+				@Override
+				protected void cleanUp() throws Exception 
+				{
+					setGameFrame( null );
+				}
+	
+				@Override
+				protected void runExceptionManager(Throwable e) 
+				{
+					if( !( e instanceof InterruptedException ) )
+					{
+						e.printStackTrace();
+					}
+				}
+			};
+		}
+
+		return loadAnimationThread;
+	}
+	
 	private synchronized List< String > getLevelSongs() throws ConfigParameterException
 	{
 		List< String > levelSongs = new ArrayList< String >();
@@ -514,10 +566,8 @@ public class GameManager
 		}
 		
 		if( this.gameWindow != null )
-		{
-			level.enableLevel();
-			level.playLevel();
-			
+		{				
+			this.gameWindow.getGamePanel().removeAll(); 
 			this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() );
 			
 			ControllerManager.getInstance().setEnableControllerListener( true );
@@ -536,7 +586,7 @@ public class GameManager
 	public void nextLevel() throws Exception
 	{
 		if( !this.currentLevel.isFinished() && this.gameWindow != null )
-		{
+		{			
 			ScreenControl.getInstance().stopScene();
 			
 			this.gameWindow.getGamePanel().setVisible( false );
@@ -569,6 +619,12 @@ public class GameManager
 			spr = sc.getSprites( IScene.BACKGROUND_ID, true );
 		}
 		
+		BufferedImage back = null;
+		if( spr != null && !spr.isEmpty() )
+		{
+			back = spr.get( 0 ).getSprite();
+		}
+				
 		if( nextLevel )
 		{
 			List< Tuple< Player, Double > > scores = new ArrayList< Tuple< Player, Double > >();
@@ -588,10 +644,6 @@ public class GameManager
 											}
 										});
 			
-			this.gameWindow.getGamePanel().setVisible( false );
-			
-			this.gameWindow.getGamePanel().removeAll();
-			
 			ConfigParameter contSession = ConfigApp.getGeneralSetting( ConfigApp.CONTINUOUS_SESSION );			
 			
 			boolean continuous = false;
@@ -607,6 +659,10 @@ public class GameManager
 			}			
 			else
 			{
+				this.gameWindow.getGamePanel().setVisible( false );
+				
+				this.gameWindow.getGamePanel().removeAll();
+				
 				MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
 														, scores
 														, spr
@@ -617,26 +673,28 @@ public class GameManager
 				
 				this.gameWindow.getGamePanel().setVisible( true );
 			}
-		}
-		
-		if( !nextLevel )
+		}		
+		else // if( !nextLevel )
 		{
-			this.currentLevel.stopThread( IStoppableThread.FORCE_STOP );
-			this.currentLevel = null;
+			if( this.currentLevel != null )
+			{	
+				this.currentLevel.stopActing( IStoppable.FORCE_STOP );			
+				this.currentLevel = null;
+			}
 			
 			ControllerManager.getInstance().stopController();
 			
-			synchronized( this.sync )
+			this.gameWindow.getGamePanel().setVisible( false );
+			
+			this.gameWindow.getGamePanel().removeAll();
+			
+			AbstractStoppableThread transitionThread = this.showTransitionScreen( Language.getLocalCaption( Language.SAVING ), back );
+			if( transitionThread != null )
 			{
-				if( this.gameWindow != null )
-				{
-					//this.gameWindow.setVisible( false );
-					this.gameWindow.dispose();
-					this.gameWindow = null;
-					
-					System.gc();
-				}
-			}		
+				transitionThread.startThread();
+			}
+			this.gameWindow.getGamePanel().setVisible( true );			
+			this.gameWindow.setVisible( true );
 			
 			//
 			try
@@ -650,6 +708,28 @@ public class GameManager
 			finally
 			{
 				System.out.println("GameManager.stopLevel() - CORREGIR ERROR: java.util.ConcurrentModificationException");
+			}
+			
+			
+			if( transitionThread != null )
+			{
+				transitionThread.stopThread( IStoppable.FORCE_STOP );
+			}
+
+			synchronized( this.sync )
+			{
+				if( this.gameWindow != null )
+				{
+					//this.gameWindow.setVisible( false );
+					for( WindowListener wl : this.gameWindow.getWindowListeners() )
+					{
+						this.gameWindow.removeWindowListener( wl );
+					}
+					this.gameWindow.dispose();
+					this.gameWindow = null;
+					
+					System.gc();
+				}
 			}
 			
 			MainAppUI.getInstance().setVisible( true );

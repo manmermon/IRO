@@ -2,7 +2,7 @@ package lslStream.biosignal;
 
 import lslStream.LSLStreamInfo.StreamType;
 import lslStream.event.InputLSLDataReader;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 
 public class LSLInputBiosignalStreamRegistral extends InputLSLDataReader
 {
@@ -28,7 +28,7 @@ public class LSLInputBiosignalStreamRegistral extends InputLSLDataReader
 	@Override
 	public void close() 
 	{
-		super.stopThread( IStoppableThread.FORCE_STOP );
+		super.stopActing( IStoppable.FORCE_STOP );
 	}
 	
 }

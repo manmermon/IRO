@@ -15,7 +15,7 @@ import gui.game.screen.level.music.BackgroundMusic;
 import music.sheet.IROTrack;
 import control.events.BackgroundMusicEventListener;
 import stoppableThread.AbstractStoppableThread;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 import tools.MusicSheetTools;
 
 public class MusicPlayerControl_copy extends AbstractStoppableThread 
@@ -49,7 +49,7 @@ public class MusicPlayerControl_copy extends AbstractStoppableThread
 		
 		try
 		{
-			super.startThread();
+			super.startActing();
 		} 
 		catch (Exception ex)
 		{
@@ -79,7 +79,7 @@ public class MusicPlayerControl_copy extends AbstractStoppableThread
 	{
 		if( this.backgroundMusic != null )
 		{
-			this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
+			this.backgroundMusic.stopActing( IStoppable.FORCE_STOP );
 		}
 		
 		this.backgroundMusic = backgroundMusicPattern;				
@@ -91,7 +91,7 @@ public class MusicPlayerControl_copy extends AbstractStoppableThread
 		{
 			for( BackgroundMusic pbgm : this.playerMusicSheets.values() )
 			{
-				pbgm.stopThread( IStoppableThread.FORCE_STOP );
+				pbgm.stopActing( IStoppable.FORCE_STOP );
 			}
 		}
 		
@@ -127,13 +127,13 @@ public class MusicPlayerControl_copy extends AbstractStoppableThread
 			for( BackgroundMusic playerSheet : this.playerMusicSheets.values() )
 			{
 				playerSheet.setMuteSession( this.isMuteSession );
-				playerSheet.startThread();
+				playerSheet.startActing();
 			}
 			
 			if( this.backgroundMusic != null )
 			{						
 				this.backgroundMusic.setMuteSession( this.isMuteSession );
-				this.backgroundMusic.startThread();
+				this.backgroundMusic.startActing();
 			}
 			
 			this.isPlay.set( true );
@@ -156,13 +156,13 @@ public class MusicPlayerControl_copy extends AbstractStoppableThread
 		{
 			for( BackgroundMusic playerSheet : this.playerMusicSheets.values() )
 			{
-				playerSheet.stopThread( IStoppableThread.FORCE_STOP );
+				playerSheet.stopActing( IStoppable.FORCE_STOP );
 			}
 			this.playerMusicSheets.clear();
 			
 			if( this.backgroundMusic != null )
 			{	
-				this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
+				this.backgroundMusic.stopActing( IStoppable.FORCE_STOP );
 			}
 			
 			this.isMuteSession = false;			
@@ -299,13 +299,13 @@ public class MusicPlayerControl_copy extends AbstractStoppableThread
 		{
 			for( BackgroundMusic bg : this.playerMusicSheets.values() )
 			{
-				bg.stopThread( IStoppableThread.FORCE_STOP );
+				bg.stopActing( IStoppable.FORCE_STOP );
 			}
 			this.mutePlayerSheet.clear();
 			
 			if( this.backgroundMusic != null )
 			{
-				this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
+				this.backgroundMusic.stopActing( IStoppable.FORCE_STOP );
 				this.backgroundMusic = null;
 			}
 			
@@ -371,7 +371,7 @@ public class MusicPlayerControl_copy extends AbstractStoppableThread
 					{
 						this.backgroundMusic.removeBackgroundMusicEventListener( bml );
 					}				
-					this.backgroundMusic.stopThread( IStoppableThread.FORCE_STOP );
+					this.backgroundMusic.stopActing( IStoppable.FORCE_STOP );
 					
 					BackgroundMusic bgMusic = new BackgroundMusic();
 					int delay = this.backgroundMusic.getRemainingDelay();
@@ -405,7 +405,7 @@ public class MusicPlayerControl_copy extends AbstractStoppableThread
 						{
 							pms.removeBackgroundMusicEventListener( bml );
 						}				
-						pms.stopThread( IStoppableThread.FORCE_STOP );
+						pms.stopActing( IStoppable.FORCE_STOP );
 						
 						for( BackgroundMusicEventListener bml : listerns )
 						{

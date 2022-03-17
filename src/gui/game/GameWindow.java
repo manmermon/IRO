@@ -4,7 +4,6 @@
 package gui.game;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.Point;
@@ -13,14 +12,9 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
@@ -29,7 +23,6 @@ import GUI.action.keyActions;
 import gui.game.component.ControllerTargetBar;
 import gui.game.component.Frame;
 import config.Player;
-import control.controller.ControllerManager;
 
 /**
  * @author manuel
@@ -45,7 +38,7 @@ public class GameWindow extends JFrame
 	private JPanel contentPane;
 	private Frame gamePanel;
 	
-	private Map< Player,  ControllerTargetBar > targetControllerIndicators;
+	//private Map< Player,  ControllerTargetBar > targetControllerIndicators;
 	
 	/**
 	 * Create the frame.
@@ -57,7 +50,7 @@ public class GameWindow extends JFrame
 			throw new IllegalArgumentException( "Player list is null or empty." );
 		}		
 		
-		this.targetControllerIndicators = new HashMap<Player, ControllerTargetBar>();
+		//this.targetControllerIndicators = new HashMap<Player, ControllerTargetBar>();
 		
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize(); 
 		Insets ins = Toolkit.getDefaultToolkit().getScreenInsets( this.getGraphicsConfiguration() );
@@ -112,7 +105,7 @@ public class GameWindow extends JFrame
 		
 		Dimension s = super.getSize();
 		
-		Dimension s2 = this.getTargetControllerIndicator().getPreferredSize();
+		Dimension s2 = this.getTargetControllerIndicator( 0 ).getPreferredSize();
 		
 		Insets inset = super.getInsets();
 		
@@ -142,59 +135,8 @@ public class GameWindow extends JFrame
 			this.contentPane = new JPanel();
 			
 			this.contentPane.setLayout( new BorderLayout( 0, 0 ) );
-			
-			String[] distributions = new String[] { BorderLayout.SOUTH
-													, BorderLayout.NORTH
-													, BorderLayout.WEST
-													, BorderLayout.EAST };
-			
+						
 			this.contentPane.add( this.getGamePanel(), BorderLayout.CENTER );
-			
-			Map< String, JPanel > panelDistribution = new HashMap< String, JPanel >();
-			for( int i = 0; i < players.size(); i++ )
-			{
-				Player player = players.get( i );
-				
-				int index = i % distributions.length;
-				String dist = distributions[ index ];
-
-				ControllerTargetBar ctgb = getTargetControllerIndicator();
-				Dimension preSize = ctgb.getPreferredSize();			
-				int s = preSize.height;
-				
-				int axis = BoxLayout.X_AXIS;
-				
-				if( dist.toLowerCase().equals( BorderLayout.WEST.toLowerCase() ) 
-						|| dist.toLowerCase().equals( BorderLayout.EAST.toLowerCase() ) )
-				{
-					axis = BoxLayout.Y_AXIS;
-					
-					int aux = preSize.height;
-					preSize.height = preSize.width;
-					preSize.width = aux;
-					
-					ctgb.setOrientation( ControllerTargetBar.VERTICAL );
-				}
-
-				JLabel playerIco = new JLabel();
-				playerIco.setIcon( player.getImg( s, s ) );
-				
-				JPanel controllerPanel = panelDistribution.get( dist );
-				if( controllerPanel == null )
-				{
-					controllerPanel = new JPanel();
-					
-					controllerPanel.setLayout( new BoxLayout( controllerPanel, axis ) );
-					panelDistribution.put( dist, controllerPanel );
-					
-					this.contentPane.add( controllerPanel, dist );
-				}
-				
-				controllerPanel.add( playerIco );
-				controllerPanel.add( ctgb );
-				
-				this.targetControllerIndicators.put( player, ctgb );
-			}
 		}
 		
 		return this.contentPane;
@@ -214,37 +156,14 @@ public class GameWindow extends JFrame
 		return this.gamePanel;
 	}
 		
-	private ControllerTargetBar getTargetControllerIndicator()
+	private ControllerTargetBar getTargetControllerIndicator( int channel )
 	{		
-		ControllerTargetBar targetControllerIndicator = new ControllerTargetBar( 0 );
+		ControllerTargetBar targetControllerIndicator = new ControllerTargetBar( channel );
 		Dimension d = targetControllerIndicator.getPreferredSize();
 		d.height *= 2;
 			
 		targetControllerIndicator.setPreferredSize( d );		
 		
 		return targetControllerIndicator;
-	}	
-	
-	public void setTargetInputValues( Player player, double min, double max )
-	{
-		ControllerTargetBar lpi = this.targetControllerIndicators.get( player );
-		
-		double distance = Math.abs( max - min ) / 4 ;
-		
-		lpi.setMinimum( min - distance );		
-		lpi.setMaximum( max + distance );		
-		lpi.setLevels( new double[] { min, max } );
-		
-		lpi.setLevelColor( new Color[] { Color.WHITE, Color.YELLOW, Color.GREEN } );
-	}
-	
-	public void putControllerListener()
-	{
-		for( Player player : this.targetControllerIndicators.keySet() )
-		{
-			ControllerTargetBar ctb = this.targetControllerIndicators.get( player );
-			
-			ControllerManager.getInstance().addControllerListener( player, ctb );
-		}
-	}
+	}		
 }

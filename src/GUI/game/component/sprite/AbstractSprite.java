@@ -43,7 +43,7 @@ public abstract class AbstractSprite implements ISprite
 	
 	protected EventListenerList listenerList;
 
-	private Rectangle frameBounds;
+	protected Rectangle frameBounds;
 	
 	private boolean onScreen = false;
 	

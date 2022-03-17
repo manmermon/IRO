@@ -147,8 +147,8 @@ public class ManagedPlayerMod implements EndOfTrackListener
     public void pause() 
     {
     	fireOnPaused();
-    	this.paused = true;
-    	common.getSequencer().stop();
+    	this.paused = true;    	
+    	common.getSequencer().stop();    	
     }
 
     /**

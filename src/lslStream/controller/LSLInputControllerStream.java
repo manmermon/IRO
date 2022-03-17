@@ -6,7 +6,7 @@ import java.util.List;
 import control.controller.IControllerMetadata;
 import control.controller.IInputController;
 import control.events.IInputControllerListener;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 import lslStream.LSLInputStream;
 import lslStream.LSLStreamInfo;
 import lslStream.event.IInputLSLDataListener;
@@ -46,7 +46,7 @@ public class LSLInputControllerStream extends LSLInputStream implements IInputCo
 	@Override
 	public void stopController() throws Exception
 	{	
-		super.stopThread( IStoppableThread.FORCE_STOP );
+		super.stopActing( IStoppable.FORCE_STOP );
 	} 
 	
 	/*(non-Javadoc)
@@ -55,7 +55,7 @@ public class LSLInputControllerStream extends LSLInputStream implements IInputCo
 	@Override
 	public void startController() throws Exception
 	{
-		super.startThread();
+		super.startActing();
 	}
 
 

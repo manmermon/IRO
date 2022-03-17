@@ -16,7 +16,7 @@ import org.jfugue.theory.Note;
 import music.jfugueIRO.PlayerMod;
 import music.sheet.IROTrack;
 import stoppableThread.AbstractStoppableThread;
-import stoppableThread.IStoppableThread;
+import stoppableThread.IStoppable;
 import tools.MusicSheetTools;
 
 public class IROPlayer 
@@ -99,7 +99,7 @@ public class IROPlayer
 			PlayerNote player = this.players.get( trackID );
 			if( player != null )
 			{
-				player.startThread();
+				player.startActing();
 			}
 		}
 	}
@@ -111,7 +111,7 @@ public class IROPlayer
 			PlayerNote player = this.players.get( trackID );
 			if( player != null )
 			{	
-				player.stopThread( IStoppableThread.FORCE_STOP );
+				player.stopActing( IStoppable.FORCE_STOP );
 			}
 		}
 	}
@@ -122,7 +122,7 @@ public class IROPlayer
 		{
 			for( PlayerNote player : this.players.values() )
 			{
-				player.stopThread( IStoppableThread.FORCE_STOP );
+				player.stopActing( IStoppable.FORCE_STOP );
 			}
 			
 			this.players.clear();
