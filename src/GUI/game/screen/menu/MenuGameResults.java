@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.Box;
@@ -33,18 +35,14 @@ import general.Tuple;
 
 public class MenuGameResults extends Scene implements IInputable, IGameMenu 
 {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 9062959498200684001L;
-	
 	private GeometricButtom nextBt;
 	private GeometricButtom stopBt;
 
 	private Dimension btSize;
 	private double padding = 0.1;
 	private List< Tuple< Player, Double > > scores = null;
+	
+	private final int pad = 5;
 	
 	/**
 	 * Create the panel.
@@ -71,7 +69,7 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 		
 		this.btSize = new Dimension( sceneSize.width / 6, sceneSize.height / 5 );
 		
-		int btPadding =  sceneSize.height / ( results.size() + 1 );;
+		int btPadding =  sceneSize.height / ( results.size() + 1 );
 		
 		if( showNextBt )
 		{
@@ -280,19 +278,20 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 		//BufferedImage s = null;
 		
 		int i = 0;
+		int yPad = h / 2 - (this.scores.size() + 1 )* this.pad / 2;		
 		for( Tuple< Player, Double > score : this.scores )
 		{
 			Score sc = null;
 			int sw = w + 100 ;
-			h += 1;
+			h += this.pad;
 			while( sw > w )
 			{	
-				h -= 1;
+				h -= this.pad;
 				sc = new Score( Level.SCORE_ID
 								, score.t2
 								, 0
 								, h
-								, new Point( 0 , (int)( ( i + 0.5 ) * h ) ) );
+								, new Point( 0 , (int)( i * ( h + this.pad ) + yPad ) ) );
 				
 				sc.setOwner( score.t1 );
 				
@@ -302,7 +301,7 @@ public class MenuGameResults extends Scene implements IInputable, IGameMenu
 						
 			Point2D.Double loc = sc.getScreenLocation();
 			
-			loc.x = ( w - sw ) / 2 ;
+			loc.x = ( w - sw ) / 2;
 			if( loc.x < 0 )
 			{
 				loc.x = 0;

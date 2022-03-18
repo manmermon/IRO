@@ -5,22 +5,22 @@ package gui.game.component.sprite;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-import javax.swing.JComponent;
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 
 import GUI.progressbar.LevelProgressIndicator;
 import config.IOwner;
 import control.events.IInputControllerListener;
 import gui.game.component.IPossessable;
-import image.BasicPainter2D;
 
 /**
  * @author manuel
  *
  */
-public class ControllerTargetSprite extends AbstractSprite 
+public class MovementBarSprite extends AbstractSprite 
 									implements IInputControllerListener, IPossessable
 {
 
@@ -43,7 +43,7 @@ public class ControllerTargetSprite extends AbstractSprite
 	/**
 	 * 
 	 */
-	public ControllerTargetSprite( String idSprite, int channel )
+	public MovementBarSprite( String idSprite, int channel )
 	{
 		super( idSprite );
 		
@@ -52,6 +52,11 @@ public class ControllerTargetSprite extends AbstractSprite
 		this.pgbar = new LevelProgressIndicator( 3 );
 		this.pgbar.setPaintedText( false );
 		this.pgbar.setVisible( true );
+		
+		Border l1 = new LineBorder( Color.BLACK, 2 );
+		Border l2 = new LineBorder( Color.WHITE, 2 );
+		Border border = BorderFactory.createCompoundBorder( l1, l2 );
+		this.pgbar.setBorder( border );
 	}
 	
 	public void setOrientation( int orientation )

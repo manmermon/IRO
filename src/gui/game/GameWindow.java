@@ -105,11 +105,11 @@ public class GameWindow extends JFrame
 		
 		Dimension s = super.getSize();
 		
-		Dimension s2 = this.getTargetControllerIndicator( 0 ).getPreferredSize();
+		//Dimension s2 = this.getTargetControllerIndicator( 0 ).getPreferredSize();
 		
 		Insets inset = super.getInsets();
 		
-		s.height =  s.height - s2.height - inset.bottom - inset.top;
+		s.height =  s.height - inset.bottom - inset.top ;//- s2.height;
 		s.width = s.width - inset.left - inset.right;
 				
 		return s;
@@ -156,6 +156,7 @@ public class GameWindow extends JFrame
 		return this.gamePanel;
 	}
 		
+	/*
 	private ControllerTargetBar getTargetControllerIndicator( int channel )
 	{		
 		ControllerTargetBar targetControllerIndicator = new ControllerTargetBar( channel );
@@ -165,5 +166,6 @@ public class GameWindow extends JFrame
 		targetControllerIndicator.setPreferredSize( d );		
 		
 		return targetControllerIndicator;
-	}		
+	}
+	*/		
 }

@@ -35,6 +35,8 @@ public class Score extends AbstractSprite implements IPossessable
 	
 	private final String scoreFormat = "%06.0f";
 
+	final private int pad = 5;
+	
 	/**
 	 * 
 	 */
@@ -64,10 +66,12 @@ public class Score extends AbstractSprite implements IPossessable
 	{
 		Dimension d = super.getSize();
 		
+		/*
 		if( this._player != null && this.playerPic == null )
 		{
 			d.width += d.height;
 		}
+		*/
 		
 		return d;
 	}
@@ -112,16 +116,16 @@ public class Score extends AbstractSprite implements IPossessable
 		}
 		
 		Color bg = new Color( 255, 255, 255, 140 );
-		BufferedImage img = ( BufferedImage )BasicPainter2D.createEmptyCanva( sprite.getWidth() + this.playerPic.getWidth( null ), sprite.getHeight(), null );
-		BasicPainter2D.roundRectangle( this.playerPic.getWidth( null ), 0
+		BufferedImage img = ( BufferedImage )BasicPainter2D.createEmptyCanva( super.spriteSize.width, super.spriteSize.height, null );
+		BasicPainter2D.roundRectangle( this.playerPic.getWidth( null ) + this.pad, 0
 										, sprite.getWidth() 
-										, sprite.getHeight() 
+										, super.spriteSize.height
 										, this.fontmetrics.stringWidth( "0")
-										, sprite.getHeight() 
+										, super.spriteSize.height 
 										, 1 , bg, bg, img );
 		
 		//BufferedImage img = (BufferedImage)basicPainter2D.createEmptyCanva( sprite.getWidth(), sprite.getHeight(), bg );
-		BasicPainter2D.composeImage( img, this.playerPic.getWidth( null ), 0, sprite );
+		BasicPainter2D.composeImage( img, this.playerPic.getWidth( null ) + this.pad, 0, sprite );
 		BasicPainter2D.composeImage( img, 0, 0, playerPic );
 				
 		return img;
@@ -148,16 +152,18 @@ public class Score extends AbstractSprite implements IPossessable
 	@Override
 	public void setOwner( IOwner owner )
 	{
-		if( this._player != null && this._player.getOwnerImage() != null )
+		if( this.playerPic != null )
 		{
-			super.spriteSize.width -= this._player.getOwnerImage().getWidth( null );
+			super.spriteSize.width -= this.playerPic.getWidth( null );
+			super.spriteSize.width -= this.pad;
 		}
 				
 		this._player = owner;
 		
 		if( this._player != null && this._player.getOwnerImage() != null )
 		{
-			super.spriteSize.width += this._player.getOwnerImage().getWidth( null );			
+			this.playerPic = this._player.getOwnerImage().getScaledInstance( super.spriteSize.height, super.spriteSize.height,  Image.SCALE_SMOOTH );
+			super.spriteSize.width += this.playerPic.getWidth( null ) + this.pad;			
 		}
 	}
 

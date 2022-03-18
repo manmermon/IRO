@@ -59,7 +59,7 @@ import general.NumberTuple;
 import general.Tuple;
 import gui.game.component.ControllerTargetBar;
 import gui.game.component.sprite.Background;
-import gui.game.component.sprite.ControllerTargetSprite;
+import gui.game.component.sprite.MovementBarSprite;
 import gui.game.component.sprite.Fret;
 import gui.game.component.sprite.ISprite;
 import gui.game.component.sprite.InputGoal;
@@ -85,6 +85,7 @@ import tools.SceneTools;
 public class Level extends Scene implements IPausable, IStoppable
 {
 	private static final double MIN_PLAYER_NOTE_TRACK = 0.5D;
+	private final double PLAYER_DELAY = 0.5D;
 	
 	public static final int PLANE_BRACKGROUND = -1;
 	public static final int PLANE_STAVE = 0;	 
@@ -208,14 +209,14 @@ public class Level extends Scene implements IPausable, IStoppable
 					double startDelay = 0;
 					for( Settings cfg : Level.this.playerSettings )
 					{	
-						List< MusicNoteGroup > aliveNotes = getNotes( cfg.getPlayer().getId() );
+						Player player = cfg.getPlayer();
+						
+						List< MusicNoteGroup > aliveNotes = getNotes( player.getId() );
 						
 						int shift = aliveNotes.isEmpty() ? 0 : 1; 
 						
 						if( aliveNotes.size() < 4 )
 						{
-							Player player = cfg.getPlayer();
-							
 							NumberTuple plTimes = playerTimes.get( player.getId() );
 							
 							double reactionTime = plTimes.t1.doubleValue();
@@ -255,6 +256,8 @@ public class Level extends Scene implements IPausable, IStoppable
 								
 								noteImg = aliveNotes.get( aliveNotes.size() -1 ).getNoteImg();
 							}
+							
+							startDelay +=  -stepTime + PLAYER_DELAY;
 							
 							double end = init + stepMusicTime;
 							
@@ -329,10 +332,10 @@ public class Level extends Scene implements IPausable, IStoppable
 									addNote( note );
 								}
 							}
-							
-							firstSegment = false;
 						}
-					}					
+					}	
+					
+					firstSegment = false;
 				}
 			}
 			
@@ -656,8 +659,7 @@ public class Level extends Scene implements IPausable, IStoppable
 			int idPlayer = player.getId();
 			
 			NumberTuple prevReactRecover = this.playerTimes.get( idPlayer );
-			
-			
+						
 			if( prevReactRecover != null )
 			{		
 				percentcReactionTimeVariation = ( percentcReactionTimeVariation <= 0 ) ? 1 : percentcReactionTimeVariation;
@@ -680,6 +682,8 @@ public class Level extends Scene implements IPausable, IStoppable
 						 */
 											
 						this.playerTimes.put( idPlayer, new NumberTuple( reactionTime, recoverTime ) );
+						
+						System.out.println("Level.changeSpeed() " + player + " >> " + prevReactRecover );
 						
 						/*
 						 *  Get notes on screen
@@ -1663,6 +1667,7 @@ public class Level extends Scene implements IPausable, IStoppable
 				double startDealy = Double.POSITIVE_INFINITY;
 				double refReactTime = 1D;
 				double adjustment = 0.079687D;
+				int indexPlayer = 0;
 				for( Settings playerSetting : this.playerSettings )
 				{
 					NumberTuple times = this.playerTimes.get( playerSetting.getPlayer().getId() );
@@ -1670,12 +1675,14 @@ public class Level extends Scene implements IPausable, IStoppable
 					double reactionTime = times.t1.doubleValue();
 					double vel = SceneTools.getAvatarVel( fretWidth, reactionTime );
 	
-					double delay = wayWidth / vel;
+					double delay = wayWidth / vel + indexPlayer * PLAYER_DELAY;
 					if( delay < startDealy )
 					{
 						refReactTime = reactionTime;
 						startDealy = delay;
 					}
+					
+					indexPlayer++;
 				}
 	
 				startDealy +=  ( adjustment * refReactTime ); 
@@ -1774,6 +1781,11 @@ public class Level extends Scene implements IPausable, IStoppable
 			totalSessionTime += msheet.getDuration();
 		}
 		
+		int totalPoints = (int)( totalSessionTime * 100 );
+		
+		final int hPad = 10;
+		Point2D.Double screenLoc = new Point2D.Double( hPad, hPad );
+		
 		for( int indexMusicSheetPlayers = 0; indexMusicSheetPlayers < this.playerSettings.size(); indexMusicSheetPlayers++ )
 		{	
 			Settings playerSetting = this.playerSettings.get( indexMusicSheetPlayers );
@@ -1781,7 +1793,9 @@ public class Level extends Scene implements IPausable, IStoppable
 			Number reaction = (Number)playerSetting.getParameter( ConfigApp.REACTION_TIME ).getSelectedValue();
 			Number recover = (Number)playerSetting.getParameter( ConfigApp.RECOVER_TIME ).getSelectedValue();
 			
-			int numNotes = (int)( totalSessionTime / ( reaction.doubleValue() + recover.doubleValue() ) );
+			int numNotes = (int)Math.ceil( totalSessionTime / ( reaction.doubleValue() + recover.doubleValue() ) );			
+			numNotes = ( numNotes < 1 ) ? 1 : numNotes;
+				
 			
 			Player player = playerSetting.getPlayer();
 			
@@ -1793,18 +1807,12 @@ public class Level extends Scene implements IPausable, IStoppable
 				staveBounds = this.getStave().getBounds();
 			}
 		
-			double scoreUnit = totalSessionTime * 100;
+			double scoreUnit = totalPoints;
 	
-			if( numNotes > 0 )
-			{
-				scoreUnit /= numNotes;
-			}
-			else
-			{
-				scoreUnit = 100;
-			}
+			scoreUnit /= numNotes;
 			scoreUnit = ( scoreUnit < 1 ) ? 1 : scoreUnit;
 			
+			/*
 			List< ISprite > scores = getSprites( Level.SCORE_ID, false );
 			
 			Point2D.Double screenLoc = null; 
@@ -1816,26 +1824,22 @@ public class Level extends Scene implements IPausable, IStoppable
 				screenLoc.x = prevScore.getScreenLocation().x;				
 				screenLoc.y = prevScore.getScreenLocation().y + prevScore.getSize().height + 5;			
 			}
+			*/
 	
 			double sc = 0;
 			Score score = new Score( Level.SCORE_ID, sc,  scoreUnit, staveRailH / 2, staveBounds.getLocation() );
 			score.setFrameBounds( this.sceneBounds );
 			score.setZIndex( Level.PLANE_SCORE );
 			score.setOwner( player );
-			
-			if( screenLoc != null )
-			{
-				score.setScreenLocation( screenLoc );
-			}
-	
-			screenLoc = score.getScreenLocation();
-			
+			score.setScreenLocation( screenLoc );
 			this.add( score, score.getZIndex() );
+			
 	
 			InputGoal goal = new InputGoal( Level.INPUT_TARGET_ID, staveRailH, staveBounds );
 			goal.setFrameBounds( this.sceneBounds );
 			goal.setOwner( player );
 			goal.setZIndex( Level.PLANE_INPUT_TARGET );
+			
 			Point2D.Double loc = new Point2D.Double();
 			loc.y = screenLoc.y;
 			loc.x = screenLoc.x + score.getSize().width + 5;
@@ -1845,7 +1849,7 @@ public class Level extends Scene implements IPausable, IStoppable
 			this.add( goal, goal.getZIndex() );
 			
 			int ch = ((Number)playerSetting.getParameter( ConfigApp.INPUT_SELECTED_CHANNEL ).getSelectedValue()).intValue() - 1;
-			ControllerTargetSprite targetControllerIndicator = new ControllerTargetSprite( INPUT_BAR_ID, ch  );
+			MovementBarSprite targetControllerIndicator = new MovementBarSprite( INPUT_BAR_ID, ch  );
 			targetControllerIndicator.setZIndex( Level.PLANE_INPUT_BAR );
 			Dimension ctgbSize = new Dimension ( score.getSize() );
 			ctgbSize.height /= 3;
@@ -1884,6 +1888,8 @@ public class Level extends Scene implements IPausable, IStoppable
 			
 			ControllerManager.getInstance().addControllerListener( player, targetControllerIndicator );
 			
+			screenLoc = targetControllerIndicator.getScreenLocation();
+			screenLoc.y += hPad + targetControllerIndicator.getSize().height; 		
 		}
 	}
 	

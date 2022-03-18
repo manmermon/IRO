@@ -639,7 +639,13 @@ public class GameManager
 											@Override
 											public int compare( Tuple< Player, Double > t0, Tuple< Player, Double > t1 ) 
 											{
-												int eq = (int)( Math.signum( t0.t2 - t1.t2 ) );
+												int eq = (int)( Math.signum( t1.t2 - t0.t2 ) );
+												
+												if( eq == 0 )
+												{
+													eq = t1.t1.getId() - t0.t1.getId();
+												}
+												
 												return eq;
 											}
 										});

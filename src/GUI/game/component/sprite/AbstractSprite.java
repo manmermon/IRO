@@ -92,7 +92,7 @@ public abstract class AbstractSprite implements ISprite
 	@Override
 	public Point2D.Double getScreenLocation() 
 	{
-		return this.screenLoc;
+		return new Point2D.Double( this.screenLoc.x, this.screenLoc.y );
 	}
 
 	/*
@@ -122,7 +122,7 @@ public abstract class AbstractSprite implements ISprite
 	 */
 	public void setSize( Dimension size )
 	{
-		this.spriteSize = size;
+		this.spriteSize = new Dimension( size );
 	}
 	
 	/*
@@ -131,7 +131,7 @@ public abstract class AbstractSprite implements ISprite
 	 */
 	public Dimension getSize()
 	{
-		return this.spriteSize;
+		return new Dimension( this.spriteSize );
 	}
 	
 	@Override
@@ -162,7 +162,7 @@ public abstract class AbstractSprite implements ISprite
 	@Override
 	public void setFrameBounds(Rectangle bounds) 
 	{
-		this.frameBounds = bounds;
+		this.frameBounds = new Rectangle( bounds );
 	}
 	//*/
 	
