@@ -483,8 +483,6 @@ public class Level extends Scene implements IPausable, IStoppable
 			int first = ThreadLocalRandom.current().nextInt( 0, this.playerDelay.length );
 			this.playerDelay[ first ] = 0;
 			
-			System.out.println("Level.initiateLevel() " + Arrays.toString( playerDelay ));
-			
 			if( this.getAllNotes() != null && !this.getAllNotes().isEmpty() )
 			{
 				List< ISprite > noteSprites = new ArrayList< ISprite >( this.getAllNotes() );

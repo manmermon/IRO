@@ -201,7 +201,7 @@ public class RegistrarStatistic
 	/**
 	 * @return the playerID
 	 */
-	public static Set< Integer > getPlayerIDs()
+	public synchronized static Set< Integer > getPlayerIDs()
 	{
 		return register.keySet();
 	}

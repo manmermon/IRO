@@ -14,6 +14,7 @@ import lslStream.LSL.StreamInlet;
 import lslStream.LSLStreamInfo.StreamDataType;
 import lslStream.event.IInputLSLDataListener;
 import lslStream.event.InputLSLDataEvent;
+import lslStream.event.InputLSLDataEvent.LSLDataEventType;
 import stoppableThread.AbstractStoppableThread;
 import stoppableThread.IStoppable;
 
@@ -171,7 +172,7 @@ public class LSLInputStream extends AbstractStoppableThread
 				this.timer.stop();
 			}
 			
-			this.fireInputLSLDataEvent( data, this.dataTime );
+			this.fireInputLSLDataEvent( LSLDataEventType.DATA, data, this.dataTime );
 			
 			if (this.timer != null)
 			{
@@ -186,10 +187,7 @@ public class LSLInputStream extends AbstractStoppableThread
 	@Override
 	protected void runExceptionManager(Exception e)
 	{
-		if( !( e instanceof InterruptedException ) )
-		{
-			super.stopThread = true;
-		}
+		this.runException( e );
 	}
 	
 	private double[] readData() throws Exception
@@ -271,7 +269,7 @@ public class LSLInputStream extends AbstractStoppableThread
 		return out;
 	}
 				
-	protected void runExceptionManager( Throwable e )
+	protected void runException( Throwable e )
 	{
 		if ( !(e instanceof InterruptedException) 
 				|| ( e instanceof Error ) )
@@ -303,8 +301,13 @@ public class LSLInputStream extends AbstractStoppableThread
 			
 			ex.addSuppressed( new IOException( errMsg ) );
 			
-			this.notifyProblem( ex );
+			this.notifyProblem();
 		}
+	}
+	
+	private void notifyProblem()
+	{
+		this.fireInputLSLDataEvent( LSLDataEventType.ERROR, null, 0D);
 	}
 
 	protected void cleanUp() throws Exception
@@ -324,16 +327,13 @@ public class LSLInputStream extends AbstractStoppableThread
 			list.close();
 		}		
 	}
-		
-	protected void notifyProblem(Exception e)
-	{		
-		// TODO
-	}
-
+	
 	private void timeOver( )
 	{	
 		this.stopActing( IStoppable.FORCE_STOP );
-		this.notifyProblem( new TimeoutException( "Waiting time for input data from device was exceeded." ) );		
+		
+		
+		this.notifyProblem( );		
 	}
 
 	/*(non-Javadoc)
@@ -371,9 +371,9 @@ public class LSLInputStream extends AbstractStoppableThread
 	 * 
 	 * @param typeEvent
 	 */
-	protected void fireInputLSLDataEvent( double[] values, double time )
+	protected void fireInputLSLDataEvent( LSLDataEventType type, double[] values, double time )
 	{
-		InputLSLDataEvent event = new InputLSLDataEvent( this, values, time );
+		InputLSLDataEvent event = new InputLSLDataEvent( this, type, values, time );
 
 		IInputLSLDataListener[] listeners = this.listenerList.getListeners( IInputLSLDataListener.class );
 

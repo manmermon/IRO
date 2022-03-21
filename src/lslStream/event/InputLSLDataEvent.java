@@ -9,21 +9,25 @@ public class InputLSLDataEvent extends EventObject
 	 */
 	private static final long serialVersionUID = 7232322653215504302L;
 
+	public enum LSLDataEventType { ERROR, DATA, STOP }
+	
 	private double[] inValues;
 	
 	private double time;
 	
-	private int typeEvent;
+	private LSLDataEventType typeEvent;
 	
-	public InputLSLDataEvent( Object source, double[] values, double time ) 
+	public InputLSLDataEvent( Object source, LSLDataEventType t, double[] values, double time ) 
 	{
 		super( source );
 		
 		this.inValues = values;
 		this.time = time;
+		
+		this.typeEvent = t;
 	}	
 	
-	public int getType()
+	public LSLDataEventType getType()
 	{
 		return this.typeEvent;
 	}

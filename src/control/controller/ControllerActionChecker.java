@@ -1,13 +1,18 @@
 package control.controller;
 
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.JOptionPane;
 import javax.swing.event.EventListenerList;
 
+import gui.GameManager;
+import gui.MainAppUI;
 import gui.game.component.IPossessable;
+import lslStream.event.InputLSLDataEvent.LSLDataEventType;
 import lslStream.event.InputLSLDataReader;
+import lslStream.exception.LostException;
 import config.IOwner;
+import config.language.Language;
 import control.ScreenControl;
 import control.events.IInputControllerListener;
 import control.events.InputActionEvent;
@@ -136,181 +141,192 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 	}
 
 	@Override
-	protected void readInputData( lslStream.event.InputLSLDataEvent ev ) 
+	protected void readInputData( lslStream.event.InputLSLDataEvent ev ) throws Exception
 	{
-		double[] values = ev.getInputValues();
-		
-		double time = ev.getTime();
-		
-		if( this.enableCheck 
-				&& values != null 
-				&& this.selectedChannel >= 0 
-				&& this.selectedChannel < values.length
-		  )
+		if( !ev.getType().equals( LSLDataEventType.DATA ) )
+		{	
+			GameManager.getInstance().stopLevel( false );
+			JOptionPane.showMessageDialog( MainAppUI.getInstance(), "Controller error: Player " + this.owner + " disconnected"
+											, Language.getLocalCaption( Language.ERROR )
+											, JOptionPane.ERROR_MESSAGE
+											, null );
+		}
+		else
 		{
-			double[] vt = new double[ values.length + 1 ];
-			System.arraycopy( values, 0, vt, 0, values.length );
-			vt[ vt.length -1 ] = time;
-			RegistrarStatistic.addControllerData( ownerID, vt );
+			double[] values = ev.getInputValues();
 			
-			double data = values[ this.selectedChannel ];
-			double timerPercentage = 0;
-
-			boolean enable = ScreenControl.getInstance().activeInputControl();
+			double time = ev.getTime();
 			
-			if( enable && !this.enabledController)
+			if( this.enableCheck 
+					&& values != null 
+					&& this.selectedChannel >= 0 
+					&& this.selectedChannel < values.length
+			  )
 			{
-				refTime = null;
+				double[] vt = new double[ values.length + 1 ];
+				System.arraycopy( values, 0, vt, 0, values.length );
+				vt[ vt.length -1 ] = time;
+				RegistrarStatistic.addControllerData( ownerID, vt );
 				
-				this.enabledController = true;
+				double data = values[ this.selectedChannel ];
+				double timerPercentage = 0;
+	
+				boolean enable = ScreenControl.getInstance().activeInputControl();
 				
-				this.repCounter = 0;
-			}
-			
-			synchronized ( this.sync )
-			{
-				boolean actionDone = false;
-				if( this.inverted )
+				if( enable && !this.enabledController)
 				{
-					actionDone = ( data < this._rng.getMin() );
-				}
-				else
-				{
-					actionDone = ( data > this._rng.getMax() );
+					refTime = null;
+					
+					this.enabledController = true;
+					
+					this.repCounter = 0;
 				}
 				
-				if( actionDone ) // target zone
+				synchronized ( this.sync )
 				{
-					if( this.statistic == 0 )
+					boolean actionDone = false;
+					if( this.inverted )
 					{
-						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_LEVEL_REACH );
-						
-						this.statistic++;
+						actionDone = ( data < this._rng.getMin() );
 					}
-	
-					//
-					// Check: time in target zone
-					//
-					timerPercentage  = 100;
-	
-					if( this.targetTime > 0 )
-					{	
-						if( this.refTime == null )
+					else
+					{
+						actionDone = ( data > this._rng.getMax() );
+					}
+					
+					if( actionDone ) // target zone
+					{
+						if( this.statistic == 0 )
 						{
-							this.refTime = System.nanoTime();
-						}
-
-						double t = ( System.nanoTime() - this.refTime ) / 1e9D;
-	
-						timerPercentage = 100 * t  / this.targetTime;						
-					}				
-	
-					//
-					// target time archieved
-					//
-					if( timerPercentage >= 100 )
-					{	
-						if( this.statistic == 1 )
-						{
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_LEVEL_REACH );
+							
 							this.statistic++;
 						}
-	
-						if( !this.archievedTarget.get( ) 
-								&& enable 
-								&&  this.recoverLevelReach.get() )
+		
+						//
+						// Check: time in target zone
+						//
+						timerPercentage  = 100;
+		
+						if( this.targetTime > 0 )
 						{	
-							this.archievedTarget.set( true );
-							
-							this.repCounter++;
-							
-							this.repCounter = ( this.repCounter >= this.repetitions ) ? 0 : this.repCounter;
-							
-							if( this.repCounter < 1 )
+							if( this.refTime == null )
 							{
-								this.fireActionEvent( InputActionEvent.ACTION_DONE );
-							}							
-							
-							this.recoverLevelReach.set( false );
+								this.refTime = System.nanoTime();
+							}
+	
+							double t = ( System.nanoTime() - this.refTime ) / 1e9D;
+		
+							timerPercentage = 100 * t  / this.targetTime;						
+						}				
+		
+						//
+						// target time archieved
+						//
+						if( timerPercentage >= 100 )
+						{	
+							if( this.statistic == 1 )
+							{
+								RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
+								this.statistic++;
+							}
+		
+							if( !this.archievedTarget.get( ) 
+									&& enable 
+									&&  this.recoverLevelReach.get() )
+							{	
+								this.archievedTarget.set( true );
+								
+								this.repCounter++;
+								
+								this.repCounter = ( this.repCounter >= this.repetitions ) ? 0 : this.repCounter;
+								
+								if( this.repCounter < 1 )
+								{
+									this.fireActionEvent( InputActionEvent.ACTION_DONE );
+								}							
+								
+								this.recoverLevelReach.set( false );
+							}
 						}
+						
+						this.recoverLevelReported = false;
 					}
-					
-					this.recoverLevelReported = false;
-				}
-				else if ( this._rng.within( data ) ) // intermediate are
-				{
-					if( this.statistic > 0 )
+					else if ( this._rng.within( data ) ) // intermediate are
 					{
-						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_FINISH );
+						if( this.statistic > 0 )
+						{
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_FINISH );
+							this.statistic = 0;
+						}
+						
+						this.recoverLevelReported = false;
+						
+						this.refTime = null;
+					}
+					else // recovered area
+					{	
 						this.statistic = 0;
-					}
-					
-					this.recoverLevelReported = false;
-					
-					this.refTime = null;
-				}
-				else // recovered area
-				{	
-					this.statistic = 0;
-					
-					if( this.archievedTarget.getAndSet( false ) && enable )
-					{		
-						this.fireActionEvent( InputActionEvent.RECOVER_DONE );
-					}
-					
-					if( !this.recoverLevelReach.getAndSet( true ) )
-					{
-						this.updateLevelGoal = true;
 						
-						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RESTORED_LEVEL );
+						if( this.archievedTarget.getAndSet( false ) && enable )
+						{		
+							this.fireActionEvent( InputActionEvent.RECOVER_DONE );
+						}
 						
-						this.recoverLevelReported = true;
+						if( !this.recoverLevelReach.getAndSet( true ) )
+						{
+							this.updateLevelGoal = true;
+							
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RESTORED_LEVEL );
+							
+							this.recoverLevelReported = true;
+						}
+						else if( !this.recoverLevelReported )
+						{
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLER_RECOVER_LEVEL_REACH );
+						}				
 					}
-					else if( !this.recoverLevelReported )
+					
+					final int rep = this.repCounter;
+					if( enable )
 					{
-						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLER_RECOVER_LEVEL_REACH );
-					}				
-				}
-				
-				final int rep = this.repCounter;
-				if( enable )
-				{
-					if( this.updateLevelGoal )
+						if( this.updateLevelGoal )
+						{
+							final double tp = timerPercentage;
+							Thread t = new Thread() 
+							{
+								public void run() 
+								{
+									super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage )" );
+									ScreenControl.getInstance().setUpdateLevelInputGoal( tp, rep, owner );
+								};
+							};
+							t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal");
+							t.start();
+							
+							if( this.archievedTarget.get() )
+							{
+								this.updateLevelGoal = false;
+							}
+						}						
+					}
+					else if( this.enabledController )
 					{
-						final double tp = timerPercentage;
+						this.enabledController = false;
+						//this.refTime = null;
+						
 						Thread t = new Thread() 
 						{
 							public void run() 
 							{
-								super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( timerPercentage )" );
-								ScreenControl.getInstance().setUpdateLevelInputGoal( tp, rep, owner );
+								super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( 0 )" );
+								ScreenControl.getInstance().setUpdateLevelInputGoal( 0, repCounter, owner );
 							};
 						};
-						t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal");
+						t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal" );
 						t.start();
-						
-						if( this.archievedTarget.get() )
-						{
-							this.updateLevelGoal = false;
-						}
-					}						
+					}					
 				}
-				else if( this.enabledController )
-				{
-					this.enabledController = false;
-					//this.refTime = null;
-					
-					Thread t = new Thread() 
-					{
-						public void run() 
-						{
-							super.setName( "ScreenControl.getInstance().setUpdateLevelInputGoal( 0 )" );
-							ScreenControl.getInstance().setUpdateLevelInputGoal( 0, repCounter, owner );
-						};
-					};
-					t.setName( this.getClass().getSimpleName() + "-setUpdateLevelInputGoal" );
-					t.start();
-				}					
 			}
 		}
 	}

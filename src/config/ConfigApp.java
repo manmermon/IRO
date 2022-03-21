@@ -1373,8 +1373,6 @@ public class ConfigApp
 						sql = sql.substring( 0, sql.length() - 1 );
 						
 						stmt.executeUpdate( sql );
-						
-						RegistrarStatistic.clearRegister();
 					}
 					catch (SQLException | IOException e) 
 					{
@@ -1396,6 +1394,8 @@ public class ConfigApp
 					}
 				}
 			}
+			
+			RegistrarStatistic.clearRegister();
 		}
 	}
 	

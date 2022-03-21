@@ -148,6 +148,8 @@ public class MainAppUI extends JFrame
 			this.addPlayerSetting( player );
 		}	
 		
+		this.updatePreviewLevelComponents();
+		
 		super.addComponentListener( new ComponentAdapter() 
 		{
 			public void componentShown(ComponentEvent e) 

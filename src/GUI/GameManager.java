@@ -713,7 +713,7 @@ public class GameManager
 			}
 			finally
 			{
-				System.out.println("GameManager.stopLevel() - CORREGIR ERROR: java.util.ConcurrentModificationException");
+				//System.out.println("GameManager.stopLevel() - CORREGIR ERROR: java.util.ConcurrentModificationException");
 			}
 			
 			

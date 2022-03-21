@@ -10,10 +10,6 @@ public class LSLInputBiosignalStreamRegistral extends InputLSLDataReader
 	{		
 	}
 	
-	@Override
-	protected void readInputData(lslStream.event.InputLSLDataEvent ev) 
-	{	
-	}
 
 	@Override
 	protected void preStopThread(int friendliness) throws Exception 
@@ -29,6 +25,11 @@ public class LSLInputBiosignalStreamRegistral extends InputLSLDataReader
 	public void close() 
 	{
 		super.stopActing( IStoppable.FORCE_STOP );
+	}
+
+	@Override
+	protected void readInputData(lslStream.event.InputLSLDataEvent ev) throws Exception 
+	{	
 	}
 	
 }

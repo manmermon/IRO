@@ -61,5 +61,5 @@ public abstract class InputLSLDataReader extends AbstractStoppableThread impleme
 		}
 	}
 	
-	protected abstract void readInputData( InputLSLDataEvent ev );
+	protected abstract void readInputData( InputLSLDataEvent ev ) throws Exception;
 }
