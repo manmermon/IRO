@@ -1,4 +1,4 @@
-package control.controller;
+package deprecated.control;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

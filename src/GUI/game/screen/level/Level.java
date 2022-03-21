@@ -30,12 +30,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.imageio.ImageIO;
 import javax.sound.midi.InvalidMidiDataException;
@@ -85,7 +87,7 @@ import tools.SceneTools;
 public class Level extends Scene implements IPausable, IStoppable
 {
 	private static final double MIN_PLAYER_NOTE_TRACK = 0.5D;
-	private final double PLAYER_DELAY = 0.5D;
+	//private final double PLAYER_DELAY = 0.D;
 	
 	public static final int PLANE_BRACKGROUND = -1;
 	public static final int PLANE_STAVE = 0;	 
@@ -143,6 +145,8 @@ public class Level extends Scene implements IPausable, IStoppable
 	private AbstractStoppableThread notifierNoteCreatorThread = null;
 	
 	private boolean firstSegment = true;
+	
+	private double[] playerDelay = null;
 	
 	public Level( Rectangle sceneSize, List< Settings > playerSettings, List< File > midiMusicSheelFiles ) throws Exception 
 	{
@@ -207,9 +211,33 @@ public class Level extends Scene implements IPausable, IStoppable
 										
 					BufferedImage noteImg = null;
 					double startDelay = 0;
+					
+					int railHeigh = getStave().getRailHeight();
+					int playerIndex = -1;
+					int numPlayers = Level.this.playerSettings.size();
+					int modPlayers = 1;
+					int padRail = railHeigh;
+					
+					if( numPlayers == 2 )
+					{
+						modPlayers = 3;
+					}
+					else if( numPlayers == 3 )
+					{
+						modPlayers = 2;
+					}
+					if( numPlayers > 5 )
+					{
+						padRail = 0;
+					}
+										
 					for( Settings cfg : Level.this.playerSettings )
-					{	
+					{							
+						playerIndex++;
+						
 						Player player = cfg.getPlayer();
+						
+						startDelay = playerDelay[ playerIndex ];
 						
 						List< MusicNoteGroup > aliveNotes = getNotes( player.getId() );
 						
@@ -257,7 +285,7 @@ public class Level extends Scene implements IPausable, IStoppable
 								noteImg = aliveNotes.get( aliveNotes.size() -1 ).getNoteImg();
 							}
 							
-							startDelay +=  -stepTime + PLAYER_DELAY;
+							startDelay +=  -stepTime;
 							
 							double end = init + stepMusicTime;
 							
@@ -268,7 +296,7 @@ public class Level extends Scene implements IPausable, IStoppable
 									end = currentMusic.getDuration();
 								}
 							}
-														
+							
 							if( end - init > stepTime || firstSegment)
 							{	
 								List< MusicNoteGroup > playerNotes = setNotes( init, end, stepTime, 0, vel );
@@ -327,6 +355,16 @@ public class Level extends Scene implements IPausable, IStoppable
 									
 									Point2D.Double loc = note.getScreenLocation();
 									loc.x = (int)( pad  + spaceBetweenNotes * ( i + shift ) );
+									
+									if( numPlayers > 1 )
+									{
+										double y = loc.y;
+										
+										int noteStep = (int)Math.floor(  y/ railHeigh ) % modPlayers;
+										
+										y = ( noteStep + playerIndex * modPlayers ) * railHeigh + padRail; 
+										loc.y = y;									
+									}
 									
 									note.setScreenLocation( loc );
 									addNote( note );
@@ -435,6 +473,17 @@ public class Level extends Scene implements IPausable, IStoppable
 			this.playGame = true;
 						
 			this.currentMusic = this.musics.poll(); 
+			
+			this.playerDelay = new double[ playerSettings.size() ];			
+			for( int i = 0; i < this.playerDelay.length; i++ )
+			{
+				this.playerDelay[ i ] = Math.round( Math.random() * 100 ) / 100D;
+			}
+			
+			int first = ThreadLocalRandom.current().nextInt( 0, this.playerDelay.length );
+			this.playerDelay[ first ] = 0;
+			
+			System.out.println("Level.initiateLevel() " + Arrays.toString( playerDelay ));
 			
 			if( this.getAllNotes() != null && !this.getAllNotes().isEmpty() )
 			{
@@ -682,8 +731,6 @@ public class Level extends Scene implements IPausable, IStoppable
 						 */
 											
 						this.playerTimes.put( idPlayer, new NumberTuple( reactionTime, recoverTime ) );
-						
-						System.out.println("Level.changeSpeed() " + player + " >> " + prevReactRecover );
 						
 						/*
 						 *  Get notes on screen
@@ -1675,7 +1722,7 @@ public class Level extends Scene implements IPausable, IStoppable
 					double reactionTime = times.t1.doubleValue();
 					double vel = SceneTools.getAvatarVel( fretWidth, reactionTime );
 	
-					double delay = wayWidth / vel + indexPlayer * PLAYER_DELAY;
+					double delay = wayWidth / vel + indexPlayer * playerDelay[ indexPlayer ];
 					if( delay < startDealy )
 					{
 						refReactTime = reactionTime;
@@ -1793,7 +1840,7 @@ public class Level extends Scene implements IPausable, IStoppable
 			Number reaction = (Number)playerSetting.getParameter( ConfigApp.REACTION_TIME ).getSelectedValue();
 			Number recover = (Number)playerSetting.getParameter( ConfigApp.RECOVER_TIME ).getSelectedValue();
 			
-			int numNotes = (int)Math.ceil( totalSessionTime / ( reaction.doubleValue() + recover.doubleValue() ) );			
+			int numNotes = (int)Math.ceil( ( totalSessionTime - this.playerDelay[ indexMusicSheetPlayers ] ) / ( reaction.doubleValue() + recover.doubleValue() ) );			
 			numNotes = ( numNotes < 1 ) ? 1 : numNotes;
 				
 			
@@ -1973,6 +2020,8 @@ public class Level extends Scene implements IPausable, IStoppable
 		{
 			this.levelThread.stopThread( friendliness );
 		}
+		
+		this.firstPlay = true;
 	}
 
 	@Override

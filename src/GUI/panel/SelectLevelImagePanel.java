@@ -167,7 +167,7 @@ public class SelectLevelImagePanel extends JPanel
 					notPath = p.toString();
 				}
 			}
-				
+						
 			//Level lv = new Level( size, preview.getBounds() );
 			Level lv = null;
 			try 
@@ -200,7 +200,7 @@ public class SelectLevelImagePanel extends JPanel
 							
 						img = img.getScaledInstance( back.getBounds().width
 													, back.getBounds().height
-													, Image.SCALE_SMOOTH );
+													, Image.SCALE_FAST );
 								
 						back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
 					}
@@ -223,7 +223,8 @@ public class SelectLevelImagePanel extends JPanel
 				loc.y = 0;
 				fret.setScreenLocation( loc );
 				lv.addFret( fret );
-				
+								
+				BufferedImage noteImg = null;				
 				char n = 'A';
 				int padding = 0;
 				for( Settings setting : ConfigApp.getSettings() )
@@ -243,8 +244,7 @@ public class SelectLevelImagePanel extends JPanel
 																	, false );
 					noteSprite1.setState( State.ACTION );
 					
-					BufferedImage noteImg = null;
-					if( notPath != null )
+					if( notPath != null && noteImg == null )
 					{
 						try
 						{
@@ -348,7 +348,7 @@ public class SelectLevelImagePanel extends JPanel
 				Frame fr = new Frame();
 				fr.setScene(  lv.getScene() );
 				
-				preview.add( fr, BorderLayout.CENTER );
+				preview.add( fr, BorderLayout.CENTER );				
 			}
 			
 			preview.setVisible( true );			
@@ -412,12 +412,14 @@ public class SelectLevelImagePanel extends JPanel
 			        return accept; 
 			    }
 			});
-			
+
 			if( files != null && files.length > 0)
 			{
+				
 				Settings cfg = null;
 				Player player = ConfigApp.getFirstPlayer();
 				final ConfigParameter par;
+				
 				
 				if( player != null )
 				{
@@ -432,8 +434,7 @@ public class SelectLevelImagePanel extends JPanel
 				{
 					par = null;
 				}
-				 
-				
+
 				expPanel =  new ExpandablePanel();
 				
 				JPanel panel = new JPanel( );
@@ -443,7 +444,7 @@ public class SelectLevelImagePanel extends JPanel
 				
 				Caption cap = Language.getAllCaptions().get( Language.NONE );
 				JRadioButton b = new JRadioButton( cap.getCaption( Language.getCurrentLanguage() ) );
-				
+								
 				b.addActionListener( new ActionListener()
 				{						
 					@Override
@@ -492,7 +493,7 @@ public class SelectLevelImagePanel extends JPanel
 										ex.printStackTrace();
 									}
 								}
-								
+																
 								setPreviewScene();
 							}
 						}

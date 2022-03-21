@@ -101,7 +101,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	
 	//private long time = -1;	
 	private long animationTime = -1;
-	private final long totalTimeAnimation = 1000; // milliseconds
+	private final long totalTimeAnimation = 800; // milliseconds
 	private long timeUpdate = totalTimeAnimation / numAngles; // milliseconds
 	
 	private Color preactionColor = Color.RED;
@@ -818,6 +818,12 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 	public boolean isNoteEnterFret() 
 	{
 		return this.noteEnterFret;
+	}
+	
+	@Override
+	public String toString() 
+	{
+		return "loc=" + super.getScreenLocation() + ", size=" + super.getSize() +", Tracks = " +  this.noteTracks.toString();
 	}
 }
 

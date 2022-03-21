@@ -48,8 +48,6 @@ import GUI.tabbedpanel.ClosableTabbedPanel;
 import GUI.tabbedpanel.CollectionEvent;
 import GUI.tabbedpanel.CollectionListener;
 import gui.dialogs.AppSelectPlayer;
-import GUI.dialog.InfoDialog;
-import GUI.dialog.OpeningDialog;
 import GUI.menu.MenuScroller;
 import gui.panel.InputDevicePanel;
 import gui.panel.SelectLevelImagePanel;
@@ -68,10 +66,8 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 
 import java.awt.FlowLayout;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 
@@ -97,7 +93,7 @@ public class MainAppUI extends JFrame
 	
 	private JSplitPane splitPanelMain;
 	
-	private ClosableTabbedPanel panelFields;
+	private ClosableTabbedPanel playerTabPanel;
 	private JTabbedPane scenePanel;
 	
 	// Buttom	
@@ -281,11 +277,11 @@ public class MainAppUI extends JFrame
 		
 	private ClosableTabbedPanel getSettingFieldPanel()
 	{
-		if( this.panelFields == null )
+		if( this.playerTabPanel == null )
 		{
-			this.panelFields = new ClosableTabbedPanel();
+			this.playerTabPanel = new ClosableTabbedPanel();
 			
-			this.panelFields.addTabbedPanelListener( new CollectionListener()
+			this.playerTabPanel.addTabbedPanelListener( new CollectionListener()
 			{
 				@Override
 				public void collectionChange(CollectionEvent ev)
@@ -306,7 +302,8 @@ public class MainAppUI extends JFrame
 						
 						if( t.getTabCount() == 0 
 								&& !addingPlayers
-								&& ConfigApp.isTesting() )
+								//&& ConfigApp.isTesting() 
+								)
 						{
 							ConfigApp.resetPlayerSettings();
 							for( Player player : ConfigApp.getPlayers() )
@@ -314,13 +311,17 @@ public class MainAppUI extends JFrame
 								addPlayerSetting( player );
 							}
 						}
+						
+						updatePreviewLevelComponents();
 					}
 					else if( type == CollectionEvent.INSERT_ELEMENT )
 					{
+						/*
 						if( index < 1 )
 						{
 							updatePreviewLevelComponents();
 						}
+						//*/						
 					}							
 
 					InputDevicePanel.getInstance( ui ).updatePlayers();
@@ -328,7 +329,7 @@ public class MainAppUI extends JFrame
 			});			
 		}
 		
-		return this.panelFields;
+		return this.playerTabPanel;
 	}
 	
 	private void addPlayerSetting( Player player )
@@ -438,30 +439,50 @@ public class MainAppUI extends JFrame
 							ConfigApp.removePlayerSetting( player );
 						}
 						
+						int playerNum = p.getTabCount();
+						
 						for( Player player : players )
 						{
-							try
-							{														
-								if( !ConfigApp.loadPlayerSetting( player ) )
-								{
-									ConfigApp.loadDefaultPlayerSetting( player );
-									ConfigApp.dbInsertPlayerSetting( player );
-								}
-							}
-							catch ( Exception ex) 
-							{
-								JOptionPane.showMessageDialog( ui, ex.getCause() + "\n" + ex.getMessage()
-								, Language.getLocalCaption( Language.ERROR )
-								, JOptionPane.ERROR_MESSAGE );
-							}
-							finally 
-							{
-							}
+							playerNum++;
 							
-							addPlayerSetting( player );
+							if( playerNum <= ConfigApp.MAX_NUM_PLAYERS )
+							{
+								try
+								{														
+									if( !ConfigApp.loadPlayerSetting( player ) )
+									{
+										ConfigApp.loadDefaultPlayerSetting( player );
+										ConfigApp.dbInsertPlayerSetting( player );
+									}
+								}
+								catch ( Exception ex) 
+								{
+									JOptionPane.showMessageDialog( ui, ex.getCause() + "\n" + ex.getMessage()
+									, Language.getLocalCaption( Language.ERROR )
+									, JOptionPane.ERROR_MESSAGE );
+								}
+								finally 
+								{
+								}
+								
+								addPlayerSetting( player );
+							}
+							else
+							{
+								break;
+							}
 						}
 						
 						addingPlayers = false;
+						
+						updatePreviewLevelComponents();
+						
+						if( playerNum > ConfigApp.MAX_NUM_PLAYERS ) 
+						{
+							JOptionPane.showMessageDialog( ui, Language.getLocalCaption( Language.MAX_PLAYER_MSG )
+															, Language.getLocalCaption( Language.ERROR )
+															, JOptionPane.ERROR_MESSAGE );
+						}
 					}
 				}
 			});
@@ -844,8 +865,8 @@ public class MainAppUI extends JFrame
 	}
 	
 	private void updatePreviewLevelComponents( )
-	{
-		SelectSongPanel.getInstance().updateSelectedSong();
+	{	
+		SelectSongPanel.getInstance().updateSelectedSong();		
 		SelectLevelImagePanel.getInstance().updatePreviewLevelImages();
 	}
 	

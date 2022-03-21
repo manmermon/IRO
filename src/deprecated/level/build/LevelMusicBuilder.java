@@ -1,4 +1,4 @@
-package gui.game.screen.level.build;
+package deprecated.level.build;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -29,6 +29,7 @@ import gui.game.component.sprite.Stave;
 import gui.game.component.sprite.Score;
 import gui.game.component.sprite.TimeSession;
 import gui.game.screen.level.Level;
+import gui.game.screen.level.build.LevelMusicSheetSegment;
 import gui.game.screen.level.music.BackgroundMusic;
 import gui.game.component.sprite.MusicNoteGroup;
 import gui.game.component.sprite.Pause;

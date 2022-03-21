@@ -141,6 +141,8 @@ public class Language
 	public static final String LOADING = "LOADING";
 	public static final String SAVING = "SAVING";
 	
+	public static final String MAX_PLAYER_MSG = "MAX_PLAYER_MSG";
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
@@ -149,6 +151,10 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( MAX_PLAYER_MSG, defaultLanguage, "The maximum number of players is 8" );
+		cap.setCaption( esEs, "El n\u00famero m\u00e1ximo de jugadores es 8");
+		captions.put( MAX_PLAYER_MSG, cap );
 		
 		cap = new Caption( SAVING, defaultLanguage, "Saving" );
 		cap.setCaption( esEs, "Guardando");
@@ -159,7 +165,7 @@ public class Language
 		captions.put( LOADING, cap );
 		
 		cap = new Caption( SCORE, defaultLanguage, "Score" );
-		cap.setCaption( esEs, "Puntuación");
+		cap.setCaption( esEs, "Puntuaci\u00f3n");
 		captions.put( SCORE, cap );
 		
 		cap = new Caption( REPETITIONS, defaultLanguage, "Repetitions" );
@@ -167,7 +173,7 @@ public class Language
 		captions.put( REPETITIONS, cap );
 		
 		cap = new Caption( CONTINUOUS_SESSION, defaultLanguage, "Continuous session" );
-		cap.setCaption( esEs, "Sesión continua");
+		cap.setCaption( esEs, "Sesi\u00f3n continua");
 		captions.put( CONTINUOUS_SESSION, cap );
 		
 		cap = new Caption( MUTE_SESSION, defaultLanguage, "Mute session" );

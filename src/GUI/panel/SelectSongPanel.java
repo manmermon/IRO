@@ -176,17 +176,18 @@ public class SelectSongPanel extends JPanel
 		
 			Object songs = par.getSelectedValue();
 			
+			DefaultTableModel tm = (DefaultTableModel)selectedSongTable.getModel();
+			
 			if( songs != null )
 			{
 				String songList = songs.toString().trim().replaceAll( "\\s+", "" );
 				
 				if( !songList.isEmpty() )
-				{					
-					String[] list = songList.split( ConfigApp.SONG_LIST_SEPARATOR );
-					
-					DefaultTableModel tm = (DefaultTableModel)selectedSongTable.getModel();
+				{	
 					tm.setRowCount( 0 );
 					
+					String[] list = songList.split( ConfigApp.SONG_LIST_SEPARATOR );
+										
 					for( String s : list )
 					{
 						boolean isIn = false;
@@ -227,6 +228,10 @@ public class SelectSongPanel extends JPanel
 						}
 					}
 				}
+			}
+			else
+			{
+				getBtnClear().doClick();
 			}
 		}
 	}

@@ -18,7 +18,7 @@
  *   
  *   Project's URL: https://github.com/manmermon/IRO
  */
-package gui.game.screen.level;
+package deprecated.level;
 
 import java.awt.Color;
 import java.awt.Dimension;

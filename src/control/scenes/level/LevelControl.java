@@ -340,7 +340,7 @@ public class LevelControl extends AbstractSceneControl
 						
 						int playerID = note.getOwner().getId();
 					
-						int thr = 0000;			
+						int thr = 20000;			
 										
 						if( !note.isSelected() )
 						{							

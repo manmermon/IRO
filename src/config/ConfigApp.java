@@ -77,7 +77,7 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2022, 3 - 1, 18 );
+	public static final Calendar buildDate = new GregorianCalendar( 2022, 3 - 1, 21 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
@@ -102,7 +102,7 @@ public class ConfigApp
 	public static final String NOTE_SPRITE_FILE_PATH = "./resources/note/";
 	
 	
-	
+	public static final int MAX_NUM_PLAYERS = 7;
 	
 	public static final Tuple< Integer, Integer > playerPicSize = new Tuple<Integer, Integer>( 100, 100 );
 	
@@ -314,10 +314,14 @@ public class ConfigApp
 			
 			loadDefaultLanguage( );
 			
+			/*
 			if( isTesting() )
 			{			
 				loadDefaultPlayerSetting( new Player() );
 			}
+			//*/
+			
+			loadDefaultPlayerSetting( new Player() );
 			
 		}
 		catch (Exception e) 
