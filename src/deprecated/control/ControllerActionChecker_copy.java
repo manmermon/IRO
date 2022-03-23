@@ -218,7 +218,7 @@ public class ControllerActionChecker_copy implements IInputControllerListener, I
 					}
 					else if( !this.recoverLevelReported )
 					{
-						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLER_RECOVER_LEVEL_REACH );
+						RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RECOVER_LEVEL_REACH );
 					}				
 				}
 				

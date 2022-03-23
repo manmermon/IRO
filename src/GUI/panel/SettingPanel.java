@@ -480,7 +480,7 @@ public class SettingPanel extends JPanel
 								Number value = (Number)selectedValue;
 								
 								JSpinner sp = new JSpinner();
-								SpinnerNumberModel model = new SpinnerNumberModel( value, rng.getMin(), rng.getMax(), 1 );
+								SpinnerNumberModel model = new SpinnerNumberModel( value.doubleValue(), rng.getMin(), rng.getMax(), 1 );
 								sp.setModel( model );		
 	
 								sp.addChangeListener( new ChangeListener()

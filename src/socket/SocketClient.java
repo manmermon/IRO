@@ -22,6 +22,8 @@ public class SocketClient extends AbstractStoppableThread
 	private long sleepTime = 1000L;
 	
 	private short state = SEARCH;
+	
+	private Object lock = new Object();
 		
 	public SocketClient( ) 
 	{		
@@ -58,9 +60,13 @@ public class SocketClient extends AbstractStoppableThread
 	{
 		synchronized( this )
 		{
-			if( this.state == NONE )
+			if( this.state != NONE )
 			{
 				super.wait( this.sleepTime );
+			}
+			else
+			{
+				super.wait();
 			}
 		}
 		
@@ -72,37 +78,40 @@ public class SocketClient extends AbstractStoppableThread
 		
 		if( this.socket != null )
 		{			
-			switch( this.state )
+			synchronized( this.lock )
 			{
-				case SEARCH:
+				switch( this.state )
 				{
-					short msg = SEARCH | CONECT | (short)0b0000_0111;
-					short res = this.sendMessage( msg );
-					
-					if( ( res & 0b0001_0000 ) != 0 
-							&& ( res & 0x07 ) > 0 )
+					case SEARCH:
 					{
-						this.state = CONECT;
+						short msg = SEARCH ; //| CONECT ;
+						short res = this.sendMessage( msg );
+						
+						if( ( res & ERROR ) == 0 
+								&& ( res & 0x07 ) > 0 )
+						{
+							this.state = CONECT;
+						}
+						
+						break;
 					}
-					
-					break;
-				}
-				case CONECT:
-				{
-					short msg =  CONECT | (short)0b0000_0111;
-					short res = this.sendMessage( msg );
-					
-					if( ( res & 0b0001_0000 ) != 0 
-							&& ( res & 0x07 ) > 0 )
+					case CONECT:
 					{
-						this.state = NONE;
+						short msg =  CONECT ; //| (short)0b0000_0111;
+						short res = this.sendMessage( msg );
+						
+						if( ( res & ERROR ) == 0 
+								&& ( res & 0x07 ) > 0 )
+						{
+							this.state = NONE;
+						}
+						
+						break;
+					}				
+					default:
+					{
+						break;
 					}
-					
-					break;
-				}				
-				default:
-				{
-					break;
 				}
 			}
 		}
@@ -115,11 +124,17 @@ public class SocketClient extends AbstractStoppableThread
 		
 		if( this.socket != null )
 		{
-			short msg = CLOSE | 0b0000_0111;
+			short msg = CLOSE ;// | 0b0000_0111;
 			
 			try
 			{
-				this.sendMessage( msg );
+				boolean again = true;
+				do
+				{
+					short res = this.sendMessage( msg );
+					again = ( res & ERROR ) != 0 ;
+				}
+				while( again );
 			}
 			catch (Exception e) 
 			{
@@ -137,8 +152,6 @@ public class SocketClient extends AbstractStoppableThread
 		
 		if( this.socket != null )
 		{
-			System.out.println("SocketClient.sendMessage() " + this.socket );
-						
 			this.socket.getOutputStream().write( new byte[] { (byte)msg } );
 			
 			byte[] buf = new byte[ 1 ];
@@ -152,4 +165,16 @@ public class SocketClient extends AbstractStoppableThread
 		return response;
 	}
 	
+	public synchronized void reset()
+	{
+		synchronized( this.lock )
+		{
+			this.state = SEARCH;
+			
+			synchronized( this )
+			{
+				super.notify();
+			}
+		}
+	}
 }

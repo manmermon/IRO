@@ -77,7 +77,7 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2022, 3 - 1, 21 );
+	public static final Calendar buildDate = new GregorianCalendar( 2022, 3 - 1, 23 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
@@ -142,6 +142,7 @@ public class ConfigApp
 	private static final String settingsTableName = "settings";
 	private static final String sessionTableName = "session";
 	private static final String statisticTableName = "statistic";
+	private static final String sessionSettingTableName = "sessionSettings";
 	
 	private static final String dbURL = prefixComm + DB_PATH;
 	
@@ -650,33 +651,49 @@ public class ConfigApp
 		tableFields.put( settingsTableName, fieldType );
 		
 		fieldType.put( "userID", Integer.class );
+		fieldType.put( MOV_REPETITIONS, Integer.class );
 		fieldType.put( REACTION_TIME, Double.class );
-		fieldType.put( RECOVER_TIME, Double.class );
+		fieldType.put( RECOVER_TIME, Double.class );		
+		fieldType.put( INPUT_MIN_VALUE, Double.class );
+		fieldType.put( INPUT_MAX_VALUE, Double.class );
+		fieldType.put( INPUT_SELECTED_CHANNEL, Double.class );
+		fieldType.put( TIME_IN_INPUT_TARGET, Double.class );
 		fieldType.put( PREACTION_COLOR, Integer.class );
 		fieldType.put( WAITING_ACTION_COLOR, Integer.class );
 		fieldType.put( ACTION_COLOR, Integer.class );
 		fieldType.put( SONG_LIST, String.class );
-		fieldType.put( INPUT_MIN_VALUE, Double.class );
-		fieldType.put( INPUT_MAX_VALUE, Double.class );
-		fieldType.put( INPUT_SELECTED_CHANNEL, Double.class );
 		fieldType.put( BACKGROUND_IMAGE, String.class );
 		fieldType.put( NOTE_IMAGE, String.class );
-		fieldType.put( TIME_IN_INPUT_TARGET, Double.class );
+		
 
 		fieldType = new HashMap<String, Class>();
 		fieldType.put( "idSession", Integer.class );
 		fieldType.put( "userID", Integer.class );
-		//fieldType.put( "date", Integer.class );
 		fieldType.put( "score", Long.class );
 		fieldType.put( "controllerName", String.class );
 		fieldType.put( "controllerSamplingRate", Double.class );
 		fieldType.put( "controllerNumberOfChannel", Integer.class );
-		fieldType.put( "controllerChannel", Integer.class );
-		fieldType.put( "controllerMinValueTarget", Double.class );
-		fieldType.put( "controllerMaxValueTarget", Double.class );
-		fieldType.put( "controllerTimeTarget", Double.class );
-		fieldType.put( "controllerData", DoubleBuffer.class );		
+		fieldType.put( "controllerData", DoubleBuffer.class );
+		fieldType.put( "muteSession", Integer.class );
 		tableFields.put( sessionTableName, fieldType );
+		
+		fieldType = new HashMap<String, Class>();
+		fieldType.put( "idSession", Integer.class );
+		fieldType.put( "userID", Integer.class );
+		fieldType.put( MOV_REPETITIONS, Integer.class );
+		fieldType.put( REACTION_TIME, Double.class );
+		fieldType.put( RECOVER_TIME, Double.class );		
+		fieldType.put( INPUT_MIN_VALUE, Double.class );
+		fieldType.put( INPUT_MAX_VALUE, Double.class );
+		fieldType.put( INPUT_SELECTED_CHANNEL, Double.class );
+		fieldType.put( TIME_IN_INPUT_TARGET, Double.class );
+		fieldType.put( PREACTION_COLOR, Integer.class );
+		fieldType.put( WAITING_ACTION_COLOR, Integer.class );
+		fieldType.put( ACTION_COLOR, Integer.class );
+		fieldType.put( SONG_LIST, String.class );
+		fieldType.put( BACKGROUND_IMAGE, String.class );
+		fieldType.put( NOTE_IMAGE, String.class );
+		tableFields.put( sessionSettingTableName, fieldType );
 		
 		fieldType = new HashMap<String, Class>();
 		//fieldType.put( "number", Integer.class );
@@ -1287,6 +1304,53 @@ public class ConfigApp
 		return users;
 	}
 
+	
+	private static void dbSaveSessionPlayerSetting( Player player, long idSerssion ) throws SQLException
+	{
+		String sql1 = "INSERT INTO "+ sessionSettingTableName  + " (idSession,userID,";
+		String sql2 = "VALUES ("+ idSerssion + "," + player.getId() + ",";
+		
+		Map< String, Class > fields = tableFields.get( sessionSettingTableName );
+		for( String fieldName : fields.keySet() )
+		{
+			if( !fieldName.equals( "idSession") && !fieldName.equals( "userID") )
+			{
+				String value = dbGetFieldValue( player, fieldName );			
+	
+				sql1 += fieldName + ",";
+				sql2 += value + ",";
+			}
+		}
+		
+		sql1 = sql1.substring( 0, sql1.length() - 1 ) + ")";
+		sql2 = sql2.substring( 0, sql2.length() - 1 ) + ")";
+
+		String sql = sql1 + " " + sql2;
+
+		Statement stmt = null;
+
+		try 
+		{
+			dbConnect();
+
+			stmt  = conn.createStatement();
+			stmt.executeUpdate(sql );
+		}
+		catch (SQLException e) 
+		{
+			throw e;			 
+		}
+		finally 
+		{
+			if( stmt != null )
+			{
+				stmt.close();
+			}
+
+			dbCloseConnection();
+		}
+	}
+	
 	public static void dbSaveStatistic() throws SQLException, IOException
 	{
 		LocalDateTime startTime = RegistrarStatistic.getStartDateTime();
@@ -1297,40 +1361,51 @@ public class ConfigApp
 			
 			long sessionID = zdt.toInstant().toEpochMilli();
 			
+			boolean mute = false;
+			
+			ConfigParameter muteSession = ConfigApp.getGeneralSetting( ConfigApp.MUTE_SESSION );
+			
+			if( muteSession != null )
+			{
+				mute = (Boolean)muteSession.getSelectedValue();
+			}
+			
 			for( int playerID : RegistrarStatistic.getPlayerIDs() )
 			{	
 				List< Tuple< LocalDateTime, RegistrarStatistic.FieldType > > register = RegistrarStatistic.getRegister( playerID );
-			
+				
 				if( playerID != Player.ANONYMOUS && !register.isEmpty() )
 				{
 					IControllerMetadata cmeta = RegistrarStatistic.getControllerSetting( playerID );
 					LinkedList< Double[] > cData = RegistrarStatistic.getControllerData( playerID );
 					double score = RegistrarStatistic.getPlayerScore( playerID );
-					//TODO
-
+					//TODO					
+					
 					String sql = "INSERT INTO "+ sessionTableName  + " ("  
 									+ " idSession"
 									+ ", userID"
 									+ ", score"
+									+ ", muteSession"
 									+ ", controllerName"
-									+ ", controllerNumberOfChannel"
-									+ ", controllerChannel"
 									+ ", controllerSamplingRate"
-									+ ", controllerMinValueTarget"
-									+ ", controllerMaxValueTarget"
-									+ ", controllerTimeTarget"
+									+ ", controllerNumberOfChannel"
+									//+ ", controllerChannel"									
+									//+ ", controllerMinValueTarget"
+									//+ ", controllerMaxValueTarget"
+									//+ ", controllerTimeTarget"
 									+ ", controllerData) ";
 					
 					sql += "VALUES(" + sessionID 
 								+ "," + playerID
 								+ "," + score
+								+ "," + ( ( mute ) ? "1" : "0" )
 								+ ",\"" + cmeta.getName() + "\""
-								+ "," + cmeta.getNumberOfChannels()
-								+ "," + cmeta.getSelectedChannel()
-								+ "," + cmeta.getSamplingRate() 
-								+ "," + cmeta.getRecoverInputLevel()
-								+ "," + cmeta.getActionInputLevel().getMin() 
-								+ "," + cmeta.getTargetTimeInLevelAction()
+								+ "," + cmeta.getSamplingRate()
+								+ "," + cmeta.getNumberOfChannels()		
+								//+ "," + cmeta.getSelectedChannel()
+								//+ "," + cmeta.getRecoverInputLevel()
+								//+ "," + cmeta.getActionInputLevel().getMin() 
+								//+ "," + cmeta.getTargetTimeInLevelAction()
 								+ ", ?) ";
 
 					
@@ -1391,6 +1466,14 @@ public class ConfigApp
 						}
 
 						dbCloseConnection();
+					}
+					
+					for( Player p : ConfigApp.getPlayers() )
+					{
+						if( p.getId() == playerID )
+						{
+							dbSaveSessionPlayerSetting( p, sessionID );						
+						}
 					}
 				}
 			}
@@ -1562,18 +1645,19 @@ public class ConfigApp
 	private static void dbCreateTables() throws SQLException
 	{	
 		String sqlCreateTableUser = 
-				"CREATE TABLE IF NOT EXISTS user ("
+				"CREATE TABLE IF NOT EXISTS " + userTableName + " ("
 						+ " id integer PRIMARY KEY AUTOINCREMENT"
 						+ ", name text NOT NULL"
 						+ ", image BLOB"
 						+ ");";
 
 		String sqlCreateTableConfig = 
-				"CREATE TABLE IF NOT EXISTS settings ("
+				"CREATE TABLE IF NOT EXISTS " + settingsTableName + " ("
 				//+ " id integer PRIMARY KEY AUTOINCREMENT"
 				+ " userID integer PRIMARY KEY "
 				+ ", reactionTime real CHECK (reactionTime > 0)"
 				+ ", recoverTime real CHECK (recoverTime >= 0)"
+				+ ", repetitions integer CHECK (repetitions > 0)"
 				+ ", colorPreaction integer"
 				+ ", colorWaitingAction integer"
 				+ ", colorAction integer"
@@ -1584,37 +1668,61 @@ public class ConfigApp
 				+ ", selectedChannel real"
 				+ ", backgroundImage text"
 				+ ", noteImage text"
-				+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
+				+ ", FOREIGN KEY (userID) REFERENCES " + userTableName + "(id) ON DELETE CASCADE\n"
 				+ ");";
-
+		
 		String sqlCreateTableSession = 
-				"CREATE TABLE IF NOT EXISTS session ("
+				"CREATE TABLE IF NOT EXISTS " +sessionTableName + " ("
 						+ " idSession integer NOT NULL" // Session date
 						+ ", userID integer NOT NULL"
+						+ ", muteSession integer NOT NULL CHECK (muteSession == 0 OR muteSession == 1 ) "
 						+ ", score integer NOT NULL"
 						+ ", controllerName text NOT NULL"
 						+ ", controllerSamplingRate real NOT NULL"
 						+ ", controllerNumberOfChannel integer NOT NULL"
-						+ ", controllerChannel integer NOT NULL"
-						+ ", controllerMinValueTarget real NOT NULL"
-						+ ", controllerMaxValueTarget real NOT NULL"
-						+ ", controllerTimeTarget real NOT NULL"						
+						//+ ", controllerChannel integer NOT NULL"
+						//+ ", controllerMinValueTarget real NOT NULL"
+						//+ ", controllerMaxValueTarget real NOT NULL"
+						//+ ", controllerTimeTarget real NOT NULL"						
 						+ ", controllerData BLOB"
 						
 						//+ ", date integer NOT NULL"
 						+ ", PRIMARY KEY (idSession, userID)"
-						+ ", FOREIGN KEY (userID) REFERENCES user(id) ON DELETE CASCADE\n"
+						+ ", FOREIGN KEY (userID) REFERENCES " + userTableName +"(id) ON DELETE CASCADE"
 						+ ");";
+		
+		String sqlCreateTableSessionConfig = 
+				"CREATE TABLE IF NOT EXISTS " + sessionSettingTableName + " ("
+				//+ " id integer PRIMARY KEY AUTOINCREMENT"
+				+ " idSession integer "
+				+ ", userID integer  "
+				+ ", reactionTime real CHECK (reactionTime > 0)"
+				+ ", recoverTime real CHECK (recoverTime >= 0)"
+				+ ", repetitions integer CHECK (repetitions > 0)"
+				+ ", colorPreaction integer"
+				+ ", colorWaitingAction integer"
+				+ ", colorAction integer"
+				+ ", songs text"
+				+ ", minInputValue real"
+				+ ", maxInputValue real"
+				+ ", timeInInputTarget real"
+				+ ", selectedChannel real"
+				+ ", backgroundImage text"
+				+ ", noteImage text"
+				+ ", PRIMARY KEY (idSession, userID)"
+				+ ", FOREIGN KEY (idSession) REFERENCES " + sessionTableName + "(idSession) ON DELETE CASCADE"
+				+ ", FOREIGN KEY (userID) REFERENCES " + userTableName + "(id) ON DELETE CASCADE"
+				+ ");";
 
 		String sqlCreateTableStatistic = 
-				"CREATE TABLE IF NOT EXISTS statistic ("
+				"CREATE TABLE IF NOT EXISTS " + statisticTableName +" ("
 						+ " number integer PRIMARY KEY AUTOINCREMENT"
 						+ ", idSession integer NOT NULL"
 						+ ", userID integer NOT NULL"
 						+ ", actionID integer NOT NULL"
 						+ ", actionName text NOT NULL"
 						+ ", time integer NOT NULL"						
-						+ ", FOREIGN KEY ( idSession ) REFERENCES statistic( idSession ) ON DELETE CASCADE"
+						+ ", FOREIGN KEY ( idSession ) REFERENCES " + sessionTableName +"( idSession ) ON DELETE CASCADE"
 						+ ");";
 		
 		try ( Connection conn = DriverManager.getConnection( dbURL );
@@ -1624,6 +1732,7 @@ public class ConfigApp
 			stmt.execute( sqlCreateTableConfig );
 			stmt.execute( sqlCreateTableSession );
 			stmt.execute( sqlCreateTableStatistic );
+			stmt.execute( sqlCreateTableSessionConfig );
 		} 
 		catch ( SQLException e ) 
 		{

@@ -190,6 +190,8 @@ public class Level extends Scene implements IPausable, IStoppable
 			this.playerTimes.put( id, new NumberTuple( reactionTime, recoverTime ) );
 		}
 		
+		this.firstPlay = true;
+		
 		this.setLevelThread();		
 	}
 	
@@ -494,7 +496,6 @@ public class Level extends Scene implements IPausable, IStoppable
 				TimeSession ts = (TimeSession)time;
 				ts.setOffsetTime( ts.getTotalTimeSession() );
 			}
-			
 			
 			if( this.firstPlay )
 			{

@@ -225,6 +225,7 @@ public class BackgroundMusic extends AbstractStoppableThread
 			{
 				final double t = this.player.getManagedPlayer().getMicrosecondLength() / 1e6D;				
 				
+				/*
 				this.player.getManagedPlayer().addManagedPlayerListener( new ManagedPlayerListener() 
 				{					
 					@Override
@@ -253,6 +254,10 @@ public class BackgroundMusic extends AbstractStoppableThread
 					public void onFinished() 
 					{}
 				});
+				*/
+				//this.mute( t );
+				
+				this.player.getManagedPlayer().muteTrack( -1,  true );
 			}
 			
 			this.player.play( );

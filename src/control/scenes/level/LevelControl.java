@@ -90,6 +90,8 @@ public class LevelControl extends AbstractSceneControl
 	public void startScene() throws Exception 
 	{
 		// TODO Auto-generated method stub
+		super.fireSceneEvent( SceneEvent.START );
+		
 		super.startScene();
 		
 		if( super.scene != null )
@@ -106,8 +108,6 @@ public class LevelControl extends AbstractSceneControl
 			MusicPlayerControl.getInstance().setMuteSession( lv.isMuteSession() );
 			
 			MusicPlayerControl.getInstance().startMusic();
-		
-			
 			
 			//MusicPlayerControl.getInstance().setPlayerMusicSheets( lv.getPlayerSheets() );
 		}
@@ -219,9 +219,17 @@ public class LevelControl extends AbstractSceneControl
 					&& this.backgroundMusicEnd )
 			{		
 				super.stopThread = true;
-				super.fireSceneEvent( SceneEvent.END );
+				
 			}
 		}
+	}
+	
+	@Override
+	protected void cleanUp() throws Exception 
+	{
+		super.fireSceneEvent( SceneEvent.END );
+		
+		super.cleanUp();
 	}
 	
 	/*
@@ -418,6 +426,15 @@ public class LevelControl extends AbstractSceneControl
 	@Override
 	public void setPauseScene(boolean pause ) 
 	{
+		if( pause )
+		{
+			super.fireSceneEvent( SceneEvent.PAUSE );
+		}
+		else
+		{
+			super.fireSceneEvent( SceneEvent.RESUME );
+		}
+		
 		super.setPauseScene( pause );
 		MusicPlayerControl.getInstance().setPauseMusic( pause );
 	}

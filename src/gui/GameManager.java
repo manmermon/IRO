@@ -69,6 +69,7 @@ import exceptions.SceneException;
 import general.NumberRange;
 import general.Tuple;
 import statistic.RegistrarStatistic;
+import statistic.RegistrarStatistic.FieldType;
 import stoppableThread.IStoppable;
 import thread.stoppableThread.AbstractStoppableThread;
 
@@ -228,6 +229,8 @@ public class GameManager
 			{
 				this.currentLevel.getBackgroundPattern().stopActing( IStoppable.FORCE_STOP );
 			}
+			
+			this.currentLevel.stopActing( IStoppable.FORCE_STOP );
 		}
 		
 		this.currentLevel = null;
@@ -430,6 +433,8 @@ public class GameManager
 				loadAnimationThread.stopThread( IStoppable.FORCE_STOP );
 			}
 			
+			RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_START );
+			
 			this.setLevel( this.currentLevel );			
 		}
 		catch( Exception ex )
@@ -573,14 +578,21 @@ public class GameManager
 			ControllerManager.getInstance().setEnableControllerListener( true );
 			
 			ScreenControl.getInstance().setScene( level );
-		
+			
 			ScreenControl.getInstance().startScene();
 		}
 	}
 	
 	public synchronized boolean hasNextLevel()
 	{
-		return !this.currentLevel.isFinished();
+		boolean next = false;
+		
+		if( this.currentLevel != null )
+		{
+			next = !this.currentLevel.isFinished();
+		}
+		
+		return next;
 	}
 	
 	public void nextLevel() throws Exception
@@ -665,28 +677,33 @@ public class GameManager
 			}			
 			else
 			{
-				this.gameWindow.getGamePanel().setVisible( false );
+				if( this.gameWindow != null )
+				{
+					this.gameWindow.getGamePanel().setVisible( false );
+					
+					this.gameWindow.getGamePanel().removeAll();
 				
-				this.gameWindow.getGamePanel().removeAll();
-				
-				MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
-														, scores
-														, spr
-														, this.hasNextLevel(), true );
-				//ScreenControl.getInstance().setScene( mr );
-				
-				this.gameWindow.getGamePanel().add( mr.getMenuFrame(), BorderLayout.CENTER );
-				
-				this.gameWindow.getGamePanel().setVisible( true );
+					
+					MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
+															, scores
+															, spr
+															, this.hasNextLevel(), true );
+					//ScreenControl.getInstance().setScene( mr );
+					
+					this.gameWindow.getGamePanel().add( mr.getMenuFrame(), BorderLayout.CENTER );
+					
+					this.gameWindow.getGamePanel().setVisible( true );
+				}
 			}
 		}		
 		else // if( !nextLevel )
-		{
-			if( this.currentLevel != null )
+		{	if( this.currentLevel != null )
 			{	
 				this.currentLevel.stopActing( IStoppable.FORCE_STOP );			
 				this.currentLevel = null;
 			}
+		
+			RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_END );		
 			
 			ControllerManager.getInstance().stopController();
 			

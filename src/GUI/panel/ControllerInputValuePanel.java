@@ -4,7 +4,6 @@
 package gui.panel;
 
 import java.awt.BorderLayout;
-import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -104,7 +103,7 @@ public class ControllerInputValuePanel extends JPanel implements IInputControlle
 	 * @see @see control.events.IInputControllerListener#InputControllerEvent(control.events.InputControllerEvent)
 	 */
 	@Override
-	public void InputLSLDataEvent(lslStream.event.InputLSLDataEvent ev) 
+	public void InputLSLDataEvent( lslStream.event.InputLSLDataEvent ev ) 
 	{
 		double[] data = ev.getInputValues();
 				

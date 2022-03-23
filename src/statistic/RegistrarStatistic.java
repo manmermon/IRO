@@ -33,9 +33,13 @@ public class RegistrarStatistic
 	{
 		GAME_START
 		
-		, GAME_PAUSE
+		, LEVEL_START
 		
-		, GAME_RESUME
+		, LEVEL_PAUSE
+		
+		, LEVEL_RESUME
+		
+		, LEVEL_END
 		
 		, GAME_END
 		
@@ -51,7 +55,7 @@ public class RegistrarStatistic
 		, NOTE_EXIT_FRET 
 		// La nota sale de la zona de accion
 		
-		, CONTROLLER_WAIT_RECORVER_LEVEL 
+		//, CONTROLLER_WAIT_RECORVER_LEVEL 
 		// Se espera a que el control (mando) caiga por debajo del nivel de recuperación. El funcionamiento normal está deshabilitado
 		
 		, CONTROLLER_RESTORED_LEVEL 
@@ -60,7 +64,7 @@ public class RegistrarStatistic
 		, CONTROLLER_LEVEL_REACH 
 		// El control (mando) alcanza el nivel objetivo para generar una acción
 		
-		, CONTROLER_RECOVER_LEVEL_REACH 
+		, CONTROLLER_RECOVER_LEVEL_REACH 
 		// El control (mando) cae por debajo del nivel de recuperación
 		
 		, CONTROLLER_MAINTAIN_LEVEL_REACH 
@@ -68,6 +72,8 @@ public class RegistrarStatistic
 		
 		, CONTROLLER_MAINTAIN_LEVEL_FINISH 
 		// El control (mando) cae por debajo del nivel objetivo que generó una acción
+		
+		, ERROR_CONTROLLER_DISCONNECTED
 		
 		//, CONTROLER_LEVEL_REACH_WITHOUT_RECOVER_LEVEL // El control (mando) alcanza el nivel objetivo para generar una acción sin haber caído por debajo del nivel de recuperación
 	};

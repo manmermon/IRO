@@ -2,7 +2,6 @@ package control;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JOptionPane;
 
@@ -186,7 +185,7 @@ public class ScreenControl extends AbstractStoppableThread
 			{			
 				if( ev.getType() == control.events.SceneEvent.START)
 				{
-					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_START );
+					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.LEVEL_START );
 				}		
 				else if( ev.getType() == control.events.SceneEvent.END )
 				{
@@ -198,7 +197,7 @@ public class ScreenControl extends AbstractStoppableThread
 
 					synchronized ( this )
 					{
-						RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_END );
+						RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.LEVEL_END );
 
 						try
 						{
@@ -217,11 +216,11 @@ public class ScreenControl extends AbstractStoppableThread
 				}
 				else if( ev.getType() == control.events.SceneEvent.PAUSE )
 				{
-					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_PAUSE );
+					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.LEVEL_PAUSE );
 				}
 				else if( ev.getType() == control.events.SceneEvent.RESUME )
 				{
-					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_RESUME );
+					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.LEVEL_RESUME );
 				}
 			}
 		};

@@ -10,7 +10,6 @@ import gui.MainAppUI;
 import gui.game.component.IPossessable;
 import lslStream.event.InputLSLDataEvent.LSLDataEventType;
 import lslStream.event.InputLSLDataReader;
-import lslStream.exception.LostException;
 import config.IOwner;
 import config.language.Language;
 import control.ScreenControl;
@@ -145,6 +144,8 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 	{
 		if( !ev.getType().equals( LSLDataEventType.DATA ) )
 		{	
+			RegistrarStatistic.add( this.ownerID, FieldType.ERROR_CONTROLLER_DISCONNECTED );
+			
 			GameManager.getInstance().stopLevel( false );
 			JOptionPane.showMessageDialog( MainAppUI.getInstance(), "Controller error: Player " + this.owner + " disconnected"
 											, Language.getLocalCaption( Language.ERROR )
@@ -283,7 +284,7 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 						}
 						else if( !this.recoverLevelReported )
 						{
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLER_RECOVER_LEVEL_REACH );
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RECOVER_LEVEL_REACH );
 						}				
 					}
 					

@@ -5,7 +5,6 @@ package gui.panel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.FontMetrics;
 import java.awt.Point;
@@ -30,7 +29,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
@@ -153,12 +151,21 @@ public class InputDevicePanel extends JPanel
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					JButton b = (JButton)e.getSource();
-					b.setEnabled( false );
+					final JButton b = (JButton)e.getSource();
 					
-					updateInputs();
+					Thread t = new Thread()
+					{
+						public void run() 
+						{
+							b.setEnabled( false );
+							
+							updateInputs();
+							
+							b.setEnabled( true );
+						};
+					};
 					
-					b.setEnabled( true );
+					t.start();
 				}
 			});
 			
@@ -307,6 +314,12 @@ public class InputDevicePanel extends JPanel
 			for( Player p : players )
 			{
 				cbb.addItem( p );
+			}
+			
+ 			if( cbb.getItemCount() == 2 && t.getRowCount() == 1 )
+			{
+				Player p = cbb.getItemAt( 1 );
+				t.setValueAt( p, 0, 0);
 			}
 		}
 	}
@@ -717,7 +730,7 @@ public class InputDevicePanel extends JPanel
 		return tm;
 	}
 	
-	public void updateInputs( )
+	public synchronized void updateInputs( )
 	{		
 		//this.lslStreamInfo = LSL.resolve_streams();
 		LSLStreamInfo[] streams = LSL.resolve_streams();
@@ -797,26 +810,7 @@ public class InputDevicePanel extends JPanel
 						ConfigParameter par = cfg.getParameter( ConfigApp.SELECTED_BIOSIGNAL );						
 						
 						if( par != null )
-						{
-							/*
-							  selectedController = par.getSelectedValue();
-							  if( selectedController != null )
-							{
-								LSLStreamInfo meta = (LSLStreamInfo)selectedController;
-								
-								String uid = info.uid();
-								if( !meta.uid().equals( uid ) )
-								{
-									selPlayer = NON_SELECTED_PLAYER;
-									break;
-								}
-							}
-							else
-							{
-								selPlayer = NON_SELECTED_PLAYER;
-							}
-							//*/
-							
+						{	
 							List< Object > vals = par.getAllOptions();
 							
 							if( vals != null && !vals.isEmpty() )
