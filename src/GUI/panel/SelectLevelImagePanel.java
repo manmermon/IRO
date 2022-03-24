@@ -36,6 +36,7 @@ import exceptions.ConfigParameterException;
 import image.BasicPainter2D;
 import music.sheet.IROTrack;
 import stoppableThread.IStoppable;
+import tools.IROFileUtils;
 
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -53,6 +54,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author manuel
@@ -129,8 +131,8 @@ public class SelectLevelImagePanel extends JPanel
 		JPanel panel = this.getImageListPanel();
 		panel.removeAll();
 		
-		panel.add( this.getImageExpandPanel( new File( ConfigApp.BACKGROUND_SPRITE_FILE_PATH ), ConfigApp.BACKGROUND_IMAGE ) );
-		panel.add( this.getImageExpandPanel( new File( ConfigApp.NOTE_SPRITE_FILE_PATH ), ConfigApp.NOTE_IMAGE ) );
+		panel.add( this.getImageExpandPanel( new File( ConfigApp.BACKGROUND_SPRITE_FILE_PATH ), ConfigApp.BACKGROUND_IMAGE , true ) );
+		panel.add( this.getImageExpandPanel( new File( ConfigApp.NOTE_SPRITE_FILE_PATH ), ConfigApp.NOTE_IMAGE, false ) );
 	}
 	
  	private void setPreviewScene( )
@@ -196,13 +198,33 @@ public class SelectLevelImagePanel extends JPanel
 				{
 					try
 					{
-						Image img = ImageIO.read( new File( bgPath ) );
+						File f = new File( bgPath );
+						
+						if( f.isDirectory() )
+						{
+							File[] imgFiles =IROFileUtils.getImageFiles( f );
 							
-						img = img.getScaledInstance( back.getBounds().width
-													, back.getBounds().height
-													, Image.SCALE_FAST );
+							if( imgFiles != null && imgFiles.length > 0 )
+							{
+								int index = new Random().nextInt( imgFiles.length );
+								f = imgFiles[ index ];
+							}
+							else
+							{
+								f = null;
+							}
+						}
+						
+						if( f != null )
+						{
+							Image img = ImageIO.read( f );
 								
-						back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
+							img = img.getScaledInstance( back.getBounds().width
+														, back.getBounds().height
+														, Image.SCALE_FAST );
+									
+							back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
+						}
 					}
 					catch (IOException ex)
 					{	
@@ -248,20 +270,40 @@ public class SelectLevelImagePanel extends JPanel
 					{
 						try
 						{
-							Image img = ImageIO.read( new File( notPath ) );
+							File f = new File( notPath );
 							
-							Dimension noteSize = noteSprite1.getSize();
-							
-							int l = (int)Math.max( noteSize.getWidth(), noteSize.getHeight() );
-							int s = (int)Math.sqrt( l * l / 2 );  
-							
-							if( s <= 0 )
+							if( f.isDirectory() )
 							{
-								s = 1;
-							}			
+								File[] imgFiles = IROFileUtils.getImageFiles( f );
+								
+								if( imgFiles != null && imgFiles.length > 0 )
+								{
+									int index = new Random().nextInt( imgFiles.length );
+									f = imgFiles[ index ];
+								}
+								else
+								{
+									f = null;
+								}
+							}
 							
-							noteImg = (BufferedImage)BasicPainter2D.copyImage( img.getScaledInstance( s , s
-																					, BufferedImage.SCALE_SMOOTH ) );
+							if( f != null ) 
+							{
+								Image img = ImageIO.read( f );
+								
+								Dimension noteSize = noteSprite1.getSize();
+								
+								int l = (int)Math.max( noteSize.getWidth(), noteSize.getHeight() );
+								int s = (int)Math.sqrt( l * l / 2 );  
+								
+								if( s <= 0 )
+								{
+									s = 1;
+								}			
+								
+								noteImg = (BufferedImage)BasicPainter2D.copyImage( img.getScaledInstance( s , s
+																						, BufferedImage.SCALE_SMOOTH ) );
+							}
 							
 							/*
 							Color bg = new Color( 255, 255, 255, 140 );
@@ -390,32 +432,16 @@ public class SelectLevelImagePanel extends JPanel
 		return this.imgListPanel;
 	}
 	
-	private ExpandablePanel getImageExpandPanel( File folder, final String configID )
+	private ExpandablePanel getImageExpandPanel( final File folder, final String configID, boolean enaDynamic )
 	{
 		ExpandablePanel expPanel = null;
 		
 		if( folder.isDirectory() )
 		{	
-			File[] files = folder.listFiles( new FilenameFilter()
-			{
-			    public boolean accept(File dir, String name) 
-			    {
-			    	String[] formatNames = ImageIO.getReaderFormatNames();
-			    	boolean accept = false;
-			    	
-			    	for( int i = 0; i < formatNames.length && !accept; i++ )
-			    	{
-			    		String format = formatNames[ i ];
-			    		accept = name.toLowerCase().endsWith( "." + format.toLowerCase() );
-			    	}
-			    	
-			        return accept; 
-			    }
-			});
-
+			File[] files = IROFileUtils.getImageFiles( folder );
+			
 			if( files != null && files.length > 0)
-			{
-				
+			{				
 				Settings cfg = null;
 				Player player = ConfigApp.getFirstPlayer();
 				final ConfigParameter par;
@@ -468,6 +494,65 @@ public class SelectLevelImagePanel extends JPanel
 				panel.add( b );
 				
 				boolean selectedFileFound = false;
+				if( enaDynamic )
+				{
+					cap = Language.getAllCaptions().get( Language.DYNAMIC );
+					b = new JRadioButton( cap.getCaption( Language.getCurrentLanguage() ) );
+									
+					b.addActionListener( new ActionListener()
+					{						
+						@Override
+						public void actionPerformed(ActionEvent e)
+						{
+							AbstractButton b = (AbstractButton)e.getSource();
+							
+							if( b.isSelected() )
+							{	
+								if( par != null )
+								{
+									try
+									{
+										String path = folder.getAbsolutePath();		
+										if( !path.endsWith( File.separator ) )
+										{
+											path += File.separator;
+										}
+																			
+										par.setSelectedValue(  path );
+									} 
+									catch (ConfigParameterException ex)
+									{
+										ex.printStackTrace();
+									}								
+								}
+								
+								setPreviewScene();
+							}
+						}
+					});
+					
+					if( par != null )
+					{
+						Object val = par.getSelectedValue();
+						String pathFolder = folder.getAbsolutePath();
+						if( !pathFolder.endsWith( File.separator ) )
+						{
+							pathFolder += File.separator;
+						}
+						
+						if( val != null 
+								&&
+								val.toString().equals( pathFolder ) )
+						{
+							b.doClick();
+							selectedFileFound = true;
+						}
+					}
+					
+					btgr.add( b );					
+					panel.add( b );
+				}
+				
 				for( File file : files )
 				{
 					b = new JRadioButton( file.getName() );

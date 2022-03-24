@@ -199,7 +199,7 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 					{
 						if( this.statistic == 0 )
 						{
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_LEVEL_REACH );
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_ACTION_LEVEL_REACH );
 							
 							this.statistic++;
 						}
@@ -228,7 +228,7 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 						{	
 							if( this.statistic == 1 )
 							{
-								RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH );
+								RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_ACTION_LEVEL );
 								this.statistic++;
 							}
 		
@@ -257,7 +257,7 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 					{
 						if( this.statistic > 0 )
 						{
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_LEVEL_FINISH );
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_EXIT_ACTION_LEVEL );
 							this.statistic = 0;
 						}
 						
@@ -278,13 +278,13 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 						{
 							this.updateLevelGoal = true;
 							
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RESTORED_LEVEL );
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_ENABLE_MOVEMENT );
 							
 							this.recoverLevelReported = true;
 						}
 						else if( !this.recoverLevelReported )
 						{
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RECOVER_LEVEL_REACH );
+							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RECOVERY_LEVEL_REACH );
 						}				
 					}
 					

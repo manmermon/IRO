@@ -30,12 +30,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -81,6 +83,7 @@ import music.sheet.io.IROMusicParserListener;
 import statistic.RegistrarStatistic;
 import stoppableThread.IStoppable;
 import thread.stoppableThread.AbstractStoppableThread;
+import tools.IROFileUtils;
 import tools.MusicSheetTools;
 import tools.SceneTools;
 
@@ -147,6 +150,8 @@ public class Level extends Scene implements IPausable, IStoppable
 	private boolean firstSegment = true;
 	
 	private double[] playerDelay = null;
+	
+	private LinkedList< File > backgroundFiles = null;
 	
 	public Level( Rectangle sceneSize, List< Settings > playerSettings, List< File > midiMusicSheelFiles ) throws Exception 
 	{
@@ -497,9 +502,12 @@ public class Level extends Scene implements IPausable, IStoppable
 				ts.setOffsetTime( ts.getTotalTimeSession() );
 			}
 			
+			this.setBackgroundSprite();			
+			this.setTempoBMP();
+			
 			if( this.firstPlay )
 			{
-				this.setBackgroundSprites();
+				this.setFretStaveTimeSprites();
 				this.setScoreAndInputGoal();
 				
 				this.firstPlay = false;
@@ -1586,22 +1594,30 @@ public class Level extends Scene implements IPausable, IStoppable
 	}
 	//*/
 	
-	private void setBackgroundSprites( )
+	private void setTempoBMP()
 	{
 		if( this.currentMusic != null && this.currentMusic.getNumberOfTracks() > 0 )
 		{			
 			int tempo = this.currentMusic.getTempo();
 
 			this.setBPM( tempo );
+		}	
+	}
+	
+	private void setBackgroundSprite( )
+	{
+		//
+		//
+		// IMAGES
+		//
+		//
 
-			//
-			//
-			// IMAGES
-			//
-			//
-
+		if( this.backgroundFiles == null )
+		{
+			this.backgroundFiles = new LinkedList< File >();
+			
 			Settings cfg = ConfigApp.getSettings().iterator().next();
-
+	
 			ConfigParameter par = cfg.getParameter( ConfigApp.BACKGROUND_IMAGE );
 			Object bg = par.getSelectedValue();
 			String path = null;
@@ -1609,76 +1625,100 @@ public class Level extends Scene implements IPausable, IStoppable
 			{
 				path = bg.toString();
 			}
-
-			if(  super.getSprites( Level.BACKGROUND_ID, false ).isEmpty() )
+	
+			if( path != null )
 			{
-				Background back = new Background( super.getSize(), Level.BACKGROUND_ID );
-				back.setFrameBounds( this.sceneBounds );
-				back.setZIndex( Level.PLANE_BRACKGROUND );
-				this.addBackgroud( back );
-				if( path != null )
+				File f = new File(  path );
+					
+				if( f.isDirectory() )
 				{
-					try
+					File[] imgFiles = IROFileUtils.getImageFiles( f );
+
+					if( imgFiles != null && imgFiles.length > 0 )
 					{
-						Image img = ImageIO.read( new File( path ) );
-	
-						img = img.getScaledInstance( back.getBounds().width
-								, back.getBounds().height
-								, Image.SCALE_SMOOTH );
-	
-						back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
+						for( File img : imgFiles )
+						{
+							this.backgroundFiles.add( img );
+						}
+
+						Collections.shuffle( this.backgroundFiles );
 					}
-					catch (IOException ex)
-					{	
-					}
-				}		
+				}
 			}
-
-			if( super.getSprites( Level.PAUSE_ID, false ).isEmpty() )
+		}
+		
+		super.remove( super.getSprites( Level.BACKGROUND_ID, false ) );
+		
+		Background back = new Background( super.getSize(), Level.BACKGROUND_ID );
+		back.setFrameBounds( this.sceneBounds );
+		back.setZIndex( Level.PLANE_BRACKGROUND );
+		this.addBackgroud( back );
+		
+		if( !this.backgroundFiles.isEmpty() ) 
+		{			
+			File f = this.backgroundFiles.poll();
+			this.backgroundFiles.add( f );
+			try
 			{
-				Pause pause = new Pause( super.getSize(), Level.PAUSE_ID );
-				pause.setFrameBounds( this.sceneBounds );
-				pause.setZIndex( Level.PLANE_PAUSE );
-				pause.setVisible( false );
-				this.addPause( pause );
+				Image img = ImageIO.read( f );
+	
+				img = img.getScaledInstance( back.getBounds().width
+						, back.getBounds().height
+						, Image.SCALE_SMOOTH );
+	
+				back.setImage( (BufferedImage)BasicPainter2D.copyImage( img ) );
 			}
-
-			Stave stave = this.getStave();			
-			if( stave == null )
+			catch (Exception e) 
 			{
-				stave = new Stave( super.getSize(), Level.STAVE_ID );
-				stave.setFrameBounds( this.sceneBounds );
-				stave.setZIndex( Level.PLANE_STAVE );
-				this.addStave( stave );
 			}
+		}		
+	}
+	
+	private void setFretStaveTimeSprites()
+	{
+		if( super.getSprites( Level.PAUSE_ID, false ).isEmpty() )
+		{
+			Pause pause = new Pause( super.getSize(), Level.PAUSE_ID );
+			pause.setFrameBounds( this.sceneBounds );
+			pause.setZIndex( Level.PLANE_PAUSE );
+			pause.setVisible( false );
+			this.addPause( pause );
+		}
 
-			Dimension sizeFret = new Dimension( stave.getStaveWidth() / 3, stave.getStaveHeigh() ); 
-			//Fret fret = new Fret( pen, IScene.FRET_ID );
-			
-			Fret fret = this.getFret();
-			
-			if( fret == null )
-			{			
-				fret = new Fret( Level.FRET_ID, sizeFret );
-				fret.setFrameBounds( this.sceneBounds );
-				fret.setZIndex( Level.PLANE_FRET );
-				Point2D.Double loc = new Point2D.Double();
-				loc.x = super.getSize().width / 2;
-				loc.y = 0;
-				fret.setScreenLocation( loc );
-				this.addFret( fret );
-			}
+		Stave stave = this.getStave();			
+		if( stave == null )
+		{
+			stave = new Stave( super.getSize(), Level.STAVE_ID );
+			stave.setFrameBounds( this.sceneBounds );
+			stave.setZIndex( Level.PLANE_STAVE );
+			this.addStave( stave );
+		}
 
+		Dimension sizeFret = new Dimension( stave.getStaveWidth() / 3, stave.getStaveHeigh() ); 
+		//Fret fret = new Fret( pen, IScene.FRET_ID );
 
-			int hTS = stave.getRailHeight() / 2;
-			Rectangle bounds = stave.getBounds();			
-			//TimeSession time = new TimeSession( IScene.TIME_ID, pen );
-			if( this.getSprites( Level.TIME_ID, false ) != null )
-			{
-				TimeSession time = new TimeSession( Level.TIME_ID, hTS, bounds );
-				time.setZIndex( Level.PLANE_TIME );
-				this.add( time, Level.PLANE_TIME );
-			}
+		Fret fret = this.getFret();
+
+		if( fret == null )
+		{			
+			fret = new Fret( Level.FRET_ID, sizeFret );
+			fret.setFrameBounds( this.sceneBounds );
+			fret.setZIndex( Level.PLANE_FRET );
+			Point2D.Double loc = new Point2D.Double();
+			loc.x = super.getSize().width / 2;
+			loc.y = 0;
+			fret.setScreenLocation( loc );
+			this.addFret( fret );
+		}
+
+		int hTS = stave.getRailHeight() / 2;
+		Rectangle bounds = stave.getBounds();			
+		//TimeSession time = new TimeSession( IScene.TIME_ID, pen );
+		if( this.getSprites( Level.TIME_ID, false ) != null )
+		{
+			TimeSession time = new TimeSession( Level.TIME_ID, hTS, bounds );
+			time.setZIndex( Level.PLANE_TIME );
+			this.add( time, Level.PLANE_TIME );
 		}
 	}
 	
@@ -2019,6 +2059,8 @@ public class Level extends Scene implements IPausable, IStoppable
 		{
 			this.levelThread.stopThread( friendliness );
 		}
+		
+		this.backgroundFiles = null;
 		
 		this.firstPlay = true;
 	}

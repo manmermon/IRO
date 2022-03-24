@@ -79,6 +79,8 @@ public class Language
 	public static final String DOWN = "DOWN";
 	public static final String NONE = "NONE";
 	
+	public static final String DYNAMIC = "DYNAMIC";
+	
 	public static final String NEXT  = "Next";
 	public static final String STOP  = "STOP";
 	public static final String END  = "END";
@@ -152,8 +154,12 @@ public class Language
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
 		
-		cap = new Caption( MAX_PLAYER_MSG, defaultLanguage, "The maximum number of players is 8" );
-		cap.setCaption( esEs, "El n\u00famero m\u00e1ximo de jugadores es 8");
+		cap = new Caption( DYNAMIC, defaultLanguage, "Dynamic" );
+		cap.setCaption( esEs, "Din\u00e1mico");
+		captions.put( DYNAMIC, cap );
+		
+		cap = new Caption( MAX_PLAYER_MSG, defaultLanguage, "The maximum number of players is 7" );
+		cap.setCaption( esEs, "El n\u00famero m\u00e1ximo de jugadores es 7");
 		captions.put( MAX_PLAYER_MSG, cap );
 		
 		cap = new Caption( SAVING, defaultLanguage, "Saving" );

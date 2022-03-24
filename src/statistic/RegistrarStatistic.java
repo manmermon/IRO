@@ -56,26 +56,27 @@ public class RegistrarStatistic
 		// La nota sale de la zona de accion
 		
 		//, CONTROLLER_WAIT_RECORVER_LEVEL 
-		// Se espera a que el control (mando) caiga por debajo del nivel de recuperación. El funcionamiento normal está deshabilitado
+		// Se espera a que el control (mando) caiga por debajo del nivel de recuperacion. El funcionamiento normal esta deshabilitado
 		
-		, CONTROLLER_RESTORED_LEVEL 
-		// El control (mando) cae por debajo del nivel de recuperación habilitando el normal funcionamiento 
+		, CONTROLLER_ENABLE_MOVEMENT 
+		// El control (mando) cae por debajo del nivel de recuperacion habilitando el normal funcionamiento 
 		
-		, CONTROLLER_LEVEL_REACH 
-		// El control (mando) alcanza el nivel objetivo para generar una acción
+		, CONTROLLER_ACTION_LEVEL_REACH 
+		// El control (mando) alcanza el nivel objetivo para generar una accion
 		
-		, CONTROLLER_RECOVER_LEVEL_REACH 
-		// El control (mando) cae por debajo del nivel de recuperación
+		, CONTROLLER_RECOVERY_LEVEL_REACH 
+		// El control (mando) cae por debajo del nivel de recuperacion
 		
-		, CONTROLLER_MAINTAIN_LEVEL_REACH 
-		// El control (mando) se mantiene en el nivel de acción el tiempo suficiente para generar la acción 
+		, CONTROLLER_MAINTAIN_ACTION_LEVEL 
+		// El control (mando) se mantiene en el nivel de accion el tiempo suficiente para generar la accion 
 		
-		, CONTROLLER_MAINTAIN_LEVEL_FINISH 
-		// El control (mando) cae por debajo del nivel objetivo que generó una acción
+		, CONTROLLER_EXIT_ACTION_LEVEL 
+		// El control (mando) cae por debajo del nivel objetivo que genero una accion
 		
 		, ERROR_CONTROLLER_DISCONNECTED
 		
-		//, CONTROLER_LEVEL_REACH_WITHOUT_RECOVER_LEVEL // El control (mando) alcanza el nivel objetivo para generar una acción sin haber caído por debajo del nivel de recuperación
+		//, CONTROLER_LEVEL_REACH_WITHOUT_RECOVER_LEVEL 
+		// El control (mando) alcanza el nivel objetivo para generar una accion sin haber caido por debajo del nivel de recuperacion
 	};
 	
 	//**********************

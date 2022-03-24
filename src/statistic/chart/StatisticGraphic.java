@@ -370,7 +370,7 @@ public class StatisticGraphic
 							&& 
 							( noteEvent.equals( RegistrarStatistic.FieldType.NOTE_ENTER_FRET.name() ) 
 								|| 
-								noteEvent.equals( RegistrarStatistic.FieldType.CONTROLLER_MAINTAIN_LEVEL_REACH.name() )
+								noteEvent.equals( RegistrarStatistic.FieldType.CONTROLLER_MAINTAIN_ACTION_LEVEL.name() )
 							) 
 						)
 					{
