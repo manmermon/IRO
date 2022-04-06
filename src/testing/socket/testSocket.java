@@ -66,7 +66,7 @@ public class testSocket {
 				
 		t.start();
 		
-		SocketClient c = new SocketClient();
+		SocketClient c = SocketClient.getInstance();
 		
 				
 		

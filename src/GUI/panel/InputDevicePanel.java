@@ -733,7 +733,7 @@ public class InputDevicePanel extends JPanel
 	public synchronized void updateInputs( )
 	{		
 		//this.lslStreamInfo = LSL.resolve_streams();
-		LSLStreamInfo[] streams = LSL.resolve_streams();
+		LSLStreamInfo[] streams = LSL.resolve_streams( );
 		
 		JTable t = this.getInputControllerTable();
 		DefaultTableModel tm = (DefaultTableModel)t.getModel();

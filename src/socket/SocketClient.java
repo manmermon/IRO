@@ -7,27 +7,40 @@ import thread.stoppableThread.AbstractStoppableThread;
 
 public class SocketClient extends AbstractStoppableThread 
 {	
-	public static final short SEARCH  = 0b1000_0000;
-	public static final short CONECT  = 0b0100_0000;
-	public static final short CLOSE   = 0b0010_0000;
-	public static final short ERROR   = 0b0001_0000;
-	public static final short NONE    = 0b0000_0000;
+	private static SocketClient sc = null;
+	
+	public static final short SEARCH  = 0b1000_0000; // 128
+	public static final short CONECT  = 0b0100_0000; // 64
+	public static final short CLOSE   = 0b0010_0000; // 32
+	public static final short ERROR   = 0b0001_0000; // 16
+	public static final short ALIVE   = 0b0000_0000; // 16
+	public static final short NONE    = 0b0000_0000; // 0
 	
 	//private final String IP = "192.168.0.132";
-	private final String IP = "127.0.0.1";
-	private final int port = 47808;
+	private final String IP = "150.214.141.159";
+	private final int port = 0xBAC0;
 	
 	private Socket socket;
 	
 	private long sleepTime = 1000L;
+	private long sleepToCheckConnection = 10_000L;
 	
 	private short state = SEARCH;
 	
 	private Object lock = new Object();
 		
-	public SocketClient( ) 
-	{		
+	private SocketClient( ) 
+	{				
+	}
+	
+	public static SocketClient getInstance()
+	{
+		if( sc == null )
+		{
+			sc = new SocketClient();
+		}
 		
+		return sc;
 	}
 	
 	@Override
@@ -44,8 +57,10 @@ public class SocketClient extends AbstractStoppableThread
 	{
 		if( this.socket == null )
 		{
-			this.socket = new Socket( this.IP, port );
+			this.socket = new Socket( this.IP, this.port );
 			this.socket.setSoTimeout( 5_000 );
+			
+			this.state = SEARCH;
 		}
 	}
 	
@@ -66,7 +81,9 @@ public class SocketClient extends AbstractStoppableThread
 			}
 			else
 			{
-				super.wait();
+				super.wait( this.sleepToCheckConnection );
+				
+				this.checkSocketConnection();
 			}
 		}
 		
@@ -84,7 +101,7 @@ public class SocketClient extends AbstractStoppableThread
 				{
 					case SEARCH:
 					{
-						short msg = SEARCH ; //| CONECT ;
+						short msg = SEARCH ; 
 						short res = this.sendMessage( msg );
 						
 						if( ( res & ERROR ) == 0 
@@ -97,7 +114,7 @@ public class SocketClient extends AbstractStoppableThread
 					}
 					case CONECT:
 					{
-						short msg =  CONECT ; //| (short)0b0000_0111;
+						short msg =  CONECT ; 
 						short res = this.sendMessage( msg );
 						
 						if( ( res & ERROR ) == 0 
@@ -105,14 +122,52 @@ public class SocketClient extends AbstractStoppableThread
 						{
 							this.state = NONE;
 						}
+						else if( ( res & ERROR ) != 0 )
+						{
+							this.state = SEARCH;
+						}
 						
 						break;
-					}				
+					}
+					case CLOSE:
+					{
+						short msg =  CLOSE ;
+						short res = this.sendMessage( msg );
+						
+						if( ( res & ERROR ) == 0 
+								&& ( res & 0x07 ) > 0 )
+						{
+							this.state = SEARCH;
+						}
+						
+						break;
+					}
 					default:
 					{
 						break;
 					}
 				}
+			}
+		}
+		
+		System.out.println("SocketClient.runInLoop() " + this.state);
+	}
+				
+	private void checkSocketConnection()
+	{
+		if( this.socket != null )
+		{
+			try 
+			{
+				short res = this.sendMessage( ALIVE );
+				if( res == ERROR )
+				{
+					this.state = SEARCH;
+				}
+			} 
+			catch (IOException e) 
+			{
+				e.printStackTrace();
 			}
 		}
 	}
@@ -152,14 +207,35 @@ public class SocketClient extends AbstractStoppableThread
 		
 		if( this.socket != null )
 		{
-			this.socket.getOutputStream().write( new byte[] { (byte)msg } );
-			
-			byte[] buf = new byte[ 1 ];
-			int r = this.socket.getInputStream().read( buf );
-			if( r > 0 )
+			try
 			{
-				response = buf[ 0 ];
-			}			
+				this.socket.getOutputStream().write( new byte[] { (byte)msg } );
+				
+				byte[] buf = new byte[ 1 ];
+				int r = this.socket.getInputStream().read( buf );
+				if( r > 0 )
+				{
+					response = buf[ 0 ];
+				}			
+			}
+			catch ( Exception e ) 
+			{
+				try
+				{			
+					this.socket.getOutputStream().write( new byte[] { (byte)CLOSE } );
+					
+					byte[] buf = new byte[ 1 ];
+					this.socket.getInputStream().read( buf );					
+				}
+				catch (Exception e1) 
+				{
+				}
+				
+				this.socket.close();
+				this.socket = null;
+				
+				response = ERROR;				
+			}
 		}
 		
 		return response;
@@ -169,7 +245,7 @@ public class SocketClient extends AbstractStoppableThread
 	{
 		synchronized( this.lock )
 		{
-			this.state = SEARCH;
+			this.state = CLOSE;
 			
 			synchronized( this )
 			{

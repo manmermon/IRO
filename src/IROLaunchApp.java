@@ -31,15 +31,16 @@ import javax.swing.UIManager;
 
 import com.sun.jna.Platform;
 
-import gui.AppIcon;
-import gui.MainAppUI;
 import GUI.dialog.OpeningDialog;
 import GUI.text.TextAreaPrintStream;
+import gui.AppIcon;
+import gui.MainAppUI;
 import config.ConfigApp;
 import config.language.Language;
 import control.RefreshControl;
 import control.ScreenControl;
 import image.icon.GeneralAppIcon;
+import socket.SocketClient;
 
 public class IROLaunchApp
 {
@@ -142,6 +143,9 @@ public class IROLaunchApp
 			
 			RefreshControl drawCtrl = RefreshControl.getInstance();
 			drawCtrl.startActing();
+			
+			SocketClient client = SocketClient.getInstance();
+			client.startThread();
 			
 			/*
 			InputControl inCtrl = InputControl.getInstance();
