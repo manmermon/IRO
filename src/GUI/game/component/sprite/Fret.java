@@ -43,6 +43,7 @@ public class Fret extends AbstractSprite
 	private int fretWidth = 100;
 
 	private Color fretFillColor;
+	private Color fretBorderColor;
 	
 	private BufferedImage fretImg = null;
 	
@@ -67,6 +68,7 @@ public class Fret extends AbstractSprite
 		this.fret.addPoint( 0, size.height );
 		
 		this.fretFillColor = new Color( 255, 255, 255, 160 );
+		this.fretBorderColor= new Color( 0, 0, 0, 160 );
 	}
 	
 	public int getFretWidth()
@@ -156,8 +158,9 @@ public class Fret extends AbstractSprite
 			Rectangle r = this.fret.getBounds();
 			
 			this.fretImg = (BufferedImage)BasicPainter2D.rectangle( r.width, r.height, 3
-																, this.fretFillColor
-																, this.fretFillColor );
+																	//, this.fretBorderColor
+																	, this.fretFillColor
+																	, this.fretFillColor );
 		}
 		
 		return this.fretImg; 

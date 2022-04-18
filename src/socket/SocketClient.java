@@ -1,6 +1,7 @@
 package socket;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.Socket;
 
 import thread.stoppableThread.AbstractStoppableThread;
@@ -18,7 +19,7 @@ public class SocketClient extends AbstractStoppableThread
 	
 	//private final String IP = "192.168.0.132";
 	private final String IP = "150.214.141.159";
-	private final int port = 0xBAC0;
+	private final int port = 0xBEBA; // 0xBAC0;
 	
 	private Socket socket;
 	
@@ -87,7 +88,7 @@ public class SocketClient extends AbstractStoppableThread
 			}
 		}
 		
-		System.out.println("SocketClient.runInLoop() WAKE UP");
+		//System.out.println("SocketClient.runInLoop() WAKE UP");
 		if( this.socket == null )
 		{
 			this.createSocket();
@@ -150,7 +151,17 @@ public class SocketClient extends AbstractStoppableThread
 			}
 		}
 		
-		System.out.println("SocketClient.runInLoop() " + this.state);
+		//System.out.println("SocketClient.runInLoop() " + this.state);
+	}
+	
+	@Override
+	protected void runExceptionManager(Throwable e) 
+	{
+		if( !( e instanceof ConnectException ) 
+				&& !( e instanceof InterruptedException ) )
+		{
+			super.runExceptionManager(e);
+		}
 	}
 				
 	private void checkSocketConnection()
