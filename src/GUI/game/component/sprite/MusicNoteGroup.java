@@ -45,7 +45,7 @@ import image.BasicPainter2D;
 import image.icon.MusicInstrumentIcons;
 import music.sheet.IROTrack;
 import statistic.RegistrarStatistic;
-import statistic.RegistrarStatistic.FieldType;
+import statistic.RegistrarStatistic.GameFieldType;
 import tools.MusicSheetTools;
 
 public class MusicNoteGroup extends AbstractSprite implements IPossessable
@@ -280,7 +280,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 							playerID = _player.getId();
 						}
 						
-						RegistrarStatistic.add( playerID, FieldType.NOTE_SHOW );
+						RegistrarStatistic.addGameData( playerID, GameFieldType.NOTE_SHOW );
 						
 						synchronized ( delay )
 						{
@@ -301,7 +301,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 							playerID = _player.getId();
 						}
 						
-						RegistrarStatistic.add( playerID, FieldType.NOTE_REMOVE );
+						RegistrarStatistic.addGameData( playerID, GameFieldType.NOTE_REMOVE );
 						break;
 					}
 					default:

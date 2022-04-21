@@ -29,7 +29,7 @@ public class RegistrarStatistic
 	//
 	//**********************
 	
-	public enum FieldType 
+	public enum GameFieldType 
 	{
 		GAME_START
 		
@@ -89,7 +89,7 @@ public class RegistrarStatistic
 	
 	private static Map< Integer, Double > sessionScore = new HashMap<Integer, Double>();
 	
-	private static ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType > > register = new ArrayTreeMap< Integer, Tuple< LocalDateTime, FieldType> >();
+	private static ArrayTreeMap< Integer, Tuple< LocalDateTime, GameFieldType > > register = new ArrayTreeMap< Integer, Tuple< LocalDateTime, GameFieldType> >();
 	
 	private static Map< Integer, IControllerMetadata > controllerSettings = new HashMap< Integer, IControllerMetadata >();
 	
@@ -98,6 +98,8 @@ public class RegistrarStatistic
 	private static Map< Integer, LSLStreamInfo > bioLSLSettings = new HashMap< Integer, LSLStreamInfo >();
 	
 	private static Map< String, LinkedList< Double[] > > biosignalData = new HashMap< String, LinkedList< Double[] > >( );
+	
+	private static ArrayTreeMap< Integer, String > valArEmoRegister = new ArrayTreeMap< Integer, String >();
 	
 	/**
 	 * 
@@ -152,7 +154,7 @@ public class RegistrarStatistic
 			}
 		}
 	}
-	
+		
 	private static String getBioLSLDataID( int playerID, String type )
 	{
 		String id = playerID + type;
@@ -192,17 +194,24 @@ public class RegistrarStatistic
 		}
 	}
 	
-	public static synchronized void add( int playerID, FieldType field )
+	public static synchronized void addGameData( int playerID, GameFieldType field )
 	{
-		register.put(  playerID, new Tuple< LocalDateTime, FieldType >( LocalDateTime.now(), field ) );
+		register.put(  playerID, new Tuple< LocalDateTime, GameFieldType >( LocalDateTime.now(), field ) );
 	}
 	
-	public static synchronized void add( Set< Player > players, FieldType field )
+	public static synchronized void addGameData( Set< Player > players, GameFieldType field )
 	{
 		for( Player player : players )
 		{
-			register.put(  player.getId(), new Tuple< LocalDateTime, FieldType >( LocalDateTime.now(), field ) );
+			register.put(  player.getId(), new Tuple< LocalDateTime, GameFieldType >( LocalDateTime.now(), field ) );
 		}
+	}
+	
+	public static synchronized void addValenceArousalEmotionData( int playerID, String sam )
+	{
+		sam = ( sam == null ) ? "" : sam;
+		
+		valArEmoRegister.put( playerID, sam );
 	}
 	
 	/**
@@ -226,7 +235,7 @@ public class RegistrarStatistic
 		return register.keySet();
 	}
 	
-	public static List< Tuple< LocalDateTime, FieldType > > getRegister( int playerID )
+	public static List< Tuple< LocalDateTime, GameFieldType > > getRegister( int playerID )
 	{
 		return register.get( playerID );
 	}
@@ -241,6 +250,11 @@ public class RegistrarStatistic
 		return controllerData.get( playerID );
 	}
 	
+	public static List< String > getValenceArousalEmotionData( int playerID )
+	{
+		return valArEmoRegister.get( playerID );
+	}
+	
 	public static void clearRegister()
 	{
 		startDateTime = null;
@@ -249,5 +263,6 @@ public class RegistrarStatistic
 		controllerSettings.clear();
 		controllerData.clear();
 		sessionScore.clear();
+		valArEmoRegister.clear();
 	}
 }

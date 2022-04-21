@@ -23,9 +23,11 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -36,13 +38,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.KeyStroke;
+import javax.swing.JPanel;
 
 import gui.game.GameWindow;
 import gui.game.component.sprite.ISprite;
@@ -50,7 +51,7 @@ import gui.game.component.sprite.Transition;
 import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import gui.game.screen.menu.MenuGameResults;
-import image.BasicPainter2D;
+import gui.panel.samSurvey.SamSurvey;
 import lslStream.LSL;
 import lslStream.LSLStreamInfo;
 import config.ConfigApp;
@@ -62,14 +63,12 @@ import control.ScreenControl;
 import control.controller.ControllerActionChecker;
 import control.controller.ControllerManager;
 import control.controller.IControllerMetadata;
-import control.controller.IInputController;
-import control.events.IInputControllerListener;
 import exceptions.ConfigParameterException;
 import exceptions.SceneException;
 import general.NumberRange;
 import general.Tuple;
 import statistic.RegistrarStatistic;
-import statistic.RegistrarStatistic.FieldType;
+import statistic.RegistrarStatistic.GameFieldType;
 import stoppableThread.IStoppable;
 import thread.stoppableThread.AbstractStoppableThread;
 
@@ -222,7 +221,7 @@ public class GameManager
 		}
 		
 		RegistrarStatistic.startRegister();
-
+		
 		if( this.currentLevel != null )
 		{
 			if( this.currentLevel.getBackgroundPattern() != null )
@@ -234,11 +233,10 @@ public class GameManager
 		}
 		
 		this.currentLevel = null;
-
+		
 		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
-
+		
 		IControllerMetadata[] controllers = new IControllerMetadata[ players.size() ];
-
 		
 		Image backImg = null;
 		
@@ -325,6 +323,25 @@ public class GameManager
 			}
 			
 			MainAppUI.getInstance().setVisible( false );
+			
+			//
+			//
+			//			
+			ConfigParameter samTest = ConfigApp.getGeneralSetting( ConfigApp.SAM_TEST );
+			
+			boolean showSamTest = true;
+			if( samTest != null && samTest.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
+			{
+				showSamTest = (Boolean)samTest.getSelectedValue();
+			}
+			
+			if( showSamTest )
+			{
+				this.showSamDialog( players );
+			}
+			//
+			//
+			//
 
 			this.gameWindow.setVisible( true );
 
@@ -432,8 +449,8 @@ public class GameManager
 			{
 				loadAnimationThread.stopThread( IStoppable.FORCE_STOP );
 			}
-			
-			RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_START );
+						
+			RegistrarStatistic.addGameData( ConfigApp.getPlayers(), GameFieldType.GAME_START );
 			
 			this.setLevel( this.currentLevel );			
 		}
@@ -466,6 +483,49 @@ public class GameManager
 		}		
 	}
 
+	private void showSamDialog( List< Player > players )
+	{
+		if( players != null )
+		{
+			JDialog samDialog = new JDialog( MainAppUI.getInstance() );
+			samDialog.setVisible( false );
+	
+			samDialog.setDefaultCloseOperation( JDialog.DO_NOTHING_ON_CLOSE );
+			samDialog.setModal( true );
+	
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			GraphicsDevice gd = ge.getDefaultScreenDevice();
+			GraphicsConfiguration gc = gd.getDefaultConfiguration();
+	
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			Insets pads = Toolkit.getDefaultToolkit().getScreenInsets( gc );
+			screenSize.width += -( pads.left + pads.right );
+			screenSize.height += -( pads.top + pads.bottom );
+	
+			samDialog.setLocation( pads.left, pads.top );
+			samDialog.setSize( screenSize );
+			JPanel container = new JPanel( new BorderLayout() );
+			samDialog.setContentPane( container );
+	
+			for( Player p : players )
+			{
+				if( !p.isAnonymous() )
+				{
+					samDialog.setVisible( false );
+		
+					SamSurvey sam = new SamSurvey( p, screenSize, false, samDialog );
+	
+					container.removeAll();
+					container.add( sam, BorderLayout.CENTER );
+	
+					samDialog.setVisible( true );
+				}
+			}
+	
+			samDialog.dispose();
+		}
+	}
+	
 	private AbstractStoppableThread showTransitionScreen( String msg, Image backImg  )
 	{
 		AbstractStoppableThread loadAnimationThread = null;
@@ -687,7 +747,8 @@ public class GameManager
 					MenuGameResults mr = new MenuGameResults( this.gameWindow.getSceneBounds().getSize()
 															, scores
 															, spr
-															, this.hasNextLevel(), true );
+															, this.hasNextLevel()
+															, true );
 					//ScreenControl.getInstance().setScene( mr );
 					
 					this.gameWindow.getGamePanel().add( mr.getMenuFrame(), BorderLayout.CENTER );
@@ -697,13 +758,14 @@ public class GameManager
 			}
 		}		
 		else // if( !nextLevel )
-		{	if( this.currentLevel != null )
+		{	
+			if( this.currentLevel != null )
 			{	
 				this.currentLevel.stopActing( IStoppable.FORCE_STOP );			
 				this.currentLevel = null;
 			}
 		
-			RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.GAME_END );		
+			RegistrarStatistic.addGameData( ConfigApp.getPlayers(), GameFieldType.GAME_END );		
 			
 			ControllerManager.getInstance().stopController();
 			
@@ -717,8 +779,29 @@ public class GameManager
 				transitionThread.startThread();
 			}
 			this.gameWindow.getGamePanel().setVisible( true );			
-			this.gameWindow.setVisible( true );
+
+			//
+			//
+			//
+			this.gameWindow.setVisible( false );
+			ConfigParameter samTest = ConfigApp.getGeneralSetting( ConfigApp.SAM_TEST );
 			
+			boolean showSamTest = true;
+			if( samTest != null && samTest.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
+			{
+				showSamTest = (Boolean)samTest.getSelectedValue();
+			}
+			
+			if( showSamTest )
+			{
+				this.showSamDialog( new ArrayList< Player >( ConfigApp.getPlayers() ) );
+			}
+			//
+			//
+			//
+
+			this.gameWindow.setVisible( true );
+						
 			//
 			try
 			{			

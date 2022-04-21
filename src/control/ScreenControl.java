@@ -18,7 +18,7 @@ import control.scenes.ISceneControl;
 import control.scenes.level.LevelControl;
 import exceptions.SceneException;
 import statistic.RegistrarStatistic;
-import statistic.RegistrarStatistic.FieldType;
+import statistic.RegistrarStatistic.GameFieldType;
 import stoppableThread.AbstractStoppableThread;
 
 public class ScreenControl extends AbstractStoppableThread 
@@ -185,7 +185,7 @@ public class ScreenControl extends AbstractStoppableThread
 			{			
 				if( ev.getType() == control.events.SceneEvent.START)
 				{
-					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.LEVEL_START );
+					RegistrarStatistic.addGameData( ConfigApp.getPlayers(), GameFieldType.LEVEL_START );
 				}		
 				else if( ev.getType() == control.events.SceneEvent.END )
 				{
@@ -197,7 +197,7 @@ public class ScreenControl extends AbstractStoppableThread
 
 					synchronized ( this )
 					{
-						RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.LEVEL_END );
+						RegistrarStatistic.addGameData( ConfigApp.getPlayers(), GameFieldType.LEVEL_END );
 
 						try
 						{
@@ -216,11 +216,11 @@ public class ScreenControl extends AbstractStoppableThread
 				}
 				else if( ev.getType() == control.events.SceneEvent.PAUSE )
 				{
-					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.LEVEL_PAUSE );
+					RegistrarStatistic.addGameData( ConfigApp.getPlayers(), GameFieldType.LEVEL_PAUSE );
 				}
 				else if( ev.getType() == control.events.SceneEvent.RESUME )
 				{
-					RegistrarStatistic.add( ConfigApp.getPlayers(), FieldType.LEVEL_RESUME );
+					RegistrarStatistic.addGameData( ConfigApp.getPlayers(), GameFieldType.LEVEL_RESUME );
 				}
 			}
 		};

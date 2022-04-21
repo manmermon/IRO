@@ -14,21 +14,19 @@ import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 
 import gui.game.component.Frame;
 import gui.game.component.sprite.ISprite;
 import gui.game.component.sprite.Transition;
 import gui.game.component.sprite.Pause;
-import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import gui.game.screen.menu.MenuGameResults;
+import gui.panel.samSurvey.SamSurvey;
 import stoppableThread.IStoppable;
 import thread.stoppableThread.AbstractStoppableThread;
 import config.ConfigApp;
 import config.Player;
 import config.Settings;
-import exceptions.ConfigParameterException;
 import general.Tuple;
 
 import javax.swing.JComboBox;
@@ -37,6 +35,7 @@ import java.awt.FlowLayout;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.plaf.basic.BasicBorders;
 
 public class testGameSprite extends JFrame {
 
@@ -53,7 +52,7 @@ public class testGameSprite extends JFrame {
 	private JLabel lblNum;
 	private JSpinner spinner;
 
-	private enum OPTS { None, MenuGameResults, PauseScreen, LoadingScreen};
+	private enum OPTS { None, MenuGameResults, PauseScreen, LoadingScreen, SamTest};
 	
 	private AbstractStoppableThread animationThread = null;
 	
@@ -189,6 +188,7 @@ public class testGameSprite extends JFrame {
 				}
 				catch ( Exception e) 
 				{
+					e.printStackTrace();
 				}
 				finally 
 				{
@@ -253,8 +253,27 @@ public class testGameSprite extends JFrame {
 				
 				break;
 			}
+			case SamTest:
+			{
+				this.lv = null;
+				
+				Frame fr = new Frame();
+				fr.setLayout( new BorderLayout() );
+				SamSurvey sam = new SamSurvey(  this.frame.getSize(), false );
+				
+				fr.add( sam,BorderLayout.CENTER );
+				this.frame.add( fr, BorderLayout.CENTER );
+				
+				break;
+			}
 			default:
 			{
+				if(lv != null )
+				{
+					lv.stopActing( IStoppable.FORCE_STOP );
+				}
+				
+				lv = null;
 				break;				
 			}
 		}

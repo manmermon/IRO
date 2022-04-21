@@ -368,9 +368,9 @@ public class StatisticGraphic
 					
 					if( pl == player.getId() 
 							&& 
-							( noteEvent.equals( RegistrarStatistic.FieldType.NOTE_ENTER_FRET.name() ) 
+							( noteEvent.equals( RegistrarStatistic.GameFieldType.NOTE_ENTER_FRET.name() ) 
 								|| 
-								noteEvent.equals( RegistrarStatistic.FieldType.CONTROLLER_MAINTAIN_ACTION_LEVEL.name() )
+								noteEvent.equals( RegistrarStatistic.GameFieldType.CONTROLLER_MAINTAIN_ACTION_LEVEL.name() )
 							) 
 						)
 					{

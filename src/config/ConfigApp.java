@@ -71,13 +71,13 @@ import image.BasicPainter2D;
 import image.icon.GeneralAppIcon;
 import statistic.chart.GameSessionStatistic;
 import statistic.RegistrarStatistic;
-import statistic.RegistrarStatistic.FieldType;
+import statistic.RegistrarStatistic.GameFieldType;
 
 public class ConfigApp 
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2022, 4 - 1, 18 );
+	public static final Calendar buildDate = new GregorianCalendar( 2022, 4 - 1, 21 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
@@ -93,7 +93,7 @@ public class ConfigApp
 	public static final String SYSTEM_LIB_LINUX_PATH = "systemLib/linux/";
 	public static final String SYSTEM_LIB_MACOS_PATH = "systemLib/macox/";
 	
-	private static final String DB_FOLDER = "./user/db/";
+	private static final String DB_FOLDER = "./resources/user/db/";
 	private static final String DB_FILENAME = "data.db";
 	private static final String DB_PATH = DB_FOLDER + DB_FILENAME;
 	
@@ -129,6 +129,8 @@ public class ConfigApp
 	public static final String MUTE_SESSION = "MUTE_SESSION";
 	
 	public static final String CONTINUOUS_SESSION = "CONTINUOUS_SESSION"; 
+	
+	public static final String SAM_TEST = "SAM_TEST";
 	
 	
 	///////////
@@ -675,6 +677,7 @@ public class ConfigApp
 		fieldType.put( "controllerNumberOfChannel", Integer.class );
 		fieldType.put( "controllerData", DoubleBuffer.class );
 		fieldType.put( "muteSession", Integer.class );
+		fieldType.put( "valenceArousalEmotion", String.class );
 		tableFields.put( sessionTableName, fieldType );
 		
 		fieldType = new HashMap<String, Class>();
@@ -1372,13 +1375,26 @@ public class ConfigApp
 			
 			for( int playerID : RegistrarStatistic.getPlayerIDs() )
 			{	
-				List< Tuple< LocalDateTime, RegistrarStatistic.FieldType > > register = RegistrarStatistic.getRegister( playerID );
+				List< Tuple< LocalDateTime, RegistrarStatistic.GameFieldType > > register = RegistrarStatistic.getRegister( playerID );
 				
 				if( playerID != Player.ANONYMOUS && !register.isEmpty() )
 				{
 					IControllerMetadata cmeta = RegistrarStatistic.getControllerSetting( playerID );
 					LinkedList< Double[] > cData = RegistrarStatistic.getControllerData( playerID );
-					double score = RegistrarStatistic.getPlayerScore( playerID );
+					double score = RegistrarStatistic.getPlayerScore( playerID );					
+					
+					String valArEmo = "" ;
+					List< String > sam = RegistrarStatistic.getValenceArousalEmotionData( playerID );
+					if( sam != null )
+					{
+						for( String vae : sam )
+						{
+							valArEmo += vae + ",";
+						}
+						
+						valArEmo = valArEmo.substring( 0, valArEmo.length() - 1 );
+					}
+					
 					//TODO					
 					
 					String sql = "INSERT INTO "+ sessionTableName  + " ("  
@@ -1393,7 +1409,9 @@ public class ConfigApp
 									//+ ", controllerMinValueTarget"
 									//+ ", controllerMaxValueTarget"
 									//+ ", controllerTimeTarget"
-									+ ", controllerData) ";
+									+ ", controllerData "
+									+ ", valenceArousalEmotion"
+									+ ")";
 					
 					sql += "VALUES(" + sessionID 
 								+ "," + playerID
@@ -1406,7 +1424,9 @@ public class ConfigApp
 								//+ "," + cmeta.getRecoverInputLevel()
 								//+ "," + cmeta.getActionInputLevel().getMin() 
 								//+ "," + cmeta.getTargetTimeInLevelAction()
-								+ ", ?) ";
+								+ ", ? "
+								+ ", \"" + valArEmo + "\""
+								+ ")" ;
 
 					
 					PreparedStatement pstmt = null;
@@ -1431,10 +1451,10 @@ public class ConfigApp
 
 						sql = "INSERT INTO "+ statisticTableName +  " (idSession,userID,actionID,actionName,time) VALUES ";
 						
-						for( Tuple< LocalDateTime, FieldType > t : register )
+						for( Tuple< LocalDateTime, GameFieldType > t : register )
 						{
 							LocalDateTime time = t.t1;
-							FieldType f = t.t2;
+							GameFieldType f = t.t2;
 
 							zdt = ZonedDateTime.of( time, ZoneId.systemDefault() );							
 							sql += "(" + sessionID 
@@ -1685,6 +1705,7 @@ public class ConfigApp
 						//+ ", controllerMaxValueTarget real NOT NULL"
 						//+ ", controllerTimeTarget real NOT NULL"						
 						+ ", controllerData BLOB"
+						+ ", valenceArousalEmotion text NOT NULL"
 						
 						//+ ", date integer NOT NULL"
 						+ ", PRIMARY KEY (idSession, userID)"

@@ -18,7 +18,7 @@ import control.events.InputActionEvent;
 import control.events.InputActionListerner;
 import general.NumberRange;
 import statistic.RegistrarStatistic;
-import statistic.RegistrarStatistic.FieldType;
+import statistic.RegistrarStatistic.GameFieldType;
 import stoppableThread.IStoppable;
 
 public class ControllerActionChecker extends InputLSLDataReader implements IInputControllerListener, IPossessable 
@@ -144,7 +144,7 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 	{
 		if( !ev.getType().equals( LSLDataEventType.DATA ) )
 		{	
-			RegistrarStatistic.add( this.ownerID, FieldType.ERROR_CONTROLLER_DISCONNECTED );
+			RegistrarStatistic.addGameData( this.ownerID, GameFieldType.ERROR_CONTROLLER_DISCONNECTED );
 			
 			GameManager.getInstance().stopLevel( false );
 			JOptionPane.showMessageDialog( MainAppUI.getInstance(), "Controller error: Player " + this.owner + " disconnected"
@@ -199,7 +199,7 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 					{
 						if( this.statistic == 0 )
 						{
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_ACTION_LEVEL_REACH );
+							RegistrarStatistic.addGameData( this.ownerID, GameFieldType.CONTROLLER_ACTION_LEVEL_REACH );
 							
 							this.statistic++;
 						}
@@ -228,7 +228,7 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 						{	
 							if( this.statistic == 1 )
 							{
-								RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_MAINTAIN_ACTION_LEVEL );
+								RegistrarStatistic.addGameData( this.ownerID, GameFieldType.CONTROLLER_MAINTAIN_ACTION_LEVEL );
 								this.statistic++;
 							}
 		
@@ -257,7 +257,7 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 					{
 						if( this.statistic > 0 )
 						{
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_EXIT_ACTION_LEVEL );
+							RegistrarStatistic.addGameData( this.ownerID, GameFieldType.CONTROLLER_EXIT_ACTION_LEVEL );
 							this.statistic = 0;
 						}
 						
@@ -278,13 +278,13 @@ public class ControllerActionChecker extends InputLSLDataReader implements IInpu
 						{
 							this.updateLevelGoal = true;
 							
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_ENABLE_MOVEMENT );
+							RegistrarStatistic.addGameData( this.ownerID, GameFieldType.CONTROLLER_ENABLE_MOVEMENT );
 							
 							this.recoverLevelReported = true;
 						}
 						else if( !this.recoverLevelReported )
 						{
-							RegistrarStatistic.add( this.ownerID, FieldType.CONTROLLER_RECOVERY_LEVEL_REACH );
+							RegistrarStatistic.addGameData( this.ownerID, GameFieldType.CONTROLLER_RECOVERY_LEVEL_REACH );
 						}				
 					}
 					

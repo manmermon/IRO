@@ -102,6 +102,7 @@ public class MainAppUI extends JFrame
 	
 	private JCheckBox chbMuteSession;
 	private JCheckBox chbContinueSession;
+	private JCheckBox chbSamTest;
 	
 	
 	// Radio Button
@@ -837,6 +838,7 @@ public class MainAppUI extends JFrame
 			this.panelPlay.add( this.getBtnPlay() );
 			this.panelPlay.add( this.getMuteSession() );
 			this.panelPlay.add( this.getContinuousSession() );
+			this.panelPlay.add( this.getSamTest() );
 		}
 		
 		return this.panelPlay;
@@ -973,5 +975,53 @@ public class MainAppUI extends JFrame
 		}
 		
 		return this.chbContinueSession;
+	}
+	
+	private JCheckBox getSamTest()
+	{
+		if( this.chbSamTest == null )
+		{
+			final String ID = ConfigApp.SAM_TEST;
+			
+			this.chbSamTest = new JCheckBox( );
+			
+			final String txt = "SAM test";
+			
+			this.chbSamTest.setText( txt );
+			//TranslateComponents.add( this.chbSamTest, Language.getAllCaptions().get(  Language.CONTINUOUS_SESSION ) );
+			
+			this.chbSamTest.addItemListener( new ItemListener() 
+			{				
+				@Override
+				public void itemStateChanged(ItemEvent arg0) 
+				{
+					ConfigParameter par  = ConfigApp.getGeneralSetting( ID );
+					
+					JCheckBox ch = (JCheckBox)arg0.getSource();
+					
+					try 
+					{
+						if( par == null )
+						{
+							Caption cap = new Caption( ID, Language.defaultLanguage, txt );
+						
+							par = new ConfigParameter( cap, ParameterType.BOOLEAN );
+							
+							ConfigApp.setGeneralSetting( ID, par );
+						}
+					
+						par.setSelectedValue( ch.isSelected() );
+					}
+					catch (IllegalArgumentException | ConfigParameterException e) 
+					{
+						e.printStackTrace();
+					}					
+				}
+			});
+			
+			this.chbSamTest.setSelected( true );
+		}
+		
+		return this.chbSamTest;
 	}
 }
