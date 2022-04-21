@@ -800,6 +800,7 @@ public class GameManager
 			//
 			//
 
+			this.gameWindow.setAlwaysOnTop( false );
 			this.gameWindow.setVisible( true );
 						
 			//
