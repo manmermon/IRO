@@ -92,11 +92,21 @@ public class InputDevicePanel extends JPanel
 	private final Player NON_SELECTED_PLAYER = new Player( Player.ANONYMOUS - 1, " ", null );
 		
 	public static InputDevicePanel getInstance( Window wOwner )
-	{
+	{	
 		owner = wOwner;
 		
 		if( setInDevPanel == null )
-		{
+		{						
+			setInDevPanel = new InputDevicePanel();
+		}
+		
+		return setInDevPanel;
+	}
+	
+	public static InputDevicePanel getInstance( )
+	{	
+		if( setInDevPanel == null )
+		{			
 			setInDevPanel = new InputDevicePanel();
 		}
 		
@@ -126,6 +136,11 @@ public class InputDevicePanel extends JPanel
 		}
 		
 		return this.inputCtrPanel;
+	}
+	
+	public void refreshStreams()
+	{
+		this.getBtRefresh().doClick();
 	}
 	
 	private JButton getBtRefresh()

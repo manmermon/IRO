@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
 
+import gui.MainAppUI;
+import gui.panel.InputDevicePanel;
 import thread.stoppableThread.AbstractStoppableThread;
 
 public class SocketClient extends AbstractStoppableThread 
@@ -81,7 +83,7 @@ public class SocketClient extends AbstractStoppableThread
 				super.wait( this.sleepTime );
 			}
 			else
-			{
+			{				
 				super.wait( this.sleepToCheckConnection );
 				
 				this.checkSocketConnection();
@@ -126,6 +128,8 @@ public class SocketClient extends AbstractStoppableThread
 						else if( ( res & ERROR ) != 0 )
 						{
 							this.state = SEARCH;
+							
+							InputDevicePanel.getInstance().refreshStreams();
 						}
 						
 						break;

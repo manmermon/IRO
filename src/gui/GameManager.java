@@ -279,32 +279,7 @@ public class GameManager
 			}
 		}
 
-		LSLStreamInfo[] streams = LSL.resolve_streams();
-		LSLStreamInfo[] lslInfos = new LSLStreamInfo[ controllers.length ];
-		for( int i = 0; i < controllers.length; i++ )
-		{			
-			IControllerMetadata meta = controllers[ i ];
-
-			checkLSLInfo:
-				for( LSLStreamInfo str : streams )
-				{
-					if( str.uid().equals( meta.getControllerID() ) )
-					{
-						lslInfos[ i ] = str;
-						break checkLSLInfo;
-					}
-				}
-		}
-
-		for( int i = 0; i < lslInfos.length; i++ )
-		{
-			LSLStreamInfo info = lslInfos[ i ];
-
-			if( info == null )
-			{				
-				throw new IOException( "Player " + players.get( i ).getName() + ": controller not found." );
-			}
-		}
+		this.checkController( players, controllers );
 
 		AbstractStoppableThread loadAnimationThread = null;
 		try
@@ -343,6 +318,9 @@ public class GameManager
 			//
 			//
 
+			this.checkController( players, controllers ); 
+			// Por si desconecta durante el test SAM
+			
 			this.gameWindow.setVisible( true );
 
 			List< IControllerMetadata > ctrs = new ArrayList<IControllerMetadata>();
@@ -481,6 +459,36 @@ public class GameManager
 				this.gameWindow.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
 			}
 		}		
+	}
+	
+	private void checkController( List< Player > players, IControllerMetadata[] controllers ) throws IOException
+	{
+		LSLStreamInfo[] streams = LSL.resolve_streams();
+		LSLStreamInfo[] lslInfos = new LSLStreamInfo[ controllers.length ];
+		for( int i = 0; i < controllers.length; i++ )
+		{			
+			IControllerMetadata meta = controllers[ i ];
+
+			checkLSLInfo:
+				for( LSLStreamInfo str : streams )
+				{
+					if( str.uid().equals( meta.getControllerID() ) )
+					{
+						lslInfos[ i ] = str;
+						break checkLSLInfo;
+					}
+				}
+		}
+
+		for( int i = 0; i < lslInfos.length; i++ )
+		{
+			LSLStreamInfo info = lslInfos[ i ];
+
+			if( info == null )
+			{				
+				throw new IOException( "Player " + players.get( i ).getName() + ": controller not found." );
+			}
+		}
 	}
 
 	private void showSamDialog( List< Player > players )
