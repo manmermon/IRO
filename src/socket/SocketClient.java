@@ -5,7 +5,7 @@ import java.net.ConnectException;
 import java.net.Socket;
 
 import gui.MainAppUI;
-import gui.panel.InputDevicePanel;
+import gui.panel.inputDevice.InputDevicePanel;
 import thread.stoppableThread.AbstractStoppableThread;
 
 public class SocketClient extends AbstractStoppableThread 

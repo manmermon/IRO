@@ -44,12 +44,12 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
 import gui.panel.SettingPanel;
+import gui.panel.inputDevice.InputDevicePanel;
 import GUI.tabbedpanel.ClosableTabbedPanel;
 import GUI.tabbedpanel.CollectionEvent;
 import GUI.tabbedpanel.CollectionListener;
 import gui.dialogs.AppSelectPlayer;
 import GUI.menu.MenuScroller;
-import gui.panel.InputDevicePanel;
 import gui.panel.SelectLevelImagePanel;
 import gui.panel.SelectSongPanel;
 import config.ConfigApp;
