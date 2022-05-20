@@ -81,6 +81,8 @@ import music.sheet.MusicSheet;
 import music.sheet.io.IROMusicParserListener;
 import statistic.RegistrarStatistic;
 import stoppableThread.IStoppable;
+import testing.experiments.synMarker.SyncMarker;
+import testing.experiments.synMarker.SyncMarker.Marker;
 import thread.stoppableThread.AbstractStoppableThread;
 import tools.IROFileUtils;
 import tools.MusicSheetTools;
@@ -678,6 +680,11 @@ public class Level extends Scene implements IPausable, IStoppable
 			for( ISprite sp : super.getSprites( Level.PAUSE_ID, false ) )
 			{
 				sp.setVisible( this.pause );
+			}
+			
+			if( pause )
+			{
+				SyncMarker.getInstance(  ConfigApp.shortNameApp ).sendMarker( Marker.PAUSE );
 			}
 		}
 	}

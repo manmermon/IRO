@@ -369,8 +369,7 @@ public class SelectSongPanel extends JPanel
 						catch (Exception ex)
 						{
 							ex.printStackTrace();
-						}
-						 
+						}						 
 					}
 				}
 			});
@@ -752,6 +751,8 @@ public class SelectSongPanel extends JPanel
 									+ " " + sequence.getTracks().length;
 							*/
 							info = midiMusicSheelFile.getName() + "; " + time + "; ";
+							
+							pattern = MusicSheetTools.getPatternFromMidi( midiMusicSheelFile );
 							
 						}
 						catch( Exception ex )

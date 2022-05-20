@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
 
-import gui.MainAppUI;
 import gui.panel.inputDevice.InputDevicePanel;
 import thread.stoppableThread.AbstractStoppableThread;
 
@@ -20,7 +19,8 @@ public class SocketClient extends AbstractStoppableThread
 	public static final short NONE    = 0b0000_0000; // 0
 	
 	//private final String IP = "192.168.0.132";
-	private final String IP = "150.214.141.159";
+	//private final String IP = "150.214.141.159";
+	private final String IP = "192.168.0.22";
 	private final int port = 0xBEBA; // 0xBAC0;
 	
 	private Socket socket;
@@ -60,10 +60,17 @@ public class SocketClient extends AbstractStoppableThread
 	{
 		if( this.socket == null )
 		{
-			this.socket = new Socket( this.IP, this.port );
-			this.socket.setSoTimeout( 5_000 );
+			try
+			{
+				this.socket = new Socket( this.IP, this.port );
+				this.socket.setSoTimeout( 5_000 );
+				
+				this.state = SEARCH;
+			}
+			catch (Exception e) 
+			{
+			}
 			
-			this.state = SEARCH;
 		}
 	}
 	

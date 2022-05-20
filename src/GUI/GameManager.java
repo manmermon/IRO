@@ -70,6 +70,8 @@ import general.Tuple;
 import statistic.RegistrarStatistic;
 import statistic.RegistrarStatistic.GameFieldType;
 import stoppableThread.IStoppable;
+import testing.experiments.synMarker.SyncMarker;
+import testing.experiments.synMarker.SyncMarker.Marker;
 import thread.stoppableThread.AbstractStoppableThread;
 
 public class GameManager 
@@ -298,6 +300,8 @@ public class GameManager
 			}
 			
 			MainAppUI.getInstance().setVisible( false );
+
+			SyncMarker.getInstance( ConfigApp.shortNameApp ).sendMarker( Marker.START_TEST );
 			
 			//
 			//
@@ -305,6 +309,7 @@ public class GameManager
 			ConfigParameter samTest = ConfigApp.getGeneralSetting( ConfigApp.SAM_TEST );
 			
 			boolean showSamTest = true;
+			
 			if( samTest != null && samTest.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
 			{
 				showSamTest = (Boolean)samTest.getSelectedValue();
@@ -379,12 +384,6 @@ public class GameManager
 
 			for( IControllerMetadata cmeta : ctrs )
 			{
-				/*
-				NumberRange rng = new NumberRange( cmeta.getRecoverInputLevel(), cmeta.getActionInputLevel().getMin() );
-				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
-																				, rng, cmeta.getTargetTimeInLevelAction( )
-																				, cmeta.getRepetitions() );
-				//*/
 				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
 																				, cmeta.getRecoverInputLevel()
 																				, cmeta.getActionInputLevel().getMin()
@@ -515,6 +514,8 @@ public class GameManager
 			JPanel container = new JPanel( new BorderLayout() );
 			samDialog.setContentPane( container );
 	
+			SyncMarker.getInstance( ConfigApp.shortNameApp ).sendMarker( Marker.SAM_TEST );
+			
 			for( Player p : players )
 			{
 				if( !p.isAnonymous() )
@@ -639,7 +640,9 @@ public class GameManager
 		}
 		
 		if( this.gameWindow != null )
-		{				
+		{	
+			SyncMarker.getInstance( ConfigApp.shortNameApp ).sendMarker( Marker.START_MUSIC );
+			
 			this.gameWindow.getGamePanel().removeAll(); 
 			this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() );
 			
@@ -666,7 +669,7 @@ public class GameManager
 	public void nextLevel() throws Exception
 	{
 		if( !this.currentLevel.isFinished() && this.gameWindow != null )
-		{			
+		{				
 			ScreenControl.getInstance().stopScene();
 			
 			this.gameWindow.getGamePanel().setVisible( false );
@@ -747,6 +750,8 @@ public class GameManager
 			{
 				if( this.gameWindow != null )
 				{
+					SyncMarker.getInstance( ConfigApp.shortNameApp ).sendMarker( Marker.SCORE_SCREEN );
+					
 					this.gameWindow.getGamePanel().setVisible( false );
 					
 					this.gameWindow.getGamePanel().removeAll();
@@ -766,7 +771,7 @@ public class GameManager
 			}
 		}		
 		else // if( !nextLevel )
-		{	
+		{
 			if( this.currentLevel != null )
 			{	
 				this.currentLevel.stopActing( IStoppable.FORCE_STOP );			
@@ -801,9 +806,12 @@ public class GameManager
 			}
 			
 			if( showSamTest )
-			{
+			{				
 				this.showSamDialog( new ArrayList< Player >( ConfigApp.getPlayers() ) );
 			}
+			
+			SyncMarker.getInstance( ConfigApp.shortNameApp ).sendMarker( Marker.STOP_TEST );
+			
 			//
 			//
 			//

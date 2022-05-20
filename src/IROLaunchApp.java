@@ -41,6 +41,7 @@ import control.RefreshControl;
 import control.ScreenControl;
 import image.icon.GeneralAppIcon;
 import socket.SocketClient;
+import testing.experiments.synMarker.SyncMarker;
 
 public class IROLaunchApp
 {
@@ -130,6 +131,7 @@ public class IROLaunchApp
 
 	private static void createApplication() throws Throwable
 	{
+		SyncMarker.getInstance( ConfigApp.shortNameApp );
 		MainAppUI ui = createAppGUI();		
 		createAppCoreControl( ui );
 	}
