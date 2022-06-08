@@ -1,9 +1,11 @@
 package tools;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Sequence;
 
@@ -182,6 +184,7 @@ public class MusicSheetTools
 	
 	public static long getSongTime( File midiMusicSheelFile ) throws Exception
 	{	
+		/*
 		StaccatoParserListener listener = new StaccatoParserListener();
 		
 		MidiParser parser = new MidiParser();
@@ -194,19 +197,39 @@ public class MusicSheetTools
 		staccatoParser.parse( listener.getPattern() );
 		
 		Sequence sequence = midiParserListener.getSequence();
-			
+		
 		return sequence.getMicrosecondLength(); //micros
+		//*/
+		
+		IROMusicParserListener tool = new IROMusicParserListener();
+		MidiParser parser = new MidiParser();
+		parser.addParserListener( tool );
+		long t = 0;
+		try 
+		{
+			parser.parse( MidiSystem.getSequence( midiMusicSheelFile ) );
+			t = (long)( tool.getSheet().getDuration() * 1_000_000 ); //micros
+		}
+		catch (InvalidMidiDataException | IOException e) 
+		{
+		}
+		
+		return t;
 	}
 	
+	/*
 	public static long getSongTime( Pattern musicPattern ) throws Exception
-	{	
+	{
+		Pattern pt = musicPattern.atomize();
+		
 		Player p = new Player();
 		Sequence sequence = p.getSequence( musicPattern );
 				
 		long t = sequence.getMicrosecondLength();
-				
+		
 		return t; //micros
-	}	
+	}
+	//*/	
 	
 	public static Pattern getPatternFromMidi( File midi ) throws Exception
 	{
@@ -217,12 +240,11 @@ public class MusicSheetTools
 		parser.parse( MidiSystem.getSequence( midi ) );
 		
 		StaccatoParser staccatoParser = new StaccatoParser();
-		MidiParserListener midiParserListener = new MidiParserListener();
-		staccatoParser.addParserListener( midiParserListener );
-		staccatoParser.parse( listener.getPattern() );
+		MidiParserListener midiParserListener = new MidiParserListener();			
+		staccatoParser.addParserListener( midiParserListener );		
+		//staccatoParser.parse( listener.getPattern() );		
+		Pattern pat = listener.getPattern();	
 		
-		Pattern pat = listener.getPattern();
-				
 		return pat;
 	}
 	

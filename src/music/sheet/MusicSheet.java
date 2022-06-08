@@ -2,8 +2,6 @@ package music.sheet;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,20 +12,20 @@ import org.jfugue.theory.Note;
 
 import general.ArrayTreeMap;
 import general.NumberRange;
-import general.Tuple;
 import tools.MusicSheetTools;
 
 public class MusicSheet 
 {
 	private Map< String, IROTrack > tracks;
-	private int tempo;	
 	
+	private int tempo;	
+			
 	public MusicSheet() 
 	{
 		this.tracks = new HashMap< String, IROTrack >();
 	}
 	
-	public IROTrack createNewTrack( String trackID )
+	public IROTrack createNewTrack( String trackID, int voice )
 	{
 		IROTrack track = this.tracks.get( trackID );
 		
@@ -35,7 +33,8 @@ public class MusicSheet
 		{
 			track = new IROTrack( trackID );
 			
-			track.setVoice( this.tracks.size() );
+			//track.setVoice( this.tracks.size() );
+			track.setVoice( voice );
 			track.setTempo( this.tempo );
 			
 			this.tracks.put( trackID, track );
@@ -57,7 +56,7 @@ public class MusicSheet
 		{
 			if( !this.tracks.containsKey( trackID ) )
 			{
-				track = this.createNewTrack( trackID );
+				track = this.createNewTrack( trackID, this.tracks.size() );
 			}
 			
 			suf++;
@@ -148,6 +147,7 @@ public class MusicSheet
 			}			
 		}
 		
+		/*
 		int voice = 0;		
 		for( IROTrack track : this.tracks.values() )
 		{
@@ -156,6 +156,7 @@ public class MusicSheet
 			
 			voice++;
 		}
+		*/
 	}
 
 	public double getDuration()

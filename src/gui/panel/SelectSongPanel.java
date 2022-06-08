@@ -134,13 +134,13 @@ public class SelectSongPanel extends JPanel
 				String[] filePaths = new String[ files.length ];
 				for( int i = 0; i < files.length; i++ )
 				{
-						filePaths[ i ] = files[ i ].getPath();
+						filePaths[ i ] = files[ i ].getName();
 				}
 				
 				Arrays.sort( filePaths, String.CASE_INSENSITIVE_ORDER );
 				
 				for( String file : filePaths )
-				{				
+				{											
 					tm.addRow( new String[] { file } );
 				}						
 				
@@ -641,6 +641,8 @@ public class SelectSongPanel extends JPanel
 			this.tableSongList.setPreferredScrollableViewportSize( this.tableSongList.getPreferredSize() );
 			this.tableSongList.setFillsViewportHeight( true );
 			
+			this.tableSongList.setName( "tableSongList");
+			
 			this.addSelectionListenerTable( this.tableSongList );
 			
 		}
@@ -662,6 +664,8 @@ public class SelectSongPanel extends JPanel
 			this.tableSelectedSongList.setPreferredScrollableViewportSize( this.tableSelectedSongList.getPreferredSize() );
 			this.tableSelectedSongList.setFillsViewportHeight( true );
 			
+			this.tableSelectedSongList.setName( "tableSelectedSongList");
+			
 			this.addSelectionListenerTable( this.tableSelectedSongList );
 			
 			this.tableSelectedSongList.getModel().addTableModelListener( new TableModelListener()
@@ -675,7 +679,7 @@ public class SelectSongPanel extends JPanel
 					
 					for( int  i = 0; i < tm.getRowCount(); i++ )
 					{
-						songs += tm.getValueAt( i, 0 ).toString() + ConfigApp.SONG_LIST_SEPARATOR; 
+						songs += ConfigApp.SONG_FILE_PATH + tm.getValueAt( i, 0 ).toString() + ConfigApp.SONG_LIST_SEPARATOR; 
 					}
 					
 					Player player = ConfigApp.getFirstPlayer();					
@@ -707,16 +711,12 @@ public class SelectSongPanel extends JPanel
 		return this.tableSelectedSongList;
 	}
 	
+	//*
 	private long getSongTime( File midiMusicSheelFile ) throws Exception
-	{	
-		/*
-		this.pattern = MusicSheetTools.getPatternFromMidi( midiMusicSheelFile );
-			
-		return MusicSheetTools.getSongTime( this.pattern ); //micros
-		//*/
-		
+	{			
 		return MusicSheetTools.getSongTime( midiMusicSheelFile );
 	}
+	//*/
 	
 	private void addSelectionListenerTable( final JTable table)
 	{
@@ -734,16 +734,20 @@ public class SelectSongPanel extends JPanel
 						getPlayStopSongButton().doClick();
 					}
 					
-					if( sel >= 0 )
+					if( sel >= 0 && arg0.getValueIsAdjusting() )
 					{
 						String info = "";
 						try
 						{
-							String song = table.getValueAt( sel, 0 ).toString();
+							String song = ConfigApp.SONG_FILE_PATH + table.getValueAt( sel, 0 ).toString();
 							
 							File midiMusicSheelFile = new File( song );
 							
-							long millis = getSongTime( midiMusicSheelFile );
+							pattern = MusicSheetTools.getPatternFromMidi( midiMusicSheelFile );
+							
+							//long millis = MusicSheetTools.getSongTime( pattern );
+							long millis = MusicSheetTools.getSongTime( midiMusicSheelFile );
+							
 							String time = time2Text( millis );
 						
 							/*
@@ -751,8 +755,6 @@ public class SelectSongPanel extends JPanel
 									+ " " + sequence.getTracks().length;
 							*/
 							info = midiMusicSheelFile.getName() + "; " + time + "; ";
-							
-							pattern = MusicSheetTools.getPatternFromMidi( midiMusicSheelFile );
 							
 						}
 						catch( Exception ex )
@@ -873,12 +875,9 @@ public class SelectSongPanel extends JPanel
 				public void actionPerformed(ActionEvent arg0)
 				{
 					JTable tSelectedSong = getSelectedSongTable();
-					//JTable tSongList = gettableSongList();
+					
 					DefaultTableModel tSongList = (DefaultTableModel)gettableSongList().getModel();
-					
-					
-					//moveSong( tSelectedSong, tSongList, true );
-					
+										
 					if( tSelectedSong.getRowCount() > 0 )
 					{
 						int[] rows = tSelectedSong.getSelectedRows();
@@ -890,7 +889,7 @@ public class SelectSongPanel extends JPanel
 						
 						for( int i = rows.length - 1; i >= 0; i-- )
 						{
-							String song = tm.getValueAt( rows[ i ], 0 ).toString() ;
+							String song = ConfigApp.SONG_FILE_PATH + tm.getValueAt( rows[ i ], 0 ).toString() ;
 							
 							try
 							{	
@@ -943,8 +942,6 @@ public class SelectSongPanel extends JPanel
 								}								
 							}
 							
-							updateSessionTime();
-							
 							InfoDialog dg = new InfoDialog( GameManager.getInstance().getCurrentWindow()
 															, Language.getLocalCaption( Language.FILE_ERROR ), true );
 							Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
@@ -954,6 +951,8 @@ public class SelectSongPanel extends JPanel
 							dg.setVisible( true );
 							 
 						}
+						
+						updateSessionTime();
 					}
 				}
 			});
@@ -1085,7 +1084,7 @@ public class SelectSongPanel extends JPanel
 			
 				try 
 				{
-					this.sessionTime += this.getSongTime( new File( song ) );
+					this.sessionTime += this.getSongTime( new File( ConfigApp.SONG_FILE_PATH +  song ) );
 					
 					tmDest.addRow( new String[] { song } );
 				} 

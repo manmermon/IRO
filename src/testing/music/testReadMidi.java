@@ -1,6 +1,8 @@
 package testing.music;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -18,11 +20,13 @@ import javax.sound.midi.Track;
 
 import org.jfugue.midi.MidiParser;
 import org.jfugue.midi.MidiParserListener;
+import org.jfugue.pattern.Pattern;
 import org.jfugue.player.Player;
 import org.jfugue.theory.Note;
 import org.staccato.StaccatoParser;
 import org.staccato.StaccatoParserListener;
 
+import config.ConfigApp;
 import general.ArrayTreeMap;
 
 public class testReadMidi 
@@ -33,7 +37,7 @@ public class testReadMidi
 
 	public static void main(String[] args) throws Exception 
 	{
-		String path = "./sheets/zelda.mid";
+		String path = ConfigApp.SONG_FILE_PATH + "Bonnie_Tyler_-_Holding_Out_for_a_Hero.mid";
 		//String path = "G:\\Sync_datos\\WorkSpace\\GitHub\\IRO\\IRO\\src\\sheets\\tes7.mid";
 		File midiMusicSheelFile = new File( path );
 
@@ -45,7 +49,29 @@ public class testReadMidi
 		parser.addParserListener( listener );
 		parser.parse( MidiSystem.getSequence( midiMusicSheelFile ) );        
 
-		System.out.println("testReadMidi.main() " + listener.getPattern() );
+		Pattern patt = listener.getPattern();
+		String spat = patt.toString();
+		
+		System.out.println("testReadMidi.main() " + spat.split( "V\\d+").length);
+		
+		
+		BufferedWriter bf =  new BufferedWriter( new FileWriter( path + ".txt" ) );
+		bf.write( spat );
+		bf.close();
+		
+		int step = 150;
+		int b = step;
+		
+		while( b < patt.toString().length() )
+		{
+			System.out.println("" + patt.toString().substring( b-step, b ) );
+			b += step;
+		}
+		if( b < patt.toString().length() )
+		{
+			System.out.println("" + patt.toString().substring( b ) );
+		}
+		
 		
 		StaccatoParser staccatoParser = new StaccatoParser();
 		MidiParserListener midiParserListener = new MidiParserListener();
@@ -62,7 +88,7 @@ public class testReadMidi
 								TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(millis)));
 		
 		
-		System.out.println("testReadMidi.main() " + listener.getPattern() );
+		//System.out.println("testReadMidi.main() " + listener.getPattern() );
 		System.out.println("testReadMidi.main() " + time );
 		
 		

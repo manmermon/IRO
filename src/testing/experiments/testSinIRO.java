@@ -1,12 +1,7 @@
 package testing.experiments;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.EventQueue;
-
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiUnavailableException;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -20,11 +15,8 @@ import config.Player;
 import config.Settings;
 import control.events.BackgroundMusicEvent;
 import control.events.BackgroundMusicEventListener;
-import control.music.MusicPlayerControl;
-import exceptions.ConfigParameterException;
 import gui.game.screen.level.music.BackgroundMusic;
 import gui.panel.SelectSongPanel;
-import image.BasicPainter2D;
 import testing.experiments.synMarker.SyncMarker;
 import testing.experiments.synMarker.SyncMarker.Marker;
 import tools.MusicSheetTools;
@@ -126,8 +118,6 @@ public class testSinIRO extends JFrame {
 				}
 			}
 		});
-		
-		
 		
 		this.panel.add(this.spinner, BorderLayout.CENTER);
 		

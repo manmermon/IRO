@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.jfugue.midi.MidiDefaults;
 import org.jfugue.midi.MidiDictionary;
@@ -36,7 +37,9 @@ public class IROTrack
 	
 	private byte maxVolumeNote = 0;
 	
-	//public double initTrackSheetTime = 0D; 
+	//public double initTrackSheetTime = 0D;
+	
+	private TreeMap< Double, String > effects;
 	
 	public IROTrack( ) 
 	{
@@ -51,6 +54,7 @@ public class IROTrack
 		
 		this.notes = new ArrayTreeMap< Double, Note >();
 		
+		this.effects = new TreeMap< Double, String >();		
 	}
 	
 	public boolean isRestTrack()
@@ -275,22 +279,27 @@ public class IROTrack
 		
 		if( !this.notes.isEmpty() )
 		{
+			double tw = MusicSheetTools.getWholeTempo2Second( this.tempo );
 			double tq = MusicSheetTools.getQuarterTempo2Second( this.tempo );
 			
 			List< Double > ts = new ArrayList< Double >( this.notes.keySet() );
 			Collections.sort( ts );
-			Double startTime = ts.get( 0 ) * 4 * tq;
+			
+			Double startTime = ts.get( 0 ); // * 4 * tq;
 			Double endTime = ts.get( ts.size() - 1 );
 			
 			List< Note > Notes = this.notes.get( endTime );
 			
-			double finTime = endTime * tq * 4;
+			double finTime = endTime * tw;
 			endTime = finTime;
+			
 			for( Note note : Notes )
 			{
-				double noteDuration = note.getDuration() * 4; // To do quarter duration equal to 1
-				noteDuration *= ( 60.0D / this.tempo ); 
+				//double noteDuration = note.getDuration() * 4; // To do quarter duration equal to 1
+				double noteDuration = note.getDuration(); // To do quarter duration equal to 1
+				noteDuration *=  tw ; //( 60.0D / this.tempo ); 
 				finTime = ( finTime >= endTime + noteDuration ) ? ( finTime ) : ( endTime + noteDuration );
+				
 			}
 			
 			d = finTime - startTime;
@@ -383,6 +392,23 @@ public class IROTrack
 		return this.initTrackSheetTime;
 	}
 	//*/
+	
+	public void addEffect( double t, String effect )
+	{
+		if( effect != null && !effect.isEmpty() )
+		{
+			String ef = this.effects.get( t );
+			
+			if( ef == null )
+			{
+				ef = "";
+			}
+			
+			ef += " " + effect;
+			
+			this.effects.put( t, effect );
+		}
+	}
 	
 	public Pattern getPatternTrackSheet()
 	{	

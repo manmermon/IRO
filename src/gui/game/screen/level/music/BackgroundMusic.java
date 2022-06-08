@@ -67,7 +67,8 @@ public class BackgroundMusic extends AbstractStoppableThread
 	{
 		this.pattern = pattern;
 		this.player.load( pattern );
-		this.tempo =  MusicSheetTools.getTempo( pattern.toString() ) ;
+		
+		this.tempo =  MusicSheetTools.getTempo( pattern.toString() ) ;	
 	}
 		
 	public Pattern getPattern() 
