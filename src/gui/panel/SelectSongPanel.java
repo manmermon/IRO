@@ -213,7 +213,7 @@ public class SelectSongPanel extends JPanel
 							File fs = new File( s );
 							for( int i = 0; i < t.getRowCount(); i++ )
 							{
-								String tVal = t.getValueAt( i, 0 ).toString();
+								String tVal = ConfigApp.SONG_FILE_PATH + t.getValueAt( i, 0 ).toString();
 								File fv = new File( tVal );
 								if( fv.getAbsolutePath().equals( fs.getAbsolutePath() ) )
 								{
