@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.concurrent.CyclicBarrier;
 
 import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequence;
+import javax.sound.midi.Synthesizer;
 import javax.swing.event.EventListenerList;
 
 import org.jfugue.pattern.Pattern;
 import org.jfugue.player.ManagedPlayerListener;
+import org.jfugue.player.SynthesizerManager;
 
 import gui.game.screen.IPausable;
 import control.events.BackgroundMusicEvent;
@@ -88,6 +91,23 @@ public class BackgroundMusic extends AbstractStoppableThread
 	{
 		return this.mute;
 	}
+	
+	/*
+	public void setVolume( double gain )
+	{
+		gain = gain < 0 ? 0 : ( gain > 1 ? 1 : gain );
+		
+		if( this.player != null )
+		{
+			Synthesizer syn = ((Synthesizer) this.player.getSequence( this.pattern ));
+			
+			for( MidiChannel cs : syn.getChannels() )
+			{
+				cs.controlChange( 7, (int)( gain * 127.0 ) );
+			}			
+		}
+	}
+	*/
 	
 	public void setDelay( double delay ) 
 	{

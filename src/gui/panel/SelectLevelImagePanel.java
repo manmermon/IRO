@@ -109,8 +109,14 @@ public class SelectLevelImagePanel extends JPanel
 			this.contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 			this.contentPane.setLayout( new GridLayout( 1, 2 ) );
 			
-			this.contentPane.add( new JScrollPane( this.getImagePanel() )); //this.getImageTreePanel() ) );
-			this.contentPane.add( new JScrollPane( this.getPreviewScene() ) );
+			JScrollPane scroll1 = new JScrollPane( this.getImagePanel() );
+			JScrollPane scroll2 = new JScrollPane( this.getPreviewScene() );
+			
+			scroll1.getVerticalScrollBar().setUnitIncrement( 5 );
+			scroll2.getVerticalScrollBar().setUnitIncrement( 5 );
+					
+			this.contentPane.add( scroll1 ); //this.getImageTreePanel() ) );
+			this.contentPane.add( scroll2 );
 		}
 		
 		return this.contentPane;

@@ -88,7 +88,7 @@ public class testSinIRO extends JFrame {
 		this.panel.add(this.lblBeep, BorderLayout.WEST );
 		
 		
-		this.spinner.setModel(new SpinnerNumberModel(new Double(1), new Double(0.1), null, new Double(0.5)));
+		this.spinner.setModel(new SpinnerNumberModel(new Double(1), 0D, null, new Double(0.5)));
 				
 		this.spinner.addMouseWheelListener( new MouseWheelListener() 
 		{				
@@ -184,6 +184,81 @@ public class testSinIRO extends JFrame {
 													}
 												});
 												
+												/*
+												Pattern pt = new Pattern();
+												short step = 20;
+												for( Token tk :  pattern.getTokens() )
+												{													
+													if( Note.isValidNote( tk.toString() ) )
+													{	
+														Note n;
+														try
+														{
+															n = new Note( tk.toString() );
+																												
+															short vol = n.getOnVelocity();
+															vol -= step;
+															
+															if( vol < 0)
+															{
+																vol = 10;
+															}
+															
+															n.setOnVelocity( (byte)vol );
+															
+															pt.add( n );
+														}
+														catch (Exception e) 
+														{
+															String t = tk.toString();
+															
+															int lastA = t.toLowerCase().lastIndexOf( "a" );
+															int lastD = t.toLowerCase().lastIndexOf( "d" );
+															
+															if( lastA < 0 )
+															{
+																t += "a" + ( step > 64 ? 64 - step : 10 );
+															}
+															else
+															{
+																int end = lastD < 0 ? t.length() : lastD;
+																							
+																String vol = t.substring( lastA + 1, end );
+																
+																try
+																{
+																	int v = 0;
+																	v = Integer.parseInt( vol ) - step;
+
+																	if( v < 0 )
+																	{
+																		v = 10;
+																	}
+																	
+																	String t1 = t.substring( 0, lastA );
+																	String t2 = t.substring( lastD );
+																	t = t1 + "a" + v + t2;
+																}
+																catch (Exception ex2) 
+																{
+																	t += "a" + ( step > 64 ? 64 - step : 10 );
+																}
+																 
+																
+																pt.add( t );
+															}
+														}
+														
+													}
+													else
+													{							
+														pt.add( tk.toString() );
+													}
+												}
+												
+												pattern = pt;
+												//*/
+												
 												bgm.setPattern( pattern );
 												bgm.startActing();
 												
@@ -196,6 +271,7 @@ public class testSinIRO extends JFrame {
 											}
 											catch ( Exception ex1)
 											{
+												ex1.printStackTrace();
 												if( bgm != null )
 												{
 													bgm.stopActing( BackgroundMusic.FORCE_STOP );
@@ -215,69 +291,81 @@ public class testSinIRO extends JFrame {
 					
 					try 
 					{
-						beepThr = new Thread()
+						final long waitTime = (long)( 1000 * Double.parseDouble( spinner.getValue().toString() ) );
+						
+						if( waitTime > 0 )
 						{
-							boolean stop = false;
-							
-							public void run() 
-							{	
-								long waitTime = (long)( 1000 * Double.parseDouble( spinner.getValue().toString() ) ); 
-								SelectionBeep beep = null;
+							beepThr = new Thread()
+							{
+								boolean stop = false;
 								
-								try 
-								{
-									beep = new SelectionBeep();
+								public void run() 
+								{	
+									 
+									SelectionBeep beep = null;
 									
-									beep.startThread();
-								} 
-								catch ( Exception e1) 
-								{
-									e1.printStackTrace();
-									
-									stop = true;
-								}
-								
-								long delay = 0;
-								
-								while( !stop )
-								{
-									try
+									try 
 									{
-										synchronized( this )
-										{											
-											if( delay > 0 )
-											{
-												delay = ( System.currentTimeMillis() - delay );
-											}
-											
-											if( delay < waitTime )
-											{
-												this.wait( waitTime - delay );
-											}
-										}
-
-										delay = System.currentTimeMillis();
+										beep = new SelectionBeep();
 										
-										beep.play();
-									}
-									catch ( InterruptedException e) 
+										beep.startThread();
+									} 
+									catch ( Exception e1) 
 									{
-										if( beep != null )
-										{
-											beep.stopThread( SelectionBeep.FORCE_STOP );
-											beep = null;
-										}
+										e1.printStackTrace();
 										
 										stop = true;
 									}
-								}
+									
+									long delay = 0;
+									
+									while( !stop )
+									{
+										try
+										{
+											synchronized( this )
+											{											
+												if( delay > 0 )
+												{
+													delay = ( System.currentTimeMillis() - delay );
+												}
+												
+												if( delay < waitTime )
+												{
+													this.wait( waitTime - delay );
+												}
+											}
+	
+											delay = System.currentTimeMillis();
+											
+											beep.play();
+										}
+										catch ( InterruptedException e) 
+										{
+											if( beep != null )
+											{
+												beep.stopThread( SelectionBeep.FORCE_STOP );
+												beep = null;
+											}
+											
+											stop = true;
+										}
+									}
+								};
 							};
-						};
+						}
 						
 						SyncMarker.getInstance( "No"+ConfigApp.shortNameApp ).sendMarker( Marker.START_TEST );
 						
-						playerThr.start();
-						beepThr.start();
+						if( playerThr != null )
+						{
+							playerThr.start();
+						}
+						
+						if( beepThr != null )
+						{
+							beepThr.start();
+						}
 						
 					} 
 					catch ( Exception e1) 

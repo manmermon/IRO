@@ -40,6 +40,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
@@ -142,6 +143,7 @@ public class MainAppUI extends JFrame
 		super.setBounds(100, 100, 450, 300);
 		
 		super.setJMenuBar( this.getGameMenuBar() );
+		
 		super.setContentPane( this.getMainPanel() );
 				
 		for( Player player : ConfigApp.getPlayers() )
@@ -253,7 +255,10 @@ public class MainAppUI extends JFrame
 		{
 			this.splitPanelMain = new JSplitPane();
 			
-			this.splitPanelMain.setLeftComponent( this.getSettingPanel() );
+			JScrollPane scroll = new JScrollPane( this.getSettingPanel() );
+			scroll.getVerticalScrollBar().setUnitIncrement( 10 );
+			
+			this.splitPanelMain.setLeftComponent( scroll );
 			this.splitPanelMain.setRightComponent( InputDevicePanel.getInstance( this ) );
 			
 			this.splitPanelMain.setResizeWeight( 0.5 );
@@ -270,9 +275,20 @@ public class MainAppUI extends JFrame
 			this.panelSettings = new JPanel( new BorderLayout() );
 			
 			this.panelSettings.add( this.getPanelMenu(), BorderLayout.NORTH );
-			//this.contentPane.add( this.getSettingPanel(), BorderLayout.CENTER );			
-			this.panelSettings.add( this.getSettingFieldPanel().getTabbedPane(), BorderLayout.CENTER );
-			this.panelSettings.add( this.getSongPanel(), BorderLayout.SOUTH );
+			//this.contentPane.add( this.getSettingPanel(), BorderLayout.CENTER );
+			
+			JScrollPane scroll = new JScrollPane( this.getSettingFieldPanel().getTabbedPane() );
+			scroll.getVerticalScrollBar().setUnitIncrement( 10 );
+			
+			JSplitPane splitPanel = new JSplitPane( JSplitPane.VERTICAL_SPLIT );			
+			
+			splitPanel.setLeftComponent( scroll );
+			splitPanel.setRightComponent( this.getSongPanel() );
+			
+			//splitPanel.setResizeWeight( 0.5 );
+			//splitPanel.setOneTouchExpandable( true );
+			
+			this.panelSettings.add( splitPanel, BorderLayout.CENTER );
 		}
 		
 		return this.panelSettings;

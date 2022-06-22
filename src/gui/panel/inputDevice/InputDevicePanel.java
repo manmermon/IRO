@@ -211,7 +211,11 @@ public class InputDevicePanel extends JPanel
 			splitInputPane.setResizeWeight( 0.25 );
 						
 			splitInputPane.setLeftComponent( this.getControllerBiosignalPanel() );
-			splitInputPane.setRightComponent( new JScrollPane( this.getPanelInputValues() ) );
+			
+			JScrollPane scroll = new JScrollPane( this.getPanelInputValues() );
+			scroll.getVerticalScrollBar().setUnitIncrement( 10 );
+			
+			splitInputPane.setRightComponent( scroll );
 		}
 		return splitInputPane;
 	}
@@ -224,8 +228,15 @@ public class InputDevicePanel extends JPanel
 			BoxLayout ly = new BoxLayout( this.panelControllerBiosignal, BoxLayout.X_AXIS );
 			this.panelControllerBiosignal.setLayout( ly );
 			
-			this.panelControllerBiosignal.add( new JScrollPane( this.getPanelInputControllerDeviceList() ) );
-			this.panelControllerBiosignal.add( new JScrollPane( this.getPanelInputBiosignalDeviceList() ) );
+			
+			JScrollPane scroll1 = new JScrollPane( this.getPanelInputControllerDeviceList() );
+			JScrollPane scroll2 = new JScrollPane( this.getPanelInputBiosignalDeviceList() );
+			
+			scroll1.getVerticalScrollBar().setUnitIncrement( 5 );
+			scroll2.getVerticalScrollBar().setUnitIncrement( 5 );
+			
+			this.panelControllerBiosignal.add( scroll1 );
+			this.panelControllerBiosignal.add( scroll2 );
 		}
 		
 		return this.panelControllerBiosignal;

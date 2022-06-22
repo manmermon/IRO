@@ -3,18 +3,23 @@
  */
 package testing.experiments;
 
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.sound.midi.MidiUnavailableException;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineEvent;
 import javax.sound.sampled.LineListener;
 import javax.sound.sampled.LineUnavailableException;
+
+import org.jfugue.realtime.RealtimePlayer;
 
 import general.ConvertTo;
 
@@ -41,6 +46,8 @@ public class SelectionBeep extends AbstractStoppableThread
 	
 	private AtomicBoolean waitLock = new AtomicBoolean( true );
 	
+	private RealtimePlayer rplayer;
+	
 	
 	public SelectionBeep() throws LineUnavailableException, IOException 
 	{
@@ -62,6 +69,7 @@ public class SelectionBeep extends AbstractStoppableThread
 				}
 			});
 			
+	        			
 			this.lines.add( line );
 		}
 		
@@ -71,6 +79,15 @@ public class SelectionBeep extends AbstractStoppableThread
 		super.setDaemon( true );
 		
 		super.setName( this.getClass().getSimpleName() );
+		
+		try
+		{
+			this.rplayer = new RealtimePlayer();
+			this.rplayer = null;
+		}
+		catch (MidiUnavailableException e) 
+		{
+		}
 	}
 
 	private List< Byte[] > createToneBuffer( int hz, int msecs, double vol )
@@ -84,7 +101,7 @@ public class SelectionBeep extends AbstractStoppableThread
 			for( int i = 0; i < beep.length; i++ )			  
 			{
 				double angle = i / (SAMPLE_RATE / hz) * 2.0 * Math.PI;
-				beep[ i ] = (byte)(Math.sin(angle) * 80.0 * vol);
+				beep[ i ] = (byte)(Math.sin(angle) * Byte.MAX_VALUE * vol);
 			}
 			
 			beeps.add( beep );
@@ -140,20 +157,29 @@ public class SelectionBeep extends AbstractStoppableThread
         {
         }
 	
-		for( int i = 0; i < 2; i++ )
+		if( this.rplayer == null )
 		{
-			if( this.itLines.hasNext() )
+			for( int i = 0; i < 2; i++ )
 			{
-				Clip line = this.itLines.next();
-								
-				line.start();
-				line.drain();
-				Thread.sleep( 50L );
+				if( this.itLines.hasNext() )
+				{
+					Clip line = this.itLines.next();
+					FloatControl gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);	        
+			        gainControl.setValue(  gainControl.getMaximum()  );	 				
+					
+					line.start();
+					line.drain();
+					Thread.sleep( 50L );
+				}
+				else if( !this.itLines.hasNext() )
+				{
+					this.itLines = this.lines.iterator();
+				}
 			}
-			else if( !this.itLines.hasNext() )
-			{
-				this.itLines = this.lines.iterator();
-			}
+		}
+		else
+		{
+			this.rplayer.play( "A5/0.05");
 		}
 	}
 
@@ -176,6 +202,11 @@ public class SelectionBeep extends AbstractStoppableThread
 			line.drain();
 			line.stop();
 			line.close();
+		}
+		
+		if( this.rplayer != null )
+		{
+			this.rplayer.close();
 		}
 		
 		super.cleanUp();		

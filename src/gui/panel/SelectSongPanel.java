@@ -406,6 +406,7 @@ public class SelectSongPanel extends JPanel
 			JScrollPane scroll = new JScrollPane( panel );
 			scroll.setBorder( BorderFactory.createTitledBorder( Language.getLocalCaption( Language.MUSIC_LIST ) ) );
 			scroll.setBackground( Color.WHITE );
+			scroll.getVerticalScrollBar().setUnitIncrement( 5 );
 			
 			TranslateComponents.add( scroll, Language.getAllCaptions().get( Language.MUSIC_LIST ) );
 			
@@ -422,7 +423,10 @@ public class SelectSongPanel extends JPanel
 		{
 			this.panelSelectControl = new JPanel( new BorderLayout() );
 			
-			this.panelSelectControl.add( new JScrollPane( this.getSelectedSongs() ), BorderLayout.CENTER );
+			JScrollPane scroll = new JScrollPane( this.getSelectedSongs() );
+			scroll.getVerticalScrollBar().setUnitIncrement( 5 );
+			
+			this.panelSelectControl.add( scroll, BorderLayout.CENTER );
 			this.panelSelectControl.add( this.getJPanelUpDownCtrl(), BorderLayout.EAST );
 		}
 		
