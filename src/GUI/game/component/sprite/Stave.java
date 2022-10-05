@@ -28,19 +28,31 @@ import image.BasicPainter2D;
 
 public class Stave extends AbstractSprite
 {
-	private int numLines = 7; 
+	public static final int NUMBER_OF_WAYS = 7; 
 	private int wayHeight;
 	
 	private BufferedImage stave = null;
 	
+	private Color[] wayColors = new Color[] { Color.BLACK };
+	
 	public Stave( Dimension panelSize, String id ) 
+	{		
+		this( panelSize, id, null );
+	}
+	
+	public Stave( Dimension panelSize, String id, Color[] wayColours ) 
 	{
 		super( id );
 		
 		super.spriteSize.width = panelSize.width;
 		super.spriteSize.height = panelSize.height;
 		
-		this.wayHeight = this.spriteSize.height / this.numLines;
+		this.wayHeight = this.spriteSize.height / NUMBER_OF_WAYS;
+		
+		if( wayColours != null && wayColours.length > 0 )
+		{
+			this.wayColors = wayColours;
+		}
 		
 		this.createStaveImg();
 	}
@@ -57,7 +69,7 @@ public class Stave extends AbstractSprite
 	
 	public int getRailHeight()
 	{
-		return this.spriteSize.height / this.numLines;
+		return this.spriteSize.height / NUMBER_OF_WAYS;
 	}
 	
 	private void createStaveImg()
@@ -71,10 +83,12 @@ public class Stave extends AbstractSprite
 		
 		this.stave = (BufferedImage)BasicPainter2D.createEmptyCanva( this.spriteSize.width, this.spriteSize.height, null );
 		
-		for( int i = 0; i < this.numLines; i++ )
-		{
+		for( int i = 0; i < NUMBER_OF_WAYS; i++ )
+		{			
+			Color color = this.wayColors[ i % this.wayColors.length ]; 
+			
 			BasicPainter2D.line( 0, i * this.wayHeight + railLoc - railThinck / 2
-												, this.spriteSize.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, Color.BLACK, this.stave );
+												, this.spriteSize.width, i * this.wayHeight + railLoc - railThinck / 2, railThinck, color, this.stave );
 		}
 	}
 	

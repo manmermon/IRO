@@ -184,7 +184,7 @@ public class SelectLevelImagePanel extends JPanel
 				set.setPlayer( new Player() );
 				List< Settings > ls = new ArrayList< Settings >();
 				ls.add( set );				
-				lv = new Level( new Rectangle( new Point(), size), ls, null );
+				lv = new Level( new Rectangle( new Point(), size), ls, null, 0 );
 				lv.stopActing( IStoppable.FORCE_STOP );
 			}
 			catch (Exception e) 
@@ -250,6 +250,16 @@ public class SelectLevelImagePanel extends JPanel
 				loc.x = lv.getSize().width / 2;
 				loc.y = 0;
 				fret.setScreenLocation( loc );
+				
+				float bg = 0;
+				if( back != null )
+				{
+					bg = back.getAverageBrightness();
+				}
+				//System.out.println("SelectLevelImagePanel.setPreviewScene() " + bg);
+				fret.setFretBrightness( bg );
+				
+				
 				lv.addFret( fret );
 								
 				BufferedImage noteImg = null;				

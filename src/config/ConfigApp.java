@@ -177,6 +177,9 @@ public class ConfigApp
 	
 	public static final String MOV_REPETITIONS = "repetitions";
 	
+	public static final String SESSION_TIME = "sessionTime";
+	
+	
 	///////////
 	
 	private static boolean test = true;
@@ -398,6 +401,9 @@ public class ConfigApp
 		par = loadDefaultRepetitions();
 		cfg.setParameter( par.get_ID().getID(), par );
 		
+		//par = loadDefaultSessionTime();
+		//cfg.setParameter( par.get_ID().getID(), par );
+		
 		return cfg;
 	}
 	
@@ -436,7 +442,7 @@ public class ConfigApp
 		par.addAllOptions( Langs );
 		
 		par.setSelectedValue( Language.getCurrentLanguage() );
-		par.setPriority( 0 );
+		par.setPriority( Integer.MAX_VALUE );
 		
 		listGeneralConfig.put( LANGUAGE, par );
 	}
@@ -446,7 +452,7 @@ public class ConfigApp
 		Caption id = getCaptions( Language.BACKGROUND );
 		id.setID( BACKGROUND_IMAGE );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
-		par.setPriority(  Integer.MAX_VALUE );
+		par.setPriority(  Integer.MIN_VALUE );
 		
 		return par;
 	}
@@ -456,7 +462,7 @@ public class ConfigApp
 		Caption id = getCaptions( Language.NOTE );
 		id.setID( NOTE_IMAGE );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
-		par.setPriority(  Integer.MAX_VALUE );
+		par.setPriority(  Integer.MIN_VALUE );
 
 		return par;		
 	}
@@ -466,7 +472,7 @@ public class ConfigApp
 		Caption id = getCaptions( Language.CONTROLLER );
 		id.setID( SELECTED_CONTROLLER );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.OTHER );
-		par.setPriority(  Integer.MAX_VALUE );
+		par.setPriority(  Integer.MIN_VALUE );
 
 		return par; 
 	}
@@ -476,7 +482,7 @@ public class ConfigApp
 		Caption id = getCaptions( Language.BIOSIGNAL );
 		id.setID( SELECTED_BIOSIGNAL );
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.STRING );
-		par.setPriority(  Integer.MAX_VALUE );
+		par.setPriority(  Integer.MIN_VALUE );
 
 		return par; 
 	}
@@ -488,7 +494,7 @@ public class ConfigApp
 		NumberRange rng = new NumberRange( 0.5, Double.MAX_VALUE );
 		ConfigParameter par = new ConfigParameter( id, rng );
 		par.setSelectedValue( 2D );
-		par.setPriority( 2 );
+		par.setPriority( 9 );
 		
 		return par;
 	}
@@ -513,7 +519,7 @@ public class ConfigApp
 		NumberRange rng = new NumberRange( minVal, Double.MAX_VALUE );
 		ConfigParameter par = new ConfigParameter( id, rng );
 		par.setSelectedValue( 2D );
-		par.setPriority( 3 );
+		par.setPriority( 9 );
 				
 		return par;
 	}
@@ -541,7 +547,7 @@ public class ConfigApp
 		ConfigParameter par = new ConfigParameter( id, ConfigParameter.ParameterType.COLOR );
 		par.addAllOptions( colors );
 		par.setSelectedValue( Color.red );
-		par.setPriority( 7 );
+		par.setPriority( 2 );
 		pars.add( par );
 
 		id = getCaptions( Language.WAITING_ACTION_COLOR);
@@ -551,7 +557,7 @@ public class ConfigApp
 		colors.add( 0, Color.blue );
 		par.addAllOptions( colors );
 		par.setSelectedValue( Color.blue );
-		par.setPriority( 8 );
+		par.setPriority( 1 );
 		pars.add( par );
 
 		id = getCaptions( Language.ACTION_COLOR );
@@ -561,7 +567,7 @@ public class ConfigApp
 		colors.add( 0, Color.green );
 		par.addAllOptions( colors );
 		par.setSelectedValue( Color.green );
-		par.setPriority( 9 );
+		par.setPriority( 0 );
 		pars.add( par );
 		
 		return pars;
@@ -573,7 +579,7 @@ public class ConfigApp
 		id.setID( SONG_LIST );
 
 		ConfigParameter par = new ConfigParameter( id, ParameterType.SONG );
-		par.setPriority( Integer.MAX_VALUE - 1 );
+		par.setPriority( Integer.MIN_VALUE + 1 );
 
 		return par;
 	}
@@ -587,7 +593,7 @@ public class ConfigApp
 
 		ConfigParameter par = new ConfigParameter( id, r );
 		par.setSelectedValue( 1D );
-		par.setPriority( 4 );
+		par.setPriority( 3 );
 
 		return par;
 	}
@@ -603,11 +609,11 @@ public class ConfigApp
 
 		ConfigParameter parMin = new ConfigParameter( idMin, ParameterType.NUMBER );
 		parMin.setSelectedValue(  -0.7D );
-		parMin.setPriority( 4 );
+		parMin.setPriority(  5 );
 
 		ConfigParameter parMax = new ConfigParameter( idMax, ParameterType.NUMBER );
 		parMax.setSelectedValue( 00D );
-		parMax.setPriority( 5 );
+		parMax.setPriority( 4 );
 
 		pars.add( parMin );
 		pars.add( parMax );
@@ -624,11 +630,28 @@ public class ConfigApp
 
 		ConfigParameter par = new ConfigParameter( id, r );
 		par.setSelectedValue( 1D );
-		par.setPriority( 1 );
+		par.setPriority( 7 );
 
 		return par;
 
 	}
+	
+	/*
+	private static ConfigParameter loadDefaultSessionTime() throws ConfigParameterException
+	{	
+		Caption id = getCaptions( Language.SESSION_TIME );
+		id.setID( SESSION_TIME );
+
+		NumberRange r = new NumberRange( 0D, Double.MAX_VALUE);
+
+		ConfigParameter par = new ConfigParameter( id, r );
+		par.setSelectedValue( 0D );
+		par.setPriority( 10 );
+
+		return par;
+
+	}
+	*/
 		
 	///////////////////
 	/*
@@ -653,6 +676,7 @@ public class ConfigApp
 		tableFields.put( settingsTableName, fieldType );
 		
 		fieldType.put( "userID", Integer.class );
+		//fieldType.put( SESSION_TIME, Integer.class );
 		fieldType.put( MOV_REPETITIONS, Integer.class );
 		fieldType.put( REACTION_TIME, Double.class );
 		fieldType.put( RECOVER_TIME, Double.class );		
@@ -677,12 +701,14 @@ public class ConfigApp
 		fieldType.put( "controllerNumberOfChannel", Integer.class );
 		fieldType.put( "controllerData", DoubleBuffer.class );
 		fieldType.put( "muteSession", Integer.class );
+		fieldType.put( "sessionTime", Integer.class );
 		fieldType.put( "valenceArousalEmotion", String.class );
 		tableFields.put( sessionTableName, fieldType );
 		
 		fieldType = new HashMap<String, Class>();
 		fieldType.put( "idSession", Integer.class );
 		fieldType.put( "userID", Integer.class );
+		//fieldType.put( SESSION_TIME, Integer.class );
 		fieldType.put( MOV_REPETITIONS, Integer.class );
 		fieldType.put( REACTION_TIME, Double.class );
 		fieldType.put( RECOVER_TIME, Double.class );		
@@ -1373,6 +1399,13 @@ public class ConfigApp
 				mute = (Boolean)muteSession.getSelectedValue();
 			}
 			
+			ConfigParameter sessionTime = ConfigApp.getGeneralSetting( ConfigApp.SESSION_TIME );
+			int stime = 0;
+			if( sessionTime != null )
+			{
+				stime = ((Number)sessionTime.getSelectedValue()).intValue();
+			}
+			
 			for( int playerID : RegistrarStatistic.getPlayerIDs() )
 			{	
 				List< Tuple< LocalDateTime, RegistrarStatistic.GameFieldType > > register = RegistrarStatistic.getRegister( playerID );
@@ -1402,6 +1435,7 @@ public class ConfigApp
 									+ ", userID"
 									+ ", score"
 									+ ", muteSession"
+									+ ", sessionTime"
 									+ ", controllerName"
 									+ ", controllerSamplingRate"
 									+ ", controllerNumberOfChannel"
@@ -1417,6 +1451,7 @@ public class ConfigApp
 								+ "," + playerID
 								+ "," + score
 								+ "," + ( ( mute ) ? "1" : "0" )
+								+ "," + stime
 								+ ",\"" + cmeta.getName() + "\""
 								+ "," + cmeta.getSamplingRate()
 								+ "," + cmeta.getNumberOfChannels()		
@@ -1678,6 +1713,7 @@ public class ConfigApp
 				+ ", reactionTime real CHECK (reactionTime > 0)"
 				+ ", recoverTime real CHECK (recoverTime >= 0)"
 				+ ", repetitions integer CHECK (repetitions > 0)"
+				//+ ", sessionTime integer CHECK (sessionTime >= 0)"
 				+ ", colorPreaction integer"
 				+ ", colorWaitingAction integer"
 				+ ", colorAction integer"
@@ -1696,6 +1732,7 @@ public class ConfigApp
 						+ " idSession integer NOT NULL" // Session date
 						+ ", userID integer NOT NULL"
 						+ ", muteSession integer NOT NULL CHECK (muteSession == 0 OR muteSession == 1 ) "
+						+ ", sessionTime integer CHECK (sessionTime >= 0)"
 						+ ", score integer NOT NULL"
 						+ ", controllerName text NOT NULL"
 						+ ", controllerSamplingRate real NOT NULL"
@@ -1720,6 +1757,7 @@ public class ConfigApp
 				+ ", reactionTime real CHECK (reactionTime > 0)"
 				+ ", recoverTime real CHECK (recoverTime >= 0)"
 				+ ", repetitions integer CHECK (repetitions > 0)"
+				//+ ", sessionTime integer CHECK (repetitions >= 0)"
 				+ ", colorPreaction integer"
 				+ ", colorWaitingAction integer"
 				+ ", colorAction integer"

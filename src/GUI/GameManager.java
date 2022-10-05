@@ -420,7 +420,16 @@ public class GameManager
 				fileSongs.add( new File( song ) );				
 			}
 			
-			this.currentLevel = this.getLevel( fileSongs, mute, settings );	
+			
+			ConfigParameter sessionTime = ConfigApp.getGeneralSetting( ConfigApp.SESSION_TIME );
+			double sstime = 0;
+			
+			if( sessionTime != null )
+			{
+				sstime = ((Number)sessionTime.getSelectedValue()).doubleValue();
+			}
+			
+			this.currentLevel = this.getLevel( fileSongs, mute, settings, sstime );	
 			
 			if( loadAnimationThread != null )
 			{
@@ -616,7 +625,7 @@ public class GameManager
 		return levelSongs;
 	}
 
-	private Level getLevel( List< File > fileSongs, boolean isMuteSession, List< Settings > settings  ) throws Exception
+	private Level getLevel( List< File > fileSongs, boolean isMuteSession, List< Settings > settings, double sessionTime  ) throws Exception
 	{
 		Level level = null;
 		
@@ -626,7 +635,7 @@ public class GameManager
 
 		//LevelMusicBuilder.changeLevelSpeed( level );
 
-		level = new Level( screenBounds, settings, fileSongs );
+		level = new Level( screenBounds, settings, fileSongs, sessionTime );
 		level.setMuteSession( isMuteSession );
 		
 		return level;

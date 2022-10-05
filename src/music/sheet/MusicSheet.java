@@ -172,4 +172,20 @@ public class MusicSheet
 		
 		return t;
 	}
+	
+	public void cutSong( double duration ) 
+	{
+		if( duration < this.getDuration() )
+		{
+			List< IROTrack > tracks = this.getNotesAtIntervalTime( new NumberRange( 0, duration ) );
+			
+			this.tracks.clear();
+			
+			for( IROTrack t : tracks )
+			{
+				this.tracks.put( t.getID(), t );
+			}
+			
+		}
+	}
 }

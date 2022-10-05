@@ -372,46 +372,51 @@ public class AppSelectPlayer extends JDialog
 				@Override
 				public void actionPerformed(ActionEvent arg0)
 				{
-					int action = JOptionPane.showConfirmDialog( dg, Language.getLocalCaption( Language.REMOVE_PLAYER_MSG )
-													, Language.getLocalCaption( Language.WARNING )
-													,	JOptionPane.WARNING_MESSAGE );
+					JTable t = getUserTable();
 					
-					if( action == JOptionPane.OK_OPTION )
+					if( t.getSelectedRowCount() > 0 )
 					{
-						JTable t = getUserTable();
-						DefaultTableModel tm = (DefaultTableModel)t.getModel();
+						int action = JOptionPane.showConfirmDialog( dg, Language.getLocalCaption( Language.REMOVE_PLAYER_MSG )
+														, Language.getLocalCaption( Language.WARNING )
+														,	JOptionPane.WARNING_MESSAGE );
 						
-						int[] sel = t.getSelectedRows();
-						Arrays.sort( sel );
-						
-						if( sel.length > 0 )
+						if( action == JOptionPane.OK_OPTION )
 						{
-							for( int i = sel.length - 1; i >= 0;  i-- )
+							
+							DefaultTableModel tm = (DefaultTableModel)t.getModel();
+							
+							int[] sel = t.getSelectedRows();
+							Arrays.sort( sel );
+							
+							if( sel.length > 0 )
 							{
-								int s = sel[ i ];
-								
-								int playerID = (int)t.getValueAt( s, 0 );
-								
-								try
+								for( int i = sel.length - 1; i >= 0;  i-- )
 								{
-									if( playerID != Player.ANONYMOUS )
+									int s = sel[ i ];
+									
+									int playerID = (int)t.getValueAt( s, 0 );
+									
+									try
 									{
-										ConfigApp.dbRemovePlayer( playerID );
-										tm.removeRow( s );
+										if( playerID != Player.ANONYMOUS )
+										{
+											ConfigApp.dbRemovePlayer( playerID );
+											tm.removeRow( s );
+										}
+									} 
+									catch (SQLException e)
+									{
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+										JOptionPane.showMessageDialog( dg, e.getMessage()
+																		, Language.getLocalCaption( Language.ERROR )
+																		, JOptionPane.ERROR_MESSAGE );
 									}
-								} 
-								catch (SQLException e)
-								{
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-									JOptionPane.showMessageDialog( dg, e.getMessage()
-																	, Language.getLocalCaption( Language.ERROR )
-																	, JOptionPane.ERROR_MESSAGE );
 								}
 							}
+							
+							t.clearSelection();
 						}
-						
-						t.clearSelection();
 					}
 				}
 			});
@@ -456,18 +461,21 @@ public class AppSelectPlayer extends JDialog
 																	, Language.getLocalCaption( Language.NAME )
 																	, b.getText() );
 					
-					try
+					if( userName != null )
 					{
-						int userId = ConfigApp.dbAddPlayer( userName, null );
-						Player user = new Player( userId, userName, null); 
-						
-						addUserToTable( user );
-					} 
-					catch (SQLException e)
-					{
-						JOptionPane.showMessageDialog( dg, e.getMessage()
-														, Language.getLocalCaption( Language.ERROR )
-														, JOptionPane.ERROR_MESSAGE );
+						try
+						{
+							int userId = ConfigApp.dbAddPlayer( userName, null );
+							Player user = new Player( userId, userName, null); 
+							
+							addUserToTable( user );
+						} 
+						catch (SQLException e)
+						{
+							JOptionPane.showMessageDialog( dg, e.getMessage()
+															, Language.getLocalCaption( Language.ERROR )
+															, JOptionPane.ERROR_MESSAGE );
+						}
 					}
 					
 				}

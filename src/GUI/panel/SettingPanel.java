@@ -151,7 +151,7 @@ public class SettingPanel extends JPanel
 			{
 				for( ConfigParameter p : orderPars.get( t ) )
 				{
-					pars.add( p );
+					pars.add( 0, p);
 				}
 			}
 			

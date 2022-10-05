@@ -67,10 +67,9 @@ public class Fret extends AbstractSprite
 		this.fret.addPoint( this.fretWidth, size.height );
 		this.fret.addPoint( 0, size.height );
 		
-		this.fretFillColor = new Color( 255, 255, 255, 160 );
-		this.fretBorderColor= new Color( 0, 0, 0, 160 );
+		this.setFretBrightness( 1 );		
 	}
-	
+		
 	public int getFretWidth()
 	{
 		return this.fretWidth;
@@ -159,7 +158,7 @@ public class Fret extends AbstractSprite
 			
 			this.fretImg = (BufferedImage)BasicPainter2D.rectangle( r.width, r.height, 3
 																	//, this.fretBorderColor
-																	, this.fretFillColor
+																	, this.fretBorderColor
 																	, this.fretFillColor );
 		}
 		
@@ -183,6 +182,21 @@ public class Fret extends AbstractSprite
 	public void removeFretEventListener( FretEventListener listener )
 	{
 		super.listenerList.remove( FretEventListener.class, listener );
+	}
+	
+	public void setFretBrightness( float brigthness )
+	{			
+		this.fretFillColor = new Color( 127, 127, 127, 120 );
+		this.fretBorderColor= new Color( 25, 25, 25, 180 );
+		
+		if( brigthness < 0.75 )
+		{
+			this.fretFillColor = new Color( 255, 255, 255, 160 );
+			this.fretBorderColor= new Color( 255, 255, 255, 240 );			
+		}
+		
+		this.fretImg = null;
+		this.createSprite();
 	}
 	
 	private synchronized void fireFretEvent( int typeEvent, MusicNoteGroup note )

@@ -90,7 +90,9 @@ public class Language
 	public static final String STATISTIC = "STATISTIC";
 	public static final String SESSION = "SESSION";
 	public static final String SESSIONS = "SESSIONS";
+	public static final String TOTAL = "TOTAL";
 	public static final String TIME = "TIME";
+	public static final String SESSION_TIME = "SESSION_TIME";
 	public static final String REACTION_TIME = "REACTION_TIME";
 	public static final String RECOVER_TIME = "RECOVER_TIME";
 	public static final String PREACTION_COLOR = "PREACTION_COLOR";
@@ -214,6 +216,10 @@ public class Language
 		cap.setCaption( esEs, "Tiempo");
 		captions.put( TIME, cap );
 		
+		cap = new Caption( SESSION_TIME, defaultLanguage, "Session time (s)" );
+		cap.setCaption( esEs, "Tiempo de sesi\u00F3n (s)");
+		captions.put( SESSION_TIME, cap );
+		
 		cap = new Caption( STATISTIC, defaultLanguage, "Statistic" );
 		cap.setCaption( esEs, "Estad\u00EDstica");
 		captions.put( STATISTIC, cap );
@@ -225,6 +231,10 @@ public class Language
 		cap = new Caption( SESSION, defaultLanguage, "Session" );
 		cap.setCaption( esEs, "Sesi\u00F3n");
 		captions.put( SESSION, cap );
+		
+		cap = new Caption( TOTAL, defaultLanguage, "Total" );
+		cap.setCaption( esEs, "Total");
+		captions.put( TOTAL, cap );
 		
 		cap = new Caption( NONE, defaultLanguage, "None" );
 		cap.setCaption( esEs, "Ninguno/a");

@@ -24,6 +24,8 @@ package gui.game.component.sprite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.util.Arrays;
 
 import image.BasicPainter2D;
 
@@ -53,6 +55,46 @@ public class Background extends AbstractSprite
 		}
 		
 		return this.pic;
+	}
+	
+	public float getAverageBrightness()
+	{
+		float brigthness = 1F;		
+
+		if( this.pic != null )
+		{
+			brigthness = 0F;
+			
+			DataBufferInt rasterDB = (DataBufferInt)this.pic.getRaster().getDataBuffer();
+			int[] imagePixelData = rasterDB.getData();
+			
+			for( int ip = 0; ip < imagePixelData.length; ip++ )
+			{
+				int px = imagePixelData[ ip ];
+				int a = ( px & 0xFF000000 ) >> 24;
+				int r = ( px & 0x00FF0000 ) >> 16;
+				int g = ( px & 0x0000FF00 ) >> 8;
+				int b = ( px & 0x000000FF );
+				
+				if( a != 0 )
+				{				
+					float[] hsb = Color.RGBtoHSB( r, g, b, null );
+					float s = hsb[ 1 ];
+					float br = hsb[ 2 ];
+					
+					brigthness += Math.sqrt( s * s*0 + br * br );// / Math.sqrt( 2 ); // sqrt(2) to normalize
+				}
+				else
+				{
+					brigthness += 1F;
+				}
+			}
+			
+			brigthness = brigthness / imagePixelData.length;
+		}
+		
+		
+		return brigthness;
 	}
 
 	@Override

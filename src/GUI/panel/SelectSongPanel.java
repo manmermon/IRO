@@ -273,9 +273,9 @@ public class SelectSongPanel extends JPanel
 		{
 			this.panelTotalSongTimeInfo = new JPanel( new FlowLayout() );
 			
-			this.panelTotalSongTimeInfo.setBorder( BorderFactory.createTitledBorder( Language.getLocalCaption( Language.SESSION ) ) );
+			this.panelTotalSongTimeInfo.setBorder( BorderFactory.createTitledBorder( Language.getLocalCaption( Language.TOTAL ) ) );
 			
-			TranslateComponents.add( this.panelTotalSongTimeInfo, Language.getAllCaptions().get( Language.SESSION ) );	
+			TranslateComponents.add( this.panelTotalSongTimeInfo, Language.getAllCaptions().get( Language.TOTAL ) );	
 			
 			this.panelTotalSongTimeInfo.add( this.getTotalSongTimeLabel() );
 		}

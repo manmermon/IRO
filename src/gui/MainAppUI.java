@@ -29,11 +29,14 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -41,8 +44,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import gui.panel.SettingPanel;
 import gui.panel.inputDevice.InputDevicePanel;
@@ -69,6 +76,8 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 
@@ -104,8 +113,7 @@ public class MainAppUI extends JFrame
 	private JCheckBox chbMuteSession;
 	private JCheckBox chbContinueSession;
 	private JCheckBox chbSamTest;
-	
-	
+			
 	// Radio Button
 	/*
 	private ButtonGroup multiplayerGroup;;	
@@ -118,6 +126,11 @@ public class MainAppUI extends JFrame
 	
 	private JMenu menuSetting;
 	private JMenu jLangMenu;
+	
+	
+	private JSpinner spSessionTime;
+	
+	private JLabel lbSessionTime;
 	
 	private MenuScroller langMenu;
 	
@@ -855,6 +868,8 @@ public class MainAppUI extends JFrame
 			this.panelPlay.add( this.getMuteSession() );
 			this.panelPlay.add( this.getContinuousSession() );
 			this.panelPlay.add( this.getSamTest() );
+			this.panelPlay.add( this.getSessionTimeLabel() );
+			this.panelPlay.add( this.getSessionTimeSpinner() );
 		}
 		
 		return this.panelPlay;
@@ -1039,5 +1054,95 @@ public class MainAppUI extends JFrame
 		}
 		
 		return this.chbSamTest;
+	}
+	
+	private JLabel getSessionTimeLabel()
+	{
+		if( this.lbSessionTime == null )
+		{
+			String txt = Language.getLocalCaption( Language.SESSION_TIME );
+			
+			this.lbSessionTime = new JLabel( txt );
+			TranslateComponents.add( this.lbSessionTime, Language.getAllCaptions().get(  Language.SESSION_TIME ) );
+		}
+		
+		return this.lbSessionTime;
+	}
+	
+	private JSpinner getSessionTimeSpinner()
+	{
+		if( this.spSessionTime == null )
+		{
+			final String ID = ConfigApp.SESSION_TIME;
+			
+			this.spSessionTime = new JSpinner( new SpinnerNumberModel( 0, 0, null, 1 ) ); 
+			
+			Font f = this.spSessionTime.getFont();
+			FontMetrics fm = this.spSessionTime.getFontMetrics( f );
+			
+			Dimension pd = this.spSessionTime.getPreferredSize();
+			pd.width = fm.stringWidth( "0" ) * 8;
+			this.spSessionTime.setPreferredSize( pd );
+			this.spSessionTime.setSize( pd );
+			
+			this.spSessionTime.addChangeListener( new ChangeListener()
+			{								
+				@Override
+				public void stateChanged(ChangeEvent e)
+				{
+					ConfigParameter par  = ConfigApp.getGeneralSetting( ID );
+					
+					JSpinner sp = (JSpinner)e.getSource();
+					
+					try 
+					{
+						if( par == null )
+						{						
+							par = new ConfigParameter( new Caption( Language.SESSION_TIME, Language.defaultLanguage, Language.getLocalCaption( Language.SESSION_TIME ) )
+														, ParameterType.NUMBER );
+							
+							ConfigApp.setGeneralSetting( ID, par );
+						}
+					
+						par.setSelectedValue( sp.getValue() );						
+					} 
+					catch (ConfigParameterException e1)
+					{
+						e1.printStackTrace();
+					}
+				}
+			});
+			
+			this.spSessionTime.addMouseWheelListener( new MouseWheelListener() 
+			{				
+				@Override
+				public void mouseWheelMoved(MouseWheelEvent e) 
+				{
+					if( e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL )
+					{
+						try
+						{	
+							JSpinner sp = (JSpinner)e.getSource();
+							
+							int d = e.getWheelRotation();
+							
+							if( d > 0 )
+							{
+								sp.setValue( sp.getModel().getPreviousValue() );
+							}
+							else
+							{
+								sp.setValue( sp.getModel().getNextValue() );
+							}	
+						}
+						catch( IllegalArgumentException ex )
+						{												
+						}
+					}
+				}
+			});
+		}
+		
+		return this.spSessionTime;
 	}
 }
