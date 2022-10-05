@@ -1060,10 +1060,10 @@ public class MainAppUI extends JFrame
 	{
 		if( this.lbSessionTime == null )
 		{
-			String txt = Language.getLocalCaption( Language.SESSION_TIME );
+			String txt = Language.getLocalCaption( Language.LIMIT_SESSION_TIME );
 			
 			this.lbSessionTime = new JLabel( txt );
-			TranslateComponents.add( this.lbSessionTime, Language.getAllCaptions().get(  Language.SESSION_TIME ) );
+			TranslateComponents.add( this.lbSessionTime, Language.getAllCaptions().get(  Language.LIMIT_SESSION_TIME ) );
 		}
 		
 		return this.lbSessionTime;
@@ -1073,7 +1073,7 @@ public class MainAppUI extends JFrame
 	{
 		if( this.spSessionTime == null )
 		{
-			final String ID = ConfigApp.SESSION_TIME;
+			final String ID = ConfigApp.LIMIT_SESSION_TIME;
 			
 			this.spSessionTime = new JSpinner( new SpinnerNumberModel( 0, 0, null, 1 ) ); 
 			
@@ -1098,7 +1098,7 @@ public class MainAppUI extends JFrame
 					{
 						if( par == null )
 						{						
-							par = new ConfigParameter( new Caption( Language.SESSION_TIME, Language.defaultLanguage, Language.getLocalCaption( Language.SESSION_TIME ) )
+							par = new ConfigParameter( new Caption( Language.LIMIT_SESSION_TIME, Language.defaultLanguage, Language.getLocalCaption( Language.LIMIT_SESSION_TIME ) )
 														, ParameterType.NUMBER );
 							
 							ConfigApp.setGeneralSetting( ID, par );

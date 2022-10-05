@@ -177,7 +177,7 @@ public class ConfigApp
 	
 	public static final String MOV_REPETITIONS = "repetitions";
 	
-	public static final String SESSION_TIME = "sessionTime";
+	public static final String LIMIT_SESSION_TIME = "sessionTime";
 	
 	
 	///////////
@@ -701,7 +701,7 @@ public class ConfigApp
 		fieldType.put( "controllerNumberOfChannel", Integer.class );
 		fieldType.put( "controllerData", DoubleBuffer.class );
 		fieldType.put( "muteSession", Integer.class );
-		fieldType.put( "sessionTime", Integer.class );
+		fieldType.put( "limitSessionTime", Integer.class );
 		fieldType.put( "valenceArousalEmotion", String.class );
 		tableFields.put( sessionTableName, fieldType );
 		
@@ -1399,11 +1399,11 @@ public class ConfigApp
 				mute = (Boolean)muteSession.getSelectedValue();
 			}
 			
-			ConfigParameter sessionTime = ConfigApp.getGeneralSetting( ConfigApp.SESSION_TIME );
-			int stime = 0;
+			ConfigParameter sessionTime = ConfigApp.getGeneralSetting( ConfigApp.LIMIT_SESSION_TIME );
+			int limitSessiontime = 0;
 			if( sessionTime != null )
 			{
-				stime = ((Number)sessionTime.getSelectedValue()).intValue();
+				limitSessiontime = ((Number)sessionTime.getSelectedValue()).intValue();
 			}
 			
 			for( int playerID : RegistrarStatistic.getPlayerIDs() )
@@ -1435,7 +1435,7 @@ public class ConfigApp
 									+ ", userID"
 									+ ", score"
 									+ ", muteSession"
-									+ ", sessionTime"
+									+ ", limitSessionTime"
 									+ ", controllerName"
 									+ ", controllerSamplingRate"
 									+ ", controllerNumberOfChannel"
@@ -1451,7 +1451,7 @@ public class ConfigApp
 								+ "," + playerID
 								+ "," + score
 								+ "," + ( ( mute ) ? "1" : "0" )
-								+ "," + stime
+								+ "," + limitSessiontime
 								+ ",\"" + cmeta.getName() + "\""
 								+ "," + cmeta.getSamplingRate()
 								+ "," + cmeta.getNumberOfChannels()		
@@ -1732,7 +1732,7 @@ public class ConfigApp
 						+ " idSession integer NOT NULL" // Session date
 						+ ", userID integer NOT NULL"
 						+ ", muteSession integer NOT NULL CHECK (muteSession == 0 OR muteSession == 1 ) "
-						+ ", sessionTime integer CHECK (sessionTime >= 0)"
+						+ ", limitSessionTime integer CHECK (limitSessionTime >= 0)"
 						+ ", score integer NOT NULL"
 						+ ", controllerName text NOT NULL"
 						+ ", controllerSamplingRate real NOT NULL"

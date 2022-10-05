@@ -92,7 +92,7 @@ public class Language
 	public static final String SESSIONS = "SESSIONS";
 	public static final String TOTAL = "TOTAL";
 	public static final String TIME = "TIME";
-	public static final String SESSION_TIME = "SESSION_TIME";
+	public static final String LIMIT_SESSION_TIME = "LIMIT_SESSION_TIME";
 	public static final String REACTION_TIME = "REACTION_TIME";
 	public static final String RECOVER_TIME = "RECOVER_TIME";
 	public static final String PREACTION_COLOR = "PREACTION_COLOR";
@@ -216,9 +216,9 @@ public class Language
 		cap.setCaption( esEs, "Tiempo");
 		captions.put( TIME, cap );
 		
-		cap = new Caption( SESSION_TIME, defaultLanguage, "Session time (s)" );
-		cap.setCaption( esEs, "Tiempo de sesi\u00F3n (s)");
-		captions.put( SESSION_TIME, cap );
+		cap = new Caption( LIMIT_SESSION_TIME, defaultLanguage, "Session time limit (s)" );
+		cap.setCaption( esEs, "Tiempo de sesi\u00F3n m\u00E1ximo (s)");
+		captions.put( LIMIT_SESSION_TIME, cap );
 		
 		cap = new Caption( STATISTIC, defaultLanguage, "Statistic" );
 		cap.setCaption( esEs, "Estad\u00EDstica");

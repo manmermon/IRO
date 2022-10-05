@@ -421,7 +421,7 @@ public class GameManager
 			}
 			
 			
-			ConfigParameter sessionTime = ConfigApp.getGeneralSetting( ConfigApp.SESSION_TIME );
+			ConfigParameter sessionTime = ConfigApp.getGeneralSetting( ConfigApp.LIMIT_SESSION_TIME );
 			double sstime = 0;
 			
 			if( sessionTime != null )
