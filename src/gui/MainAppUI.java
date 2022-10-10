@@ -63,6 +63,7 @@ import gui.panel.SelectSongPanel;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.ConfigParameter.ParameterType;
+import config.DataBaseSettings;
 import config.Player;
 import config.language.Caption;
 import config.language.Language;
@@ -484,7 +485,7 @@ public class MainAppUI extends JFrame
 									if( !ConfigApp.loadPlayerSetting( player ) )
 									{
 										ConfigApp.loadDefaultPlayerSetting( player );
-										ConfigApp.dbInsertPlayerSetting( player );
+										DataBaseSettings.dbInsertPlayerSetting( player );
 									}
 								}
 								catch ( Exception ex) 

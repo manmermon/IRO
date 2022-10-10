@@ -52,20 +52,24 @@ import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import gui.game.screen.menu.MenuGameResults;
 import gui.panel.samSurvey.SamSurvey;
-import lslStream.LSL;
-import lslStream.LSLStreamInfo;
+import lslInput.LSL;
+import lslInput.LSLStreamInfo;
+import lslInput.stream.IInputStreamMetadata;
+import lslInput.stream.controller.IControllerMetadata;
 import config.ConfigApp;
 import config.ConfigParameter;
+import config.DataBaseSettings;
 import config.Player;
 import config.Settings;
 import config.language.Language;
 import control.ScreenControl;
-import control.controller.ControllerActionChecker;
-import control.controller.ControllerManager;
-import control.controller.IControllerMetadata;
+import control.inputStream.biosignal.InputBiosignalStreamManager;
+import control.inputStream.biosignal.LSLInputBiosignalStreamReader;
+import control.inputStream.controller.ControllerActionChecker;
+import control.inputStream.controller.ControllerManager;
 import exceptions.ConfigParameterException;
 import exceptions.SceneException;
-import general.NumberRange;
+import general.ArrayTreeMap;
 import general.Tuple;
 import statistic.RegistrarStatistic;
 import statistic.RegistrarStatistic.GameFieldType;
@@ -239,6 +243,7 @@ public class GameManager
 		List< Player > players = new ArrayList<Player>( ConfigApp.getPlayers() );
 		
 		IControllerMetadata[] controllers = new IControllerMetadata[ players.size() ];
+		ArrayTreeMap< Integer, IInputStreamMetadata > biosignals = new ArrayTreeMap< Integer, IInputStreamMetadata >(); 		
 		
 		Image backImg = null;
 		
@@ -247,7 +252,6 @@ public class GameManager
 			Player player = players.get( i );
 
 			Settings setting = ConfigApp.getPlayerSetting( player );
-			ConfigParameter par = setting.getParameter( ConfigApp.SELECTED_CONTROLLER );
 			
 			Object path = setting.getParameter( ConfigApp.BACKGROUND_IMAGE ).getSelectedValue();
 			if( backImg == null )
@@ -264,11 +268,26 @@ public class GameManager
 				}		
 			}
 
+			ConfigParameter par = setting.getParameter( ConfigApp.SELECTED_CONTROLLER );
 			Object ctr = par.getSelectedValue();
 
 			if( ctr != null )
 			{
 				controllers[ i ] = (IControllerMetadata)ctr;				
+			}
+			
+			par = setting.getParameter( ConfigApp.SELECTED_BIOSIGNAL );
+			Object bios = par.getSelectedValue();
+			if( bios != null )
+			{				
+				List< IInputStreamMetadata > biosgs = (List< IInputStreamMetadata >)bios;
+				
+				for( IInputStreamMetadata bs : biosgs )
+				{
+					bs.setPlayer( player );
+				}
+				
+				biosignals.put( player.getId(), biosgs );
 			}
 		}
 
@@ -281,7 +300,8 @@ public class GameManager
 			}
 		}
 
-		this.checkController( players, controllers );
+		//this.checkController( controllers );
+		//TODO
 
 		AbstractStoppableThread loadAnimationThread = null;
 		try
@@ -323,12 +343,19 @@ public class GameManager
 			//
 			//
 
-			this.checkController( players, controllers ); 
+			//
 			// Por si desconecta durante el test SAM
-			
+			//
+			this.checkInputStream( controllers );
+			for( Integer playerID : biosignals.keySet() )
+			{
+				List< IInputStreamMetadata > bs = biosignals.get( playerID );
+				this.checkInputStream( bs.toArray( new IInputStreamMetadata[0] ) );
+			}
+						
 			this.gameWindow.setVisible( true );
 
-			List< IControllerMetadata > ctrs = new ArrayList<IControllerMetadata>();
+			List< IControllerMetadata > ctrs = new ArrayList< IControllerMetadata >();
 
 			for( int i = 0; i < players.size(); i++ )
 			{
@@ -368,7 +395,8 @@ public class GameManager
 
 				cmeta.setPlayer( player );
 				cmeta.setRecoverInputLevel( min );
-				cmeta.setActionInputLevel( new NumberRange( max, Double.POSITIVE_INFINITY ));
+				//cmeta.setActionInputLevel( new NumberRange( max, Double.POSITIVE_INFINITY ));
+				cmeta.setActionInputLevel( max );
 				cmeta.setTargetTimeInLevelAction( timeTarget );
 				cmeta.setRepetitions( rep );
 				cmeta.setSelectedChannel( ch );
@@ -384,20 +412,46 @@ public class GameManager
 
 			for( IControllerMetadata cmeta : ctrs )
 			{
+				/*
 				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta.getSelectedChannel()
 																				, cmeta.getRecoverInputLevel()
-																				, cmeta.getActionInputLevel().getMin()
+																				, cmeta.getActionInputLevel()
 																				, cmeta.getTargetTimeInLevelAction( )
 																				, cmeta.getRepetitions() );
+				//*/
+				ControllerActionChecker actCheck = new ControllerActionChecker( cmeta );
 				actCheck.setOwner( cmeta.getPlayer() );				
+				actCheck.setEnableInputStream( false );
 				ControllerManager.getInstance().addControllerListener( cmeta.getPlayer(), actCheck );
 				actCheck.addInputActionListerner( ScreenControl.getInstance() );
 				actCheck.startActing();
 			}
+			
+			//ControllerManager.getInstance().setEnableControllerListener( false );
+			
+			for( Integer playerID : biosignals.keySet() )
+			{				
+				List< IInputStreamMetadata > biometa = biosignals.get( playerID );
+				InputBiosignalStreamManager.getInstance().startInputBioStream( biometa );
+			}
+			
+			for( Integer playerID : biosignals.keySet() )
+			{				
+				List< IInputStreamMetadata > biometa = biosignals.get( playerID );
+				
+				for( IInputStreamMetadata meta : biometa )
+				{
+					RegistrarStatistic.addBiosignalStreamSetting( playerID, meta );
+					
+					LSLInputBiosignalStreamReader bioReader = new LSLInputBiosignalStreamReader( meta );
+					bioReader.setOwner( meta.getPlayer() );
+					bioReader.setEnableInputStream( false );
+					InputBiosignalStreamManager.getInstance().addInputBiosignalStreamListener( meta.getPlayer(), bioReader );
+					bioReader.startActing();
+				}
+			}
 
 			//this.gameWindow.putControllerListener();
-
-			ControllerManager.getInstance().setEnableControllerListener( false );
 
 			ConfigParameter muteSession = ConfigApp.getGeneralSetting( ConfigApp.MUTE_SESSION );			
 
@@ -469,6 +523,7 @@ public class GameManager
 		}		
 	}
 	
+	/*
 	private void checkController( List< Player > players, IControllerMetadata[] controllers ) throws IOException
 	{
 		LSLStreamInfo[] streams = LSL.resolve_streams();
@@ -495,6 +550,48 @@ public class GameManager
 			if( info == null )
 			{				
 				throw new IOException( "Player " + players.get( i ).getName() + ": controller not found." );
+			}
+		}
+	}
+	//*/
+	
+	private void checkInputStream( IInputStreamMetadata[] controllers ) throws IOException
+	{
+		LSLStreamInfo[] streams = LSL.resolve_streams();
+		LSLStreamInfo[] lslInfos = new LSLStreamInfo[ controllers.length ];
+		for( int i = 0; i < controllers.length; i++ )
+		{			
+			IInputStreamMetadata meta = controllers[ i ];
+
+			if( meta != null )
+			{
+				checkLSLInfo:
+					for( LSLStreamInfo str : streams )
+					{
+						if( str.uid().equals( meta.getInputSourceID() ) )
+						{
+							lslInfos[ i ] = str;
+							break checkLSLInfo;
+						}
+					}
+			}
+		}
+
+		for( int i = 0; i < lslInfos.length; i++ )
+		{
+			LSLStreamInfo info = lslInfos[ i ];
+
+			if( info == null )
+			{	
+				String pname = "" + i;
+				
+				IInputStreamMetadata meta = controllers[ i ];
+								
+				if( meta != null )
+				{
+					pname = meta.getPlayer().getName();
+				}
+				throw new IOException( "Player " + pname + ": controller not found." );
 			}
 		}
 	}
@@ -656,6 +753,7 @@ public class GameManager
 			this.gameWindow.setTitle( MainAppUI.getInstance().getTitle() );
 			
 			ControllerManager.getInstance().setEnableControllerListener( true );
+			InputBiosignalStreamManager.getInstance().setEnableInputBiosignalStreamListener( true );
 			
 			ScreenControl.getInstance().setScene( level );
 			
@@ -700,6 +798,7 @@ public class GameManager
 	public synchronized void stopLevel( boolean nextLevel ) throws Exception
 	{
 		ControllerManager.getInstance().setEnableControllerListener( false );
+		InputBiosignalStreamManager.getInstance().setEnableInputBiosignalStreamListener( false );
 		
 		IScene sc = ScreenControl.getInstance().getScene();
 		ScreenControl.getInstance().stopScene();
@@ -831,7 +930,7 @@ public class GameManager
 			//
 			try
 			{			
-				ConfigApp.dbSaveStatistic();
+				DataBaseSettings.dbSaveStatistic();
 			}
 			catch (Exception e) 
 			{
@@ -876,6 +975,7 @@ public class GameManager
 			
 			ScreenControl.getInstance().setPauseScene( pause );
 			ControllerManager.getInstance().setEnableControllerListener( !pause );
+			InputBiosignalStreamManager.getInstance().setEnableInputBiosignalStreamListener( !pause );
 		}
 	}
 }

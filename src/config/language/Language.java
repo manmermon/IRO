@@ -56,7 +56,7 @@ public class Language
 	public static final String LOCAL_MULTIPLAYER = "LOCAL_MULTIPLAYER";
 	public static final String REMOTE_MULTIPLAYER = "REMOTE_MULTIPLAYER";
 	public static final String MULTIPLAYER = "MULTIPLAYER";
-		
+	
 	public static final String OTHERS = "OTHERS";
 	public static final String SONG = "SONG";
 	public static final String SONGS = "SONGS";	
@@ -146,6 +146,8 @@ public class Language
 	public static final String SAVING = "SAVING";
 	
 	public static final String MAX_PLAYER_MSG = "MAX_PLAYER_MSG";
+	
+	public static final String ENABLE_REMOVE_PLAYER = "ENABLE_REMOVE_PLAYER";
 	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
@@ -457,6 +459,10 @@ public class Language
 		cap = new Caption( TRACK, defaultLanguage, "Tracks" );
 		cap.setCaption( esEs, "Pistas" );
 		captions.put( TRACK, cap );
+	
+		cap = new Caption( ENABLE_REMOVE_PLAYER, defaultLanguage, "Deleting players" );
+		cap.setCaption( esEs, "Borrar jugadores" );
+		captions.put( ENABLE_REMOVE_PLAYER, cap );
 	}
 
 	public static void loadLanguages() 

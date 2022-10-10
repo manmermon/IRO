@@ -31,7 +31,7 @@ import gui.game.component.Frame;
 import config.ConfigApp;
 import config.Player;
 import config.Settings;
-import control.controller.ControllerManager;
+import control.inputStream.controller.ControllerManager;
 
 /**
  * @author manuel

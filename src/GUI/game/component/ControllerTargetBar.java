@@ -9,13 +9,13 @@ import java.awt.Color;
 import javax.swing.JPanel;
 
 import GUI.progressbar.LevelProgressIndicator;
-import control.events.IInputControllerListener;
+import control.events.IEnabledInputLSLDataListener;
 
 /**
  * @author manuel
  *
  */
-public class ControllerTargetBar extends JPanel implements IInputControllerListener
+public class ControllerTargetBar extends JPanel implements IEnabledInputLSLDataListener
 {
 
 	/**
@@ -87,7 +87,7 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 	 * @see @see control.events.IInputControllerListener#InputControllerEvent(control.events.InputControllerEvent)
 	 */
 	@Override
-	public void InputLSLDataEvent(lslStream.event.InputLSLDataEvent ev) 
+	public void InputLSLDataEvent(lslInput.event.InputLSLDataEvent ev) 
 	{
 		double[] data = ev.getInputValues();
 		
@@ -105,7 +105,7 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 	}
 
 	@Override
-	public void setEnableInputController( boolean enable) 
+	public void setEnableInputStream( boolean enable) 
 	{
 		
 		this.enableCtr = enable;
@@ -114,7 +114,7 @@ public class ControllerTargetBar extends JPanel implements IInputControllerListe
 	@Override
 	public void close() 
 	{
-		this.setEnableInputController( false );
+		this.setEnableInputStream( false );
 	}
 
 	/*(non-Javadoc)

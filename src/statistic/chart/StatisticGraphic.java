@@ -64,7 +64,7 @@ import statistic.RegistrarStatistic;
 public class StatisticGraphic
 {
 	//*
-	public static JPanel getSessionStatistic( GameSessionStatistic session, Player player, Dimension size )
+	public static JPanel getSessionStatistic( GameSessionStatisticPlayer session, Player player, Dimension size )
 	{   
 		JPanel statPanel = new JPanel( new BorderLayout() );
 		
@@ -88,28 +88,28 @@ public class StatisticGraphic
 
 		XChartPanel< XYChart > chartPanel = new XChartPanel< XYChart>( chart );
 
-		Pair< ControllerMetadataExtenderAdapter, Double[][] > ctr = session.getControllerData( player.getId() );
+		ControllerMetadataExtender cmeta = session.getControllerInfo();		
+		Double[][] ctrData = session.getControllerData( );
 		//double startSession = session.getStartSessionInMillis() / 1e3D;
 
 		Double startSession = null;
 		
-		int ch = ctr.getX1().getSelectedChannel();
-		Double[][] data = ctr.getX2();
+		int ch = cmeta.getSelectedChannel();
 		
-		if( data != null )
+		if( ctrData != null )
 		{
-			int dataLen = data.length;
-			int numChannels = data[ 0 ].length;
+			int dataLen = ctrData.length;
+			int numChannels = ctrData[ 0 ].length;
 			double[] xAxis = new double[ dataLen ];			
 			
 			for( int i = 0; i < dataLen; i++ )
 			{
 				if( startSession == null )
 				{
-					startSession = data[ i ] [ numChannels - 1 ];
+					startSession = ctrData[ i ] [ numChannels - 1 ];
 				}
 				
-				xAxis[ i ] = ( data[ i ] [ numChannels - 1 ] - startSession );
+				xAxis[ i ] = ( ctrData[ i ] [ numChannels - 1 ] - startSession );
 			}
 	
 			boolean show = true;
@@ -127,7 +127,7 @@ public class StatisticGraphic
 				double[] yAxis = new double[ dataLen ];
 				for( int j = 0; j < dataLen; j++ )
 				{
-					yAxis[ j ] = data[ j ][ i ];
+					yAxis[ j ] = ctrData[ j ][ i ];
 				}
 	
 				String lb = Language.getLocalCaption( Language.CHANNEL) + " " + i;
@@ -283,7 +283,7 @@ public class StatisticGraphic
 		return statPanel;
 	}
 	
-	public static JPanel getScores( List< GameSessionStatistic > gss, Player player, Dimension panelSize )
+	public static JPanel getScores( List< GameSessionStatisticPlayer > gss, Player player, Dimension panelSize )
 	{		
 		StatisticPropieties prop = new StatisticPropieties();
 		
@@ -294,25 +294,25 @@ public class StatisticGraphic
 		prop.setXlabel( "days" );
 		prop.setLegendOn( false );
 		
+		Collections.sort( gss
+							, new Comparator< GameSessionStatisticPlayer >() 
+								{				
+									@Override
+									public int compare( GameSessionStatisticPlayer o1, GameSessionStatisticPlayer o2) 
+									{
+										return o1.getSessionDate().compareTo( o2.getSessionDate() );
+									}
+								} );
+		
 		List< Tuple< Double, Double > > score = new ArrayList<Tuple<Double,Double>>();
 		
-		List< Tuple< Long, Integer > > values = new ArrayList< Tuple< Long, Integer > >();
+		List< Tuple< Long, Integer > > values = new ArrayList<  Tuple< Long, Integer > >();
 		
-		for( GameSessionStatistic session : gss )
+		for( GameSessionStatisticPlayer session : gss )
 		{
-			 values.addAll( session.getScores( player.getId() ) );			
+			 values.add( new Tuple< Long, Integer >( session.getSessionID(), session.getScore( ) ) );			
 		}
 		
-		Collections.sort( values
-				, new Comparator< Tuple< Long, Integer > >() 
-		{				
-			@Override
-			public int compare(Tuple<Long, Integer> o1, Tuple<Long, Integer> o2) 
-			{
-				return (int)( o1.t1 - o2.t1);
-			}
-		} );
-
 		Calendar refDate = null;
 		for( Tuple< Long, Integer > sc : values )
 		{
@@ -340,7 +340,7 @@ public class StatisticGraphic
 	}
 
 	
-	public static JPanel getReactionTime( List< GameSessionStatistic > gss, Player player, Dimension panelSize )
+	public static JPanel getReactionTime( List< GameSessionStatisticPlayer > gss, Player player, Dimension panelSize )
 	{
 		StatisticPropieties prop = new StatisticPropieties();
 	
@@ -353,14 +353,15 @@ public class StatisticGraphic
 				
 		ArrayTreeMap< Long, String > eventTime = new ArrayTreeMap< Long, String >();
 		
-		for( GameSessionStatistic session : gss )
+		for( GameSessionStatisticPlayer session : gss )
 		{
-			ArrayTreeMap< Long, Pair< Integer, String > > events = session.getGameEvent();
+			ArrayTreeMap< Long, String > events = session.getGameEvent();
 			
 			for( Long t : events.keySet() )
 			{
-				List< Pair< Integer, String > > evs = events.get( t );
+				List< String > evs = events.get( t );
 				
+				/*
 				for( Pair< Integer, String > ev : evs )
 				{
 					String noteEvent = ev.getX2();
@@ -378,39 +379,17 @@ public class StatisticGraphic
 						eventTime.put( t, noteEvent );
 					}
 				}
+				*/
 			}			
 		}
 		
-		
-		
-		Calendar refDate = null;
-		for( Tuple< Long, Integer > sc : values )
-		{
-			long date = sc.t1;
-			int val = sc.t2;
-
-			Calendar cal = GregorianCalendar.getInstance();
-			cal.setTimeInMillis( date );
-
-			if( refDate == null )
-			{
-				refDate = cal;
-			}
-
-			long minutes = ChronoUnit.MINUTES.between( refDate.toInstant(), cal.toInstant() );
-
-			double time = minutes / ( 24D * 60 ); // day distance
-
-			score.add( new Tuple<Double, Double>( time, (double)val ) );
-		}
-		
-		JPanel scorePlot = getPlot( score, prop );
+		JPanel scorePlot = getPlot( null, null );
 		
 		return scorePlot;
 	}
 	
 	
-	public static void showSessionStatistic( Window owner, List< GameSessionStatistic > sessions, Player player, Rectangle bounds )
+	public static void showSessionStatistic( Window owner, List< GameSessionStatisticPlayer > sessions, Player player, Rectangle bounds )
 	{
 		final List< JPanel > statPlotPanels = new ArrayList<JPanel>();
 		
@@ -449,7 +428,7 @@ public class StatisticGraphic
 		
 		Dimension panelSize = plotPanel.getSize();
 		SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
-		for( GameSessionStatistic session : sessions )
+		for( GameSessionStatisticPlayer session : sessions )
 		{
 			//statPlotPanels.add( getSessionStatistic( session, player, panelSize ) );
 			statPlotPanels.add( getScores( sessions, player, panelSize ) );

@@ -52,6 +52,7 @@ import GUI.combobox.JColorComboBox;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.ConfigParameter.ParameterType;
+import config.DataBaseSettings;
 import config.Player;
 import config.Settings;
 import config.language.Language;
@@ -60,6 +61,7 @@ import exceptions.ConfigParameterException;
 import general.ArrayTreeMap;
 import general.NumberRange;
 import statistic.chart.GameSessionStatistic;
+import statistic.chart.GameSessionStatisticPlayer;
 import statistic.chart.StatisticGraphic;
 
 public class SettingPanel extends JPanel
@@ -307,7 +309,7 @@ public class SettingPanel extends JPanel
 					
 					try
 					{
-						List< GameSessionStatistic> sessions = ConfigApp.dbGetPlayerStatistic( _player.getId() );
+						List< GameSessionStatisticPlayer > sessions = DataBaseSettings.dbGetPlayerStatistic( _player.getId() );
 
 						StatisticGraphic.showSessionStatistic( owner, sessions, _player, bounds);
 					}
@@ -341,7 +343,7 @@ public class SettingPanel extends JPanel
 			
 			try
 			{
-				ConfigApp.dbUpdatePlayer( this._player );
+				DataBaseSettings.dbUpdatePlayer( this._player );
 			} 
 			catch (SQLException ex)
 			{
@@ -391,7 +393,7 @@ public class SettingPanel extends JPanel
 					
 					this._player.getImg().setImage( newImg );
 					
-					ConfigApp.dbUpdatePlayer( this._player );
+					DataBaseSettings.dbUpdatePlayer( this._player );
 					
 					updatePlayerImage( b );
 				}

@@ -20,16 +20,16 @@ import general.Tuple;
 public class GameSessionStatistic
 {
 	private long idSession;
-	private Map< Integer, Pair< ControllerMetadataExtenderAdapter, Double[][] > > sessionControllerData;
+	private Map< Integer, Pair< ControllerMetadataExtender, Double[][] > > sessionControllerData;
 	private ArrayTreeMap< Long, Pair< Integer, String > > gameEvent;
 	
 	private ArrayTreeMap< Integer, Tuple< Long, Integer > > scores;
-		
+	
 	public GameSessionStatistic( long id )
 	{
 		this.idSession = id;
 		
-		this.sessionControllerData = new HashMap<Integer, Pair<ControllerMetadataExtenderAdapter,Double[][] > >();
+		this.sessionControllerData = new HashMap<Integer, Pair<ControllerMetadataExtender,Double[][] > >();
 		this.gameEvent = new ArrayTreeMap<Long, Pair<Integer,String>>();
 		
 		this.scores = new ArrayTreeMap< Integer, Tuple< Long, Integer > >(); 
@@ -49,21 +49,21 @@ public class GameSessionStatistic
 	{
 		if( !this.sessionControllerData.containsKey( player ) )
 		{
-			ControllerMetadataExtenderAdapter cma = new ControllerMetadataExtenderAdapter();
-			Pair< ControllerMetadataExtenderAdapter, Double[][] > pair = new Pair<ControllerMetadataExtenderAdapter, Double[][]>( cma, null );
+			ControllerMetadataExtender cma = new ControllerMetadataExtender();
+			Pair< ControllerMetadataExtender, Double[][] > pair = new Pair<ControllerMetadataExtender, Double[][]>( cma, null );
 			
 			this.sessionControllerData.put( player, pair );
 		}
 	}
 	
-	public Pair< ControllerMetadataExtenderAdapter, Double[][] > getControllerData( int player )
+	public Pair< ControllerMetadataExtender, Double[][] > getControllerData( int player )
 	{
 		return this.sessionControllerData.get( player );
 	}
 	
 	public void setControllerName( int player, String name )
 	{
-		Pair< ControllerMetadataExtenderAdapter, Double[][] > pair = this.getControllerData( player );
+		Pair< ControllerMetadataExtender, Double[][] > pair = this.getControllerData( player );
 		
 		if( pair != null )
 		{
@@ -73,7 +73,7 @@ public class GameSessionStatistic
 	
 	public void setSamplingRate( int player, double samplingRate )
 	{
-		Pair< ControllerMetadataExtenderAdapter, Double[][] > pair = this.getControllerData( player );
+		Pair< ControllerMetadataExtender, Double[][] > pair = this.getControllerData( player );
 		
 		if( pair != null )
 		{
@@ -83,7 +83,7 @@ public class GameSessionStatistic
 	
 	public void setNumberOfChannels( int player, int n )
 	{
-		Pair< ControllerMetadataExtenderAdapter, Double[][] > pair = this.getControllerData( player );
+		Pair< ControllerMetadataExtender, Double[][] > pair = this.getControllerData( player );
 		
 		if( pair != null )
 		{
@@ -93,7 +93,7 @@ public class GameSessionStatistic
 	
 	public void setSelectedChannel( int player, int ch )
 	{
-		Pair< ControllerMetadataExtenderAdapter, Double[][] > pair = this.getControllerData( player );
+		Pair< ControllerMetadataExtender, Double[][] > pair = this.getControllerData( player );
 		
 		if( pair != null )
 		{
@@ -103,7 +103,7 @@ public class GameSessionStatistic
 	
 	public void setRecoverLevel( int player, double value )
 	{
-		Pair< ControllerMetadataExtenderAdapter, Double[][] > pair = this.getControllerData( player );
+		Pair< ControllerMetadataExtender, Double[][] > pair = this.getControllerData( player );
 		
 		if( pair != null )
 		{
@@ -111,19 +111,19 @@ public class GameSessionStatistic
 		}
 	}
 	
-	public void setActionLevel( int player, NumberRange range )
+	public void setActionLevel( int player, double act )
 	{
-		Pair< ControllerMetadataExtenderAdapter, Double[][] > pair = this.getControllerData( player );
+		Pair< ControllerMetadataExtender, Double[][] > pair = this.getControllerData( player );
 		
 		if( pair != null )
 		{
-			pair.getX1().setActionInputLevel( range );
+			pair.getX1().setActionInputLevel( act );
 		}
 	}
 	
 	public void setTargetTimeInLevelAction( int player, double time )
 	{
-		Pair< ControllerMetadataExtenderAdapter, Double[][] > pair = this.getControllerData( player );
+		Pair< ControllerMetadataExtender, Double[][] > pair = this.getControllerData( player );
 		
 		if( pair != null )
 		{
@@ -131,9 +131,14 @@ public class GameSessionStatistic
 		}
 	}
 	
+	public void setMuteSession( int player, int mute )
+	{
+		
+	}
+	
 	public void setSessionControllerData( int player, Double[][] data )
 	{
-		Pair< ControllerMetadataExtenderAdapter, Double[][] > pair = this.getControllerData( player );
+		Pair< ControllerMetadataExtender, Double[][] > pair = this.getControllerData( player );
 		
 		if( pair != null )
 		{

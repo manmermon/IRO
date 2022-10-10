@@ -8,6 +8,9 @@ import biosignal.analyzer.BiosignalAnalyzer;
 import biosignal.analyzer.emotion.EmotionAnalyzer;
 import biosignal.analyzer.health.HealthAnalyzer;
 import general.DataQueue;
+import general.StringTuple;
+import lslInput.LSLUtils;
+import lslInput.LSLStreamInfo.StreamType;
 
 /**
  * @author Manuel Merino Monge
@@ -15,7 +18,7 @@ import general.DataQueue;
  */
 public class Biosignal 
 {
-	public enum Type { ECG, HR, EEG, EDA,  BREATH, TEMPERATURE };
+	public enum Type { ECG, HR, EEG, EDA,  BREATH, TEMPERATURE, UNKNOW };
 	
 	private int winLen = 1;
 	
@@ -26,6 +29,51 @@ public class Biosignal
 	private DataQueue< Double > buffer;
 	
 	private BiosignalAnalyzer healthAnalyzer, emotionAnalyzer;
+	
+	public static Biosignal.Type getBiosignalType( String type )
+	{
+		Biosignal.Type bioType = Type.UNKNOW;
+		
+		String bioStr = "";
+		
+		if( type != null )
+		{
+			StringTuple strTuple = LSLUtils.splitFieldStreamContentType( type );
+			
+			StreamType strType = LSLUtils.getStreamType( type );
+			
+			if( strType == StreamType.BIOSIGNAL || strType == StreamType.CONTROLLER_BIOSIGNAL )
+			{
+				bioStr = strTuple.t1;
+				
+				if( strTuple.t2 != null )
+				{
+					bioStr = strTuple.t2;
+				}
+				
+				String[] parts2 = bioStr.split( ":" );
+					
+				if( parts2.length == 2 )
+				{
+					String p22 = parts2 [ 1 ];
+					boolean find = false;
+	
+					for( Biosignal.Type bt : Biosignal.Type.values() )
+					{
+						find = bt.name().equalsIgnoreCase( p22 );
+	
+						if( find )
+						{
+							bioType = bt;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return bioType;
+	}
 	
 	/**
 	 * 

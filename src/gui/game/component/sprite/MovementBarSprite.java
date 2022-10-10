@@ -13,7 +13,7 @@ import javax.swing.border.LineBorder;
 
 import GUI.progressbar.LevelProgressIndicator;
 import config.IOwner;
-import control.events.IInputControllerListener;
+import control.events.IEnabledInputLSLDataListener;
 import gui.game.component.IPossessable;
 
 /**
@@ -21,7 +21,7 @@ import gui.game.component.IPossessable;
  *
  */
 public class MovementBarSprite extends AbstractSprite 
-									implements IInputControllerListener, IPossessable
+									implements IEnabledInputLSLDataListener, IPossessable
 {
 
 	/**
@@ -109,7 +109,7 @@ public class MovementBarSprite extends AbstractSprite
 	 * @see @see control.events.IInputControllerListener#InputControllerEvent(control.events.InputControllerEvent)
 	 */
 	@Override
-	public void InputLSLDataEvent(lslStream.event.InputLSLDataEvent ev) 
+	public void InputLSLDataEvent(lslInput.event.InputLSLDataEvent ev) 
 	{
 		double[] data = ev.getInputValues();
 		
@@ -127,7 +127,7 @@ public class MovementBarSprite extends AbstractSprite
 	}
 
 	@Override
-	public void setEnableInputController( boolean enable) 
+	public void setEnableInputStream( boolean enable) 
 	{
 		this.enableCtr = enable;
 	}
@@ -135,7 +135,7 @@ public class MovementBarSprite extends AbstractSprite
 	@Override
 	public void close() 
 	{
-		this.setEnableInputController( false );
+		this.setEnableInputStream( false );
 	}
 
 	@Override

@@ -7,8 +7,8 @@ import com.sun.jna.Platform;
 import com.sun.jna.Pointer;
 
 import config.ConfigApp;
-import lslStream.LSLDll;
-import lslStream.LSLStreamInfo;
+import lslInput.LSLDll;
+import lslInput.LSLStreamInfo;
 
 public class StreamOutlet 
 {

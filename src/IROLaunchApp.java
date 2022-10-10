@@ -36,6 +36,7 @@ import GUI.text.TextAreaPrintStream;
 import gui.AppIcon;
 import gui.MainAppUI;
 import config.ConfigApp;
+import config.DataBaseSettings;
 import config.language.Language;
 import control.RefreshControl;
 import control.ScreenControl;
@@ -218,7 +219,7 @@ public class IROLaunchApp
 		
 		open.dispose();
 		
-		if( ConfigApp.checkDBFile() )
+		if( DataBaseSettings.checkDBFile() )
 		{
 			JOptionPane.showMessageDialog( ui, "Database file no found. A new one was created."
 										, "Database", JOptionPane.WARNING_MESSAGE);

@@ -54,7 +54,7 @@ import config.ConfigParameter;
 import config.IOwner;
 import config.Player;
 import config.Settings;
-import control.controller.ControllerManager;
+import control.inputStream.controller.ControllerManager;
 import control.music.MusicPlayerControl;
 import general.ArrayTreeMap;
 import general.NumberRange;

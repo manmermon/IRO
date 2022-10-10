@@ -18,6 +18,7 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 import config.ConfigApp;
+import config.DataBaseSettings;
 import config.Player;
 import config.language.Language;
 
@@ -28,6 +29,8 @@ import java.awt.Point;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -39,6 +42,7 @@ import java.util.Set;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 
 public class AppSelectPlayer extends JDialog
 {
@@ -60,6 +64,7 @@ public class AppSelectPlayer extends JDialog
 	private JButton btAddUser;
 	private JButton btnRemoveUser;
 	private JButton btCancel;
+	private JCheckBox jchbEnableDelete;	
 	
 	/**
 	 * Create the dialog.
@@ -84,7 +89,7 @@ public class AppSelectPlayer extends JDialog
 		
 		try
 		{
-			List< Player > allPlayers = ConfigApp.dbGetAllPlayers();			
+			List< Player > allPlayers = DataBaseSettings.dbGetAllPlayers();			
 			Set< Player > selectedPlayer = ConfigApp.getPlayers();
 			
 			for( Player player : allPlayers )
@@ -135,7 +140,7 @@ public class AppSelectPlayer extends JDialog
 		{
 			for( Integer id : this.playerIDs )
 			{
-				Player player = ConfigApp.dbGetPlayer( id );
+				Player player = DataBaseSettings.dbGetPlayer( id );
 				
 				if( player != null && !player.isAnonymous() )
 				{
@@ -356,15 +361,17 @@ public class AppSelectPlayer extends JDialog
 			
 			panelAddRemoveUser.add( this.getBtNewUser() );
 			panelAddRemoveUser.add( this.getBtnRemoveUser() );
+			panelAddRemoveUser.add( this.getJChbEnableDeleteUser() );
 		}
 		return panelAddRemoveUser;
 	}
 	
 	private JButton getBtnRemoveUser() 
 	{
-		if (btnRemoveUser == null) 
+		if ( this.btnRemoveUser == null) 
 		{
-			btnRemoveUser = new JButton( Language.getLocalCaption( Language.REMOVE ) );
+			this.btnRemoveUser = new JButton( Language.getLocalCaption( Language.REMOVE ) );
+			this.btnRemoveUser.setEnabled( false );
 			
 			final JDialog dg = this;			
 			this.btnRemoveUser.addActionListener( new ActionListener()
@@ -400,7 +407,7 @@ public class AppSelectPlayer extends JDialog
 									{
 										if( playerID != Player.ANONYMOUS )
 										{
-											ConfigApp.dbRemovePlayer( playerID );
+											DataBaseSettings.dbRemovePlayer( playerID );
 											tm.removeRow( s );
 										}
 									} 
@@ -418,6 +425,8 @@ public class AppSelectPlayer extends JDialog
 							t.clearSelection();
 						}
 					}
+					
+					getJChbEnableDeleteUser().setSelected( false );
 				}
 			});
 		}
@@ -465,7 +474,7 @@ public class AppSelectPlayer extends JDialog
 					{
 						try
 						{
-							int userId = ConfigApp.dbAddPlayer( userName, null );
+							int userId = DataBaseSettings.dbAddPlayer( userName, null );
 							Player user = new Player( userId, userName, null); 
 							
 							addUserToTable( user );
@@ -482,5 +491,26 @@ public class AppSelectPlayer extends JDialog
 			});
 		}
 		return btAddUser;
+	}
+	
+	private JCheckBox getJChbEnableDeleteUser()
+	{
+		if( this.jchbEnableDelete == null )
+		{
+			this.jchbEnableDelete = new JCheckBox( Language.getLocalCaption( Language.ENABLE_REMOVE_PLAYER ) );
+			
+			this.jchbEnableDelete.addItemListener( new ItemListener() {
+				
+				@Override
+				public void itemStateChanged(ItemEvent e) 
+				{
+					JCheckBox ch = (JCheckBox)e.getSource();
+					
+					getBtnRemoveUser().setEnabled( ch.isSelected() );
+				}
+			});
+		}
+		
+		return this.jchbEnableDelete;
 	}
 }

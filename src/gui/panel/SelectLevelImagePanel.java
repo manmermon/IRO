@@ -49,7 +49,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -498,7 +497,15 @@ public class SelectLevelImagePanel extends JPanel
 						{	
 							if( par != null )
 							{
-								par.removeSelectedValue();
+								try
+								{																			
+									par.removeSelectedValue();
+								} 
+								catch (ConfigParameterException ex)
+								{
+									ex.printStackTrace();
+								}		
+								
 							}
 							
 							setPreviewScene();

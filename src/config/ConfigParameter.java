@@ -173,7 +173,7 @@ public class ConfigParameter
 		}
 	}
 	
-	public void removeAllOptions()
+	public void removeAllOptions() throws ConfigParameterException
 	{
 		this.removeSelectedValue();
 		
@@ -211,11 +211,23 @@ public class ConfigParameter
 			this._selectedValue = val;
 		}
 		
+		this.updateDB( val );
+	}
+	
+	public void removeSelectedValue() throws ConfigParameterException 
+	{
+		this._selectedValue = null;
+		
+		this.updateDB( null );
+	}
+	
+	private void updateDB( Object val ) throws ConfigParameterException
+	{
 		if( this._player != null && !this._player.isAnonymous() )
 		{
 			try
 			{
-				ConfigApp.dbUpdatePlayerSetting( this._player, this._ID.getID() );
+				DataBaseSettings.dbUpdatePlayerSetting( this._player, this._ID.getID() );
 			} 
 			catch (SQLException ex)
 			{
@@ -224,11 +236,6 @@ public class ConfigParameter
 				throw new ConfigParameterException( ex );
 			}
 		}
-	}
-	
-	public void removeSelectedValue()
-	{
-		this._selectedValue = null;
 	}
 	
 	public Caption get_ID()

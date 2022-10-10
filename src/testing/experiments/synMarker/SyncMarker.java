@@ -1,7 +1,7 @@
 package testing.experiments.synMarker;
 
 import config.ConfigApp;
-import lslStream.LSLStreamInfo;
+import lslInput.LSLStreamInfo;
 
 public class SyncMarker
 {

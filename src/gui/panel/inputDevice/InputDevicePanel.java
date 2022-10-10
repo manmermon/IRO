@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -43,14 +44,16 @@ import config.Settings;
 import config.language.Caption;
 import config.language.Language;
 import config.language.TranslateComponents;
-import control.controller.ControllerManager;
-import control.controller.IControllerMetadata;
+import control.inputStream.controller.ControllerManager;
 import image.icon.GeneralAppIcon;
-import lslStream.LSL;
-import lslStream.LSLStreamInfo;
-import lslStream.LSLStreamInfo.StreamType;
-import lslStream.LSLUtils;
-import lslStream.controller.LSLMetadataController;
+import lslInput.LSL;
+import lslInput.LSLStreamInfo;
+import lslInput.LSLUtils;
+import lslInput.LSLStreamInfo.StreamType;
+import lslInput.stream.IInputStreamMetadata;
+import lslInput.stream.LSLInputMetaDataStream;
+import lslInput.stream.controller.IControllerMetadata;
+import lslInput.stream.controller.LSLMetadataController;
 
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
@@ -554,7 +557,7 @@ public class InputDevicePanel extends JPanel
 						IControllerMetadata cmeta = (IControllerMetadata)val;
 
 						String uid = info.uid();
-						if( cmeta.getControllerID().equals( uid ) )
+						if( cmeta.getInputSourceID().equals( uid ) )
 						{
 							par.removeSelectedValue();
 						}
@@ -563,6 +566,7 @@ public class InputDevicePanel extends JPanel
 				else
 				{
 					IControllerMetadata meta = new LSLMetadataController( info );
+					meta.setPlayer( player );
 					par.setSelectedValue( meta );
 				}
 			}
@@ -573,10 +577,12 @@ public class InputDevicePanel extends JPanel
 		}
 	}
 	
-	private void updatePlayerBiosignalSetting( Player player, LSLStreamInfo strInfo )
+	private void updatePlayerBiosignalSetting( Player player, LSLStreamInfo info )
 	{
 		try
 		{
+			String uid = info.uid();
+			
 			for( Player pl : ConfigApp.getPlayers() )
 			{
 				Settings setplayer = ConfigApp.getPlayerSetting( pl );			
@@ -590,29 +596,49 @@ public class InputDevicePanel extends JPanel
 					par = new ConfigParameter( cap, ParameterType.OTHER );											
 				}
 
-				if( !pl.equals( player ) )
+				Object selVal = par.getSelectedValue();
+				
+				if( selVal == null )
 				{
-					Object val = par.getSelectedValue();
-					
-					if( val != null )
-					{		
-						String[] strUIDS = val.toString().split( ";" );
-						
-						val = "";
-						for( String uid : strUIDS )
+					selVal = new ArrayList< IInputStreamMetadata >();
+					par.setSelectedValue( selVal );
+				}				
+				
+				List< IInputStreamMetadata > metas = (List< IInputStreamMetadata > )selVal;				
+				
+				if( !pl.equals( player ) )
+				{	
+					if( !metas.isEmpty() )
+					{
+						Iterator< IInputStreamMetadata > itMetas = metas.iterator();
+						while( itMetas.hasNext() )
 						{
-							if( !strInfo.uid().equals( uid ) )
+							IInputStreamMetadata meta = itMetas.next();
+							
+							if( meta.getInputSourceID().equals( uid ) )
 							{
-								val += uid + ";";
-							}						
+								itMetas.remove();
+							}
 						}
-						
-						par.setSelectedValue( val );
 					}
 				}
 				else
 				{
-					par.setSelectedValue( strInfo.uid() );
+					Iterator< IInputStreamMetadata > itMetas = metas.iterator();
+					boolean find = false;
+					while( itMetas.hasNext() && !find )
+					{
+						IInputStreamMetadata meta = itMetas.next();
+						
+						find = meta.getInputSourceID().equals( uid );						
+					}
+					
+					if( !find )
+					{
+						IInputStreamMetadata meta = new LSLInputMetaDataStream( info );
+						meta.setPlayer( player );
+						metas.add( meta );
+					}
 				}
 			}
 		}
@@ -810,7 +836,7 @@ public class InputDevicePanel extends JPanel
 								IControllerMetadata meta = (IControllerMetadata)selectedController;
 								
 								String uid = info.uid();
-								if( meta.getControllerID().equals( uid ) )
+								if( meta.getInputSourceID().equals( uid ) )
 								{
 									selPlayer = p;
 									break;

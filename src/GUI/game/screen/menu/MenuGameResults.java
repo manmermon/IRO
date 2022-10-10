@@ -29,8 +29,8 @@ import gui.game.screen.level.Level;
 import GUI.layout.VerticalFlowLayout;
 import config.Player;
 import config.language.Language;
-import control.controller.IInputable;
 import control.events.InputActionEvent;
+import control.inputStream.controller.IInputable;
 import general.Tuple;
 
 public class MenuGameResults extends Scene implements IInputable, IGameMenu 

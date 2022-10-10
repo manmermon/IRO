@@ -4,18 +4,27 @@
 package statistic;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.text.AbstractDocument.Content;
+
+import biosignal.Biosignal;
 import config.Player;
-import control.controller.IControllerMetadata;
 import general.ArrayTreeMap;
 import general.ConvertTo;
+import general.StringTuple;
 import general.Tuple;
-import lslStream.LSLStreamInfo;
+import lslInput.LSLStreamInfo;
+import lslInput.LSLStreamInfo.StreamType;
+import lslInput.LSLUtils;
+import lslInput.stream.IInputStreamMetadata;
+import lslInput.stream.IInputStreamMetadata.InputSourceType;
+import lslInput.stream.controller.IControllerMetadata;
 
 /**
  * @author manuel
@@ -95,7 +104,7 @@ public class RegistrarStatistic
 	
 	private static Map< Integer, LinkedList< Double[] > > controllerData = new HashMap< Integer, LinkedList< Double[] > >();
 	
-	private static Map< Integer, LSLStreamInfo > bioLSLSettings = new HashMap< Integer, LSLStreamInfo >();
+	private static ArrayTreeMap< Integer, IInputStreamMetadata > bioLSLSettings = new ArrayTreeMap< Integer, IInputStreamMetadata >();
 	
 	private static Map< String, LinkedList< Double[] > > biosignalData = new HashMap< String, LinkedList< Double[] > >( );
 	
@@ -141,23 +150,39 @@ public class RegistrarStatistic
 		}
 	}
 	
-	public static synchronized void addBiosignalStreamSetting( int playerID, LSLStreamInfo info)
+	public static synchronized void addBiosignalStreamSetting( int playerID, IInputStreamMetadata meta)
 	{
-		if( info != null )
+		if( meta != null )
 		{
-			bioLSLSettings.put(  playerID, info );
-			String id = getBioLSLDataID( playerID, info.content_type() );
+			bioLSLSettings.put(  playerID, meta );
+			String id = getBioLSLDataID( playerID, meta );
 			if( biosignalData.get( id ) == null )
 			{
-				LinkedList< Double[] > cd = new LinkedList<Double[]>();
+				LinkedList< Double[] > cd = new LinkedList< Double[] >();
 				biosignalData.put( id, cd );
 			}
 		}
 	}
 		
-	private static String getBioLSLDataID( int playerID, String type )
+	private static String getBioLSLDataID( int playerID, IInputStreamMetadata meta )
 	{
-		String id = playerID + type;
+		String id = null;
+		
+		if( meta != null )
+		{
+			if( meta.getInputSourceType() == InputSourceType.LSLSTREAM )
+			{	
+				LSLStreamInfo strInfo = (LSLStreamInfo)meta.getInputSourseSetting();
+				String ctype = strInfo.content_type();
+				
+				Biosignal.Type bioTyope = Biosignal.getBiosignalType( ctype );
+				
+				if( bioTyope != null )
+				{
+					id = playerID + bioTyope.name() + meta.getInputSourceID();
+				}
+			}
+		}
 		
 		return id;
 	}
@@ -177,11 +202,11 @@ public class RegistrarStatistic
 		}
 	}
 	
-	public static synchronized void addBiosignalData( int playerID, String bioType, double[] ctrData )
+	public static synchronized void addBiosignalData( int playerID, IInputStreamMetadata meta, double[] ctrData )
 	{
 		if( ctrData != null && ctrData.length > 0 )
 		{
-			String id = getBioLSLDataID( playerID, bioType );
+			String id = getBioLSLDataID( playerID, meta );
 			
 			LinkedList< Double[] > cd = biosignalData.get( id );
 			if( cd == null )
@@ -248,6 +273,25 @@ public class RegistrarStatistic
 	public static LinkedList< Double[] > getControllerData( int playerID )
 	{
 		return controllerData.get( playerID );
+	}
+	
+	public static List< IInputStreamMetadata > getBiosignalStreamSettings( int playerID )
+	{
+		return bioLSLSettings.get( playerID );
+	}
+	
+	public static LinkedList< Double[] > getBiosignalData( int playerID, IInputStreamMetadata meta )
+	{
+		LinkedList< Double[] > bioData = null;
+		
+		if( meta != null )
+		{
+			String idBioData = getBioLSLDataID( playerID, meta );
+
+			bioData = biosignalData.get( idBioData );
+		}
+		
+		return bioData;
 	}
 	
 	public static List< String > getValenceArousalEmotionData( int playerID )

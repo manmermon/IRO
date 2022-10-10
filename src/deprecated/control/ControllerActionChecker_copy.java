@@ -7,7 +7,7 @@ import javax.swing.event.EventListenerList;
 import gui.game.component.IPossessable;
 import config.IOwner;
 import control.ScreenControl;
-import control.events.IInputControllerListener;
+import control.events.IEnabledInputLSLDataListener;
 import control.events.InputActionEvent;
 import control.events.InputActionListerner;
 import control.events.InputControllerEvent;
@@ -15,7 +15,7 @@ import general.NumberRange;
 import statistic.RegistrarStatistic;
 import statistic.RegistrarStatistic.GameFieldType;
 
-public class ControllerActionChecker_copy implements IInputControllerListener, IPossessable 
+public class ControllerActionChecker_copy implements IEnabledInputLSLDataListener, IPossessable 
 {	
 	public int selectedChannel = 0;
 	
@@ -306,7 +306,7 @@ public class ControllerActionChecker_copy implements IInputControllerListener, I
 	}
 
 	@Override
-	public void setEnableInputController(boolean enable)
+	public void setEnableInputStream(boolean enable)
 	{
 		this.enableCheck = enable;
 	}

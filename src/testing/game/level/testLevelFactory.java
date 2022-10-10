@@ -10,11 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import gui.game.screen.level.Level;
+import lslInput.stream.IControllerMetadata;
 import config.ConfigApp;
 import config.ConfigParameter;
 import config.Player;
 import config.Settings;
-import control.controller.IControllerMetadata;
 import deprecated.level.build.LevelMusicBuilder;
 import exceptions.ConfigParameterException;
 import general.NumberRange;

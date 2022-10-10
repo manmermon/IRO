@@ -12,8 +12,8 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import control.controller.IInputable;
 import control.events.InputActionEvent;
+import control.inputStream.controller.IInputable;
 import image.BasicPainter2D;
 
 public class Buttom extends AbstractSprite implements IInputable

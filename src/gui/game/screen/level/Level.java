@@ -54,7 +54,7 @@ import config.ConfigParameter;
 import config.IOwner;
 import config.Player;
 import config.Settings;
-import control.controller.ControllerManager;
+import control.inputStream.controller.ControllerManager;
 import control.music.MusicPlayerControl;
 import general.ArrayTreeMap;
 import general.NumberRange;
@@ -208,7 +208,13 @@ public class Level extends Scene implements IPausable, IStoppable
 					double startDelay = 0;
 					
 					int playerIndex = -1;
-					int railHeigh = getStave().getRailHeight();
+					Stave stv = getStave();
+					int railHeigh = getSize().height / 7; 
+					if( stv != null )
+					{
+						railHeigh = stv.getRailHeight();
+					}
+					
 					int numPlayers = Level.this.playerSettings.size();
 					int padRail = 0;// (numPlayers < 6 ) ? railHeigh : 0;
 					/*										
@@ -243,7 +249,10 @@ public class Level extends Scene implements IPausable, IStoppable
 						{	
 							if( firstSegment )
 							{
-								startDelay = playerDelay[ playerIndex ];
+								if( playerDelay != null )
+								{
+									startDelay = playerDelay[ playerIndex ];
+								}
 							}
 							
 							NumberTuple plTimes = playerTimes.get( player.getId() );
