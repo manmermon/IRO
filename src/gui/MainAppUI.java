@@ -44,6 +44,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -397,6 +398,7 @@ public class MainAppUI extends JFrame
 		{
 			this.panelMenu = new JPanel();
 			this.panelMenu.setLayout(new BorderLayout(0, 0));
+			
 			this.panelMenu.add( this.getPanelPlay(), BorderLayout.WEST);
 			this.panelMenu.add( this.getMultiplayerPanel(), BorderLayout.EAST );
 			//this.panelMenu.add( this.getAddPlayerButton(), BorderLayout.EAST );
@@ -866,9 +868,13 @@ public class MainAppUI extends JFrame
 			this.panelPlay = new JPanel( new FlowLayout( FlowLayout.RIGHT ) );			
 			
 			this.panelPlay.add( this.getBtnPlay() );
+			
 			this.panelPlay.add( this.getMuteSession() );
 			this.panelPlay.add( this.getContinuousSession() );
 			this.panelPlay.add( this.getSamTest() );
+			JSeparator sp = new JSeparator( JSeparator.VERTICAL );
+			sp.setPreferredSize( new Dimension( 2, this.getSamTest().getPreferredSize().height ) );
+			this.panelPlay.add( sp );
 			this.panelPlay.add( this.getSessionTimeLabel() );
 			this.panelPlay.add( this.getSessionTimeSpinner() );
 		}
