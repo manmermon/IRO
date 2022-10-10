@@ -787,18 +787,20 @@ public class InputDevicePanel extends JPanel
 		//this.lslStreamInfo = LSL.resolve_streams();
 		LSLStreamInfo[] streams = LSL.resolve_streams( );
 		
-		JTable t = this.getInputControllerTable();
-		DefaultTableModel tm = (DefaultTableModel)t.getModel();
-		t.clearSelection();
+		JTable ctrTable = this.getInputControllerTable();
+		ctrTable.setVisible( false );
+		DefaultTableModel tm = (DefaultTableModel)ctrTable.getModel();
+		ctrTable.clearSelection();
 		
 		for( int i = tm.getRowCount() -1; i >= 0; i-- )
 		{
 			tm.removeRow( i );
 		}
 		
-		JTable bioT = this.getInputBiosignalTable();
-		DefaultTableModel bioTm = (DefaultTableModel)bioT.getModel();
-		bioT.clearSelection();
+		JTable bioTable = this.getInputBiosignalTable();
+		bioTable.setVisible( false );
+		DefaultTableModel bioTm = (DefaultTableModel)bioTable.getModel();
+		bioTable.clearSelection();
 		
 		for( int i = bioTm.getRowCount() -1; i >= 0; i-- )
 		{
@@ -810,160 +812,31 @@ public class InputDevicePanel extends JPanel
 		
 		for( LSLStreamInfo info : streams )
 		{
-			StreamType strType = LSLUtils.getStreamType( info.content_type() );
+			String uid = info.uid();
+			String contentType = info.content_type();
+			StreamType strType = LSLUtils.getStreamType( contentType );
 			
 			if( strType == StreamType.CONTROLLER || strType == StreamType.CONTROLLER_BIOSIGNAL )
 			{				
 				ctrStreams.add( info );
 				
-				Object selectedController = null;
-				Set< Player > players = ConfigApp.getPlayers();
-				
-				Player selPlayer = NON_SELECTED_PLAYER;
-				for( Player p : players )
-				{
-					Settings cfg = ConfigApp.getPlayerSetting( p );
-					if( cfg != null )
-					{
-						ConfigParameter par = cfg.getParameter( ConfigApp.SELECTED_CONTROLLER );						
-						
-						if( par != null )
-						{
-							selectedController = par.getSelectedValue();
-							
-							if( selectedController != null )
-							{
-								IControllerMetadata meta = (IControllerMetadata)selectedController;
-								
-								String uid = info.uid();
-								if( meta.getInputSourceID().equals( uid ) )
-								{
-									selPlayer = p;
-									break;
-								}
-							}
-						}						
-						
-					}
-				}
+				Player selPlayer = findStreamOwner( uid, ConfigApp.SELECTED_CONTROLLER );
+				selPlayer = ( selPlayer == null ) ? NON_SELECTED_PLAYER : selPlayer;				
 				
 				Object[] row = new Object[] { selPlayer, info.channel_count(), info.name(), info.uid() };
 				
-				tm.addRow( row );
-				
-				if( strType == StreamType.CONTROLLER_BIOSIGNAL )
-				{
-					bioStreams.add( info );
-					
-					Settings cfg = ConfigApp.getPlayerSetting( selPlayer );
-					
-					if( cfg != null )
-					{
-						ConfigParameter par = cfg.getParameter( ConfigApp.SELECTED_BIOSIGNAL );						
-						
-						if( par != null )
-						{	
-							List< Object > vals = par.getAllOptions();
-							
-							if( vals != null && !vals.isEmpty() )
-							{
-								boolean find = false;
-								
-								for( Object val : vals )
-								{
-									LSLStreamInfo meta = (LSLStreamInfo)val;
-									
-									String uid = info.uid();
-									find = !meta.uid().equals( uid );
-									
-									if( find )
-									{
-										break;
-									}
-								}
-								
-								if( !find )
-								{
-									selPlayer = NON_SELECTED_PLAYER;
-								}
-							}
-							else
-							{
-								selPlayer = NON_SELECTED_PLAYER;
-							}
-							
-							
-						}
-						else
-						{
-							selPlayer = NON_SELECTED_PLAYER;
-						}
-						
-					}
-					else
-					{
-						selPlayer = NON_SELECTED_PLAYER;
-					}
-					
-					row = new Object[] { selPlayer, info.name(), info.uid() };
-					bioTm.addRow( row );
-				}
+				tm.addRow( row );				
 			}
-			else if( strType == StreamType.BIOSIGNAL )
-			{
-				
+			
+			
+			if( strType == StreamType.BIOSIGNAL || strType == StreamType.CONTROLLER_BIOSIGNAL)
+			{				
 				bioStreams.add( info );
 				
-				Set< Player > players = ConfigApp.getPlayers();
-				
-				Player selPlayer = NON_SELECTED_PLAYER;
-				
-				bioPlayer:
-				for( Player p : players )
-				{
-					Settings cfg = ConfigApp.getPlayerSetting( p );
-					if( cfg != null )
-					{
-						ConfigParameter par = cfg.getParameter( ConfigApp.SELECTED_BIOSIGNAL );
-						
-						if( par != null )
-						{
-							/*
-							selectedBiosignal = par.getSelectedValue();
-							
-							if( selectedBiosignal != null )
-							{
-								LSLStreamInfo meta = (LSLStreamInfo)selectedBiosignal;
-								
-								if( meta.uid().equalsIgnoreCase( info.uid() ) )
-								{
-									selPlayer = p;
-									break;
-								}
-							}
-							//*/
-							
-							Object val = par.getSelectedValue();
-							
-							if( val != null )
-							{
-								String[] uids = val.toString().split( ";" );
-								
-								for( String uid : uids )
-								{
-									if( info.uid().equals( uid ) )
-									{
-										selPlayer = p;										
-										break bioPlayer;
-									}
-								}
-							}
-						}
-					}
-				}				
+				Player selPlayer = findStreamOwner( uid, ConfigApp.SELECTED_BIOSIGNAL );
+				selPlayer = ( selPlayer == null ) ? NON_SELECTED_PLAYER : selPlayer;	
 				
 				Object[] row = new Object[] { selPlayer, info.name(), info.uid() };
-				
 				bioTm.addRow( row );
 			}
 		}
@@ -973,13 +846,13 @@ public class InputDevicePanel extends JPanel
 		
 		if( streams.length == 1 )
 		{
-			if( t.getRowCount() > 0 )
+			if( ctrTable.getRowCount() > 0 )
 			{
-				t.addRowSelectionInterval( 0, 0 );
+				ctrTable.addRowSelectionInterval( 0, 0 );
 				Set< Player > players = ConfigApp.getPlayers();
 				if( players.size() == 1 )
 				{
-					JTableHeader th = t.getTableHeader();
+					JTableHeader th = ctrTable.getTableHeader();
 					TableColumnModel tcm = th.getColumnModel();				
 					TableColumn tc = tcm.getColumn( 0 );
 					DefaultCellEditor ed = (DefaultCellEditor)tc.getCellEditor();
@@ -987,12 +860,65 @@ public class InputDevicePanel extends JPanel
 					
 					Player player = players.iterator().next();
 					cbb.setSelectedItem( player );
-					t.setValueAt( player,  0, 0 );
+					ctrTable.setValueAt( player,  0, 0 );
 				}
 			}
 		}
+		
+		ctrTable.setVisible( true );
+		bioTable.setVisible( true );
 	}
 
+	private Player findStreamOwner( String uid, String cfgID )
+	{
+		Player selPlayer = null;
+		
+		Set< Player > players = ConfigApp.getPlayers();
+		
+		loop1:
+		for( Player p : players )
+		{
+			Settings cfg = ConfigApp.getPlayerSetting( p );
+			if( cfg != null )
+			{
+				ConfigParameter par = cfg.getParameter( cfgID );						
+				
+				if( par != null )
+				{
+					Object selectedStream = par.getSelectedValue();
+										
+					if( selectedStream != null )
+					{
+						if( selectedStream instanceof List )
+						{
+							for( IInputStreamMetadata meta : (List< IInputStreamMetadata >)selectedStream )
+							{
+								if( meta.getInputSourceID().equals( uid ) )
+								{
+									selPlayer = p;
+									break loop1;
+								}
+							}
+						}
+						else
+						{
+							IInputStreamMetadata meta = (IInputStreamMetadata)selectedStream;
+							
+							if( meta.getInputSourceID().equals( uid ) )
+							{
+								selPlayer = p;
+								break loop1;
+							}
+						}
+					}
+				}						
+				
+			}
+		}
+		
+		return selPlayer;
+	}
+	
 	private void showInputControllerInfo( LSLStreamInfo info )
 	{	
 		JPanel panel = this.getPanelInputValues();
