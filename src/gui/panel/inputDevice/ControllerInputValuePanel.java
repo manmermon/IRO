@@ -4,6 +4,7 @@
 package gui.panel.inputDevice;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 
@@ -81,6 +82,9 @@ public class ControllerInputValuePanel extends JPanel implements IEnabledInputLS
 			TwoWayProgressBar twpb = new TwoWayProgressBar();
 			JLabel lbmin = new JLabel();
 			JLabel lbmax = new JLabel();
+			
+			twpb.setBackground( Color.WHITE );
+			twpb.setBarColor( Color.CYAN );
 			
 			this._2progBar[ i ] = twpb;
 			
