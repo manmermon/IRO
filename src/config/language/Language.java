@@ -99,6 +99,9 @@ public class Language
 	public static final String ACTION_COLOR = "ACTION_COLOR";
 	public static final String WAITING_ACTION_COLOR = "WAITING_ACTION_COLOR";
 	
+	public static final String TASK_BLOCK_TIME = "TASK_BLOCK_TIME";
+	public static final String REST_TASK_TIME = "REST_TASK_TIME";
+	
 	public static final String INPUT = "INPUT";
 	public static final String VALUE = "VALUE";
 	public static final String MINIMUM = "MIN";
@@ -157,6 +160,14 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( TASK_BLOCK_TIME, defaultLanguage, "Task block time" );
+		cap.setCaption( esEs, "Bloque de actividad (s)" );
+		captions.put( TASK_BLOCK_TIME, cap );
+		
+		cap = new Caption( REST_TASK_TIME, defaultLanguage, "Rest time (s)" );
+		cap.setCaption( esEs, "Bloque de descanso (s)" );
+		captions.put( REST_TASK_TIME, cap );
 		
 		cap = new Caption( DYNAMIC, defaultLanguage, "Dynamic" );
 		cap.setCaption( esEs, "Din\u00e1mico");

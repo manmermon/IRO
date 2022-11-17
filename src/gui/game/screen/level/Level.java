@@ -142,7 +142,7 @@ public class Level extends Scene implements IPausable, IStoppable
 	
 	private boolean firstPlay = true;
 	
-	private double stepMusicTime = 45D; 
+	private double stepMusicTime = 45D;
 	
 	private Object lock = new Object();
 	
@@ -260,6 +260,9 @@ public class Level extends Scene implements IPausable, IStoppable
 							double reactionTime = plTimes.t1.doubleValue();
 							double recoverTime = plTimes.t2.doubleValue();
 							
+							double taskTimeBlock = (Double)cfg.getParameter( ConfigApp.TASK_BLOCK_TIME ).getSelectedValue();
+							double restTimeBlock = (Double)cfg.getParameter( ConfigApp.REST_TASK_TIME ).getSelectedValue();
+							
 							double stepTime = reactionTime + recoverTime;
 							double initTime  =  firstSegment ? 0 : Double.MAX_VALUE;
 													
@@ -314,7 +317,7 @@ public class Level extends Scene implements IPausable, IStoppable
 							
 							if( end - init > stepTime || firstSegment)
 							{	
-								List< MusicNoteGroup > playerNotes = setNotes( init, end, stepTime, 0, vel );
+								List< MusicNoteGroup > playerNotes = setNotes( init, end, stepTime, taskTimeBlock, restTimeBlock, 0, vel );
 								
 								double spaceBetweenNotes = stepTime * vel;
 														
@@ -384,6 +387,7 @@ public class Level extends Scene implements IPausable, IStoppable
 									}
 									
 									note.setScreenLocation( loc );
+									
 									addNote( note );
 								}
 							}
@@ -1858,8 +1862,7 @@ public class Level extends Scene implements IPausable, IStoppable
 						sessionDuration -= ms.getDuration();
 					}
 					
-					ms.cutSong( songDuration );
-					
+					ms.cutSong( songDuration );					
 				}
 				catch (InvalidMidiDataException | IOException e) 
 				{
@@ -2149,12 +2152,20 @@ public class Level extends Scene implements IPausable, IStoppable
 	}
 	
 	private List< MusicNoteGroup > setNotes( double initMusicTime, double endMusicTime, double stepMusicTime								
+											, double taskTimeBlock, double restTimeBlock
 											, double padding, double vel
 											)
 	{
 		List< MusicNoteGroup > notes = new ArrayList< MusicNoteGroup >();
 		if( this.currentMusic != null )
-		{	
+		{
+			double timeBlock = taskTimeBlock + restTimeBlock;
+			
+			if( timeBlock <= 0 )
+			{
+				timeBlock = 0;
+			}
+			
 			for( double timeMusic = initMusicTime
 					; timeMusic < endMusicTime
 					; timeMusic += stepMusicTime )
@@ -2198,6 +2209,18 @@ public class Level extends Scene implements IPausable, IStoppable
 																, vel
 																, false
 																);
+				
+				
+				if( timeBlock > 0 )
+				{
+					double aux = timeMusic / timeBlock;
+					aux = timeMusic - Math.floor( aux ) * timeBlock;
+					if( aux > taskTimeBlock ) 
+					{
+						System.out.println("Level.setNotes() " + aux);
+						noteSprite.setGhost( true );
+					}
+				}
 	
 				noteSprite.setZIndex( Level.PLANE_NOTE );
 				

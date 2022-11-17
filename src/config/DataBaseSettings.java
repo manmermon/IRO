@@ -30,7 +30,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import org.w3c.dom.UserDataHandler;
 
 import biosignal.Biosignal;
 import config.ConfigParameter.ParameterType;
@@ -38,7 +37,6 @@ import general.ConvertTo;
 import general.Tuple;
 import image.BasicPainter2D;
 import image.icon.GeneralAppIcon;
-import lslInput.LSLUtils;
 import lslInput.LSLStreamInfo.StreamType;
 import lslInput.stream.IInputStreamMetadata;
 import lslInput.stream.controller.IControllerMetadata;
@@ -133,6 +131,8 @@ public class DataBaseSettings
 		fieldType.put( ConfigApp.SONG_LIST, String.class );
 		fieldType.put( ConfigApp.BACKGROUND_IMAGE, String.class );
 		fieldType.put( ConfigApp.NOTE_IMAGE, String.class );
+		fieldType.put( ConfigApp.TASK_BLOCK_TIME, Integer.class );
+		fieldType.put( ConfigApp.REST_TASK_TIME, Integer.class );		
 		tableFields.put( settingsTableName, fieldType );
 
 		//**************
@@ -1194,6 +1194,9 @@ public class DataBaseSettings
 					gss.setRecoverLevel( rs2.getDouble("minInputValue" ) );					
 					gss.setSelectedChannel( rs2.getInt( "selectedChannel" ) );
 					gss.setTargetTimeInLevelAction( rs2.getDouble( "timeInInputTarget" ) );
+					
+					gss.setTaskBlockTime( rs.getInt( ConfigApp.TASK_BLOCK_TIME ) );
+					gss.setRestBlockTime( rs2.getInt( ConfigApp.REST_TASK_TIME ) );
 				}
 
 				sqlQuery = sqlStatistic + sessionID;
@@ -1292,9 +1295,11 @@ e.printStackTrace();
 						+ ");";
 
 		String sqlSettingFields =  USER_ID_FOREIGN + " integer "
-							+ ", " + ConfigApp.REACTION_TIME + " real CHECK (reactionTime > 0)"
-							+ ", " + ConfigApp.RECOVER_TIME + " real CHECK (recoverTime >= 0)"
-							+ ", " + ConfigApp.MOV_REPETITIONS + " integer CHECK (repetitions > 0)"
+							+ ", " + ConfigApp.REACTION_TIME + " real CHECK (" + ConfigApp.REACTION_TIME +"> 0)"
+							+ ", " + ConfigApp.RECOVER_TIME + " real CHECK (" + ConfigApp.RECOVER_TIME + ">= 0)"
+							+ ", " + ConfigApp.MOV_REPETITIONS + " integer CHECK ( " + ConfigApp.MOV_REPETITIONS + " > 0)"
+							+ ", " + ConfigApp.TASK_BLOCK_TIME + " integer CHECK (" + ConfigApp.TASK_BLOCK_TIME + "> 0)"
+							+ ", " + ConfigApp.REST_TASK_TIME + " integer CHECK (" + ConfigApp.REST_TASK_TIME + ">= 0)"
 							+ ", " + ConfigApp.PREACTION_COLOR + " integer"
 							+ ", " + ConfigApp.WAITING_ACTION_COLOR + " integer"
 							+ ", " + ConfigApp.ACTION_COLOR + " integer"

@@ -26,6 +26,9 @@ public class GameSessionStatisticPlayer
 	private final String RECOVER_TIME = "RECOVER_TIME";
 	private final String REPETITIONS = "REPETITIONS";
 	
+	private final String TASK_BLOCK_TIME = "TASK_BLOCK";
+	private final String REST_TASK_BLOCK = "REST_TASK_BLOCK";
+	
 	private ArrayTreeMap< Long, String > gameEvent;
 		
 	public GameSessionStatisticPlayer( long id, int player )
@@ -223,7 +226,35 @@ public class GameSessionStatisticPlayer
 		return r;
 	}
 	
+	
+	public void setTaskBlockTime( int taskBlockTime )
+	{
+		this.sessionInfo.put( this.TASK_BLOCK_TIME, taskBlockTime );
+	}
+	
+	public int getTaskBlockTime( )
+	{
+		Number time = this.sessionInfo.get( this.TASK_BLOCK_TIME );
 		
+		int r = ( time != null ) ? time.intValue() : 0;
+		
+		return r;
+	}
+	
+	public void setRestBlockTime( int time )
+	{
+		this.sessionInfo.put( this.REST_TASK_BLOCK, time );
+	}
+	
+	public int getRestBlockTime( )
+	{
+		Number time = this.sessionInfo.get( this.REST_TASK_BLOCK );
+		
+		int r = ( time != null ) ? time.intValue() : 0;
+		
+		return r;
+	}
+	
 	//
 	// GAME EVENTS
 	//****************

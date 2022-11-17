@@ -47,7 +47,7 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2022, 10 - 1, 14 );
+	public static final Calendar buildDate = new GregorianCalendar( 2022, 11 - 1, 17 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
@@ -125,6 +125,10 @@ public class ConfigApp
 	public static final String LIMIT_SESSION_TIME = "sessionTime";
 	
 	public static final String MUTE_SESSION = "MUTE_SESSION";
+	
+	public static final String TASK_BLOCK_TIME = "taskBlockTime";
+	
+	public static final String REST_TASK_TIME = "restTaskTime";
 	
 	///////////
 	
@@ -350,6 +354,14 @@ public class ConfigApp
 		//par = loadDefaultSessionTime();
 		//cfg.setParameter( par.get_ID().getID(), par );
 		
+		par = loadDefaultTaskBlockTime();
+		cfg.setParameter( par.get_ID().getID(), par );
+		
+		
+		par = loadDefaultRestTaskTime();
+		cfg.setParameter( par.get_ID().getID(), par );
+		
+		
 		return cfg;
 	}
 	
@@ -440,7 +452,7 @@ public class ConfigApp
 		NumberRange rng = new NumberRange( 0.5, Double.MAX_VALUE );
 		ConfigParameter par = new ConfigParameter( id, rng );
 		par.setSelectedValue( 2D );
-		par.setPriority( 9 );
+		par.setPriority( 10 );
 		
 		return par;
 	}
@@ -577,6 +589,36 @@ public class ConfigApp
 		ConfigParameter par = new ConfigParameter( id, r );
 		par.setSelectedValue( 1D );
 		par.setPriority( 7 );
+
+		return par;
+
+	}
+	
+	private static ConfigParameter loadDefaultTaskBlockTime() throws ConfigParameterException
+	{	
+		Caption id = getCaptions( Language.TASK_BLOCK_TIME );
+		id.setID( TASK_BLOCK_TIME );
+
+		NumberRange r = new NumberRange( 1D, Double.MAX_VALUE);
+
+		ConfigParameter par = new ConfigParameter( id, r );
+		par.setSelectedValue( 30D );
+		par.setPriority( 12 );
+
+		return par;
+
+	}
+	
+	private static ConfigParameter loadDefaultRestTaskTime() throws ConfigParameterException
+	{	
+		Caption id = getCaptions( Language.REST_TASK_TIME );
+		id.setID( REST_TASK_TIME );
+
+		NumberRange r = new NumberRange( 0D, Double.MAX_VALUE);
+
+		ConfigParameter par = new ConfigParameter( id, r );
+		par.setSelectedValue( 0D );
+		par.setPriority( 11  );
 
 		return par;
 

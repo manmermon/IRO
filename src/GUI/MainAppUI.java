@@ -72,6 +72,7 @@ import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
 import image.icon.GeneralAppIcon;
 
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -270,10 +271,11 @@ public class MainAppUI extends JFrame
 		{
 			this.splitPanelMain = new JSplitPane();
 			
-			JScrollPane scroll = new JScrollPane( this.getSettingPanel() );
-			scroll.getVerticalScrollBar().setUnitIncrement( 10 );
+			//JScrollPane scroll = new JScrollPane( this.getSettingPanel() );
+			//scroll.getVerticalScrollBar().setUnitIncrement( 10 );			
+			//this.splitPanelMain.setLeftComponent( scroll );
 			
-			this.splitPanelMain.setLeftComponent( scroll );
+			this.splitPanelMain.setLeftComponent( this.getSettingPanel() );
 			this.splitPanelMain.setRightComponent( InputDevicePanel.getInstance( this ) );
 			
 			this.splitPanelMain.setResizeWeight( 0.5 );
@@ -288,6 +290,7 @@ public class MainAppUI extends JFrame
 		if( this.panelSettings == null )
 		{
 			this.panelSettings = new JPanel( new BorderLayout() );
+			//this.panelSettings.setBorder( BorderFactory.createLineBorder(Color.RED));
 			
 			this.panelSettings.add( this.getPanelMenu(), BorderLayout.NORTH );
 			//this.contentPane.add( this.getSettingPanel(), BorderLayout.CENTER );
@@ -300,7 +303,7 @@ public class MainAppUI extends JFrame
 			splitPanel.setLeftComponent( scroll );
 			splitPanel.setRightComponent( this.getSongPanel() );
 			
-			//splitPanel.setResizeWeight( 0.5 );
+			splitPanel.setResizeWeight( 0.75 );
 			//splitPanel.setOneTouchExpandable( true );
 			
 			this.panelSettings.add( splitPanel, BorderLayout.CENTER );

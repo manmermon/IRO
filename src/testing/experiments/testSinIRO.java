@@ -1,6 +1,7 @@
 package testing.experiments;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -19,6 +20,9 @@ import gui.game.screen.level.music.BackgroundMusic;
 import gui.panel.SelectSongPanel;
 import testing.experiments.synMarker.SyncMarker;
 import testing.experiments.synMarker.SyncMarker.Marker;
+import thread.timer.ActionTimerThread;
+import thread.timer.IAction;
+import thread.timer.Timer;
 import tools.MusicSheetTools;
 
 import javax.swing.JLabel;
@@ -30,6 +34,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
 import java.awt.event.ActionEvent;
+import javax.swing.JCheckBox;
+import java.awt.FlowLayout;
 
 public class testSinIRO extends JFrame {
 
@@ -39,13 +45,26 @@ public class testSinIRO extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel contentPane;
-	private final JLabel lblBeep = new JLabel("Periodo Beeps (s): ");
+	private final JLabel lblBeep = new JLabel("Periodo (s): ");
 	private final JPanel panel = new JPanel();
 	private final JSpinner spinner = new JSpinner();
 	private final JPanel panel_1 = new JPanel();
 	private final JToggleButton tglbtnStart = new JToggleButton("Start");
 	
+	private JPanel mainPane = new JPanel( new BorderLayout() );
+	private final JCheckBox chckbxBeepAct = new JCheckBox("Activar Beep");
 	private DisabledPanel disablePane = new DisabledPanel( SelectSongPanel.getInstance() );
+	
+	private Timer taskTimer = new Timer( 750, false, new ActionTimerThread( new IAction() 
+	{		
+		@Override
+		public void execute() 
+		{
+			mainPane.setBackground( Color.WHITE );
+		}
+	}) );
+	private final JCheckBox chckbxSem = new JCheckBox("Sem\u00E1foro");
+	private final JPanel panel_2 = new JPanel();
 	
 	/**
 	 * Launch the application.
@@ -72,6 +91,20 @@ public class testSinIRO extends JFrame {
 	
 	private void initialize() {
 		
+		synchronized( this )
+		{
+			try 
+			{
+				taskTimer.startThread();
+				super.wait( 100L );
+				taskTimer.stopTimer();
+			}
+			catch (Exception e2) 
+			{
+				e2.printStackTrace();
+			}
+		}
+		
 		SyncMarker.getInstance( "No"+ConfigApp.shortNameApp );
 		setTitle( "Test sin " + ConfigApp.shortNameApp );
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -81,13 +114,14 @@ public class testSinIRO extends JFrame {
 		this.contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(this.contentPane);
 		
-		this.contentPane.add( this.disablePane, BorderLayout.CENTER );
+		this.mainPane.add( disablePane );
+		this.mainPane.setBackground( Color.WHITE );
+		this.contentPane.add( this.mainPane, BorderLayout.CENTER );
 		
 		this.contentPane.add(this.panel, BorderLayout.NORTH);
 		this.panel.setLayout(new BorderLayout(0, 0));
 		this.panel.add(this.lblBeep, BorderLayout.WEST );
-		
-		
+						
 		this.spinner.setModel(new SpinnerNumberModel(new Double(1), 0D, null, new Double(0.5)));
 				
 		this.spinner.addMouseWheelListener( new MouseWheelListener() 
@@ -120,6 +154,14 @@ public class testSinIRO extends JFrame {
 		});
 		
 		this.panel.add(this.spinner, BorderLayout.CENTER);
+		FlowLayout flowLayout = (FlowLayout) this.panel_2.getLayout();
+		flowLayout.setVgap(0);
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		
+		this.panel.add(this.panel_2, BorderLayout.EAST);
+		this.panel_2.add(this.chckbxBeepAct);
+		this.chckbxBeepAct.setSelected(true);
+		this.panel_2.add(this.chckbxSem);
 		
 		this.contentPane.add(this.panel_1, BorderLayout.SOUTH);
 		this.tglbtnStart.addActionListener(new ActionListener() 
@@ -134,9 +176,19 @@ public class testSinIRO extends JFrame {
 					SelectSongPanel.getInstance().setEnabled( false );
 					tglbtnStart.setText( "Stop" );
 					
-					disablePane.setEnabled( false );
+					mainPane.setVisible( false );
+					mainPane.setBackground( Color.WHITE );
+					
+					disablePane.setEnabled( false );										
+					disablePane.setVisible( !chckbxSem.isSelected() );
+					//mainPane.removeAll();
+					
+					mainPane.setVisible( true );
 					
 					spinner.setEnabled( false );
+					chckbxBeepAct.setEnabled( false );
+					
+					chckbxSem.setEnabled( false );
 					
 					Player player = ConfigApp.getFirstPlayer();
 					Settings cfg = null;
@@ -295,6 +347,7 @@ public class testSinIRO extends JFrame {
 						
 						if( waitTime > 0 )
 						{
+							final boolean beepAct = chckbxBeepAct.isSelected();
 							beepThr = new Thread()
 							{
 								boolean stop = false;
@@ -338,7 +391,18 @@ public class testSinIRO extends JFrame {
 	
 											delay = System.currentTimeMillis();
 											
-											beep.play();
+											if( beepAct )
+											{
+												beep.play();
+											}
+											
+											
+											taskTimer.stopTimer();
+											
+											mainPane.setBackground( Color.GREEN );
+											
+											taskTimer.restartTimer();
+											
 										}
 										catch ( InterruptedException e) 
 										{
@@ -396,7 +460,17 @@ public class testSinIRO extends JFrame {
 					tglbtnStart.setText( "Start" );
 					
 					spinner.setEnabled( true );
-					disablePane.setEnabled( true );
+					mainPane.setEnabled( true );
+					chckbxBeepAct.setEnabled( true );
+					
+					chckbxSem.setEnabled( true );
+					
+					mainPane.setVisible( false );
+					//mainPane.add( SelectSongPanel.getInstance() );
+					disablePane.setEnabled( true );										
+					disablePane.setVisible( true );
+					
+					mainPane.setVisible( true );
 				}
 			}
 		});

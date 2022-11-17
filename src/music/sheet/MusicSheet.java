@@ -82,7 +82,7 @@ public class MusicSheet
 				ctrack.setInstrument( track.getInstrument() );
 				ctrack.setTempo( track.getTempo() );
 				ctrack.setVoice( track.getVoice() );
-				
+								
 				for( Double t : trackNotes.keySet() )
 				{
 					double tt = t * wholeDuration;
@@ -166,7 +166,8 @@ public class MusicSheet
 		{
 			if( t < ( track.getStartTimeFirstNote() + track.getTrackDuration() ) )
 			{
-				t = track.getTrackDuration() + track.getStartTimeFirstNote();
+				t = track.getTrackDuration();
+				t += track.getStartTimeFirstNote();
 			}
 		}
 		
@@ -181,11 +182,30 @@ public class MusicSheet
 			
 			this.tracks.clear();
 			
-			for( IROTrack t : tracks )
-			{
-				this.tracks.put( t.getID(), t );
+			for( IROTrack track : tracks )
+			{				
+				double wholeDuration = MusicSheetTools.getWholeTempo2Second( track.getTempo() );
+				
+				ArrayTreeMap< Double, Note > trackNotes = track.getTrackNotes();
+								
+				for( Double t : trackNotes.keySet() )
+				{
+					double noteInitTime = t * wholeDuration;
+					for( Note note : trackNotes.get( t ) )
+					{
+						double noteDuration = note.getDuration() * wholeDuration;
+						double noteEnd = noteInitTime + noteDuration ; 
+						if( noteEnd > duration )
+						{
+							double newNoteDuration = ( duration - noteInitTime );
+							newNoteDuration /= wholeDuration;
+							note.setDuration( newNoteDuration );
+						}
+					}	
+				}
+				
+				this.tracks.put( track.getID(), track );
 			}
-			
 		}
 	}
 }
