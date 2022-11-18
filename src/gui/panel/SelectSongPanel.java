@@ -180,7 +180,7 @@ public class SelectSongPanel extends JPanel
 			
 			if( songs != null )
 			{
-				String songList = songs.toString().trim().replaceAll( "\\s+", "" );
+				String songList = songs.toString().trim();//.replaceAll( "\\s+", "" );
 				
 				if( !songList.isEmpty() )
 				{	

@@ -32,7 +32,6 @@ import GUI.buttom.NoneSelectedButtonGroup;
 import config.Player;
 import gui.panel.samSurvey.EmotionParameter.Emotion;
 import image.BasicPainter2D;
-import image.icon.GeneralAppIcon;
 import statistic.RegistrarStatistic;
 
 public class SamSurvey extends JPanel 
@@ -404,7 +403,7 @@ public class SamSurvey extends JPanel
 		BoxLayout ly = new BoxLayout( samPanel, BoxLayout.Y_AXIS );
 		samPanel.setLayout( ly );		
 		
-		int N = 10;
+		int N = 3;
 		
 		JPanel panel = this.getSAMPictsPanel( 0, N );		
 		samPanel.add( panel );
