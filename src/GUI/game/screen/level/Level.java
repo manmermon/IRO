@@ -2071,18 +2071,45 @@ public class Level extends Scene implements IPausable, IStoppable
 		final int hPad = 10;
 		Point2D.Double screenLoc = new Point2D.Double( hPad, hPad );
 		
+		double delayMusicTime = 0;
+		for( int indexMusicSheetPlayers = 0; indexMusicSheetPlayers < this.playerSettings.size(); indexMusicSheetPlayers++ )
+		{
+			Settings playerSetting = this.playerSettings.get( indexMusicSheetPlayers );
+			
+			Number reaction = (Number)playerSetting.getParameter( ConfigApp.REACTION_TIME ).getSelectedValue();
+			Number recover = (Number)playerSetting.getParameter( ConfigApp.RECOVER_TIME ).getSelectedValue();
+			
+			double actionTime = reaction.doubleValue() + recover.doubleValue();
+			
+			if( delayMusicTime < actionTime )
+			{
+				delayMusicTime = actionTime;
+			}
+		}
+		
 		for( int indexMusicSheetPlayers = 0; indexMusicSheetPlayers < this.playerSettings.size(); indexMusicSheetPlayers++ )
 		{	
 			Settings playerSetting = this.playerSettings.get( indexMusicSheetPlayers );
 			
 			Number reaction = (Number)playerSetting.getParameter( ConfigApp.REACTION_TIME ).getSelectedValue();
 			Number recover = (Number)playerSetting.getParameter( ConfigApp.RECOVER_TIME ).getSelectedValue();
+			//int numNotes = (int)Math.ceil( ( totalSessionTime - this.playerDelay[ indexMusicSheetPlayers ] ) / ( reaction.doubleValue() + recover.doubleValue() ) );			
+			//numNotes = ( numNotes < 1 ) ? 1 : numNotes;
 			
-			int numNotes = (int)Math.ceil( ( totalSessionTime - this.playerDelay[ indexMusicSheetPlayers ] ) / ( reaction.doubleValue() + recover.doubleValue() ) );			
+			Number taskBlockTime = (Number)playerSetting.getParameter( ConfigApp.TASK_BLOCK_TIME).getSelectedValue();
+			Number restBlockTime = (Number)playerSetting.getParameter( ConfigApp.REST_TASK_TIME ).getSelectedValue();
+			
+			double actionTime = reaction.doubleValue() + recover.doubleValue();
+			
+			double numNotesInOneBlock = taskBlockTime.doubleValue() / actionTime;
+			double numBlocks = ( totalSessionTime - this.playerDelay[ indexMusicSheetPlayers ] -delayMusicTime ) / ( taskBlockTime.doubleValue() + restBlockTime.doubleValue() );
+			
+			int numNotes = (int)Math.ceil( numNotesInOneBlock * numBlocks );
 			numNotes = ( numNotes < 1 ) ? 1 : numNotes;
-				
-			
+						
 			Player player = playerSetting.getPlayer();
+			
+			System.out.println("Level.setScoreAndInputGoal() [Player, numNotes]=["+player+", " + numNotes);
 			
 			int staveRailH = 1;
 			Rectangle staveBounds = new Rectangle();
@@ -2256,7 +2283,7 @@ public class Level extends Scene implements IPausable, IStoppable
 			//*/
 						
 			double timeMusic = initMusicTime;			
-			System.out.println("Level.setNotes() [" + initMusicTime +", " +endMusicTime);
+			//System.out.println("Level.setNotes() [" + initMusicTime +", " +endMusicTime);
 			while( timeMusic < endMusicTime )
 			{						
 				String trackID = "";
@@ -2307,10 +2334,12 @@ public class Level extends Scene implements IPausable, IStoppable
 				double prevT = timeMusic;
 				timeMusic = getNextNoteTime( timeMusic, taskTimeBlock, restTimeBlock ) + stepMusicTime;
 				
+				/*
 				if( (timeMusic - stepMusicTime) > prevT )
 				{
 					System.out.println("Rest: [" + (timeMusic-restTimeBlock-stepMusicTime) + ",  " + timeMusic+"]");
 				}
+				//*/
 			}
 		}
 		

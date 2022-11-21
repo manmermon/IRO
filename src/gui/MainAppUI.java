@@ -43,7 +43,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
+//import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
@@ -295,15 +295,16 @@ public class MainAppUI extends JFrame
 			this.panelSettings.add( this.getPanelMenu(), BorderLayout.NORTH );
 			//this.contentPane.add( this.getSettingPanel(), BorderLayout.CENTER );
 			
-			JScrollPane scroll = new JScrollPane( this.getSettingFieldPanel().getTabbedPane() );
-			scroll.getVerticalScrollBar().setUnitIncrement( 10 );
+			//JScrollPane scroll = new JScrollPane( this.getSettingFieldPanel().getTabbedPane() );
+			//scroll.getVerticalScrollBar().setUnitIncrement( 10 );
 			
 			JSplitPane splitPanel = new JSplitPane( JSplitPane.VERTICAL_SPLIT );			
 			
-			splitPanel.setLeftComponent( scroll );
+			//splitPanel.setLeftComponent( scroll );
+			splitPanel.setLeftComponent( this.getSettingFieldPanel().getTabbedPane() );
 			splitPanel.setRightComponent( this.getSongPanel() );
 			
-			splitPanel.setResizeWeight( 0.75 );
+			splitPanel.setResizeWeight( 0.65 );
 			//splitPanel.setOneTouchExpandable( true );
 			
 			this.panelSettings.add( splitPanel, BorderLayout.CENTER );

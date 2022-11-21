@@ -38,6 +38,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+//import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -60,7 +61,6 @@ import config.language.TranslateComponents;
 import exceptions.ConfigParameterException;
 import general.ArrayTreeMap;
 import general.NumberRange;
-import statistic.chart.GameSessionStatistic;
 import statistic.chart.GameSessionStatisticPlayer;
 import statistic.chart.StatisticGraphic;
 
@@ -70,7 +70,7 @@ public class SettingPanel extends JPanel
 	
 	private JPanel containerPanel = null;
 	
-	private JScrollPane scrollFields = null;
+	//private JScrollPane scrollFields = null;
 	
 	private JPopupMenu playerImgPopMenu;
 		
@@ -89,7 +89,8 @@ public class SettingPanel extends JPanel
 		
 		this.setLayout( new BorderLayout() );
 		
-		this.add( this.getContainerScroll(), BorderLayout.CENTER  );
+		//this.add( this.getContainerScroll(), BorderLayout.CENTER  );
+		this.add( this.getContainerPanel(), BorderLayout.CENTER  );
 	}
 	
 	public Player getPlayer()
@@ -97,6 +98,7 @@ public class SettingPanel extends JPanel
 		return this._player;
 	}
 
+	/*
 	private JScrollPane getContainerScroll()	
 	{
 		if( this.scrollFields == null )
@@ -108,6 +110,7 @@ public class SettingPanel extends JPanel
 		
 		return this.scrollFields;
 	}
+	//*/
 	
 	private JPanel getContainerPanel()
 	{
@@ -125,7 +128,7 @@ public class SettingPanel extends JPanel
 	
 	private void updateSetting( )
 	{
-		JPanel container = this.getContainerPanel();
+		JPanel container = this.getContainerPanel();		
 		container.setVisible( false );
 		container.removeAll();
 		
@@ -134,7 +137,10 @@ public class SettingPanel extends JPanel
 		container.setLayout( new BorderLayout() );
 		
 		JPanel subContainer = new JPanel( new GridLayout( 0, cols, 0, 0) );
-		container.add( subContainer, BorderLayout.CENTER );
+		JScrollPane scroll = new JScrollPane( subContainer );
+		scroll.getVerticalScrollBar().setUnitIncrement( 10 );
+		container.add( scroll, BorderLayout.CENTER );
+		//container.add( subContainer, BorderLayout.CENTER );
 		
 		Settings cfg = ConfigApp.getPlayerSetting( this._player );
 		
@@ -159,7 +165,7 @@ public class SettingPanel extends JPanel
 			
 			List< JPanel > listPanels = new ArrayList<JPanel>();
 			
-			JPanel containerEvenPanel = new JPanel( new BorderLayout() );
+			JPanel containerEvenPanel = new JPanel( new BorderLayout() );			
 			subContainer.add(containerEvenPanel);
 			
 			JPanel panelEven = new JPanel();
