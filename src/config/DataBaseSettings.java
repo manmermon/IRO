@@ -1298,7 +1298,7 @@ e.printStackTrace();
 							+ ", " + ConfigApp.REACTION_TIME + " real CHECK (" + ConfigApp.REACTION_TIME +"> 0)"
 							+ ", " + ConfigApp.RECOVER_TIME + " real CHECK (" + ConfigApp.RECOVER_TIME + ">= 0)"
 							+ ", " + ConfigApp.MOV_REPETITIONS + " integer CHECK ( " + ConfigApp.MOV_REPETITIONS + " > 0)"
-							+ ", " + ConfigApp.TASK_BLOCK_TIME + " integer CHECK (" + ConfigApp.TASK_BLOCK_TIME + "> 0)"
+							+ ", " + ConfigApp.TASK_BLOCK_TIME + " integer CHECK (" + ConfigApp.TASK_BLOCK_TIME + ">= 0)"
 							+ ", " + ConfigApp.REST_TASK_TIME + " integer CHECK (" + ConfigApp.REST_TASK_TIME + ">= 0)"
 							+ ", " + ConfigApp.PREACTION_COLOR + " integer"
 							+ ", " + ConfigApp.WAITING_ACTION_COLOR + " integer"

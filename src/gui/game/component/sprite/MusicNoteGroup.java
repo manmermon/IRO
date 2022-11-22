@@ -138,8 +138,6 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 		
 		if( Notes != null )
 		{
-			this.noteTracks.addAll( Notes );	
-		
 			boolean restTrack = true;
 			
 			String instrument = null;
@@ -185,6 +183,8 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 				Notes = new ArrayList<IROTrack>();
 				Notes.add( tr );
 			}
+			
+			this.noteTracks.addAll( Notes );
 			
 			for( IROTrack t : Notes )
 			{
@@ -257,7 +257,7 @@ public class MusicNoteGroup extends AbstractSprite implements IPossessable
 					}
 				}
 			}
-		}
+		}		
 		
 		super.screenLoc = new Point2D.Double( initLoc, noteLine * y + ( y - super.getSize().width ) / 2);
 		
