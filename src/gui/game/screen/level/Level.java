@@ -151,6 +151,7 @@ public class Level extends Scene implements IPausable, IStoppable
 	
 	private boolean firstSegment = true;
 	
+	private LinkedList< double[] > playersAllDelays = null;
 	private double[] playerDelay = null;
 	
 	private LinkedList< File > backgroundFiles = null;
@@ -176,6 +177,8 @@ public class Level extends Scene implements IPausable, IStoppable
 		}
 		
 		this.firstPlay = true;
+		
+		this.playersAllDelays = new LinkedList< double[] >();
 		
 		this.setLevelThread();		
 		
@@ -324,7 +327,7 @@ public class Level extends Scene implements IPausable, IStoppable
 							
 							if( end - init > stepTime || firstSegment)
 							{	
-								List< MusicNoteGroup > playerNotes = getNotes( currentMusic, init, end, stepTime, taskTimeBlock, restTimeBlock, padding, vel );
+								List< MusicNoteGroup > playerNotes = getLevelNotes( currentMusic, init, end, stepTime, taskTimeBlock, restTimeBlock, padding, vel );
 								
 								double spaceBetweenNotes = stepTime * vel;
 														
@@ -528,15 +531,26 @@ public class Level extends Scene implements IPausable, IStoppable
 			this.playGame = true;
 						
 			//this.setMusicBackground();			
-			this.playerDelay = new double[ playerSettings.size() ];			
-			for( int i = 0; i < this.playerDelay.length; i++ )
-			{
-				this.playerDelay[ i ] = Math.round( Math.random() * 100 ) / 100D;
+			
+			if( this.playersAllDelays.isEmpty() )
+			{					
+				for( int j = 0; j < this.listMusics.size(); j++ )
+				{
+					int nPlayer = this.playerSettings.size();
+					
+					double[] delays = new double[ nPlayer ];					
+					for( int i = 0; i < nPlayer; i++ )
+					{
+						delays[ i ] = Math.round( Math.random() * 100 ) / 100D;
+					}
+					
+					int first = ThreadLocalRandom.current().nextInt( 0, nPlayer );
+					delays[ first ] = 0;
+					
+					this.playersAllDelays.add( delays );
+				}				
 			}
-			
-			int first = ThreadLocalRandom.current().nextInt( 0, this.playerDelay.length );
-			this.playerDelay[ first ] = 0;
-			
+						
 			if( this.getAllNotes() != null && !this.getAllNotes().isEmpty() )
 			{
 				List< ISprite > noteSprites = new ArrayList< ISprite >( this.getAllNotes() );
@@ -559,6 +573,12 @@ public class Level extends Scene implements IPausable, IStoppable
 				
 				this.firstPlay = false;
 			}
+			
+			/*
+			 * Set playerDelay after setScoreAndInputGoal
+			 */
+			this.playerDelay = this.playersAllDelays.pop();
+			//*/
 			
 			this.setMusicBackground();
 			
@@ -872,7 +892,7 @@ public class Level extends Scene implements IPausable, IStoppable
 								double t =  dist / noteVel;
 								double time = currentMusicTime + t;
 								double step = Math.abs( t );
-								List< MusicNoteGroup > notes = this.getNotes(  this.currentMusic, time, time + step, step, taskTimeBlock, restTimeBlock, padding, noteVel );
+								List< MusicNoteGroup > notes = this.getLevelNotes(  this.currentMusic, time, time + step, step, taskTimeBlock, restTimeBlock, padding, noteVel );
 								
 								if( notes.isEmpty() )
 								{
@@ -2098,11 +2118,17 @@ public class Level extends Scene implements IPausable, IStoppable
 			
 			List< MusicNoteGroup > notes = new ArrayList< MusicNoteGroup >();
 
+			int indList = -1;
 			for( Tuple< MusicSheet, BackgroundMusic > msheet : this.listMusics )
-			{
+			{							
 				double musicDur = msheet.t1.getDuration();
-				List< MusicNoteGroup > ns = this.getNotes( msheet.t1,  this.playerDelay[ indexMusicSheetPlayers ] + delayFret, musicDur, actionTime, taskBlockTime.doubleValue(), restBlockTime.doubleValue(), 0, vel );
-				notes.addAll( ns  );
+				
+				indList++;
+				double[] delays = this.playersAllDelays.get( indList );
+				
+				double initDelay = delays[ indexMusicSheetPlayers ] + delayFret;
+				List< MusicNoteGroup > ns = this.getLevelNotes( msheet.t1, initDelay, musicDur, actionTime, taskBlockTime.doubleValue(), restBlockTime.doubleValue(), 0, vel );
+				notes.addAll( ns  );				
 			}
 			
 			/*
@@ -2132,7 +2158,7 @@ public class Level extends Scene implements IPausable, IStoppable
 	
 			scoreUnit /= numNotes;
 			scoreUnit = ( scoreUnit < 1 ) ? 1 : scoreUnit;
-			System.out.println("Level.setScoreAndInputGoal() " + playerSetting.getPlayer() + ": " + notes.size() + " -> " + scoreUnit + " = " + (notes.size()*scoreUnit));
+			//System.out.println("Level.setScoreAndInputGoal() " + playerSetting.getPlayer() + ": " + notes.size() + " -> " + scoreUnit + " = " + (notes.size()*scoreUnit) + "\n");
 			//System.out.println(", " + scoreUnit);
 			/*
 			List< ISprite > scores = getSprites( Level.SCORE_ID, false );
@@ -2215,7 +2241,7 @@ public class Level extends Scene implements IPausable, IStoppable
 		}
 	}
 	
-	private List< MusicNoteGroup > getNotes( MusicSheet music
+	private List< MusicNoteGroup > getLevelNotes( MusicSheet music
 											, double initMusicTime, double endMusicTime, double stepMusicTime								
 											, double taskTimeBlock, double restTimeBlock
 											, double padding, double vel
@@ -2338,19 +2364,6 @@ public class Level extends Scene implements IPausable, IStoppable
 				noteSprite.setZIndex( Level.PLANE_NOTE );
 				
 				notes.add( noteSprite );
-			
-				if( noteSprite.getScreenLocation().y < 0 )
-				{
-					noteSprite = new MusicNoteGroup( trackID
-							, timeMusic //+ startDelay
-							, Tracks
-							, Level.NOTE_ID
-							, rH
-							, screenPos
-							, vel
-							, false
-							);
-				}
 				
 				timeMusic = getNextNoteTime( timeMusic, taskTimeBlock, restTimeBlock, stepMusicTime );
 				
@@ -2363,7 +2376,7 @@ public class Level extends Scene implements IPausable, IStoppable
 			}
 		}
 		
-		//*
+		/*
 		System.out.println("Level.getNotes() size="+notes.size());
 		for( MusicNoteGroup note : notes )
 		{

@@ -47,7 +47,7 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2022, 11 - 1, 22 );
+	public static final Calendar buildDate = new GregorianCalendar( 2022, 11 - 1, 23 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
@@ -599,10 +599,10 @@ public class ConfigApp
 		Caption id = getCaptions( Language.TASK_BLOCK_TIME );
 		id.setID( TASK_BLOCK_TIME );
 
-		NumberRange r = new NumberRange( 1D, Double.MAX_VALUE);
+		NumberRange r = new NumberRange( 0D, Double.MAX_VALUE);
 
 		ConfigParameter par = new ConfigParameter( id, r );
-		par.setSelectedValue( 30D );
+		par.setSelectedValue( 0D );
 		par.setPriority( 12 );
 
 		return par;

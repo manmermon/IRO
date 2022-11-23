@@ -498,11 +498,16 @@ public class GameManager
 		{
 			ex.printStackTrace();
 
-			if( this.gameWindow != null )
+			synchronized ( sync )
 			{
-				this.gameWindow.dispose();
-				this.gameWindow = null;
-			}
+				if( this.gameWindow != null )
+				{
+					this.gameWindow.dispose();
+					this.gameWindow = null;
+				}
+			}			
+			
+			RegistrarStatistic.clearRegister();
 
 			MainAppUI.getInstance().setVisible( true );
 
@@ -515,10 +520,13 @@ public class GameManager
 				loadAnimationThread.stopThread( IStoppable.FORCE_STOP );
 			}
 
-			if( this.gameWindow != null )
-			{	
-				this.gameWindow.setWindowsKeyStrokeAction();
-				this.gameWindow.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+			synchronized ( sync )
+			{
+				if( this.gameWindow != null )
+				{	
+					this.gameWindow.setWindowsKeyStrokeAction();
+					this.gameWindow.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+				}
 			}
 		}		
 	}
@@ -699,24 +707,27 @@ public class GameManager
 		Settings setplayer = ConfigApp.getPlayerSetting( firstPlayer );
 		ConfigParameter par = setplayer.getParameter( ConfigApp.SONG_LIST );
 
-		Object songList = par.getSelectedValue();			
-		if( songList == null )
+		Object songList = par.getSelectedValue();
+		if( songList != null )
 		{
-			throw new ConfigParameterException( "Non songs selected." );
-		}
-
-		String[] songs = songList.toString().split( ConfigApp.SONG_LIST_SEPARATOR );
-
-		if( songs.length == 0 )
-		{
-			throw new ConfigParameterException( "Non songs selected." );
-		}			
-		else
-		{
-			for( String s : songs )
+			String[] songs = songList.toString().split( ConfigApp.SONG_LIST_SEPARATOR );
+					
+			if( songs.length > 0  )
 			{
-				levelSongs.add( s );
+				for( String s : songs )
+				{
+					if( !s.trim().isEmpty() )
+					{
+						levelSongs.add( s );
+					}
+				}
+				
 			}
+		}
+		
+		if( levelSongs.isEmpty() )
+		{
+			throw new ConfigParameterException( "Non songs selected." );
 		}
 		
 		return levelSongs;
@@ -890,21 +901,29 @@ public class GameManager
 			
 			ControllerManager.getInstance().stopController();
 			
-			this.gameWindow.getGamePanel().setVisible( false );
+			AbstractStoppableThread transitionThread = null;
 			
-			this.gameWindow.getGamePanel().removeAll();
-			
-			AbstractStoppableThread transitionThread = this.showTransitionScreen( Language.getLocalCaption( Language.SAVING ), back );
-			if( transitionThread != null )
+			synchronized ( sync )
 			{
-				transitionThread.startThread();
+				if( this.gameWindow != null )
+				{
+					this.gameWindow.getGamePanel().setVisible( false );
+					
+					this.gameWindow.getGamePanel().removeAll();
+					
+					transitionThread = this.showTransitionScreen( Language.getLocalCaption( Language.SAVING ), back );
+					if( transitionThread != null )
+					{
+						transitionThread.startThread();
+					}
+					this.gameWindow.getGamePanel().setVisible( true );			
+		
+					//
+					//
+					//
+					this.gameWindow.setVisible( false );
+				}
 			}
-			this.gameWindow.getGamePanel().setVisible( true );			
-
-			//
-			//
-			//
-			this.gameWindow.setVisible( false );
 			ConfigParameter samTest = ConfigApp.getGeneralSetting( ConfigApp.SAM_TEST );
 			
 			boolean showSamTest = true;
@@ -924,8 +943,14 @@ public class GameManager
 			//
 			//
 
-			this.gameWindow.setAlwaysOnTop( false );
-			this.gameWindow.setVisible( true );
+			synchronized( this.sync )
+			{
+				if( this.gameWindow != null )
+				{
+					this.gameWindow.setAlwaysOnTop( false );
+					this.gameWindow.setVisible( true );
+				}
+			}
 						
 			//
 			try
