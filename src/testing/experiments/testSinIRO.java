@@ -2,6 +2,7 @@ package testing.experiments;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -36,6 +37,8 @@ import java.io.File;
 import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import java.awt.FlowLayout;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 public class testSinIRO extends JFrame {
 
@@ -65,6 +68,14 @@ public class testSinIRO extends JFrame {
 	}) );
 	private final JCheckBox chckbxSem = new JCheckBox("Sem\u00E1foro");
 	private final JPanel panel_2 = new JPanel();
+	private final JLabel lblBlqAct = new JLabel("Actividad (s)");
+	private final JSpinner spinnerBlqAct = new JSpinner();
+	private final JLabel lblBlqDesc = new JLabel("Descanso (s)");
+	private final JSpinner spinnerDescanso = new JSpinner();
+	private final JLabel lblSesion = new JLabel("Tiempo Sesi\u00F3n (s)");
+	private final JSpinner spinner_1 = new JSpinner();
+	private final JScrollPane scrollPane = new JScrollPane();
+	private final JToggleButton btnPause = new JToggleButton("Pause");
 	
 	/**
 	 * Launch the application.
@@ -105,10 +116,22 @@ public class testSinIRO extends JFrame {
 			}
 		}
 		
+		Dimension d = new Dimension( 50, 20 );
+		
+		spinner.setPreferredSize( d );
+		spinner_1.setPreferredSize( d );
+		spinnerBlqAct.setPreferredSize( d );
+		spinnerDescanso.setPreferredSize( d );
+		
+		scrollPane.getHorizontalScrollBar().setBlockIncrement( 10 );
+		scrollPane.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 10));
+		
 		SyncMarker.getInstance( "No"+ConfigApp.shortNameApp );
 		setTitle( "Test sin " + ConfigApp.shortNameApp );
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 600, 400);
+		setBounds(100, 100, 800, 400);
+		
+		
 		this.contentPane = new JPanel();
 		this.contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		this.contentPane.setLayout(new BorderLayout(0, 0));
@@ -120,48 +143,66 @@ public class testSinIRO extends JFrame {
 		
 		this.contentPane.add(this.panel, BorderLayout.NORTH);
 		this.panel.setLayout(new BorderLayout(0, 0));
-		this.panel.add(this.lblBeep, BorderLayout.WEST );
-						
-		this.spinner.setModel(new SpinnerNumberModel(new Double(1), 0D, null, new Double(0.5)));
-				
+		FlowLayout flowLayout = (FlowLayout) this.panel_2.getLayout();
+		flowLayout.setVgap(0);
+		flowLayout.setAlignment(FlowLayout.LEFT);
+		this.scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+		
+		scrollPane.setViewportView( this.panel_2 );
+		this.panel.add( this.scrollPane, BorderLayout.CENTER);
+		
+		this.panel_2.add(this.lblSesion);
+		this.spinner_1.setModel(new SpinnerNumberModel(new Double(180), new Double(30), null, new Double(1)));
+		
+		this.panel_2.add(this.spinner_1);
+		
+		this.panel_2.add(this.lblBlqAct);
+		this.spinnerBlqAct.setModel(new SpinnerNumberModel(new Integer(45), new Integer(1), null, new Integer(1)));
+		
+		this.panel_2.add(this.spinnerBlqAct);
+		
+		this.panel_2.add(this.lblBlqDesc);
+		this.spinnerDescanso.setModel(new SpinnerNumberModel(new Integer(15), new Integer(0), null, new Integer(1)));
+		
+		this.panel_2.add(this.spinnerDescanso);
+		this.panel_2.add(this.lblBeep);
+		this.panel_2.add(this.spinner);
+		
+		this.spinner.setModel(new SpinnerNumberModel(new Double(3), new Double(0), null, new Double(0)));
+		
 		this.spinner.addMouseWheelListener( new MouseWheelListener() 
 		{				
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) 
 			{
-				if( e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL )
+		if( e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL )
+		{
+			try
+			{	
+				JSpinner sp = (JSpinner)e.getSource();
+				
+				int d = e.getWheelRotation();
+				
+				if( d > 0 )
 				{
-					try
-					{	
-						JSpinner sp = (JSpinner)e.getSource();
-						
-						int d = e.getWheelRotation();
-						
-						if( d > 0 )
-						{
-							sp.setValue( sp.getModel().getPreviousValue() );
-						}
-						else
-						{
-							sp.setValue( sp.getModel().getNextValue() );
-						}	
-					}
-					catch( IllegalArgumentException ex )
-					{												
-					}
+					sp.setValue( sp.getModel().getPreviousValue() );
 				}
+				else
+				{
+					sp.setValue( sp.getModel().getNextValue() );
+				}	
+			}
+			catch( IllegalArgumentException ex )
+			{												
+			}
+		}
 			}
 		});
-		
-		this.panel.add(this.spinner, BorderLayout.CENTER);
-		FlowLayout flowLayout = (FlowLayout) this.panel_2.getLayout();
-		flowLayout.setVgap(0);
-		flowLayout.setAlignment(FlowLayout.LEFT);
-		
-		this.panel.add(this.panel_2, BorderLayout.EAST);
 		this.panel_2.add(this.chckbxBeepAct);
 		this.chckbxBeepAct.setSelected(true);
 		this.panel_2.add(this.chckbxSem);
+		
+		this.panel.add(this.scrollPane, BorderLayout.CENTER);
 		
 		this.contentPane.add(this.panel_1, BorderLayout.SOUTH);
 		this.tglbtnStart.addActionListener(new ActionListener() 
@@ -186,6 +227,9 @@ public class testSinIRO extends JFrame {
 					mainPane.setVisible( true );
 					
 					spinner.setEnabled( false );
+					spinner_1.setEnabled( false );
+					spinnerBlqAct.setEnabled( false );
+					spinnerDescanso.setEnabled( false );
 					chckbxBeepAct.setEnabled( false );
 					
 					chckbxSem.setEnabled( false );
@@ -460,6 +504,9 @@ public class testSinIRO extends JFrame {
 					tglbtnStart.setText( "Start" );
 					
 					spinner.setEnabled( true );
+					spinner_1.setEnabled( true );
+					spinnerBlqAct.setEnabled( true );
+					spinnerDescanso.setEnabled( true );
 					mainPane.setEnabled( true );
 					chckbxBeepAct.setEnabled( true );
 					
@@ -476,5 +523,8 @@ public class testSinIRO extends JFrame {
 		});
 		
 		this.panel_1.add(this.tglbtnStart);
+		
+		this.panel_1.add(this.btnPause);
+		this.btnPause.setVisible( false );
 	}
 }
