@@ -19,6 +19,7 @@ import control.events.BackgroundMusicEvent;
 import control.events.BackgroundMusicEventListener;
 import gui.game.screen.level.music.BackgroundMusic;
 import gui.panel.SelectSongPanel;
+import stoppableThread.IStoppable;
 import testing.experiments.synMarker.SyncMarker;
 import testing.experiments.synMarker.SyncMarker.Marker;
 import thread.timer.ActionTimerThread;
@@ -50,7 +51,7 @@ public class testSinIRO extends JFrame {
 	private JPanel contentPane;
 	private final JLabel lblBeep = new JLabel("Periodo (s): ");
 	private final JPanel panel = new JPanel();
-	private final JSpinner spinner = new JSpinner();
+	private final JSpinner spinnerBeepTime = new JSpinner();
 	private final JPanel panel_1 = new JPanel();
 	private final JToggleButton tglbtnStart = new JToggleButton("Start");
 	
@@ -58,7 +59,10 @@ public class testSinIRO extends JFrame {
 	private final JCheckBox chckbxBeepAct = new JCheckBox("Activar Beep");
 	private DisabledPanel disablePane = new DisabledPanel( SelectSongPanel.getInstance() );
 	
-	private Timer taskTimer = new Timer( 750, false, new ActionTimerThread( new IAction() 
+	private JLabel tiempoTranscurridoLabel = new JLabel( "Tiempo Transcurrido:");
+	private JLabel tiempoTranscurridoValor = new JLabel( );
+	
+	private Timer semaforoTimer = new Timer( 750, false, new ActionTimerThread( new IAction() 
 	{		
 		@Override
 		public void execute() 
@@ -66,6 +70,14 @@ public class testSinIRO extends JFrame {
 			mainPane.setBackground( Color.WHITE );
 		}
 	}) );
+	
+	private Timer sessionTimer = null;
+	private Timer taskBlockTimer = null;
+	private Timer tiempoTranscurridoTimer = null;
+	private long restTime = 0;
+	private Object sync = new Object();
+	private boolean endSession = false;
+	
 	private final JCheckBox chckbxSem = new JCheckBox("Sem\u00E1foro");
 	private final JPanel panel_2 = new JPanel();
 	private final JLabel lblBlqAct = new JLabel("Actividad (s)");
@@ -73,7 +85,7 @@ public class testSinIRO extends JFrame {
 	private final JLabel lblBlqDesc = new JLabel("Descanso (s)");
 	private final JSpinner spinnerDescanso = new JSpinner();
 	private final JLabel lblSesion = new JLabel("Tiempo Sesi\u00F3n (s)");
-	private final JSpinner spinner_1 = new JSpinner();
+	private final JSpinner spinnerSession = new JSpinner();
 	private final JScrollPane scrollPane = new JScrollPane();
 	private final JToggleButton btnPause = new JToggleButton("Pause");
 	
@@ -106,9 +118,10 @@ public class testSinIRO extends JFrame {
 		{
 			try 
 			{
-				taskTimer.startThread();
+				semaforoTimer.setName( "Semaforo Timer");
+				semaforoTimer.startThread();
 				super.wait( 100L );
-				taskTimer.stopTimer();
+				semaforoTimer.stopTimer();
 			}
 			catch (Exception e2) 
 			{
@@ -118,8 +131,8 @@ public class testSinIRO extends JFrame {
 		
 		Dimension d = new Dimension( 50, 20 );
 		
-		spinner.setPreferredSize( d );
-		spinner_1.setPreferredSize( d );
+		spinnerBeepTime.setPreferredSize( d );
+		spinnerSession.setPreferredSize( d );
 		spinnerBlqAct.setPreferredSize( d );
 		spinnerDescanso.setPreferredSize( d );
 		
@@ -152,9 +165,9 @@ public class testSinIRO extends JFrame {
 		this.panel.add( this.scrollPane, BorderLayout.CENTER);
 		
 		this.panel_2.add(this.lblSesion);
-		this.spinner_1.setModel(new SpinnerNumberModel(new Double(180), new Double(30), null, new Double(1)));
+		this.spinnerSession.setModel(new SpinnerNumberModel(new Double(180), new Double(30), null, new Double(1)));
 		
-		this.panel_2.add(this.spinner_1);
+		this.panel_2.add(this.spinnerSession);
 		
 		this.panel_2.add(this.lblBlqAct);
 		this.spinnerBlqAct.setModel(new SpinnerNumberModel(new Integer(45), new Integer(1), null, new Integer(1)));
@@ -166,11 +179,11 @@ public class testSinIRO extends JFrame {
 		
 		this.panel_2.add(this.spinnerDescanso);
 		this.panel_2.add(this.lblBeep);
-		this.panel_2.add(this.spinner);
+		this.panel_2.add(this.spinnerBeepTime);
 		
-		this.spinner.setModel(new SpinnerNumberModel(new Double(3), new Double(0), null, new Double(0)));
+		this.spinnerBeepTime.setModel(new SpinnerNumberModel(new Double(3), new Double(0), null, new Double(0)));
 		
-		this.spinner.addMouseWheelListener( new MouseWheelListener() 
+		this.spinnerBeepTime.addMouseWheelListener( new MouseWheelListener() 
 		{				
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) 
@@ -217,6 +230,26 @@ public class testSinIRO extends JFrame {
 					SelectSongPanel.getInstance().setEnabled( false );
 					tglbtnStart.setText( "Stop" );
 					
+					if( sessionTimer != null )
+					{
+						sessionTimer.stopThread( IStoppable.FORCE_STOP );
+						sessionTimer = null;
+					}
+					
+					if( taskBlockTimer != null )
+					{
+						taskBlockTimer.stopThread( IStoppable.FORCE_STOP );
+						taskBlockTimer = null;
+					}
+					
+					if( tiempoTranscurridoTimer != null )
+					{
+						tiempoTranscurridoTimer.stopThread( IStoppable.FORCE_STOP );
+						tiempoTranscurridoTimer = null;
+					}
+					
+					restTime = 0;
+										
 					mainPane.setVisible( false );
 					mainPane.setBackground( Color.WHITE );
 					
@@ -226,13 +259,14 @@ public class testSinIRO extends JFrame {
 					
 					mainPane.setVisible( true );
 					
-					spinner.setEnabled( false );
-					spinner_1.setEnabled( false );
+					spinnerBeepTime.setEnabled( false );
+					spinnerSession.setEnabled( false );
 					spinnerBlqAct.setEnabled( false );
 					spinnerDescanso.setEnabled( false );
 					chckbxBeepAct.setEnabled( false );
 					
 					chckbxSem.setEnabled( false );
+					endSession = false;
 					
 					Player player = ConfigApp.getFirstPlayer();
 					Settings cfg = null;
@@ -280,81 +314,7 @@ public class testSinIRO extends JFrame {
 													}
 												});
 												
-												/*
-												Pattern pt = new Pattern();
-												short step = 20;
-												for( Token tk :  pattern.getTokens() )
-												{													
-													if( Note.isValidNote( tk.toString() ) )
-													{	
-														Note n;
-														try
-														{
-															n = new Note( tk.toString() );
-																												
-															short vol = n.getOnVelocity();
-															vol -= step;
-															
-															if( vol < 0)
-															{
-																vol = 10;
-															}
-															
-															n.setOnVelocity( (byte)vol );
-															
-															pt.add( n );
-														}
-														catch (Exception e) 
-														{
-															String t = tk.toString();
-															
-															int lastA = t.toLowerCase().lastIndexOf( "a" );
-															int lastD = t.toLowerCase().lastIndexOf( "d" );
-															
-															if( lastA < 0 )
-															{
-																t += "a" + ( step > 64 ? 64 - step : 10 );
-															}
-															else
-															{
-																int end = lastD < 0 ? t.length() : lastD;
-																							
-																String vol = t.substring( lastA + 1, end );
-																
-																try
-																{
-																	int v = 0;
-																	v = Integer.parseInt( vol ) - step;
-
-																	if( v < 0 )
-																	{
-																		v = 10;
-																	}
-																	
-																	String t1 = t.substring( 0, lastA );
-																	String t2 = t.substring( lastD );
-																	t = t1 + "a" + v + t2;
-																}
-																catch (Exception ex2) 
-																{
-																	t += "a" + ( step > 64 ? 64 - step : 10 );
-																}
-																 
-																
-																pt.add( t );
-															}
-														}
-														
-													}
-													else
-													{							
-														pt.add( tk.toString() );
-													}
-												}
-												
-												pattern = pt;
-												//*/
-												
+												bgm.setName( "BackgroundMusic" );
 												bgm.setPattern( pattern );
 												bgm.startActing();
 												
@@ -367,7 +327,10 @@ public class testSinIRO extends JFrame {
 											}
 											catch ( Exception ex1)
 											{
-												ex1.printStackTrace();
+												if( !( ex1 instanceof InterruptedException ) )
+												{
+													ex1.printStackTrace();
+												}
 												if( bgm != null )
 												{
 													bgm.stopActing( BackgroundMusic.FORCE_STOP );
@@ -378,18 +341,61 @@ public class testSinIRO extends JFrame {
 											}					
 										}
 										
-										tglbtnStart.doClick();
+										synchronized ( sync )
+										{
+											if( !endSession )
+											{
+												endSession = true;
+
+												tglbtnStart.doClick();
+											}
+										}
 									}
 								};
+							
+								playerThr.setName( "Player thread" );
 							}
 						}
 					}	
 					
 					try 
 					{
-						final long waitTime = (long)( 1000 * Double.parseDouble( spinner.getValue().toString() ) );
+						long sessionTime = (long)(1000*Double.parseDouble( spinnerSession.getValue().toString() ));
+						sessionTimer = new Timer( sessionTime, false, new ActionTimerThread( new IAction() {							
+							@Override
+							public void execute() 
+							{	
+								synchronized ( sync )
+								{
+									if( !endSession )
+									{
+										endSession = true;
+
+										tglbtnStart.doClick();
+									}
+								}
+							}
+						}));
+						sessionTimer.setName( "Session Timer");
 						
-						if( waitTime > 0 )
+						final long waitBeepTime = (long)( 1000 * Double.parseDouble( spinnerBeepTime.getValue().toString() ) );
+						
+						long taskBlockTime = (long)(1000*Double.parseDouble( spinnerBlqAct.getValue().toString() ));
+						taskBlockTimer = new Timer(taskBlockTime, false, new ActionTimerThread( new IAction() 
+						{	
+							@Override
+							public void execute() 
+							{
+								synchronized ( sync ) 
+								{
+									restTime = (long)(1000*Double.parseDouble( spinnerDescanso.getValue().toString() ));
+									restTime -= waitBeepTime;
+								}
+							}
+						} ) );
+						taskBlockTimer.setName( "Task block timer" );
+						
+						if( waitBeepTime > 0 )
 						{
 							final boolean beepAct = chckbxBeepAct.isSelected();
 							beepThr = new Thread()
@@ -397,8 +403,7 @@ public class testSinIRO extends JFrame {
 								boolean stop = false;
 								
 								public void run() 
-								{	
-									 
+								{										 
 									SelectionBeep beep = null;
 									
 									try 
@@ -427,9 +432,25 @@ public class testSinIRO extends JFrame {
 													delay = ( System.currentTimeMillis() - delay );
 												}
 												
-												if( delay < waitTime )
+												if( delay < waitBeepTime )
 												{
-													this.wait( waitTime - delay );
+													boolean restartTaskBlockTimer =  false;
+													
+													long time = waitBeepTime - delay;
+													
+													synchronized( sync )
+													{
+														time += restTime;
+														restartTaskBlockTimer = ( restTime > 0 );
+														restTime = 0;															
+													}
+													
+													this.wait( time );
+													
+													if( restartTaskBlockTimer )
+													{
+														taskBlockTimer.restartTimer();
+													}
 												}
 											}
 	
@@ -438,14 +459,15 @@ public class testSinIRO extends JFrame {
 											if( beepAct )
 											{
 												beep.play();
-											}
+												
+												SyncMarker.getInstance( "No"+ConfigApp.shortNameApp ).sendMarker( Marker.BEEP );
+											}											
 											
-											
-											taskTimer.stopTimer();
+											semaforoTimer.stopTimer();
 											
 											mainPane.setBackground( Color.GREEN );
 											
-											taskTimer.restartTimer();
+											semaforoTimer.restartTimer();
 											
 										}
 										catch ( InterruptedException e) 
@@ -461,9 +483,42 @@ public class testSinIRO extends JFrame {
 									}
 								};
 							};
+						
+							beepThr.setName( "Beep timer" );
 						}
 						
 						SyncMarker.getInstance( "No"+ConfigApp.shortNameApp ).sendMarker( Marker.START_TEST );
+						
+						tiempoTranscurridoTimer = new Timer( 1000L, true, new ActionTimerThread( new IAction() 
+						{
+							private long timeRef = -1;
+							@Override
+							public void execute() 
+							{
+								if( timeRef < 0 )
+								{
+									timeRef = System.nanoTime();
+								}
+								
+								long nanoseconds = System.nanoTime() - timeRef + 1_000_000_000L; // Le sumo 1 segundo que es el tiempo de la primera ejecucion)
+								
+								long microseconds = nanoseconds / 1000;
+								long miliseconds = microseconds / 1000;
+								long seconds = miliseconds / 1000;
+								long minutes = seconds / 60;
+								long hours = minutes / 60;
+
+								String timeStamp = String.format( "%02d:%02d:%02d", hours, minutes%60, seconds%60 );
+								tiempoTranscurridoValor.setText( timeStamp );
+							}
+						}));
+						
+						tiempoTranscurridoTimer.setName( "Tiempo transcurrido Timer");
+						
+						if( tiempoTranscurridoTimer != null )
+						{
+							tiempoTranscurridoTimer.startThread();
+						}
 						
 						if( playerThr != null )
 						{
@@ -475,12 +530,63 @@ public class testSinIRO extends JFrame {
 							beepThr.start();
 						}
 						
+						if( sessionTimer != null )
+						{
+							sessionTimer.startThread();
+						}
+						
+						if( taskBlockTimer != null )
+						{
+							taskBlockTimer.startThread();
+						}
 					} 
 					catch ( Exception e1) 
 					{
 						e1.printStackTrace();
 						
-						beepThr = null;
+						
+						if( beepThr != null )
+						{
+							beepThr.interrupt();
+							
+							beepThr = null;
+						}
+						
+						if( playerThr != null )
+						{
+							playerThr.interrupt();
+							
+							playerThr = null;
+						}
+						
+						if( sessionTimer != null )
+						{
+							sessionTimer.stopThread( IStoppable.FORCE_STOP );
+							
+							sessionTimer = null;
+						}
+						
+						if( taskBlockTimer != null )
+						{
+							taskBlockTimer.stopThread( IStoppable.FORCE_STOP );
+							
+							taskBlockTimer = null;
+						}
+						
+						/*
+						if( semaforoTimer != null )
+						{
+							semaforoTimer.stopThread( IStoppable.FORCE_STOP );
+							
+							semaforoTimer = null;
+						}
+						*/
+						
+						if( tiempoTranscurridoTimer != null )
+						{
+							tiempoTranscurridoTimer.stopThread( IStoppable.FORCE_STOP );
+							tiempoTranscurridoTimer = null;
+						}
 					}
 				}
 				else
@@ -500,11 +606,40 @@ public class testSinIRO extends JFrame {
 						
 						playerThr = null;
 					}
+					
+					if( sessionTimer != null )
+					{
+						sessionTimer.stopThread( IStoppable.FORCE_STOP );
+						
+						sessionTimer = null;
+					}
+					
+					if( taskBlockTimer != null )
+					{
+						taskBlockTimer.stopThread( IStoppable.FORCE_STOP );
+						
+						taskBlockTimer = null;
+					}
+					
+					/*
+					if( semaforoTimer != null )
+					{
+						semaforoTimer.stopThread( IStoppable.FORCE_STOP );
+						
+						semaforoTimer = null;
+					}
+					*/
+					
+					if( tiempoTranscurridoTimer != null )
+					{
+						tiempoTranscurridoTimer.stopThread( IStoppable.FORCE_STOP );
+						tiempoTranscurridoTimer = null;
+					}
 				
 					tglbtnStart.setText( "Start" );
 					
-					spinner.setEnabled( true );
-					spinner_1.setEnabled( true );
+					spinnerBeepTime.setEnabled( true );
+					spinnerSession.setEnabled( true );
 					spinnerBlqAct.setEnabled( true );
 					spinnerDescanso.setEnabled( true );
 					mainPane.setEnabled( true );
@@ -525,6 +660,9 @@ public class testSinIRO extends JFrame {
 		this.panel_1.add(this.tglbtnStart);
 		
 		this.panel_1.add(this.btnPause);
+		this.panel_1.add( this.tiempoTranscurridoLabel );
+		this.panel_1.add( this.tiempoTranscurridoValor );
+		
 		this.btnPause.setVisible( false );
 	}
 }

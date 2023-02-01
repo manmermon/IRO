@@ -47,7 +47,7 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2022, 11 - 1, 23 );
+	public static final Calendar buildDate = new GregorianCalendar( 2023, 2 - 1, 1 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 

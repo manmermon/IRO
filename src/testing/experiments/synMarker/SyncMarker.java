@@ -7,7 +7,7 @@ public class SyncMarker
 {
 	private static SyncMarker markers = null;
 
-	public enum Marker { NO_MARKER, START_TEST, STOP_TEST, SAM_TEST, START_MUSIC, PAUSE, SCORE_SCREEN  } 
+	public enum Marker { NO_MARKER, START_TEST, STOP_TEST, SAM_TEST, START_MUSIC, PAUSE, SCORE_SCREEN, BEEP  } 
 	
 	private StreamOutlet stream;	
 	
