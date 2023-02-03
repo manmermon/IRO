@@ -152,6 +152,8 @@ public class Language
 	
 	public static final String ENABLE_REMOVE_PLAYER = "ENABLE_REMOVE_PLAYER";
 	
+	public static final String STATUS_SURVEY = "STATE_SURVEY"; 
+	
 	private static Map< String, Caption > captions = new HashMap< String, Caption >();
 
 	static 
@@ -160,6 +162,10 @@ public class Language
 		Caption cap = new Caption( LANGUAGE, defaultLanguage, defaultLanguage );
 		cap.setCaption( esEs, esEs);
 		captions.put( LANGUAGE, cap );
+		
+		cap = new Caption( STATUS_SURVEY, defaultLanguage, "Status survey" );
+		cap.setCaption( esEs, "Encuesta de estado" );
+		captions.put( STATUS_SURVEY, cap );
 		
 		cap = new Caption( TASK_BLOCK_TIME, defaultLanguage, "Task block time" );
 		cap.setCaption( esEs, "Bloque de actividad (s)" );

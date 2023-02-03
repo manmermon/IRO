@@ -21,7 +21,7 @@ import gui.game.component.sprite.Transition;
 import gui.game.component.sprite.Pause;
 import gui.game.screen.level.Level;
 import gui.game.screen.menu.MenuGameResults;
-import gui.panel.samSurvey.SamSurvey;
+import gui.panel.statusSurvey.PlayerStatusSurvey;
 import stoppableThread.IStoppable;
 import thread.stoppableThread.AbstractStoppableThread;
 import config.ConfigApp;
@@ -259,7 +259,7 @@ public class testGameSprite extends JFrame {
 				
 				Frame fr = new Frame();
 				fr.setLayout( new BorderLayout() );
-				SamSurvey sam = new SamSurvey(  this.frame.getSize(), false );
+				PlayerStatusSurvey sam = new PlayerStatusSurvey(  this.frame.getSize(), false );
 				
 				fr.add( sam,BorderLayout.CENTER );
 				this.frame.add( fr, BorderLayout.CENTER );

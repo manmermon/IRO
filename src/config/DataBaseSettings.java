@@ -79,7 +79,7 @@ public class DataBaseSettings
 	private static final String SESSION_SCORE = "score";	
 	private static final String SESSION_MUTE = "muteSession";
 	private static final String SESSION_LIMIT_SESSION_TIME = "limitSessionTime";
-	private static final String SESSION_VALENCE_AROUSAL_EMOTION = "valenceArousalEmotion";
+	private static final String SESSION_VALENCE_AROUSAL_EFFORT = "valenceArousalEmotion";
 	
 	private static final String STATISTIC_NUMBER = "number";
 	private static final String STATISTIC_ACTION_ID = "actionID";
@@ -159,7 +159,7 @@ public class DataBaseSettings
 		fieldType.put( SESSION_SCORE, Long.class );		
 		fieldType.put( SESSION_MUTE, Integer.class );
 		fieldType.put( SESSION_LIMIT_SESSION_TIME, Integer.class );
-		fieldType.put( SESSION_VALENCE_AROUSAL_EMOTION, String.class );
+		fieldType.put( SESSION_VALENCE_AROUSAL_EFFORT, String.class );
 		tableFields.put( sessionTableName, fieldType );
 
 		//**************
@@ -880,16 +880,16 @@ public class DataBaseSettings
 				{
 					double score = RegistrarStatistic.getPlayerScore( playerID );					
 
-					String valArEmo = "" ;
-					List< String > sam = RegistrarStatistic.getValenceArousalEmotionData( playerID );
-					if( sam != null )
+					String surveyStatus = "" ;
+					List< String > _SubjState = RegistrarStatistic.getValenceArousalEffortData( playerID );
+					if( _SubjState != null )
 					{
-						for( String vae : sam )
+						for( String vae : _SubjState )
 						{
-							valArEmo += vae + ",";
+							surveyStatus += vae + ",";
 						}
 
-						valArEmo = valArEmo.substring( 0, valArEmo.length() - 1 );
+						surveyStatus = surveyStatus.substring( 0, surveyStatus.length() - 1 );
 					}
 
 					//TODO					
@@ -900,7 +900,7 @@ public class DataBaseSettings
 							+ ", " + SESSION_SCORE
 							+ ", " + SESSION_MUTE
 							+ ", " + SESSION_LIMIT_SESSION_TIME
-							+ ", " + SESSION_VALENCE_AROUSAL_EMOTION
+							+ ", " + SESSION_VALENCE_AROUSAL_EFFORT
 							+ ")";
 
 					sqlSession += "VALUES(" + sessionID 
@@ -908,7 +908,7 @@ public class DataBaseSettings
 							+ "," + score
 							+ "," + ( ( mute ) ? "1" : "0" )
 							+ "," + limitSessiontime
-							+ ", \"" + valArEmo + "\""
+							+ ", \"" + surveyStatus + "\""
 							+ ")" ;
 
 
@@ -1336,7 +1336,7 @@ e.printStackTrace();
 						+ ", " + SESSION_MUTE + " integer NOT NULL CHECK (muteSession == 0 OR muteSession == 1 ) "
 						+ ", " + SESSION_LIMIT_SESSION_TIME + " integer CHECK (limitSessionTime >= 0)"
 						+ ", " + SESSION_SCORE + " integer NOT NULL"						
-						+ ", " + SESSION_VALENCE_AROUSAL_EMOTION + " text NOT NULL"
+						+ ", " + SESSION_VALENCE_AROUSAL_EFFORT + " text NOT NULL"
 						+ ", PRIMARY KEY (" + SESSION_ID + "," + USER_ID_FOREIGN + ")"
 						+ ", FOREIGN KEY ("+USER_ID_FOREIGN+") REFERENCES " + userTableName +"(" + USER_ID +") ON DELETE CASCADE"
 						+ ");";

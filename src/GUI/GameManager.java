@@ -51,7 +51,8 @@ import gui.game.component.sprite.Transition;
 import gui.game.screen.IScene;
 import gui.game.screen.level.Level;
 import gui.game.screen.menu.MenuGameResults;
-import gui.panel.samSurvey.SamSurvey;
+import gui.panel.statusSurvey.PlayerStatusSurvey;
+import gui.panel.statusSurvey.PlayerStatusSurvey.StatusSurvey;
 import lslInput.LSL;
 import lslInput.LSLStreamInfo;
 import lslInput.stream.IInputStreamMetadata;
@@ -326,18 +327,18 @@ public class GameManager
 			//
 			//
 			//			
-			ConfigParameter samTest = ConfigApp.getGeneralSetting( ConfigApp.SAM_TEST );
+			ConfigParameter statusSurvey = ConfigApp.getGeneralSetting( ConfigApp.STATUS_SURVEY_TEST );
 			
-			boolean showSamTest = true;
+			boolean showStatusSurvey = true;
 			
-			if( samTest != null && samTest.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
+			if( statusSurvey != null && statusSurvey.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
 			{
-				showSamTest = (Boolean)samTest.getSelectedValue();
+				showStatusSurvey = (Boolean)statusSurvey.getSelectedValue();
 			}
 			
-			if( showSamTest )
+			if( showStatusSurvey )
 			{
-				this.showSamDialog( players );
+				this.showStatusSurveyDialog( players );
 			}
 			//
 			//
@@ -604,15 +605,15 @@ public class GameManager
 		}
 	}
 
-	private void showSamDialog( List< Player > players )
+	private void showStatusSurveyDialog( List< Player > players )
 	{
 		if( players != null )
 		{
-			JDialog samDialog = new JDialog( MainAppUI.getInstance() );
-			samDialog.setVisible( false );
+			JDialog statusSurveyDialog = new JDialog( MainAppUI.getInstance() );
+			statusSurveyDialog.setVisible( false );
 	
-			samDialog.setDefaultCloseOperation( JDialog.DO_NOTHING_ON_CLOSE );
-			samDialog.setModal( true );
+			statusSurveyDialog.setDefaultCloseOperation( JDialog.DO_NOTHING_ON_CLOSE );
+			statusSurveyDialog.setModal( true );
 	
 			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 			GraphicsDevice gd = ge.getDefaultScreenDevice();
@@ -623,10 +624,10 @@ public class GameManager
 			screenSize.width += -( pads.left + pads.right );
 			screenSize.height += -( pads.top + pads.bottom );
 	
-			samDialog.setLocation( pads.left, pads.top );
-			samDialog.setSize( screenSize );
+			statusSurveyDialog.setLocation( pads.left, pads.top );
+			statusSurveyDialog.setSize( screenSize );
 			JPanel container = new JPanel( new BorderLayout() );
-			samDialog.setContentPane( container );
+			statusSurveyDialog.setContentPane( container );
 	
 			SyncMarker.getInstance( ConfigApp.shortNameApp ).sendMarker( Marker.SAM_TEST );
 			
@@ -634,18 +635,21 @@ public class GameManager
 			{
 				if( !p.isAnonymous() )
 				{
-					samDialog.setVisible( false );
+					statusSurveyDialog.setVisible( false );
 		
-					SamSurvey sam = new SamSurvey( p, screenSize, false, samDialog );
+					PlayerStatusSurvey sae = new PlayerStatusSurvey( p, screenSize, new StatusSurvey[] { StatusSurvey.VALENCE, StatusSurvey.AROUSAL, StatusSurvey.PHYSICAL_EFFORT }, statusSurveyDialog );
 	
 					container.removeAll();
-					container.add( sam, BorderLayout.CENTER );
+					container.add( sae, BorderLayout.CENTER );
 	
-					samDialog.setVisible( true );
+					statusSurveyDialog.setVisible( true );
+					
+					String playerState = sae.getPlayerState();
+					RegistrarStatistic.addValenceArousalEffortData( p.getId(), playerState );
 				}
 			}
 	
-			samDialog.dispose();
+			statusSurveyDialog.dispose();
 		}
 	}
 	
@@ -924,7 +928,7 @@ public class GameManager
 					this.gameWindow.setVisible( false );
 				}
 			}
-			ConfigParameter samTest = ConfigApp.getGeneralSetting( ConfigApp.SAM_TEST );
+			ConfigParameter samTest = ConfigApp.getGeneralSetting( ConfigApp.STATUS_SURVEY_TEST );
 			
 			boolean showSamTest = true;
 			if( samTest != null && samTest.get_type().equals( ConfigParameter.ParameterType.BOOLEAN ) )
@@ -934,7 +938,7 @@ public class GameManager
 			
 			if( showSamTest )
 			{				
-				this.showSamDialog( new ArrayList< Player >( ConfigApp.getPlayers() ) );
+				this.showStatusSurveyDialog( new ArrayList< Player >( ConfigApp.getPlayers() ) );
 			}
 			
 			SyncMarker.getInstance( ConfigApp.shortNameApp ).sendMarker( Marker.STOP_TEST );

@@ -47,7 +47,7 @@ public class ConfigApp
 {
 	public static final String fullNameApp = "Interactive Rehab Orchestra";
 	public static final String shortNameApp = "IRO";
-	public static final Calendar buildDate = new GregorianCalendar( 2023, 2 - 1, 1 );
+	public static final Calendar buildDate = new GregorianCalendar( 2023, 2 - 1, 3 );
 
 	public static final String version = "Version 1." + ( buildDate.get( Calendar.YEAR ) % 100 ) + "." + ( buildDate.get( Calendar.DAY_OF_YEAR ) );
 
@@ -95,7 +95,7 @@ public class ConfigApp
 		
 	public static final String CONTINUOUS_SESSION = "CONTINUOUS_SESSION"; 
 	
-	public static final String SAM_TEST = "SAM_TEST";
+	public static final String STATUS_SURVEY_TEST = "STATUS_SURVEY_TEST";
 			
 	/*
 	 * Table: settings

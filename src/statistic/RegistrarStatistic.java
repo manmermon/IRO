@@ -4,24 +4,19 @@
 package statistic;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.text.AbstractDocument.Content;
 
 import biosignal.Biosignal;
 import config.Player;
 import general.ArrayTreeMap;
 import general.ConvertTo;
-import general.StringTuple;
 import general.Tuple;
 import lslInput.LSLStreamInfo;
-import lslInput.LSLStreamInfo.StreamType;
-import lslInput.LSLUtils;
 import lslInput.stream.IInputStreamMetadata;
 import lslInput.stream.IInputStreamMetadata.InputSourceType;
 import lslInput.stream.controller.IControllerMetadata;
@@ -108,7 +103,7 @@ public class RegistrarStatistic
 	
 	private static Map< String, LinkedList< Double[] > > biosignalData = new HashMap< String, LinkedList< Double[] > >( );
 	
-	private static ArrayTreeMap< Integer, String > valArEmoRegister = new ArrayTreeMap< Integer, String >();
+	private static ArrayTreeMap< Integer, String > valArEfRegister = new ArrayTreeMap< Integer, String >();
 	
 	/**
 	 * 
@@ -232,11 +227,11 @@ public class RegistrarStatistic
 		}
 	}
 	
-	public static synchronized void addValenceArousalEmotionData( int playerID, String sam )
+	public static synchronized void addValenceArousalEffortData( int playerID, String statusSurvey )
 	{
-		sam = ( sam == null ) ? "" : sam;
+		statusSurvey = ( statusSurvey == null ) ? "" : statusSurvey;
 		
-		valArEmoRegister.put( playerID, sam );
+		valArEfRegister.put( playerID, statusSurvey );
 	}
 	
 	/**
@@ -294,9 +289,9 @@ public class RegistrarStatistic
 		return bioData;
 	}
 	
-	public static List< String > getValenceArousalEmotionData( int playerID )
+	public static List< String > getValenceArousalEffortData( int playerID )
 	{
-		return valArEmoRegister.get( playerID );
+		return valArEfRegister.get( playerID );
 	}
 	
 	public static void clearRegister()
@@ -307,6 +302,6 @@ public class RegistrarStatistic
 		controllerSettings.clear();
 		controllerData.clear();
 		sessionScore.clear();
-		valArEmoRegister.clear();
+		valArEfRegister.clear();
 	}
 }

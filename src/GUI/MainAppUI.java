@@ -115,7 +115,7 @@ public class MainAppUI extends JFrame
 	
 	private JCheckBox chbMuteSession;
 	private JCheckBox chbContinueSession;
-	private JCheckBox chbSamTest;
+	private JCheckBox chbStatusSurvey;
 			
 	// Radio Button
 	/*
@@ -875,9 +875,9 @@ public class MainAppUI extends JFrame
 			
 			this.panelPlay.add( this.getMuteSession() );
 			this.panelPlay.add( this.getContinuousSession() );
-			this.panelPlay.add( this.getSamTest() );
+			this.panelPlay.add( this.getStatusSurvey() );
 			JSeparator sp = new JSeparator( JSeparator.VERTICAL );
-			sp.setPreferredSize( new Dimension( 2, this.getSamTest().getPreferredSize().height ) );
+			sp.setPreferredSize( new Dimension( 2, this.getStatusSurvey().getPreferredSize().height ) );
 			this.panelPlay.add( sp );
 			this.panelPlay.add( this.getSessionTimeLabel() );
 			this.panelPlay.add( this.getSessionTimeSpinner() );
@@ -1019,20 +1019,20 @@ public class MainAppUI extends JFrame
 		return this.chbContinueSession;
 	}
 	
-	private JCheckBox getSamTest()
+	private JCheckBox getStatusSurvey()
 	{
-		if( this.chbSamTest == null )
+		if( this.chbStatusSurvey == null )
 		{
-			final String ID = ConfigApp.SAM_TEST;
+			final String ID = ConfigApp.STATUS_SURVEY_TEST;
 			
-			this.chbSamTest = new JCheckBox( );
+			this.chbStatusSurvey = new JCheckBox( );
 			
-			final String txt = "SAM test";
+			final String txt = " test";
 			
-			this.chbSamTest.setText( txt );
+			this.chbStatusSurvey.setText( txt );
 			//TranslateComponents.add( this.chbSamTest, Language.getAllCaptions().get(  Language.CONTINUOUS_SESSION ) );
 			
-			this.chbSamTest.addItemListener( new ItemListener() 
+			this.chbStatusSurvey.addItemListener( new ItemListener() 
 			{				
 				@Override
 				public void itemStateChanged(ItemEvent arg0) 
@@ -1061,10 +1061,10 @@ public class MainAppUI extends JFrame
 				}
 			});
 			
-			this.chbSamTest.setSelected( true );
+			this.chbStatusSurvey.setSelected( true );
 		}
 		
-		return this.chbSamTest;
+		return this.chbStatusSurvey;
 	}
 	
 	private JLabel getSessionTimeLabel()

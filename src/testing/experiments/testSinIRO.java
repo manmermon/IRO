@@ -17,8 +17,11 @@ import config.Player;
 import config.Settings;
 import control.events.BackgroundMusicEvent;
 import control.events.BackgroundMusicEventListener;
+import gui.MainAppUI;
 import gui.game.screen.level.music.BackgroundMusic;
 import gui.panel.SelectSongPanel;
+import gui.panel.statusSurvey.PlayerStatusSurvey;
+import gui.panel.statusSurvey.PlayerStatusSurvey.StatusSurvey;
 import stoppableThread.IStoppable;
 import testing.experiments.synMarker.SyncMarker;
 import testing.experiments.synMarker.SyncMarker.Marker;
@@ -32,12 +35,25 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JToggleButton;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
+import java.util.List;
 import java.awt.event.ActionEvent;
+
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+
 import java.awt.FlowLayout;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
+import java.awt.Toolkit;
+
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
@@ -53,7 +69,7 @@ public class testSinIRO extends JFrame {
 	private final JPanel panel = new JPanel();
 	private final JSpinner spinnerBeepTime = new JSpinner();
 	private final JPanel panel_1 = new JPanel();
-	private final JToggleButton tglbtnStart = new JToggleButton("Start");
+	private final JButton tglbtnStart = new JButton("Start");
 	
 	private JPanel mainPane = new JPanel( new BorderLayout() );
 	private final JCheckBox chckbxBeepAct = new JCheckBox("Activar Beep");
@@ -88,6 +104,7 @@ public class testSinIRO extends JFrame {
 	private final JSpinner spinnerSession = new JSpinner();
 	private final JScrollPane scrollPane = new JScrollPane();
 	private final JToggleButton btnPause = new JToggleButton("Pause");
+	private final JCheckBox chbStateSurvey = new JCheckBox("Encuesta de estado");
 	
 	/**
 	 * Launch the application.
@@ -142,7 +159,7 @@ public class testSinIRO extends JFrame {
 		SyncMarker.getInstance( "No"+ConfigApp.shortNameApp );
 		setTitle( "Test sin " + ConfigApp.shortNameApp );
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 800, 400);
+		setBounds(100, 100, 925, 400);
 		
 		
 		this.contentPane = new JPanel();
@@ -214,18 +231,25 @@ public class testSinIRO extends JFrame {
 		this.panel_2.add(this.chckbxBeepAct);
 		this.chckbxBeepAct.setSelected(true);
 		this.panel_2.add(this.chckbxSem);
+		this.chbStateSurvey.setSelected(true);
+		
+		this.panel_2.add(this.chbStateSurvey);
 		
 		this.panel.add(this.scrollPane, BorderLayout.CENTER);
 		
 		this.contentPane.add(this.panel_1, BorderLayout.SOUTH);
-		this.tglbtnStart.addActionListener(new ActionListener() 
-		{
+		//this.tglbtnStart.addActionListener(new ActionListener()
+		this.tglbtnStart.addItemListener( new ItemListener() 
+		{	
 			Thread beepThr = null;
 			Thread playerThr = null;
 			
-			public void actionPerformed(ActionEvent e) 
-			{	
-				if( tglbtnStart.isSelected() )
+			@Override
+			public void itemStateChanged(ItemEvent e) 
+			{		
+				System.out.println("testSinIRO.initialize() A " + tglbtnStart.isSelected() );
+				System.out.println("testSinIRO.initialize() B " + ( e.getStateChange() == ItemEvent.SELECTED));
+				if(  e.getStateChange() == ItemEvent.SELECTED )
 				{
 					SelectSongPanel.getInstance().setEnabled( false );
 					tglbtnStart.setText( "Stop" );
@@ -264,9 +288,12 @@ public class testSinIRO extends JFrame {
 					spinnerBlqAct.setEnabled( false );
 					spinnerDescanso.setEnabled( false );
 					chckbxBeepAct.setEnabled( false );
+					chbStateSurvey.setEnabled( false );
 					
 					chckbxSem.setEnabled( false );
 					endSession = false;
+					
+					showStatusSurveyDialog( chbStateSurvey.isSelected() );
 					
 					Player player = ConfigApp.getFirstPlayer();
 					Settings cfg = null;
@@ -636,6 +663,8 @@ public class testSinIRO extends JFrame {
 						tiempoTranscurridoTimer = null;
 					}
 				
+					showStatusSurveyDialog( chbStateSurvey.isSelected() );
+					
 					tglbtnStart.setText( "Start" );
 					
 					spinnerBeepTime.setEnabled( true );
@@ -644,6 +673,7 @@ public class testSinIRO extends JFrame {
 					spinnerDescanso.setEnabled( true );
 					mainPane.setEnabled( true );
 					chckbxBeepAct.setEnabled( true );
+					chbStateSurvey.setEnabled( true );
 					
 					chckbxSem.setEnabled( true );
 					
@@ -664,5 +694,47 @@ public class testSinIRO extends JFrame {
 		this.panel_1.add( this.tiempoTranscurridoValor );
 		
 		this.btnPause.setVisible( false );
+	}
+	
+	private void showStatusSurveyDialog( boolean show )
+	{
+		if( show )
+		{
+			JDialog statusSurveyDialog = new JDialog( this );
+			statusSurveyDialog.setVisible( false );
+	
+			statusSurveyDialog.setDefaultCloseOperation( JDialog.DO_NOTHING_ON_CLOSE );
+			statusSurveyDialog.setModal( true );
+	
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			GraphicsDevice gd = ge.getDefaultScreenDevice();
+			GraphicsConfiguration gc = gd.getDefaultConfiguration();
+	
+			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			Insets pads = Toolkit.getDefaultToolkit().getScreenInsets( gc );
+			screenSize.width += -( pads.left + pads.right );
+			screenSize.height += -( pads.top + pads.bottom );
+	
+			statusSurveyDialog.setLocation( pads.left, pads.top );
+			statusSurveyDialog.setSize( screenSize );
+			JPanel container = new JPanel( new BorderLayout() );
+			statusSurveyDialog.setContentPane( container );
+	
+	
+			statusSurveyDialog.setVisible( false );
+			
+			Player p = new Player( 0, "", null );
+			PlayerStatusSurvey sae = new PlayerStatusSurvey( p, screenSize, new StatusSurvey[] { StatusSurvey.VALENCE, StatusSurvey.AROUSAL, StatusSurvey.PHYSICAL_EFFORT }, statusSurveyDialog );
+
+			container.removeAll();
+			container.add( sae, BorderLayout.CENTER );
+
+			statusSurveyDialog.setVisible( true );
+			
+			String playesState = sae.getPlayerState();
+			System.out.println("testSinIRO.showStatusSurveyDialog() " + playesState);
+			
+			statusSurveyDialog.dispose();
+		}
 	}
 }
