@@ -1027,10 +1027,11 @@ public class MainAppUI extends JFrame
 			
 			this.chbStatusSurvey = new JCheckBox( );
 			
-			final String txt = " test";
+			final String txt = Language.getLocalCaption( Language.STATUS_SURVEY );
 			
 			this.chbStatusSurvey.setText( txt );
 			//TranslateComponents.add( this.chbSamTest, Language.getAllCaptions().get(  Language.CONTINUOUS_SESSION ) );
+			TranslateComponents.add( this.chbStatusSurvey, Language.getAllCaptions().get(  Language.STATUS_SURVEY ) );
 			
 			this.chbStatusSurvey.addItemListener( new ItemListener() 
 			{				
