@@ -26,7 +26,7 @@ public class SocketClient extends AbstractStoppableThread
 	private Socket socket;
 	
 	private long sleepTime = 1000L;
-	private long sleepToCheckConnection = 10_000L;
+	private long sleepToCheckConnection = 500L;//10_000L;
 	
 	private short state = SEARCH;
 	

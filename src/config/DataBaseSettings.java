@@ -9,10 +9,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.DoubleBuffer;
+import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
@@ -29,12 +31,13 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
-
+import javax.swing.JOptionPane;
 
 import biosignal.Biosignal;
 import config.ConfigParameter.ParameterType;
 import general.ConvertTo;
 import general.Tuple;
+import gui.MainAppUI;
 import image.BasicPainter2D;
 import image.icon.GeneralAppIcon;
 import lslInput.LSLStreamInfo.StreamType;
@@ -55,8 +58,13 @@ public class DataBaseSettings
 	// Data base
 	//
 	///////////
+	
+	private static final double dbVersion = 1.0;
+	
 	private static final String prefixComm = "jdbc:sqlite:";
 
+	private static final String dbInfoTableName = "databaseInfo";
+	
 	private static final String userTableName = "user";
 	private static final String settingsTableName = "settings";
 	private static final String sessionTableName = "session";
@@ -70,6 +78,9 @@ public class DataBaseSettings
 
 	private static Connection conn;
 	
+	private static String DB_ID = "id";
+	private static String DB_VERSION = "version";
+	
 	private static final String USER_ID = "id";
 	private static final String USER_NAME = "name";
 	private static final String USER_IMAGE = "image";
@@ -80,6 +91,7 @@ public class DataBaseSettings
 	private static final String SESSION_MUTE = "muteSession";
 	private static final String SESSION_LIMIT_SESSION_TIME = "limitSessionTime";
 	private static final String SESSION_VALENCE_AROUSAL_EFFORT = "valenceArousalEmotion";
+	private static final String SESSION_ID_FOREIG = "idSession";
 	
 	private static final String STATISTIC_NUMBER = "number";
 	private static final String STATISTIC_ACTION_ID = "actionID";
@@ -92,6 +104,7 @@ public class DataBaseSettings
 	private static final String INDATA_STREAM_NAME = "streamName";
 	private static final String INDATA_STREAM_SAMPLING_RATE = "streamSamplingRate";
 	private static final String INDATA_NUMBER_CHANNELS = "streamNumberOfChannels";
+	private static final String INDATA_DATETIME_FIRST_DATA = "datetimeOfFirstData";
 		
 	protected static void dbLoadFields()
 	{
@@ -99,11 +112,22 @@ public class DataBaseSettings
 
 		//**************
 		//
+		// DATABASE INFO TABLE
+		//
+		//**************
+
+		Map< String, Class > fieldType = new HashMap<String, Class>();
+		fieldType.put( DB_ID, Integer.class );
+		fieldType.put( DB_VERSION, Double.class );		
+		tableFields.put( dbInfoTableName, fieldType );
+		
+		//**************
+		//
 		// USER TABLE
 		//
 		//**************
 		
-		Map< String, Class > fieldType = new HashMap<String, Class>();
+		fieldType = new HashMap<String, Class>();
 		fieldType.put( USER_ID, Integer.class );
 		fieldType.put( USER_NAME, String.class );
 		fieldType.put( USER_IMAGE, Image.class );		
@@ -170,6 +194,8 @@ public class DataBaseSettings
 		
 		
 		fieldType = new HashMap<String, Class>();
+		fieldType.put( STATISTIC_NUMBER, Integer.class );
+		fieldType.put( SESSION_ID_FOREIG, Long.class );
 		fieldType.put( STATISTIC_ACTION_ID, Integer.class );
 		fieldType.put( STATISTIC_ACTION_NAME, String.class );
 		fieldType.put( USER_ID_FOREIGN, Integer.class );
@@ -183,12 +209,14 @@ public class DataBaseSettings
 		//**************
 		
 		fieldType = new HashMap<String, Class>();
-		fieldType.put( SESSION_ID, Integer.class );
+		fieldType.put( INDATA_STREAM_ID, Integer.class );
+		fieldType.put( SESSION_ID_FOREIG, Integer.class );
 		fieldType.put( USER_ID_FOREIGN, Integer.class );
 		fieldType.put( INDATA_STREAM_TYPE, String.class );
 		fieldType.put( INDATA_STREAM_NAME, String.class );
 		fieldType.put( INDATA_STREAM_SAMPLING_RATE, Double.class );
-		fieldType.put( INDATA_NUMBER_CHANNELS, Integer.class );		
+		fieldType.put( INDATA_NUMBER_CHANNELS, Integer.class );
+		fieldType.put( INDATA_DATETIME_FIRST_DATA, Integer.class );
 		fieldType.put( INDATA_STREAM_DATA, DoubleBuffer.class );			
 		tableFields.put( inputDataStreamTableName, fieldType );
 	}
@@ -1281,16 +1309,264 @@ e.printStackTrace();
 
 			dbCreateTables();
 		}
+		else
+		{	
+			int change = changeDBVersion();
+			
+			if( change != 0 )
+			{
+				String msg = "New ";
+				if( change < 0 )
+				{
+					msg = "Previous ";
+				}
+						
+				msg += " database version was detected.\nA new database has been created with the correct version and the data has been transferred.";
+				
+				final String m = msg;
+				Thread t = new Thread()
+				{
+					public void run() 
+					{
+						JOptionPane.showMessageDialog( MainAppUI.getInstance(), m );
+					}
+				};
+				
+				t.start();
+				
+				transferDB2NewVersion();
+			}
+		}
 
 		return created;
 	}
+	
+	private static int changeDBVersion()
+	{
+		int change = 0;
+		
+		try 
+		{
+			dbConnect();
+						
+			Statement stmt = null;
+			ResultSet rs = null;
+			
+			String sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='" + dbInfoTableName + "'";
+			
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery( sql );
+						
+			if( rs.next() )
+			{
+				sql = "SELECT * FROM " + dbInfoTableName;
+				
+				rs = stmt.executeQuery( sql );
+				
+				if( rs.next() )
+				{
+					double ver = rs.getDouble( DB_VERSION );
+					
+					if( ( dbVersion - ver ) > 0 ) 
+					{
+						change = 1;
+					}
+					else if( (dbVersion - ver) < 0 )
+					{
+						change = -1;
+					}
+				}
+			}
+			else
+			{
+				change = 1;
+			}
+			
+			dbCloseConnection();			
+		}
+		catch (SQLException e) 
+		{
+			change = 1;
+		}	
+		
+		return change;
+	}
 
+	private static void transferDB2NewVersion() throws SQLException, IOException
+	{
+		File dbFile = new File( DB_PATH );
+		
+		String copy = DB_PATH.substring( 0, DB_PATH.lastIndexOf( "." ) ) + "_copy" + ".db";
+		
+		File dbcopy = new File( copy );
+		
+		if( !dbFile.renameTo( dbcopy ) )
+		{
+			throw new IOException( "Error when transferring data to the new version: Failed to rename the database.");
+		}
+		
+		if( dbFile.exists() )
+		{
+			throw new IOException( "Error previous version: original db file remaining.");
+		}
+		
+		Connection original_conn  = null;
+		try
+		{		
+			dbCreateTables();
+			
+			original_conn = DriverManager.getConnection( prefixComm + copy );
+			
+			Statement original_smt = original_conn.createStatement();
+			original_smt.execute( "PRAGMA foreign_keys=ON" );
+			
+			String sql = "INSERT INTO "+ dbInfoTableName +  "(" + DB_ID  + ", " + DB_VERSION + " ) VALUES( 0, " + dbVersion + " );" ;
+
+			dbConnect();
+			Statement smt = conn.createStatement();
+			smt.execute( sql );
+
+			for( String tableName : new String[]{ userTableName, settingsTableName, sessionTableName, sessionSettingTableName, statisticTableName, inputDataStreamTableName } )
+			{
+				Map<String, Class> fieldType = tableFields.get( tableName );
+
+				String original_sql = "SELECT * from " + tableName;
+
+				ResultSet original_rs = original_smt.executeQuery( original_sql );
+				ResultSetMetaData rsmd = original_rs.getMetaData();
+
+				List< String > colNames = new ArrayList< String >();
+				for( int ic = 1; ic <= rsmd.getColumnCount(); ic++ )
+				{
+					colNames.add( rsmd.getColumnName( ic ) );
+				}
+				
+				while( original_rs.next() )
+				{
+					sql = "INSERT INTO " + tableName + "(";
+					String sqlValue = " VALUES ( ";
+					
+					List< InputStream > blobList = new ArrayList< InputStream >();
+					for( String fieldName  : colNames )
+					{
+						Class dataType = fieldType.get( fieldName );
+
+						if( dataType != null )
+						{
+							sql += fieldName + "," ;
+
+							if( dataType == Integer.class || dataType == Long.class )
+							{
+								sqlValue += original_rs.getLong( fieldName ) + ",";
+							}
+							else if( dataType == Double.class || dataType == Float.class )
+							{
+								sqlValue += original_rs.getDouble( fieldName ) + ",";
+							}
+							else if( dataType == String.class )
+							{
+								sqlValue += "'" +  original_rs.getString( fieldName ) + "',";
+							}
+							else
+							{
+								sqlValue += "?,";
+								blobList.add( original_rs.getBinaryStream( fieldName ) );
+							}
+						}
+						else
+						{
+							System.out.println( "Field " + fieldName + " in table " +  tableName + ", type no found." );
+						}
+					}
+					
+					sql = sql.substring( 0, sql.length() - 1 ) + " ) ";
+					sqlValue = sqlValue.substring( 0, sqlValue.length() - 1 ) + " ) ";
+
+					if( blobList.isEmpty() )
+					{
+						smt.executeUpdate( sql + sqlValue );
+					}
+					else
+					{
+						PreparedStatement pstmt = conn.prepareStatement( sql + sqlValue );
+
+
+						for( int iBL = 0; iBL < blobList.size(); iBL++ )
+						{
+							InputStream inStream = blobList.get( iBL );
+
+							byte[] data = null;
+							if( inStream != null )
+							{
+								List< Byte > blobBytes = new ArrayList< Byte >();
+	
+								data = new byte[1];
+								while( inStream.read( data ) > 0 )
+								{
+									blobBytes.add( data[ 0 ] );
+								}
+	
+								if( !blobBytes.isEmpty() )
+								{
+									data = new byte[ blobBytes.size() ];
+	
+									for( int id = 0; id < blobBytes.size(); id++ )
+									{
+										data[ id ] = blobBytes.get( id );
+									}									
+								}
+							}
+							
+							pstmt.setBytes( iBL+1, data );
+						}
+
+						pstmt.executeUpdate( );							
+						pstmt.close();
+					}
+				}					
+			}
+			
+			if( smt != null )
+			{
+				smt.close();
+			}
+						
+			dbCloseConnection();
+			
+			if( original_smt != null )
+			{
+				original_smt.close();
+			}			
+			original_conn.close();
+		}
+		catch (SQLException e) 
+		{
+			throw e;
+		}
+		finally 
+		{
+			dbCloseConnection();
+			
+			if( original_conn != null )
+			{ 
+				original_conn.close();
+			}
+		}
+		
+	}
+	
 	private static void dbCreateTables() throws SQLException
 	{	
+		String sqlCreateTableDBInfo = 
+				"CREATE TABLE IF NOT EXISTS " + dbInfoTableName + " ("
+						+ DB_ID + " integer PRIMARY KEY CHECK (" + DB_ID + " = 0 )"
+						+ ", " + DB_VERSION + " real CHECK (" + DB_VERSION + " >= 0 )"
+						+ ");";
+		
 		String sqlCreateTableUser = 
 				"CREATE TABLE IF NOT EXISTS " + userTableName + " ("
 						+ USER_ID + " integer PRIMARY KEY AUTOINCREMENT"
-						+ ", " + USER_NAME + " name text NOT NULL"
+						+ ", " + USER_NAME + " text NOT NULL"
 						+ ", " + USER_IMAGE + " BLOB"
 						+ ");";
 
@@ -1322,7 +1598,7 @@ e.printStackTrace();
 		String sqlCreateTableSessionConfig = 
 				"CREATE TABLE IF NOT EXISTS " + sessionSettingTableName + " ("
 				//+ " id integer PRIMARY KEY AUTOINCREMENT"
-				+ " " + SESSION_ID + " integer "
+				+ " " + SESSION_ID_FOREIG + " integer "
 				+ ", " + sqlSettingFields				
 				+ ", PRIMARY KEY (" + SESSION_ID + ", " + USER_ID_FOREIGN +")"
 				+ ", FOREIGN KEY (" + SESSION_ID + "," + USER_ID_FOREIGN + ") REFERENCES " + sessionTableName + "(" + SESSION_ID + ","+USER_ID_FOREIGN + ") ON DELETE CASCADE"
@@ -1333,23 +1609,24 @@ e.printStackTrace();
 				"CREATE TABLE IF NOT EXISTS " +sessionTableName + " ("
 						+ SESSION_ID + "  integer NOT NULL" // Session date
 						+ ", " + USER_ID_FOREIGN + " integer NOT NULL"
-						+ ", " + SESSION_MUTE + " integer NOT NULL CHECK (muteSession == 0 OR muteSession == 1 ) "
-						+ ", " + SESSION_LIMIT_SESSION_TIME + " integer CHECK (limitSessionTime >= 0)"
+						+ ", " + SESSION_MUTE + " integer NOT NULL CHECK ( " + SESSION_MUTE + " == 0 OR " + SESSION_MUTE + " == 1 ) "
+						+ ", " + SESSION_LIMIT_SESSION_TIME + " integer CHECK (" + SESSION_LIMIT_SESSION_TIME + " >= 0)"
 						+ ", " + SESSION_SCORE + " integer NOT NULL"						
 						+ ", " + SESSION_VALENCE_AROUSAL_EFFORT + " text NOT NULL"
 						+ ", PRIMARY KEY (" + SESSION_ID + "," + USER_ID_FOREIGN + ")"
-						+ ", FOREIGN KEY ("+USER_ID_FOREIGN+") REFERENCES " + userTableName +"(" + USER_ID +") ON DELETE CASCADE"
+						+ ", FOREIGN KEY (" + USER_ID_FOREIGN + ") REFERENCES " + userTableName +"(" + USER_ID +") ON DELETE CASCADE"
 						+ ");";
 
 		
 		String sqlCreateTableInputDataStream = 
 				"CREATE TABLE IF NOT EXISTS " + inputDataStreamTableName + " ("
 						+ INDATA_STREAM_ID + " integer PRIMARY KEY AUTOINCREMENT"
-						+ ", " + SESSION_ID + "  integer NOT NULL" 
+						+ ", " + SESSION_ID_FOREIG + "  integer NOT NULL" 
 						+ ", " + USER_ID_FOREIGN + " integer NOT NULL"
 						+ ", " + INDATA_STREAM_NAME + "  text NOT NULL"
 						+ ", " + INDATA_STREAM_SAMPLING_RATE + " real NOT NULL"
 						+ ", " + INDATA_NUMBER_CHANNELS + " integer NOT NULL"
+						+ ", " + INDATA_DATETIME_FIRST_DATA + " integer DEFAULT -1 NOT NULL"
 						+ ", " + INDATA_STREAM_TYPE + " text NOT NULL"
 						+ ", " + INDATA_STREAM_DATA + " BLOB"
 						+ ", FOREIGN KEY (" + SESSION_ID + "," + USER_ID_FOREIGN + ") REFERENCES " + sessionTableName + "(" + SESSION_ID + ","+USER_ID_FOREIGN + ") ON DELETE CASCADE"
@@ -1360,7 +1637,7 @@ e.printStackTrace();
 		String sqlCreateTableStatistic = 
 				"CREATE TABLE IF NOT EXISTS " + statisticTableName +" ("
 						+ STATISTIC_NUMBER + " integer PRIMARY KEY AUTOINCREMENT"
-						+ ", " + SESSION_ID + " integer NOT NULL"
+						+ ", " + SESSION_ID_FOREIG + " integer NOT NULL"
 						+ ", " + USER_ID_FOREIGN + " integer NOT NULL"
 						+ ", " + STATISTIC_ACTION_ID + " integer NOT NULL"
 						+ ", " + STATISTIC_ACTION_NAME + " text NOT NULL"
@@ -1372,6 +1649,7 @@ e.printStackTrace();
 		try ( Connection conn = DriverManager.getConnection( dbURL );
 				Statement stmt = conn.createStatement()) 
 		{
+			stmt.execute( sqlCreateTableDBInfo );
 			stmt.execute( sqlCreateTableUser );
 			stmt.execute( sqlCreateTableConfig );
 			stmt.execute( sqlCreateTableSession );
